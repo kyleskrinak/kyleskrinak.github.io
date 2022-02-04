@@ -1,0 +1,736 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>In the Jekyll garden - Kyle Skrinak</title>
+<meta name="description" content="Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.">
+
+
+  <meta name="author" content="Kyle Skrinak">
+  
+  <meta property="article:author" content="Kyle Skrinak">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Kyle Skrinak">
+<meta property="og:title" content="In the Jekyll garden">
+<meta property="og:url" content="https://kyleskrinak.github.io/in-the-jekyll-garden/">
+
+
+  <meta property="og:description" content="Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.">
+
+
+
+  <meta property="og:image" content="https://kyleskrinak.github.io/assets/images/21-04-02-jekyll-garden.jpg">
+
+
+
+  <meta name="twitter:site" content="@screenack">
+  <meta name="twitter:title" content="In the Jekyll garden">
+  <meta name="twitter:description" content="Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.">
+  <meta name="twitter:url" content="https://kyleskrinak.github.io/in-the-jekyll-garden/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kyleskrinak.github.io/assets/images/21-04-02-jekyll-garden.jpg">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-04-02T14:37:00+00:00">
+
+
+
+
+
+  
+
+  
+    <meta property="fb:app_id" content="1517884551695849">
+  
+
+
+<link rel="canonical" href="https://kyleskrinak.github.io/in-the-jekyll-garden/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Kyle Skrinak",
+      "url": "https://kyleskrinak.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Kyle Skrinak Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png?v=gAdJjl2Mvd">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest?v=gAdJjl2Mvd">
+<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg?v=gAdJjl2Mvd" color="#d55b5b">
+<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico?v=gAdJjl2Mvd">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/mstile-144x144.png?v=gAdJjl2Mvd">
+<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml?v=gAdJjl2Mvd">
+<meta name="theme-color" content="#ffffff">
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Kyle Skrinak
+          <span class="site-subtitle">IT Manager, Duke University</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/pages/calendar.html">Calendar</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/location.html">Location</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/tts-drupal.html">Drupal</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/my-low-carb.html">Low Carb</a>
+            </li><li class="masthead__menu-item">
+              <a href="/year-archive">Archive</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories">Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/tags">Tags</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+  
+
+
+
+
+
+
+
+<div class="page__hero--overlay"
+  style=" background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/images/21-04-02-jekyll-garden.jpg');"
+>
+  
+    <div class="wrapper">
+      <h1 id="page-title" class="page__title" itemprop="headline">
+        
+          In the Jekyll garden
+
+        
+      </h1>
+      
+        <p class="page__lead">Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.
+</p>
+      
+      
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+      
+      
+    </div>
+  
+  
+</div>
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://kyleskrinak.github.io/">
+        <img src="https://s.gravatar.com/avatar/ff8a556b0c640770c8e933d7b5f57631?s=80" alt="Kyle Skrinak" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://kyleskrinak.github.io/" itemprop="url">Kyle Skrinak</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>IT Manager, <a href="http://duke.edu" title="Duke&rsquo;s web site">Duke University</a></p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality"><a style="display: inline-block" href="https://goo.gl/maps/8TmAf96K2M82">Durham, NC</a></span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="mailto:kyle.skrinak@duke.edu" rel="nofollow noopener noreferrer me"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span></a></li>
+          
+        
+          
+        
+          
+            <li><a href="https://twitter.com/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://linkedin.com/in/kyleskrinak" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/kyleskrinak" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+            <li><a href="https://www.drupal.org/u/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-drupal" aria-hidden="true"></i><span class="label">Drupal</span></a></li>
+          
+        
+          
+            <li><a href="https://www.stackoverflow.com/users/479709/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-stack-overflow" aria-hidden="true"></i><span class="label">StackOverflow</span></a></li>
+          
+        
+          
+        
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+  
+  </div>
+
+
+
+  <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="In the Jekyll garden">
+    <meta itemprop="description" content="Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.">
+    <meta itemprop="datePublished" content="2021-04-02T14:37:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+
+      <section class="page__content e-content" itemprop="text">
+        
+        <p>Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.</p>
+
+<p>How so?</p>
+
+<p>I’m trying a new Jekyll theme, <a href="https://mmistakes.github.io/jekyll-theme-basically-basic/">Basically Basic</a>, made by the same developer, <a href="https://github.com/mmistakes">Michael Rose</a>, for the <a href="https://mmistakes.github.io/minimal-mistakes/">Minimal Mistakes</a> theme that I use for my professional website. He’s done excellent work supporting and maintaining with his Minimal Mistakes theme, so I’m comfortable with his new theme as a starting point.</p>
+
+<p>I’m on a Windows 10 21H1, using WSL2 and Ubuntu 18.04 LTS. In that virtualized OS I am using rbenv to manage my Ruby versions. Already, expecting a non-information technologist to build or configure such an environment is a concern. I suppose a docker image may help? Digression: writing this motivated me to upgrade Ubuntu to 20.04. Thanks to this <a href="https://alessio.franceschelli.me/posts/windows/wsl2-upgrade/">careful description</a> of the process, I did so without interrupting my post-upgrade environment, which is no small engineering feet.</p>
+
+<p>Noted I used <a href="https://stackoverflow.com/a/25735388/479709">this method</a> to copy the 18.04 image export to my OneDrive as a remote backup. It enabled a PowerShell progress bar on the copy transfer process.</p>
+
+<p>With those details out of the way, my first step was to cd to my desired disk location and create a new Jekyll website</p>
+
+<p><code class="language-plaintext highlighter-rouge">jekyll new recipes</code></p>
+
+<p>If you’ve been through my website, that premise shouldn’t surprise you. I then <code class="language-plaintext highlighter-rouge">cd recipes</code> to snap in the Basically Basic theme, using the <a href="https://github.com/mmistakes/jekyll-theme-basically-basic#ruby-gem-method">Ruby Gem Method</a> to install the theme and gem requirements.</p>
+
+<p>Great! Ready to go, right? Not so fast. Welcome to Ruby. My first attempt at a server run is met with failure. The ffi gem is incompatible with… something. I don’t know whether Ruby 3.0.0 or Jekyll 4.2. To fix this failure I must backport ffi to version 1.14.2.</p>
+
+<p>I run <code class="language-plaintext highlighter-rouge">bundle exec jekyll serve --livereload</code> and I’m met with this error.</p>
+
+<p><code class="language-plaintext highlighter-rouge">/home/figgles/gems/gems/jekyll-4.2.0/lib/jekyll/commands/serve/servlet.rb:3:in 'require': cannot load such file -- webrick (LoadError)</code></p>
+
+<p>This is a <a href="https://github.com/jekyll/jekyll/issues/8523">known Ruby 3.0.0 bug</a>. I fixed it with this:</p>
+
+<p><code class="language-plaintext highlighter-rouge">bundle add webrick</code></p>
+
+<blockquote>
+  <p><strong>Whoops!</strong> I run <code class="language-plaintext highlighter-rouge">bundle exec jekyll serve --livereload</code> and I’m met with a ffi library error. However, I cannot replicate the error after updating my OS. If you do experience this, you can run the following:<br />
+Update the Gemlock.file to <code class="language-plaintext highlighter-rouge">ffi (1.14.2)</code><br />
+<code class="language-plaintext highlighter-rouge">bundle remove ffi</code><br />
+<code class="language-plaintext highlighter-rouge">bundle add ffi --version=1.14.2</code></p>
+</blockquote>
+
+<p>Finally, I can successfully launch my local compiled website and begin making edits. Since I am an information technologist, that’s fine. These convolutions, however, make recommending this approach more problematic, especially for non-IT users, such as researchers or faculty.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2021-04-02T14:37:00+00:00">April 2, 2021</time></p>
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=screenack&text=In+the+Jekyll+garden%20https%3A%2F%2Fkyleskrinak.github.io%2Fin-the-jekyll-garden%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkyleskrinak.github.io%2Fin-the-jekyll-garden%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fkyleskrinak.github.io%2Fin-the-jekyll-garden%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/personal/loose-shorts-and-the-tsa/" class="pagination--pager" title="Loose Shorts and the TSA
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h2 class="page__related-title">You may also enjoy</h2>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/loose-shorts-and-the-tsa/" rel="permalink">Loose Shorts and the TSA
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">“Sir, you better grab those shorts tightly, no one wants them to drop.” Thank you, captain O.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/gratitude-and-that-s-right/" rel="permalink">Gratitude, and That’s Right
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Another day in the life of Kyle Skrinak
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/meet-holly/" rel="permalink">Meet Holly
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">The Skrinaks adopt Holly from the Wake County SPCA
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/shinleaf-campsite/" rel="permalink">Shinleaf Campsite
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">When I was 8, I played alongside a lake, against a star-splattered night with my brother and sister.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+
+
+
+<p><a href="/pages/disclaimer.html" title="My curiously inspired disclaimer" class="btn btn--danger">website disclaimer</a></p>
+
+<!-- end custom footer snippets -->
+
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Kyle Skrinak. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-127178668-1']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://kyleskrinak.github.io/in-the-jekyll-garden/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/in-the-jekyll-garden"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://kds38-duke-blog.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>2019-Feb-13 SLG Presentation - Kyle Skrinak</title>
+<meta name="description" content="Trinity’s presentation to the Security Liaison’s Group on Hardening and Unanticipated Affects">
+
+
+  <meta name="author" content="Kyle Skrinak">
+  
+  <meta property="article:author" content="Kyle Skrinak">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Kyle Skrinak">
+<meta property="og:title" content="2019-Feb-13 SLG Presentation">
+<meta property="og:url" content="https://kyleskrinak.github.io/presentations/2019-Feb-SLG.html">
+
+
+  <meta property="og:description" content="Trinity’s presentation to the Security Liaison’s Group on Hardening and Unanticipated Affects">
+
+
+
+  <meta property="og:image" content="https://kyleskrinak.github.io/assets/images/181008-butter.JPG">
+
+
+
+  <meta name="twitter:site" content="@screenack">
+  <meta name="twitter:title" content="2019-Feb-13 SLG Presentation">
+  <meta name="twitter:description" content="Trinity’s presentation to the Security Liaison’s Group on Hardening and Unanticipated Affects">
+  <meta name="twitter:url" content="https://kyleskrinak.github.io/presentations/2019-Feb-SLG.html">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kyleskrinak.github.io/assets/images/181008-butter.JPG">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-02-12T00:00:00+00:00">
+
+
+
+
+
+  
+
+  
+    <meta property="fb:app_id" content="1517884551695849">
+  
+
+
+<link rel="canonical" href="https://kyleskrinak.github.io/presentations/2019-Feb-SLG.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Kyle Skrinak",
+      "url": "https://kyleskrinak.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Kyle Skrinak Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png?v=gAdJjl2Mvd">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest?v=gAdJjl2Mvd">
+<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg?v=gAdJjl2Mvd" color="#d55b5b">
+<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico?v=gAdJjl2Mvd">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/mstile-144x144.png?v=gAdJjl2Mvd">
+<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml?v=gAdJjl2Mvd">
+<meta name="theme-color" content="#ffffff">
+
+<!-- end custom head snippets -->
+
+    <link rel="stylesheet" href="/assets/reveal/reveal.css">
+    <link rel="stylesheet" href="/assets/reveal/theme/black.css" id="theme">
+    <style>
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5 {
+                  text-transform: none;
+          }
+    </style>
+  </head>
+
+  <body class="layout--reveal">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown
+                 data-separator="^\n\n\n"
+                 data-separator-vertical="^\n\n"
+                 data-separator-notes="^Note:">
+		<textarea data-template>
+		  
+# From F to B
+#### in Mozilla’s Observatory Security Report
+
+The **Trinity Technology Services** system administrators implement changes to Varnish to dramatically improve our Drupal website’s security.
+
+* Kyle Skrinak
+* David Palmer
+* Blaine Ott
+
+https://people.duke.edu/~kds38/presentations/2019-Feb-SLG.html
+
+
+
+# The Problem
+
+* ITSO sends TTS NetSparker report
+* We break out the Drupal Security Kit module
+* We create a test configuration and ask for another scan
+* NetSparker is now busy, ITSO recommends Observatory
+
+
+
+## Mozilla Observatory
+
+![Observatory conducts an audit](/assets/images/19-02-09-observatory-open.gif)
+
+* https://observatory.mozilla.com
+
+
+
+## Original website results
+
+![Observatory results for one of our websites](/assets/images/19-02-09-LM-testresults.png) 
+
+
+
+## Eureka!
+
+Why have MySQL + PHP do something apache can do?
+
+Why have apache do something that varnish can do?
+
+
+
+## Our First Attempt
+
+```
+# TTS Apache Hardening  
+set resp.http.X-XSS-Protection = "1; mode=block";  
+set resp.http.Strict-Transport-Security= "max-age=31536000; includeSubDomains";  
+set resp.http.X-Content-Type-Options = "nosniff";  
+```
+
+
+
+# Oops
+
+![Lack of careful planning](/assets/images/dock-break.gif "Lack of careful planning")
+
+We inadvertently blocked fourth-level domains
+
+
+
+### Info pages for HSTS configuration options
+
+* A link to Mozilla&rsquo;s [HTTP Strict Transport Security](https://infosec.mozilla.org/guidelines/web_security#http-strict-transport-security "link to HSTS page") information page.
+
+
+![Mozilla URL screenshot](/assets/images/mozilla-hsts-page.png "Mozilla URL screenshot") 
+
+
+
+* A link to Redhat’s [HSTS configuration](https://access.redhat.com/solutions/1220063 "Redhat page on HSTS config") page.
+
+
+![RHEL URL screenshot](/assets/images/RHEL-Apache.png "RHEL URL screenshot") 
+
+
+
+### Questions?
+
+		</textarea>
+        </section>
+      </div>
+    </div>
+
+    <script src="/assets/reveal/reveal.js"></script>
+    <script src="/assets/reveal/plugin/markdown/marked.min.js"></script>
+    <script src="/assets/reveal/plugin/markdown/markdown.js"></script>
+    <script src="/assets/reveal/plugin/menu/menu.js"></script>
+    <script>
+      Reveal.initialize({
+	  plugins: [ RevealMarkdown, RevealMenu ],
+        	// The "normal" size of the presentation, aspect ratio will be preserved
+          // when the presentation is scaled to fit different resolutions. Can be
+          // specified using percentage units.
+          width: 1300,
+          height: 760,
+
+          // Factor of the display size that should remain empty around the content
+          margin: 0.05,
+          center: false,
+
+          // Bounds for smallest/largest possible scale to apply to content
+          minScale: 0.2,
+          maxScale: 1.0,
+          history: true,
+	  menu: {
+		  custom: [
+			  {
+				  title: 'Links',
+				  icon: '<i class="fa fa-link">',
+				  src: '/reveallinks.html'
+			  }
+		  ]
+	  }
+      });
+    </script>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-127178668-1']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

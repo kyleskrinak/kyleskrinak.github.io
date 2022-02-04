@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>2019 DrupalCon Drupal 8 Multisite - Kyle Skrinak</title>
+<meta name="description" content="My presentation to the DrupalCon 2019 Higher Ed Summit">
+
+
+  <meta name="author" content="Kyle Skrinak">
+  
+  <meta property="article:author" content="Kyle Skrinak">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Kyle Skrinak">
+<meta property="og:title" content="2019 DrupalCon Drupal 8 Multisite">
+<meta property="og:url" content="https://kyleskrinak.github.io/presentations/DC19-DevOps-Multisite.html">
+
+
+  <meta property="og:description" content="My presentation to the DrupalCon 2019 Higher Ed Summit">
+
+
+
+  <meta property="og:image" content="https://kyleskrinak.github.io/assets/images/181008-butter.JPG">
+
+
+
+  <meta name="twitter:site" content="@screenack">
+  <meta name="twitter:title" content="2019 DrupalCon Drupal 8 Multisite">
+  <meta name="twitter:description" content="My presentation to the DrupalCon 2019 Higher Ed Summit">
+  <meta name="twitter:url" content="https://kyleskrinak.github.io/presentations/DC19-DevOps-Multisite.html">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kyleskrinak.github.io/assets/images/181008-butter.JPG">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-04-07T00:00:00+00:00">
+
+
+
+
+
+  
+
+  
+    <meta property="fb:app_id" content="1517884551695849">
+  
+
+
+<link rel="canonical" href="https://kyleskrinak.github.io/presentations/DC19-DevOps-Multisite.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Kyle Skrinak",
+      "url": "https://kyleskrinak.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Kyle Skrinak Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png?v=gAdJjl2Mvd">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest?v=gAdJjl2Mvd">
+<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg?v=gAdJjl2Mvd" color="#d55b5b">
+<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico?v=gAdJjl2Mvd">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/mstile-144x144.png?v=gAdJjl2Mvd">
+<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml?v=gAdJjl2Mvd">
+<meta name="theme-color" content="#ffffff">
+
+<!-- end custom head snippets -->
+
+    <link rel="stylesheet" href="/assets/reveal/reveal.css">
+    <link rel="stylesheet" href="/assets/reveal/theme/black.css" id="theme">
+    <style>
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5 {
+                  text-transform: none;
+          }
+    </style>
+  </head>
+
+  <body class="layout--reveal">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown
+                 data-separator="^\n\n\n"
+                 data-separator-vertical="^\n\n"
+                 data-separator-notes="^Note:">
+		<textarea data-template>
+		  
+# Our DevOps Approach to Multisite and Drupal 8
+
+----
+
+### A high-level overview   
+of how we’re using DevOps to
+#### pimp our stack
+
+
+
+
+## Kyle Skrinak, I.T. Manager 
+Web Development and Systems Administration  
+https://people.duke.edu/~kds38  
+_(nom de cyber: @screenack)_
+
+----
+
+#### Trinity College of Arts &amp; Sciences _at_
+### Duke University
+
+----
+
+#### This presentation:
+http://bit.ly/DC19-HES
+
+
+
+# Meet the team
+
+----
+
+* Two Drupal website designers and developers
+* Two Symfony custom application developers
+* Three sysadmins, including one Drupal lead
+* Host 380 websites, including 108 Drupal websites 
+* Highly normalized platform &mdash; branding, features, and content
+* Support third-party developed websites
+* Plus a bevy of other web and sysadmin-related support
+* We maintain an excellent support reputation
+
+
+
+# Current Infrastructure
+
+----
+
+* Duke OIT provided VM’s
+* RHEL7
+* MySQL > MariaDB
+* PHP’s aggressive EoL change
+* Shibboleth SSO
+* Third-party integrations: e.g., Qualtrics forms and Box for storage
+* 108 websites on a clustered server pair
+* A varnish and a pound load balancer.
+* A staging and production server per website
+
+
+
+# Our Drupal 7 workflow
+
+----
+
+* Ansible pulls Drupal core updates from d.o.
+* Three git repos for code
+  * Global
+    1. Our **sites/all** _(contrib modules, themes, and libraries)_ repo
+    1. **Trinity-level theme** _(Omega-based)_ repo at sites/all/themes
+  * per website
+    1. **Website repo** _(theme, modules, libraries)_ in the  
+      `sites/\&lt;sitename&gt;` directory
+*  `drush`, `git` and `ansible` to manage our stack cluster
+
+
+
+# What of Sleeping Dogs?
+
+----
+
+* Our mature workflow serves our customers and ourselves well… 
+* …but it fails us, moving forward
+* Shifting external requirements continue to mount
+  * Web accessibility and responsive design
+  * Our security posture
+  * Integrate CI/CD and QA 
+  * Increasingly rapid stack updates
+
+
+
+# Enter DevOps
+
+----
+
+### What is DevOps?
+
+* To radically yet _seamlessly_ change our workflow
+* Rethink roles, rules, interactions, expectations
+* Stay current with tool and paradigm shifts
+* Learning from our peers and contributing back
+* Maintain and improve our service reputation
+
+
+
+
+# Has DevOps Helped Us?
+
+----
+
+## Yes.
+
+> _“Achieving extraordinary results  
+> from ordinary people.”_
+
+
+
+# DevOps? 
+
+----
+
+## You’re Soaking in It
+
+* Bi-weekly DevOps meeting
+  * New concerns and opportunities 
+  * New tools 
+  * Paradigm shifts
+  * Changing individual roles
+* Refactor our distribution and workflow
+* Cross-discipline training
+* Presentations on new proposals and tech
+
+
+
+# Why multisite?
+
+----
+
+* Misleading FUD on multisite
+* Stable
+* n-factor reduction in duplicate stack code
+* Faster and inexpensive code updates
+
+
+
+# Preparing for Drupal 8
+
+----
+
+* Confirm continued D.O. support for multisite past 9.x
+  * Yep: https://www.drupal.org/project/drupal/issues/2306013 
+* Confirm our understanding of Drupal 8 multisite
+  * Yep: https://people.duke.edu/~kds38/drupal/drupal-8-multisite-documentation/ **BUT**
+* `composer` replaces `drush` for managing Drupal
+* A “pure” composer-based workflow conflicts with
+  * Managing the individual website instances
+  * JavaScript library dependency resolution
+
+
+
+# How, then?
+
+----
+
+## Distribution reference
+
+* Maintain a “reference” D8 installation for managing core, based on the Drupal Project composer template
+  * https://github.com/drupal-composer/drupal-project
+* Run `composer update` against the reference
+  * If there are updates, this will also update the `composer.lock` file
+* Commit the `composer.lock` file updates to the core git repo
+
+
+
+## Core and Code Deployment
+
+----
+
+### Switch from `ansible` to `GitLab CE CI/CD`
+
+* The value of recent GitLab updates
+* Trigger deployment updates from the GitLab UI.
+
+>
+> Oops… NoOps!
+>
+
+
+
+## Core and Code Deployment
+
+----
+
+### Use a GitLab’s CI/CD to 
+* `composer install` with the updated lock file to distributed D8 cores.
+  * Far less expensive than `composer update` on all cores.
+* Run QA tests as part of a build process
+  * (Still in development)
+* Consistently run deployment scripts
+* Deploy website code to our staging and production servers
+
+
+
+## Core and Website Updates
+
+----
+
+### Run a `pipeline` on targeted servers
+
+* For all child sites:
+  * Move website to maintenance mode 
+  * Database and code backup for all child websites
+* Pull composer.lock file
+* Composer install (core only)
+* For all child sites:
+  * Drupal database update
+  * Cache rebuild
+* Reapply permissions on core or website directories only
+
+
+
+# GitLab CI/CD Demo
+
+----
+
+[Link](https://www.youtube.com/embed/_3wf9p9v5ik)
+
+
+
+
+# Features and Benefits
+
+----
+
+* Eliminates need for manual deployment
+* “True” push-button deployment for our devs
+* Consistent deployment execution
+* Consistent state restoration
+* Easy access to deployment logs by all
+
+
+
+# Hindsight = 20/20
+
+----
+
+* Base our distribution on Acquia’s Lightning distribution
+  * https://github.com/acquia/lightning
+* Build an installation profile
+
+
+# What’s Next?
+
+----
+
+* Library management: big hairy eyeball
+* Implement varnish and pound for D8
+* Build and maintain our own installation profile
+* Trigger deployments with commit tags
+* Improve integration of website-level configuration management
+* Backport what we can to our D7 workflow
+
+
+
+
+# Questions?
+
+----
+
+> ?
+
+
+
+# Thank You!
+
+----
+
+> !
+
+		</textarea>
+        </section>
+      </div>
+    </div>
+
+    <script src="/assets/reveal/reveal.js"></script>
+    <script src="/assets/reveal/plugin/markdown/marked.min.js"></script>
+    <script src="/assets/reveal/plugin/markdown/markdown.js"></script>
+    <script src="/assets/reveal/plugin/menu/menu.js"></script>
+    <script>
+      Reveal.initialize({
+	  plugins: [ RevealMarkdown, RevealMenu ],
+        	// The "normal" size of the presentation, aspect ratio will be preserved
+          // when the presentation is scaled to fit different resolutions. Can be
+          // specified using percentage units.
+          width: 1300,
+          height: 760,
+
+          // Factor of the display size that should remain empty around the content
+          margin: 0.05,
+          center: false,
+
+          // Bounds for smallest/largest possible scale to apply to content
+          minScale: 0.2,
+          maxScale: 1.0,
+          history: true,
+	  menu: {
+		  custom: [
+			  {
+				  title: 'Links',
+				  icon: '<i class="fa fa-link">',
+				  src: '/reveallinks.html'
+			  }
+		  ]
+	  }
+      });
+    </script>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-127178668-1']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://kyleskrinak.github.io/presentations/DC19-DevOps-Multisite.html";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/presentations/2019-drupalcon-drupal-8-multisite"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://kds38-duke-blog.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

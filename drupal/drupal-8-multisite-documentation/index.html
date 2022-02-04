@@ -1,0 +1,868 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Drupal 8 Multisite documentation - Kyle Skrinak</title>
+<meta name="description" content="Summary">
+
+
+  <meta name="author" content="Kyle Skrinak">
+  
+  <meta property="article:author" content="Kyle Skrinak">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Kyle Skrinak">
+<meta property="og:title" content="Drupal 8 Multisite documentation">
+<meta property="og:url" content="https://kyleskrinak.github.io/drupal/drupal-8-multisite-documentation/">
+
+
+  <meta property="og:description" content="Summary">
+
+
+
+  <meta property="og:image" content="https://kyleskrinak.github.io/assets/images/drupal_logo.png">
+
+
+
+  <meta name="twitter:site" content="@screenack">
+  <meta name="twitter:title" content="Drupal 8 Multisite documentation">
+  <meta name="twitter:description" content="Summary">
+  <meta name="twitter:url" content="https://kyleskrinak.github.io/drupal/drupal-8-multisite-documentation/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kyleskrinak.github.io/assets/images/drupal_logo.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-05-26T00:00:00+00:00">
+
+
+
+
+
+  
+
+  
+    <meta property="fb:app_id" content="1517884551695849">
+  
+
+
+<link rel="canonical" href="https://kyleskrinak.github.io/drupal/drupal-8-multisite-documentation/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Kyle Skrinak",
+      "url": "https://kyleskrinak.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Kyle Skrinak Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png?v=gAdJjl2Mvd">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest?v=gAdJjl2Mvd">
+<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg?v=gAdJjl2Mvd" color="#d55b5b">
+<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico?v=gAdJjl2Mvd">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/mstile-144x144.png?v=gAdJjl2Mvd">
+<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml?v=gAdJjl2Mvd">
+<meta name="theme-color" content="#ffffff">
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Kyle Skrinak
+          <span class="site-subtitle">IT Manager, Duke University</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/pages/calendar.html">Calendar</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/location.html">Location</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/tts-drupal.html">Drupal</a>
+            </li><li class="masthead__menu-item">
+              <a href="/pages/my-low-carb.html">Low Carb</a>
+            </li><li class="masthead__menu-item">
+              <a href="/year-archive">Archive</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories">Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/tags">Tags</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+  
+
+
+
+
+
+
+
+<div class="page__hero--overlay"
+  style=" background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/images/drupal_logo.png');"
+>
+  
+    <div class="wrapper">
+      <h1 id="page-title" class="page__title" itemprop="headline">
+        
+          Drupal 8 Multisite documentation
+
+        
+      </h1>
+      
+        <p class="page__lead"><h2 class="no_toc" id="summary">Summary</h2>
+</p>
+      
+      
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+      
+      
+        <p>
+        
+          <a href="https://drupal.org" class="btn btn--light-outline btn--large">More Info</a>
+        
+      
+    </div>
+  
+  
+    <span class="page__hero-caption">Drupal
+</span>
+  
+</div>
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://kyleskrinak.github.io/">
+        <img src="https://s.gravatar.com/avatar/ff8a556b0c640770c8e933d7b5f57631?s=80" alt="Kyle Skrinak" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://kyleskrinak.github.io/" itemprop="url">Kyle Skrinak</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>IT Manager, <a href="http://duke.edu" title="Duke&rsquo;s web site">Duke University</a></p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality"><a style="display: inline-block" href="https://goo.gl/maps/8TmAf96K2M82">Durham, NC</a></span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="mailto:kyle.skrinak@duke.edu" rel="nofollow noopener noreferrer me"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span></a></li>
+          
+        
+          
+        
+          
+            <li><a href="https://twitter.com/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://linkedin.com/in/kyleskrinak" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/kyleskrinak" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+            <li><a href="https://www.drupal.org/u/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-drupal" aria-hidden="true"></i><span class="label">Drupal</span></a></li>
+          
+        
+          
+            <li><a href="https://www.stackoverflow.com/users/479709/screenack" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-stack-overflow" aria-hidden="true"></i><span class="label">StackOverflow</span></a></li>
+          
+        
+          
+        
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+  
+  </div>
+
+
+
+  <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Drupal 8 Multisite documentation">
+    <meta itemprop="description" content="Summary">
+    <meta itemprop="datePublished" content="2017-05-26T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+
+      <section class="page__content e-content" itemprop="text">
+        
+        <h2 class="no_toc" id="summary">Summary</h2>
+
+<p>In order to better understand what adopting Drupal 8 multisite means, I have reviewed the code base for Drupal 8.3.2 for all references related to ‘multisite’ or multi-site’ in the comments of the Drupal code.</p>
+
+<ul>
+  <li>Conceptually, Drupal 8 multisite seems identical to Drupal 7’s model, though there are noteworthy differences in how the docroot structure is different.
+    <ul>
+      <li>We could continue with our git repo-based module and sites workflow?</li>
+    </ul>
+  </li>
+  <li>I’m unclear what a composer workflow for multisite will look like.</li>
+  <li>JS/PHP library management in Drupal 8?</li>
+</ul>
+
+<h2 class="no_toc" id="table-of-contents">Table of Contents</h2>
+<ul id="markdown-toc">
+  <li><a href="#from-the-readmetxt-in-docroot" id="markdown-toc-from-the-readmetxt-in-docroot">from the README.txt in docroot</a></li>
+  <li><a href="#sites-theme-module-and-profile-locations" id="markdown-toc-sites-theme-module-and-profile-locations">Sites, Theme, Module, and Profile locations</a>    <ul>
+      <li><a href="#from-the-modulesreadmetxt-file" id="markdown-toc-from-the-modulesreadmetxt-file">from the modules/README.txt file</a></li>
+      <li><a href="#from-the-themesreadmetxt-file" id="markdown-toc-from-the-themesreadmetxt-file">from the themes/README.txt file</a></li>
+      <li><a href="#from-the-profilesreadmetxt-file" id="markdown-toc-from-the-profilesreadmetxt-file">from the profiles/README.txt file</a></li>
+      <li><a href="#from-the-sitesexamplesitesphp-file" id="markdown-toc-from-the-sitesexamplesitesphp-file">from the sites/example.sites.php file</a></li>
+    </ul>
+  </li>
+  <li><a href="#code-references-to-multisite" id="markdown-toc-code-references-to-multisite">Code references to multisite</a></li>
+</ul>
+
+<h2 id="from-the-readmetxt-in-docroot">from the README.txt in docroot</h2>
+
+<p><em>Note: I have based this documentation on Drupal 8.3.x INSTALL.txt. I essentially changed the passive voice verbs to active.</em></p>
+
+<p>A single Drupal installation can host several Drupal-powered sites, each with its own individual configuration.</p>
+
+<p>For this to work you need the file sites/sites.php to exist. Make a copy of the example.sites.php file:</p>
+
+<pre>$ cp sites/example.sites.php sites/sites.php</pre>
+
+<p>You create additional site configurations in subdirectories within the ‘sites’ directory. You must include a ‘settings.php’ file, in each subdirectory which specifies the configuration settings. The easiest way to create additional sites is to copy file ‘default.settings.php’ from the ‘sites/default’ directory into the new site directory with file name ‘settings.php’ and modify as appropriate. You copy the new directory name from the site’s URL. The configuration for www.example.com will be in ‘sites/example.com/settings.php’ (note that you’ll omit ‘www.’ if users can access your site at http://example.com/).</p>
+
+<pre>$ cp sites/default/defaults.settings.php sites/example.com/settings.php</pre>
+
+<p>Sites do not have to have a different domain. You can also use subdomains and subdirectories for Drupal sites. For example, you may define example.com, sub.example.com, and sub.example.com/site3 as independent Drupal sites. The setup for a configuration such as this would look like the following:</p>
+
+<ul>
+  <li>sites/default/settings.php </li>
+  <li>sites/example.com/settings.php </li>
+  <li>sites/sub.example.com/settings.php </li>
+  <li>sites/sub.example.com.site3/settings.php</li>
+</ul>
+
+<p>When searching for a site configuration (for example www.sub.example.com/site3), Drupal will search for configuration files in the following order, using the first configuration it finds:</p>
+
+<ul>
+  <li>sites/www.sub.example.com.site3/settings.php </li>
+  <li>sites/sub.example.com.site3/settings.php </li>
+  <li>sites/example.com.site3/settings.php </li>
+  <li>sites/www.sub.example.com/settings.php </li>
+  <li>sites/sub.example.com/settings.php </li>
+  <li>sites/example.com/settings.php </li>
+  <li>sites/default/settings.php</li>
+</ul>
+
+<p>If you are installing on a non-standard port, the port number is treated as the deepest subdomain. For example: http://www.example.com:8080/ could be loaded from sites/8080.www.example.com/. The port number will be removed according to the pattern above if no port-specific configuration is found, just like a real subdomain.</p>
+
+<p>Each site configuration can have its own site-specific modules and themes in addition to those installed in the standard ‘modules’ and ‘themes’ directories. To use site-specific modules or themes, simply create a ‘modules’ or ‘themes’ directory within the site configuration directory. For example, if sub.example.com has a custom theme and a custom module that should not be accessible to other sites, the setup would look like this:</p>
+
+<ul>
+  <li>sites/sub.example.com/ </li>
+  <li>settings.php </li>
+  <li>themes/custom_theme </li>
+  <li>modules/custom_module</li>
+</ul>
+
+<p>For more information about multiple virtual hosts or the configuration settings, consult https://www.drupal.org/documentation/install/multi-site</p>
+
+<h2 id="sites-theme-module-and-profile-locations">Sites, Theme, Module, and Profile locations</h2>
+
+<p>Do not mix downloaded or custom modules and themes with Drupal’s core modules and themes. Drupal’s modules and themes are located in the /core/modules and /core/themes directories, while the modules and themes you add to Drupal are normally placed in the /modules and /themes directories. If you run a multisite installation, you can also place modules and themes in the site-specific directories – see the Multisite Configuration section, below.</p>
+
+<h3 id="from-the-modulesreadmetxt-file">from the modules/README.txt file</h3>
+
+<p>In multisite configurations, modules found in this directory are available to all sites. You may also put modules in the sites/all/modules directory, and the versions in sites/all/modules will take precedence over versions of the same module that are here. Alternatively, the sites/your_site_name/modules directory pattern may be used to restrict modules to a specific site instance.</p>
+
+<h3 id="from-the-themesreadmetxt-file">from the themes/README.txt file</h3>
+
+<p>In multisite configurations, themes found in this directory are available to all sites. You may also put themes in the sites/all/themes directory, and the versions in sites/all/themes will take precedence over versions of the same themes that are here. Alternatively, the sites/your_site_name/themes directory pattern may be used to restrict themes to a specific site instance.</p>
+
+<h3 id="from-the-profilesreadmetxt-file">from the profiles/README.txt file</h3>
+
+<p>In multisite configurations, installation profiles found in this directory <em>(docroot/profiles)</em> are available to all sites during their initial site installation.</p>
+
+<h3 id="from-the-sitesexamplesitesphp-file">from the sites/example.sites.php file</h3>
+
+<p>Configuration file for multi-site support and directory aliasing feature.</p>
+
+<p>This file is required for multi-site support and also allows you to define a set of aliases that map hostnames, ports, and pathnames to configuration directories in the sites directory. These aliases are loaded prior to scanning for directories, and they are exempt from the normal discovery rules. See default.settings.php to view how Drupal discovers the configuration directory when no alias is found.</p>
+
+<p>Aliases are useful on development servers, where the domain name may not be the same as the domain of the live server. Since Drupal stores file paths in the database (files, system table, etc.) this will ensure the paths are correct when the site is deployed to a live server.</p>
+
+<p>To activate this feature, copy and rename it such that its path plus filename is ‘sites/sites.php’.</p>
+
+<h2 id="code-references-to-multisite">Code references to multisite</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">core/lib/Drupal/Core/DrupalKernel.php</code>, line 363, findSitePath to determine site’s base directory</li>
+  <li><code class="language-plaintext highlighter-rouge">core/lib/Drupal/Core/Extension/ExtensionDiscovery.php</code>, line 176, determine site’s “parent” for finding global extensions</li>
+  <li><code class="language-plaintext highlighter-rouge">core/lib/Drupal/Core/Updater/Module.php</code>, line 20, for determining installation directory for modules in multisite contexts</li>
+  <li><code class="language-plaintext highlighter-rouge">core/lib/Drupal/Core/Updater/Theme.php</code>, line 12, same as above</li>
+  <li><code class="language-plaintext highlighter-rouge">core/modules/editor/src/Form/EditorImageDialog.php</code>, line 210, for creating valid file paths in multisite contexts</li>
+  <li><code class="language-plaintext highlighter-rouge">core/modules/file/file.module</code>,
+    <ul>
+      <li>line 995, same as above</li>
+      <li>line 1253, same as above for file link creation</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">core/modules/filter/filter.module</code>, line 778, for creating valid file paths in multisite contexts</li>
+  <li><code class="language-plaintext highlighter-rouge">core/modules/image/src/Plugin/Field/FieldFormatter/ImageFormatter.php</code>, line 209, for creating valid file paths in multisite contexts</li>
+  <li><code class="language-plaintext highlighter-rouge">example.gitignore</code>, line 25, “ignore multisite environment”</li>
+  <li><code class="language-plaintext highlighter-rouge">modules/README.txt</code>, line 29, multisite information, added above</li>
+  <li><code class="language-plaintext highlighter-rouge">profiles/README.txt</code>, line 21, same as above</li>
+  <li><code class="language-plaintext highlighter-rouge">sites/default/default.services.yml</code>, line 29, setting the cookie_domain variable.</li>
+  <li><code class="language-plaintext highlighter-rouge">sites/default/default.settings.php</code>,
+    <ul>
+      <li>line 13, commented instructions on selection rules for site discovery</li>
+      <li>line 709, commented instructions on setting the ‘trusted_host_patterns’ variable</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">sites/example.sites.php</code>, This file is now essential for multisite. Worth reading entire file.</li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#multisite" class="page__taxonomy-item p-category" rel="tag">Multisite</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#drupal" class="page__taxonomy-item p-category" rel="tag">Drupal</a>
+    
+    </span>
+  </p>
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2017-05-26T00:00:00+00:00">May 26, 2017</time></p>
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=screenack&text=Drupal+8+Multisite+documentation%20https%3A%2F%2Fkyleskrinak.github.io%2Fdrupal%2Fdrupal-8-multisite-documentation%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkyleskrinak.github.io%2Fdrupal%2Fdrupal-8-multisite-documentation%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fkyleskrinak.github.io%2Fdrupal%2Fdrupal-8-multisite-documentation%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/drupal/drupalcon-baltimore-2017-mdash-backend-security-notes/" class="pagination--pager" title="DrupalCon Baltimore 2017 — Backend Security notes
+">Previous</a>
+    
+    
+      <a href="/drupal/drupalcon-nashville-2018/" class="pagination--pager" title="DrupalCon Nashville 2018 – Higher Education Summit Notes
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h2 class="page__related-title">You may also enjoy</h2>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/in-the-jekyll-garden/" rel="permalink">In the Jekyll garden
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. D...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/loose-shorts-and-the-tsa/" rel="permalink">Loose Shorts and the TSA
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">“Sir, you better grab those shorts tightly, no one wants them to drop.” Thank you, captain O.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/gratitude-and-that-s-right/" rel="permalink">Gratitude, and That’s Right
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Another day in the life of Kyle Skrinak
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/personal/meet-holly/" rel="permalink">Meet Holly
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">The Skrinaks adopt Holly from the Wake County SPCA
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+
+
+
+<p><a href="/pages/disclaimer.html" title="My curiously inspired disclaimer" class="btn btn--danger">website disclaimer</a></p>
+
+<!-- end custom footer snippets -->
+
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Kyle Skrinak. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-127178668-1']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://kyleskrinak.github.io/drupal/drupal-8-multisite-documentation/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/drupal/drupal-8-multisite-documentation"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://kds38-duke-blog.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

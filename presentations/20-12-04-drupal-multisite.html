@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Drupal Multisite on a Dime - Kyle Skrinak</title>
+<meta name="description" content="or How we Adopted CI/CD for TCA&amp;S’s Drupal Multisite Hosting for Trinity’s 100 Drupal websites">
+
+
+  <meta name="author" content="Kyle Skrinak">
+  
+  <meta property="article:author" content="Kyle Skrinak">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Kyle Skrinak">
+<meta property="og:title" content="Drupal Multisite on a Dime">
+<meta property="og:url" content="https://kyleskrinak.github.io/presentations/20-12-04-drupal-multisite.html">
+
+
+  <meta property="og:description" content="or How we Adopted CI/CD for TCA&amp;S’s Drupal Multisite Hosting for Trinity’s 100 Drupal websites">
+
+
+
+  <meta property="og:image" content="https://kyleskrinak.github.io/assets/images/doublenickelsonthedime.jpg">
+
+
+
+  <meta name="twitter:site" content="@screenack">
+  <meta name="twitter:title" content="Drupal Multisite on a Dime">
+  <meta name="twitter:description" content="or How we Adopted CI/CD for TCA&amp;S’s Drupal Multisite Hosting for Trinity’s 100 Drupal websites">
+  <meta name="twitter:url" content="https://kyleskrinak.github.io/presentations/20-12-04-drupal-multisite.html">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kyleskrinak.github.io/assets/images/doublenickelsonthedime.jpg">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-12-03T20:21:00+00:00">
+
+
+
+
+
+  
+
+  
+    <meta property="fb:app_id" content="1517884551695849">
+  
+
+
+<link rel="canonical" href="https://kyleskrinak.github.io/presentations/20-12-04-drupal-multisite.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Kyle Skrinak",
+      "url": "https://kyleskrinak.github.io/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Kyle Skrinak Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png?v=gAdJjl2Mvd">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png?v=gAdJjl2Mvd">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest?v=gAdJjl2Mvd">
+<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg?v=gAdJjl2Mvd" color="#d55b5b">
+<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico?v=gAdJjl2Mvd">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/mstile-144x144.png?v=gAdJjl2Mvd">
+<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml?v=gAdJjl2Mvd">
+<meta name="theme-color" content="#ffffff">
+
+<!-- end custom head snippets -->
+
+    <link rel="stylesheet" href="/assets/reveal/reveal.css">
+    <link rel="stylesheet" href="/assets/reveal/theme/black.css" id="theme">
+    <style>
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5 {
+                  text-transform: none;
+          }
+    </style>
+  </head>
+
+  <body class="layout--reveal">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown
+                 data-separator="^\n\n\n"
+                 data-separator-vertical="^\n\n"
+                 data-separator-notes="^Note:">
+		<textarea data-template>
+		  
+
+# Drupal Multisite on a Dime
+## or How we Adopted CI/CD for TCA&S’s Drupal Multisite Hosting for Trinity’s 100+ Drupal websites
+
+----
+
+#### This presentation:
+https://bit.ly/tcas-drupal-multisite
+
+
+
+# Your presenter
+
+----
+
+## Kyle Skrinak, I.T. Manager 
+### Trinity College of Arts & Sciences   
+Web Support (now part of OIT), Duke University
+https://people.duke.edu/~kds38  
+
+
+
+# Meet the team
+
+----
+
+* David Palmer, *DevOps*
+* Andy Smith, *Web Dev & Design*
+* Gabe Fahl, *PHP Programmer*
+* Alex Verhoeven, *Web Dev & Design*
+* John Herr, *PHP Programmer*
+
+
+
+# Who We Serve?
+
+----
+
+* Trinity College of Arts & Sciences departments, administrative, labs, etc.
+  * 120 active websites
+  * 100+ legacy websites and web applications 
+* SLAs and MoUs, *including*
+  * divinity.duke.edu
+  * dibs.duke.edu
+  * sanford.duke.edu
+
+
+
+# Requirements
+
+----
+
+* Consistency across all of our websites
+* Rely on Open Source community, and not custom module development
+* Decreased support and discovery time
+* Greatly agility with code updates, website maintenance, and deployment
+* Minimize cost for external tools
+
+
+
+# Overview: Timeline
+
+----
+
+* 2013: Apostrophe → Drupal migration starts
+* 2014: Drupal Multi-site *(hosting, version control)*
+* 2015: Base + Sub theme *(branding, gitorius → gitlab)*
+* 2016: FDS → Scholars migration *(profile data, membership)* 
+* 2017: Drupal 8 distribution begins, first D8 website (A→D7 migration ends)
+* 2018: D8 requirements set (hosting, branding, membership)
+* 2019: D8 distribution starts, production begins (CI/CD deployed)
+* 2020: Currently at 27 D8 websites
+
+
+
+# Innovations
+
+----
+
+* 2014: Drupal Multi-site
+  * Pantheon discussions and debate over multi-site
+  * The DevOps-like dashboard for managing websites
+* 2015: Drupal Omega Base + Sub theme <!-- .element: class="fragment" -->
+  * Simplified enforcing our branding across n number of websites
+  * Reduced complexity of our support by providing reasonable defaults for content migration
+
+
+
+# Innovations
+
+----
+
+* 2016: Department profile management
+  * The "People" section of our websites
+  * Faculty Database System (FDS) → Scholars effort  <!-- .element: class="fragment" -->
+  * Missing: non-faculty membership and our TCA&S-wide directory on trinity.duke.edu  <!-- .element: class="fragment" -->
+  * Support for Duke's system of record  <!-- .element: class="fragment" -->
+  * Solution: design and implement middleware <!-- .element: class="fragment" -->
+    * Directory Tool
+    * Plenty of Feeds
+
+
+
+# Drupal 8: Design phase
+
+----
+
+* Finished D7 website migration by 2017
+* Goal setting  <!-- .element: class="fragment" -->
+  * Enforce feature and content denormalization  <!-- .element: class="fragment" -->
+  * Continue to lean on community, not custom modules  <!-- .element: class="fragment" -->
+  * Confirm: multi-site <!-- .element: class="fragment" -->
+  * Configuration management <!-- .element: class="fragment" -->
+  * Exploit DevOps tools: Composer, CI/CD <!-- .element: class="fragment" -->
+
+
+
+# DevOps becomes a real thing 
+
+----
+
+* You've got developers in my sysadmins?
+* You've got sysadmins in my developers?
+
+> Mmmm! It's good!
+
+
+
+# Our CI/CD Pipeline
+
+| Site tasks                  | Pushbuttons         | Revert      | Migrate         |
+|-----------------------------|---------------------|-------------|-----------------|
+| Enable maintenance mode     | Production backsync | Restore DB  | Staging to Prod |
+| DB Backup                   | Git pull \<branch\> | Revert code |                 |
+| Git Reset --hard \<branch\> |                     |             |                 |
+| Drush entity update         |                     |             |                 |
+| Drush clear caches          |                     |             |                 |
+| Apache OpCache clear        |                     |             |                 |
+| Drush config export         |                     |             |                 |
+| Drush config import         |                     |             |                 |
+| Fix permissions             |                     |             |                 |
+| Disable maintenance mode    |                     |             |                 |
+| Backsync DB from prod       |                     |             |                 |
+
+
+
+# Our Current Workflow
+
+----
+
+* Continue to enhance our content editorial experience
+* Weekly meetings with the TCA&S Comm team
+* Tamp down scope creep as we scale
+* Synchronize core features and display across all websites
+* Extend our CI/CD to WordPress and other servers
+* In process: default site content
+
+
+
+# Q & A 
+
+----
+
+> *thank you*
+
+		</textarea>
+        </section>
+      </div>
+    </div>
+
+    <script src="/assets/reveal/reveal.js"></script>
+    <script src="/assets/reveal/plugin/markdown/marked.min.js"></script>
+    <script src="/assets/reveal/plugin/markdown/markdown.js"></script>
+    <script src="/assets/reveal/plugin/menu/menu.js"></script>
+    <script>
+      Reveal.initialize({
+	  plugins: [ RevealMarkdown, RevealMenu ],
+        	// The "normal" size of the presentation, aspect ratio will be preserved
+          // when the presentation is scaled to fit different resolutions. Can be
+          // specified using percentage units.
+          width: 1300,
+          height: 760,
+
+          // Factor of the display size that should remain empty around the content
+          margin: 0.05,
+          center: false,
+
+          // Bounds for smallest/largest possible scale to apply to content
+          minScale: 0.2,
+          maxScale: 1.0,
+          history: true,
+	  menu: {
+		  custom: [
+			  {
+				  title: 'Links',
+				  icon: '<i class="fa fa-link">',
+				  src: '/reveallinks.html'
+			  }
+		  ]
+	  }
+      });
+    </script>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-127178668-1']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

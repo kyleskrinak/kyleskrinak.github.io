@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://kyleskrinak.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kyleskrinak.github.io/" rel="alternate" type="text/html" /><updated>2022-02-04T16:32:36+00:00</updated><id>https://kyleskrinak.github.io/feed.xml</id><title type="html">Kyle Skrinak</title><subtitle>Kyle Skrinak, IT Manager, Duke University</subtitle><author><name>Kyle Skrinak</name></author><entry><title type="html">In the Jekyll garden</title><link href="https://kyleskrinak.github.io/in-the-jekyll-garden/" rel="alternate" type="text/html" title="In the Jekyll garden" /><published>2021-04-02T14:37:00+00:00</published><updated>2021-04-02T14:37:00+00:00</updated><id>https://kyleskrinak.github.io/in-the-jekyll-garden</id><content type="html" xml:base="https://kyleskrinak.github.io/in-the-jekyll-garden/"><![CDATA[<p>Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.</p>
+
+<p>How so?</p>
+
+<p>I’m trying a new Jekyll theme, <a href="https://mmistakes.github.io/jekyll-theme-basically-basic/">Basically Basic</a>, made by the same developer, <a href="https://github.com/mmistakes">Michael Rose</a>, for the <a href="https://mmistakes.github.io/minimal-mistakes/">Minimal Mistakes</a> theme that I use for my professional website. He’s done excellent work supporting and maintaining with his Minimal Mistakes theme, so I’m comfortable with his new theme as a starting point.</p>
+
+<p>I’m on a Windows 10 21H1, using WSL2 and Ubuntu 18.04 LTS. In that virtualized OS I am using rbenv to manage my Ruby versions. Already, expecting a non-information technologist to build or configure such an environment is a concern. I suppose a docker image may help? Digression: writing this motivated me to upgrade Ubuntu to 20.04. Thanks to this <a href="https://alessio.franceschelli.me/posts/windows/wsl2-upgrade/">careful description</a> of the process, I did so without interrupting my post-upgrade environment, which is no small engineering feet.</p>
+
+<p>Noted I used <a href="https://stackoverflow.com/a/25735388/479709">this method</a> to copy the 18.04 image export to my OneDrive as a remote backup. It enabled a PowerShell progress bar on the copy transfer process.</p>
+
+<p>With those details out of the way, my first step was to cd to my desired disk location and create a new Jekyll website</p>
+
+<p><code class="language-plaintext highlighter-rouge">jekyll new recipes</code></p>
+
+<p>If you’ve been through my website, that premise shouldn’t surprise you. I then <code class="language-plaintext highlighter-rouge">cd recipes</code> to snap in the Basically Basic theme, using the <a href="https://github.com/mmistakes/jekyll-theme-basically-basic#ruby-gem-method">Ruby Gem Method</a> to install the theme and gem requirements.</p>
+
+<p>Great! Ready to go, right? Not so fast. Welcome to Ruby. My first attempt at a server run is met with failure. The ffi gem is incompatible with… something. I don’t know whether Ruby 3.0.0 or Jekyll 4.2. To fix this failure I must backport ffi to version 1.14.2.</p>
+
+<p>I run <code class="language-plaintext highlighter-rouge">bundle exec jekyll serve --livereload</code> and I’m met with this error.</p>
+
+<p><code class="language-plaintext highlighter-rouge">/home/figgles/gems/gems/jekyll-4.2.0/lib/jekyll/commands/serve/servlet.rb:3:in 'require': cannot load such file -- webrick (LoadError)</code></p>
+
+<p>This is a <a href="https://github.com/jekyll/jekyll/issues/8523">known Ruby 3.0.0 bug</a>. I fixed it with this:</p>
+
+<p><code class="language-plaintext highlighter-rouge">bundle add webrick</code></p>
+
+<blockquote>
+  <p><strong>Whoops!</strong> I run <code class="language-plaintext highlighter-rouge">bundle exec jekyll serve --livereload</code> and I’m met with a ffi library error. However, I cannot replicate the error after updating my OS. If you do experience this, you can run the following:<br />
+Update the Gemlock.file to <code class="language-plaintext highlighter-rouge">ffi (1.14.2)</code><br />
+<code class="language-plaintext highlighter-rouge">bundle remove ffi</code><br />
+<code class="language-plaintext highlighter-rouge">bundle add ffi --version=1.14.2</code></p>
+</blockquote>
+
+<p>Finally, I can successfully launch my local compiled website and begin making edits. Since I am an information technologist, that’s fine. These convolutions, however, make recommending this approach more problematic, especially for non-IT users, such as researchers or faculty.</p>]]></content><author><name>Kyle Skrinak</name></author><summary type="html"><![CDATA[Continuing my research on a static website workflow, I’m spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.]]></summary></entry><entry><title type="html">Loose Shorts and the TSA</title><link href="https://kyleskrinak.github.io/personal/loose-shorts-and-the-tsa/" rel="alternate" type="text/html" title="Loose Shorts and the TSA" /><published>2021-02-20T23:45:00+00:00</published><updated>2021-02-20T23:45:00+00:00</updated><id>https://kyleskrinak.github.io/personal/loose-shorts-and-the-tsa</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/loose-shorts-and-the-tsa/"><![CDATA[<p>I wrote this story, years ago, back when my low-carb weight loss was still new to me. Like many life-long yo-yo dieters, I had yet to develop the conviction that this time is different, and that I might once again re-inflate. The shorts in question were 4 sizes too big for me then, more so, now, though I’ve long donated them to Goodwill.</p>
+
+<hr />
+
+<p>You know the drill. Before you get to the gate to board your flight, you must remove all electronics and metal, shoes, wristwatch off, double-check your pockets, bags, and <em>finally,</em> pass through inspection – like a mini-colonoscopy. Anyhow, flashback a couple of hours earlier, where I’m dressing for the day. My only pair of shorts is my now way-too-loose shorts. Slap on a belt, and I’m fine-ish, right.</p>
+
+<p>Well…</p>
+
+<p>There I am, converting into Mahatma Gandhi to get through inspection when a TSA agent <em>helpfully</em> reminds me; “<em>and your belt, too.</em>” Unthinkingly, I unthread the belt and queue “Moon River.” Um… My hands grab hold of my gravity-obeying shorts.</p>
+
+<blockquote>
+  <p>Houston, we have a problem.</p>
+</blockquote>
+
+<p>Now, don’t forget, you must hold your hands overhead for the full-body scanner. By now, it’s clear that I decided to wear my dad’s shorts. I see beads of sweat form on the forehead of every TSA agent watching my exam. (Yea, they’re human, too.) I spread out my legs, and shove my belly out as far as I can, and assume the pose. I hear a faint “ding” as they steer me out of the scanner. <em>Of course,</em> we’re not done, yet. I think there’s one <a href="https://en.wikipedia.org/wiki/Don_Rickles">Don Rickles</a> reincarnated as a TSA agent, who insists on a pat-down. Really. “Sir, you better grab those shorts tightly, <em>no one wants them to drop</em>.” Thank you, captain O.</p>
+
+<p>The good news is my shorts didn’t drop. The public and I are relieved at this. I scramble to rethread my belt before I re-acquire every other earthly possession to end this abomination.</p>
+
+<p>Now onto my flight.</p>
+
+<p>Oh, by the way? I never fit so comfortably into airplane seats as I do now.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[“Sir, you better grab those shorts tightly, *no one wants them to drop*.” Thank you, captain O.]]></summary></entry><entry><title type="html">Gratitude, and That’s Right</title><link href="https://kyleskrinak.github.io/personal/gratitude-and-that-s-right/" rel="alternate" type="text/html" title="Gratitude, and That’s Right" /><published>2021-01-30T23:26:00+00:00</published><updated>2021-01-30T23:26:00+00:00</updated><id>https://kyleskrinak.github.io/personal/gratitude-and-that-s-right</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/gratitude-and-that-s-right/"><![CDATA[<p class="notice--info"><em><strong>Note:</strong> I originally posted this on my Facebook account on <a href="https://www.facebook.com/notes/kyle-skrinak/gratitude-and-thats-right/10154313466556625">April 2nd, 2017</a>. However, Facebook is getting rid of their “notes” blog-like ability, so I’ve moved this content to my blog, with some edits for clarity.</em></p>
+
+<p>You all have been so kind about the two recent notes I’ve published. I’ve been thrashing that story around for years in my head. As my friend Jim tells me, you don’t have to be writing to be writing. I’d love to write some more, as I’ve found it quite enjoyable and satisfying, but, well, not yet. So, I hope you enjoy this journal entry of sorts.</p>
+
+<p>This is a big week for me. Duke University is holding their TechExpo this Friday, and I’m one of the co-chairs. I’m soberly honored to be working in this capacity along with so many bright lights. We have the highest registration recorded yet. The venue will be at capacity if everyone shows up. Event planners, reading this, are nodding sagaciously. I’m looking forward to attending as many sessions as I can, but I suspect I’ll be Nervous Nelly, running the floor, looking for raging fires to extinguish.</p>
+
+<p>On other fronts, I’m the president of my neighborhood’s HOA, and that is been challenging, put mildly. We’ve got a Gordian knot of informality to fix, and we’re doing our best. Yet, let this cup pass, Lord, I beg you.</p>
+
+<p>Finally, we’re helping Alexa find the right college for her. My children fill me with ineffable pride to see who they are and who they continue to become.</p>
+
+<p>My mom Lorraine is stable now. Her health is strong — all of us should be so healthy, at 89. The staff at Chatham Commons have been wonderful. This was my biggest worry. Not that assisting living is a Shangri-La, of course. Mom is still Jack Nicholson’s Randle McMurphy at the Oregon State Mental Hospital, and this continues to be a challenge for her. Kris is visiting with us, and her, of course, as I write this. For mom, seeing her sons is like water for parched lips.</p>
+
+<p>In short, we’re juggling 5, 6, 7 pins in the air. Keep us in your prayers, I promise we’ll do likewise.</p>
+
+<p>As for the title for this post, I’ve always thought this is a fetching tune. Then I read the lyrics. Good stuff. Not bad for a bunch of punks from Brooklyn.</p>
+
+<!-- Courtesy of embedresponsively.com -->
+
+<div class="responsive-video-container">
+    <iframe src="https://www.youtube-nocookie.com/embed/ZdJ5e70Q8mw" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen=""></iframe>
+  </div>
+
+<blockquote>
+  <p>What you think,<br />
+that the world owes you?<br />
+What’s gonna set you free?</p>
+</blockquote>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[Another day in the life of Kyle Skrinak]]></summary></entry><entry><title type="html">Meet Holly</title><link href="https://kyleskrinak.github.io/personal/meet-holly/" rel="alternate" type="text/html" title="Meet Holly" /><published>2021-01-30T20:03:00+00:00</published><updated>2021-01-30T20:03:00+00:00</updated><id>https://kyleskrinak.github.io/personal/meet-holly</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/meet-holly/"><![CDATA[<h2 id="holly---ida054700">HOLLY - ID#A054700</h2>
+
+<p class="notice--info"><em><strong>Note:</strong> I originally posted this on my Facebook account on <a href="https://www.facebook.com/notes/kyle-skrinak/new-skrinak-addition/131859026624">August 1st, 2009</a>. However, Facebook is getting rid of their “notes” blog-like ability, so I’ve moved this content to my blog, with some edits for clarity.</em></p>
+
+<p><em>This was my post the day after we adopted Holly from the <a href="https://spcawake.org">Wake County SPCA</a>. It is essentially copied from the SPCA pet catalog.</em></p>
+
+<figure class="">
+  <img src="/assets/images/holly-pup.jpg" alt="Meet Holly Skrinak" /><figcaption>
+      Meet Holly Skrinak
+
+    </figcaption></figure>
+
+<h3 id="original-catalog-text">Original catalog text</h3>
+
+<p>My name is Holly, and I am a spayed female, white and brown brindle Pointer and American Staffordshire Terrier. I am 10 months old.</p>
+
+<p>Hi there! My name’s Holly. One, two, three, go! Come on, let’s race! No, really! Come on! Just so you know, I’m a go-go-go kind of girl! I’m a little shy when we first meet but give me a couple of treats and a few minutes, and you’ll find me by your side in no time. I am also sweet, not to mention a cute little girl who’s looking for a family to keep up with me. Of course, I know whoever I end up with will love me and take care of me for the rest of my life. I occasionally indulge in coprophagia, but I’m sure a steady discipline will help me break this disgusting habit. I like finding new things to chew on, and my new parents will need to make sure I don’t get into anything I’m not supposed to. I will reward your patience with lots of kisses. Are you the perfect person for me? I currently weigh ~40 lbs. and should reach ~45-50lbs.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[The Skrinaks adopt Holly from the Wake County SPCA]]></summary></entry><entry><title type="html">Shinleaf Campsite</title><link href="https://kyleskrinak.github.io/personal/shinleaf-campsite/" rel="alternate" type="text/html" title="Shinleaf Campsite" /><published>2021-01-19T10:11:00+00:00</published><updated>2021-01-19T10:11:00+00:00</updated><id>https://kyleskrinak.github.io/personal/shinleaf-campsite</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/shinleaf-campsite/"><![CDATA[<p class="notice--info"><em><strong>Note:</strong> I originally posted this on my Facebook account on <a href="https://www.facebook.com/notes/kyle-skrinak/shinleaf-campsite/52885601624">November 8th, 2008</a>. However, Facebook is getting rid of their “notes” blog-like ability, so I’ve moved this content to my blog, with some edits for clarity.</em></p>
+
+<p>A tall and thick web of branch silhouettes cut the night sky. A few stars and a bright moon cut through, enough to dimly illuminate the forest around us. There was nothing extraordinary about it, other than the infinite richness around us. We were with other dads and daughters, and we all went for an ordinary walk at the campsite. My eight-your-old daughter and I walked hand-in-hand. Being with her friends excited her, being with me excited her; yet we were walking as if to get the mail.</p>
+
+<p>When I was 8, I played alongside a lake against a star-splattered night with my brother and sister. Kris showed me the Milky Way; Karen showed me the isthmus to a usually unreachable island. That was also an ordinary night, a night that now sneaks up and extraordinarily fills me.</p>
+
+<p>For my daughter, that walk was just a brief moment between the scary campfire stories, marshmallow smores, and watching and playing with the campfire.</p>
+
+<p>For her dad, it was something else.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[When I was 8, I played alongside a lake, against a star-splattered night with my brother and sister.]]></summary></entry><entry><title type="html">My Hero, Karen — Part II</title><link href="https://kyleskrinak.github.io/personal/my-hero-karen/" rel="alternate" type="text/html" title="My Hero, Karen — Part II" /><published>2021-01-19T09:58:00+00:00</published><updated>2021-01-19T09:58:00+00:00</updated><id>https://kyleskrinak.github.io/personal/my-hero-karen</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/my-hero-karen/"><![CDATA[<p class="notice--info"><em><strong>Note:</strong> I originally posted this on my Facebook account on <a href="https://www.facebook.com/notes/kyle-skrinak/karen-my-hero/10154297420991625">March 26th, 2017</a>. However, Facebook is getting rid of their “notes” blog-like ability, so I’ve moved this content to my blog, with some edits for clarity.</em></p>
+
+<p>This is the conclusion to “<a href="/personal/two-guys-watch-a-burning-house/">Two Guys Watch a Burning Building.</a>” I like this title better. The burning house, and attendant ne’er-do-wells, are incidental. That’s Karen, on the left, above.</p>
+
+<figure class="">
+  <img src="/assets/images/88-walnut-roof.jpg" alt="My perch, 40-some years ago, after some significant renovation, and shrubs." /><figcaption>
+      My perch, 40-some years ago, after some significant renovation, and shrubs.
+
+    </figcaption></figure>
+
+<p>The windows of Kris’s bedroom were the smallish size of the windows in my room. Their bottoms began a couple of inches above my belly button, making passing through it difficult, even for this expert climber-into-and-out-of-er. Is this really the only way out? I go back into the room and look down the stairwell. The flames are much brighter now. I can feel the heat rising from the steps. The flame’s luminosity pierces the veil of smoke, the fire now visible. The smoke hurts my lungs, my eyes — I must get to fresh air. My young mind assessed that leaving Kris’s door open would be better for the house and my options. Of course, this only made my situation worse.</p>
+
+<p>Karen and I decide there’s no choice but to get on the roof. I wiggle through the window. From my earliest memories, I’ve had a dreadful and stultifying fear of heights. I don’t this evening. There was a thin ledge of the roof in front of Kris’s window, which I follow to the larger roof over the living room. My new waiting area seems safe for now while Karen and I consider our options. Looking right, I see a light rise of smoke from Kris’s window — not too heavy. The roof wasn’t hot, and Karen didn’t see flames in the living room below me. This seemed to buy us time.</p>
+
+<p>Our house on Walnut street had a unique aspect. Our first floor’s foundation was 6 feet higher than the other houses on the street. When last year’s flood had hit us, this was a blessing. Whereas our neighbors had the water level fill their first floor, we only had 2 feet of water on the first floor. As different as fire is to water, our blessing was now my curse. My one-story perch was roughly a story-and-a-half drop. Karen and I didn’t want me to jump. In our desperate hope, we continued to look for alternatives.</p>
+
+<p>Wisps of smoke crawl from the eaves of the roof in front of me. Looking to my right, the smoke had become dense. Karen tells me that my brothers and the neighbors are frantically looking for a ladder tall enough to reach me. In the floor beneath Kris’s bedroom was our laundry room. Our dog, Louisa, and our cat, Handsome, were trapped there, barking and mewing.</p>
+
+<p>Louisa was a beautiful silky-grey Weimaraner. We bought her as a gift for my Mom’s dad, “Pop-pop” as a consolation companion after he lost his wife, my Grandma, his everything, to cancer a couple of years after my father died. “Louisa,” the Skrinak-forced feminine form for “Louis,” my Pop-pop’s name, seemed fitting. Dogs make lousy gifts, however, and Louisa was soon an adopted Skrinak. Handsome was a stray Siamese tomcat badass that was always roaming the neighborhood, calling for in-heat partners, and getting in fights. Yea, you should get your male cats fixed. You don’t want to hear that every night. Handsome got his name when Karen, seeing him for the first time, said, “Hey, handsome!” Handsome and I had a unique relationship as well. Kimmer is a fantastic storyteller and loved to play up the voodoo-superstition of our youth. “The Devil can control cats, Kyle.” Kimmer somberly informed my wide-eyed self. Afterward, I was terrified of that cat. Handsome would chase me around the house. One night I worked up a rouse to have Handsome chase me, wherein I lead him to the basement, and closing it tightly. Score one for me. Looking back, I don’t understand what I was afraid of. Still, Handsome was our pet, and I thought he was the best cat ever.</p>
+
+<p>Fires are loud, and the cacophony of all the discernible sounds only becomes horrific in retrospect. I’m sad to say we lost our pets in the fire, trapped in the laundry room. It still hurts as I type this.</p>
+
+<p>My squatting calves, trembling and tiptoe, are eager to get me out of there. Karen and I agreed — my only option is for me to jump and for Karen to “catch” me. The two adult men, across the street, continue to savor their evening’s spectacle. “Kyle! I’ll break your fall!” as Karen positions beneath me. “How? What does that mean?” “I don’t know; we have no other choice. Just jump.” We sure seemed like we didn’t have any other options, as the fire was spreading and there were no firefighters in sight and my jostling brothers and neighbors could not find a ladder.</p>
+
+<p>I jump.</p>
+
+<p>Karen, God bless her, broke my fall. I didn’t aim, nor think of how to fall. I trusted Karen to resolve the details. It is amazing what we can do in love. Tears well up as I think of my beautiful sister, but this wasn’t her time, yet. We collapse together on the ground. Miraculously, neither she nor I were hurt. The whole drama resolving in a single fall. My neighbors take us in as Karen as we decompress. Karen was hoarse. My knees and ankles sorely burned but I broke nothing. Yes, I was as big for an 11-year-old as I am for a 54-year-old now.</p>
+
+<p>I suspect those two adult men would have come in handy at that precise moment. We, nor they, will ever know. I was later told they were volunteer firemen, waiting for the firetruck to arrive. Sometimes we embellish our memories in vindication or vituperation. Whatever. They will remain shiftless and useless cowards in this story. I pray they found redemption elsewhere.</p>
+
+<p>The fire didn’t consume the house, leaving the frame in-tact. Though I don’t recall their arrival, the fire crew did show up in time to put out the fire and slap us with a costly water charge. Thanks, guys. My perch would have been fine for the keystone cops of firefighters to arrive at their leisure. Though the flames never spread to the living room, the heat was so intense that it melted our television and stereo. Who knows?</p>
+
+<p>Our house was a charred blemish on E. Walnut Street for several months afterward. Our dear friends gave us a place to stay while Mom figured out the details, with us finally moving to Wyoming, PA. I remember my first bedtime after the fire. The eerie orange-glow illumination of the old-style flip-clock before my closing eyes told more than time. I dreamt of fire raging behind a wall, struggling to break through and get me. In my waking moments, however, I never doubted I was safe.</p>
+
+<p>My Mom has been through quite a struggle. I’m unclear on how Mom figured all this out while single-handedly raising her family. She has told me, many times, “I never signed up for this.” The only way I can make sense of all this is this; “It is amazing what we can do in love.”</p>
+
+<p>Postscript, January 23rd, 2021. My Mom passed away on October 29th, 2019, two-some years after I wrote this. I wrote a eulogy honoring her extraordinary life that you can read <a href="/personal/lorraine-barbara-kubik-skrinak/">here</a>.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[Wisps of smoke crawl from the eaves of the roof in front of me.]]></summary></entry><entry><title type="html">Two Guys Watch a Burning House, Part I</title><link href="https://kyleskrinak.github.io/personal/two-guys-watch-a-burning-house/" rel="alternate" type="text/html" title="Two Guys Watch a Burning House, Part I" /><published>2021-01-18T23:39:00+00:00</published><updated>2021-01-18T23:39:00+00:00</updated><id>https://kyleskrinak.github.io/personal/two-guys-watch-a-burning-house</id><content type="html" xml:base="https://kyleskrinak.github.io/personal/two-guys-watch-a-burning-house/"><![CDATA[<p class="notice--info"><em><strong>Note:</strong> I originally posted this on my Facebook account on <a href="https://www.facebook.com/notes/kyle-skrinak/two-guys-watch-a-burning-house/10154279590431625">March 19th, 2017</a>. However, Facebook is getting rid of their “notes” blog-like ability, so I’ve moved this content to my blog, with some edits for clarity.</em></p>
+
+<p>I forget when in 1973 the Skrinak family house caught on fire. I’m guessing it was in late Spring, but that was so long ago. I do remember this — it was warm enough for my 11-year-old self to be on the roof of my house in my pajamas.</p>
+
+<p>I went to bed after an ordinary day, around 9 PM. We had largely restored our house after the devastating 1972 flood from <a href="https://www.timesleader.com/news/local/663873/45-years-later-agnes-still-on-peoples-minds">Hurricane Agnes</a> that ravaged the Wyoming valley. The neighborhood had largely returned to its old Kingston self. We had also recently reshuffled the second floor so all of us siblings were able to get our separate rooms. Not that I minded sharing with my brothers, as many of us youngest siblings love our sibling’s company. Unlike now, a kid per room was a luxury.</p>
+
+<p>As for my bedroom, I had three smallish windows. With the room darkened for sleep, I could see the streetlight-diffused night sky illuminate my room in a row of three rectangles. As I drifted off to sleep, I’d peek my eyes open and closed as I settled in.</p>
+
+<p>My Mom had gone out with her friends, a long-deserved night of fun. She rarely went out, and it was good to see her have some down-time. In the kitchen directly below my room was a cooking pot of vegetable oil. The details as to why are unimportant. The cooking oil was soon forgotten by some other distraction, and a grease fire started. Grease fires move quickly — too quickly. The fire consumed the kitchen in minutes and spread to the dining room. The steps to the upstairs were off the dining room, and the nascent fire blocked access to the steps. My siblings — Kim, Kris, and Karen — scrambled out of the house, unable to get to me.</p>
+
+<p>From my bed, I peeked my eyes open. The row of windows had slightly dimmed. I wasn’t sure why. I couldn’t smell the smoke as it was just starting to fill the room. I closed my eyes to go back to bed. The second time, I peek again. The windows were even dimmer but still clearly set. My eyes faintly burned when I opened them. The Sandman? Really? Odd, but I was so relaxed and comfortable. The smoke was like liquid Nyquil (the old formula), and I felt great. A third time I stirred. I didn’t hear anything (the white-noise wash of crackling house was steadily getting louder), but I “sensed” Karen calling for me.</p>
+
+<p>Kimmer and Kris were scrambling to put the fire out. Someone called Mom, and she rushed home. Neighbors were helping as well with their garden hoses. Karen was focused on yelling for me to get out. The fire department had not yet come. Though a mere half-a-mile away, they took over 30 minutes to respond. I suspect more time than that. They play an imperceptible role in this story. Though I now daily pray for firefighters and first responders and honor the work they do, the hero in this story is Karen.</p>
+
+<p>The last time I was this relaxed was when I was under anesthesia to get my tonsils out. <em>“Kyle! Kyle!”</em> Again, I sensed Karen. I didn’t hear her. I felt her, dreamt her, calling me, demanding my attention. <em>“Kyle! Kyle!”</em> I forced my eyes open. A million pinpricks greet my eyes. I wanted to shut them hard to keep the burning pain out. My breathing was difficult, but the difficulty had come gradually, in my sleep. The windows now were nearly imperceptible. <em>“Kyle! Kyle!”</em> I rose out of bed and walked to the stairwell. Looking down the steps, I see a dim eerie light show of a shifting red-orange-yellow, from behind a thin black smoke veil, raging from the kitchen. I couldn’t see the flames. The light above the steps, which was my night-light, was darkened by smoke. Unmistakably, something was wrong. Now I’m fully awake.</p>
+
+<p>I pass through Kris’s room to his two smallish windows. I snap out of my dream-like state, and now I can hear Karen frantically and unmistakably calling my name. I poke my head out the window. My eyes and lungs get immediate relief. I see Karen, hands cuffed to her mouth to focus her shouts, and she is relieved to now see me. I can see our neighbors gathering to watch the unfolding drama.</p>
+
+<p>Amidst the chaos, I notice two adult men, across Walnut Street, casually watching, having found their evening’s diversion. Karen and I now scramble to figure out how to get me out of there.</p>
+
+<p><a href="/personal/my-hero-karen/">Continued…</a></p>]]></content><author><name>Kyle Skrinak</name></author><category term="Personal" /><category term="Story-telling" /><summary type="html"><![CDATA[I forget when in 1973 the Skrinak family house caught on fire. I’m guessing it was in late Spring, but that was so long ago.]]></summary></entry><entry><title type="html">Jekyll, Hugo, and Me</title><link href="https://kyleskrinak.github.io/static%20websites/jekyll-hugo-and-me/" rel="alternate" type="text/html" title="Jekyll, Hugo, and Me" /><published>2021-01-16T15:00:00+00:00</published><updated>2021-01-16T15:00:00+00:00</updated><id>https://kyleskrinak.github.io/static%20websites/jekyll-hugo-and-me</id><content type="html" xml:base="https://kyleskrinak.github.io/static%20websites/jekyll-hugo-and-me/"><![CDATA[<p>I’ve been using <a href="https://jekyllrb.com/">Jekyll</a> for the blog that you’re currently reading for several years now. There is much to love in static websites for my professional and personal musings. My employer offers free static website hosting, and as a manager, I can use my blog pages for commonly-asked-for content or information. The theme I use, <a href="https://github.com/mmistakes/minimal-mistakes">“Minimal Mistakes”</a> is a well-developed and maintained Jekyll theme that incorporates much of what a modern website should — if not must — have, such as device responsiveness, web accessibility, and other modern web goodness. I can also use <a href="https://www.markdownguide.org/">Markdown</a> for my writing, with the <a href="https://neovim.io/">Neovim</a> editor. Also, using the <code class="language-plaintext highlighter-rouge">--livereload</code> option in <code class="language-plaintext highlighter-rouge">jekyll serve</code>, I can see my content updates in my browser, in full display context, when I save my markdown.</p>
+
+<h2 id="if-all-is-well-whats-the-rub">If all is well, what’s the rub?</h2>
+
+<h3 id="maintenance">Maintenance</h3>
+
+<p>Jekyll runs on <a href="https://www.ruby-lang.org/">Ruby</a>. Unless you’re a Ruby developer, the occasional visit to a ruby compilation brings a lot of left feet to the dance. Ruby has two environment managers, <a href="https://github.com/rbenv/rbenv">rbenv</a> (which I use), and <a href="https://rvm.io/">rvm</a>. Ruby uses <a href="https://rubygems.org/">gems</a> for libraries, logic, and object encapsulation, and the environments work to manage dependencies. That’s all nice, but when you simply want to blog, ensuring you’re up to date with your environment becomes a big, hairy, fugly ball of “what just happened?” At work, we use Ruby version 1.9.3 to compile SASS to CSS. Yes, we’re working on that update. It won’t come soon enough. Supporting such an old version, however, comes at a high cost.</p>
+
+<p>I like to keep my code reasonably current. I check for updates from the theme’s author, as well as ruby and gem updates. If I spent even half my day in Ruby, I’m sure I’d be fine with this standard maintenance. But I don’t. I’m usually in mainstream office-type applications. I’m a manager, after all.</p>
+
+<h3 id="slow-server-content-updating">Slow server content updating</h3>
+
+<p><a href="https://jekyllrb.com/news/2018/01/02/jekyll-3-7-0-released/">Livereload</a> is great, but, <em>until recently,</em> the round-trip from file-save to Jekyll-reloaded web page was in the 10 - 20 second range. I was in the 4 - 6 second range on my Mac-brew managed ruby system years ago. (FYI — I tried natively compiling Ruby and gems in Windows and it is a royal PITA. It’s possible but not worth my time.) I saw the drop in performance when I switched to Windows 10 some years ago, using the new WSL service. Seeing my content in context is important to me. A few months ago, I upgraded my WSL to WSL2 and saw improved performance, now in the 5 - 10 second range. Better, but still annoying for my temperament and preferences.</p>
+
+<h3 id="theres-gotta-be-something-better">There’s gotta be something better</h3>
+
+<p>We’re seeing increasing interest in static websites. This also means more options in everyone’s favorite frameworks or languages. Python has <a href="https://blog.getpelican.com/">Pelican</a> and others, Node has <a href="https://hexo.io/">Hexo</a>, and, not wanting to be left uninvited to the dance, even PHP has <a href="https://sculpin.io/">Sculpin</a>. At the DrupalCon Nashville 2018 conference, I had the pleasure of attending <a href="https://stevefrancia.com/">Steve Francia’s</a> <a href="https://youtu.be/EJo9tPXGPo8">keynote</a>. While there was a lot of good stuff in that keynote, he mentioned his work on the Go programming language at Google, and unsurprisingly, on the Go-based static website generator <a href="https://gohugo.io/">Hugo</a>. Given my favorable impression of Francia and his work, I was curious to check out Hugo.</p>
+
+<p>My initial impression was, well, wow. Hugo has markdown, was painless to install (I used linuxbrew on WSL2) and most importantly, Hugo is fast. Shockingly fast. My simple “hello world” website renders in under a second, heck in under 100 milliseconds. It’s nuts. So what happens with more content? I’m assured Hugo scales quite well and retains its blazing speed. I also took full advantage of a new CI/CD system in GitLab where a push to the specified git repository branch publishes pages on their service but that’s another topic.</p>
+
+<p>Smitten with this performance, I started to dig into Hugo as a new publishing platform for this blog. I soon discovered that the Hugo theme world is still lagging behind Jekyll’s. Using GitHub’s star rating method, the most popular Hugo theme, which includes Disqus support, is 1/7th that the rating of my current Jekyll theme. Additionally, the features and display of the better supported Hugo themes are missing aspects of my Jekyll configuration that aren’t trivial to give up.</p>
+
+<h3 id="here-we-are-again">Here we are, again</h3>
+
+<p>Dejectedly, I spun up the old (current) environment blog environment. I see Ruby has a 3.x major release out. I update and things break. <em>Here we are again.</em> I completely uninstall and reinstall ruby, rbenv, and gems. Then I see Jekyll and my theme doesn’t play well with Ruby 3.0.0 so I set my environment to use Ruby 2.7.2, which fixes the problem. <em>More of the same ol’, same ol’.</em> Then I get <code class="language-plaintext highlighter-rouge">jekyll serve</code> to launch and, wait, <em>what?</em> Jekyll is now generating my page and site updates in under a second? At some point in the past few months, someone, somewhere, made some adjustments, and now my Jekyll system is, while not as fast as Hugo, it is fast enough, and I can keep all of my customizations for this blog.</p>
+
+<p>Here are the stats as I update this page:</p>
+
+<blockquote>
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Regenerating: 1 file(s) changed at 2021-01-16 11:59:14
+               _posts/2021-01-16-jekyll-hugo-and-me.md
+  Jekyll Feed: Generating feed for posts
+               ...done in 0.7113945 seconds.
+</code></pre></div>  </div>
+</blockquote>
+
+<p>I noticed that I have updated the Jekyll Gemfile requirement from 3.4 to 3.7 as a version minimum. Perhaps this accounts for the dramatic speed increase? Or Microsoft has implemented some architecture changes to WSL2 that is helping? Or both? Or something else? Whatever the reason, I’ll take it.</p>
+
+<p>It looks like this blog will be on Jekyll for a little while longer.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="Static Websites" /><summary type="html"><![CDATA[The battle for a better static website generator]]></summary></entry><entry><title type="html">Drupal Multisite on a Dime</title><link href="https://kyleskrinak.github.io/presentations/20-12-04-drupal-multisite.html" rel="alternate" type="text/html" title="Drupal Multisite on a Dime" /><published>2020-12-03T20:21:00+00:00</published><updated>2020-12-03T20:21:00+00:00</updated><id>https://kyleskrinak.github.io/presentations/drupal-multisite-on-a-dime</id><content type="html" xml:base="https://kyleskrinak.github.io/presentations/20-12-04-drupal-multisite.html"><![CDATA[# Drupal Multisite on a Dime
+## or How we Adopted CI/CD for TCA&S’s Drupal Multisite Hosting for Trinity’s 100+ Drupal websites
+
+----
+
+#### This presentation:
+https://bit.ly/tcas-drupal-multisite
+
+
+
+# Your presenter
+
+----
+
+## Kyle Skrinak, I.T. Manager 
+### Trinity College of Arts & Sciences   
+Web Support (now part of OIT), Duke University
+https://people.duke.edu/~kds38  
+
+
+
+# Meet the team
+
+----
+
+* David Palmer, *DevOps*
+* Andy Smith, *Web Dev & Design*
+* Gabe Fahl, *PHP Programmer*
+* Alex Verhoeven, *Web Dev & Design*
+* John Herr, *PHP Programmer*
+
+
+
+# Who We Serve?
+
+----
+
+* Trinity College of Arts & Sciences departments, administrative, labs, etc.
+  * 120 active websites
+  * 100+ legacy websites and web applications 
+* SLAs and MoUs, *including*
+  * divinity.duke.edu
+  * dibs.duke.edu
+  * sanford.duke.edu
+
+
+
+# Requirements
+
+----
+
+* Consistency across all of our websites
+* Rely on Open Source community, and not custom module development
+* Decreased support and discovery time
+* Greatly agility with code updates, website maintenance, and deployment
+* Minimize cost for external tools
+
+
+
+# Overview: Timeline
+
+----
+
+* 2013: Apostrophe → Drupal migration starts
+* 2014: Drupal Multi-site *(hosting, version control)*
+* 2015: Base + Sub theme *(branding, gitorius → gitlab)*
+* 2016: FDS → Scholars migration *(profile data, membership)* 
+* 2017: Drupal 8 distribution begins, first D8 website (A→D7 migration ends)
+* 2018: D8 requirements set (hosting, branding, membership)
+* 2019: D8 distribution starts, production begins (CI/CD deployed)
+* 2020: Currently at 27 D8 websites
+
+
+
+# Innovations
+
+----
+
+* 2014: Drupal Multi-site
+  * Pantheon discussions and debate over multi-site
+  * The DevOps-like dashboard for managing websites
+* 2015: Drupal Omega Base + Sub theme <!-- .element: class="fragment" -->
+  * Simplified enforcing our branding across n number of websites
+  * Reduced complexity of our support by providing reasonable defaults for content migration
+
+
+
+# Innovations
+
+----
+
+* 2016: Department profile management
+  * The "People" section of our websites
+  * Faculty Database System (FDS) → Scholars effort  <!-- .element: class="fragment" -->
+  * Missing: non-faculty membership and our TCA&S-wide directory on trinity.duke.edu  <!-- .element: class="fragment" -->
+  * Support for Duke's system of record  <!-- .element: class="fragment" -->
+  * Solution: design and implement middleware <!-- .element: class="fragment" -->
+    * Directory Tool
+    * Plenty of Feeds
+
+
+
+# Drupal 8: Design phase
+
+----
+
+* Finished D7 website migration by 2017
+* Goal setting  <!-- .element: class="fragment" -->
+  * Enforce feature and content denormalization  <!-- .element: class="fragment" -->
+  * Continue to lean on community, not custom modules  <!-- .element: class="fragment" -->
+  * Confirm: multi-site <!-- .element: class="fragment" -->
+  * Configuration management <!-- .element: class="fragment" -->
+  * Exploit DevOps tools: Composer, CI/CD <!-- .element: class="fragment" -->
+
+
+
+# DevOps becomes a real thing 
+
+----
+
+* You've got developers in my sysadmins?
+* You've got sysadmins in my developers?
+
+> Mmmm! It's good!
+
+
+
+# Our CI/CD Pipeline
+
+| Site tasks                  | Pushbuttons         | Revert      | Migrate         |
+|-----------------------------|---------------------|-------------|-----------------|
+| Enable maintenance mode     | Production backsync | Restore DB  | Staging to Prod |
+| DB Backup                   | Git pull \<branch\> | Revert code |                 |
+| Git Reset --hard \<branch\> |                     |             |                 |
+| Drush entity update         |                     |             |                 |
+| Drush clear caches          |                     |             |                 |
+| Apache OpCache clear        |                     |             |                 |
+| Drush config export         |                     |             |                 |
+| Drush config import         |                     |             |                 |
+| Fix permissions             |                     |             |                 |
+| Disable maintenance mode    |                     |             |                 |
+| Backsync DB from prod       |                     |             |                 |
+
+
+
+# Our Current Workflow
+
+----
+
+* Continue to enhance our content editorial experience
+* Weekly meetings with the TCA&S Comm team
+* Tamp down scope creep as we scale
+* Synchronize core features and display across all websites
+* Extend our CI/CD to WordPress and other servers
+* In process: default site content
+
+
+
+# Q & A 
+
+----
+
+> *thank you*]]></content><author><name>Kyle Skrinak</name></author><summary type="html"><![CDATA[or How we Adopted CI/CD for TCA&S’s Drupal Multisite Hosting for Trinity’s 100 Drupal websites]]></summary></entry><entry><title type="html">Happy Third Lowcarbiversary</title><link href="https://kyleskrinak.github.io/lchf/happy-third-lowcarbiversary/" rel="alternate" type="text/html" title="Happy Third Lowcarbiversary" /><published>2020-06-08T10:51:00+00:00</published><updated>2020-06-08T10:51:00+00:00</updated><id>https://kyleskrinak.github.io/lchf/happy-third-lowcarbiversary</id><content type="html" xml:base="https://kyleskrinak.github.io/lchf/happy-third-lowcarbiversary/"><![CDATA[<figure class="">
+  <img src="/assets/images/2014-08-2020-06-1200.jpg" alt="Left, working the camera, 2014-August. Right, 2020-June" /><figcaption>
+      Left, working the camera at my son’s football game, 2014-August. Right, 2020-June.
+
+    </figcaption></figure>
+
+<h2 id="yo-yo-dieting-no-mas">Yo-yo dieting, no mas</h2>
+
+<p>I’ve lost more weight in the past. I became frail, cold and hungry on those diets. I’ve never kept it off for more than three months. I never felt as good as I do on low-carb, either.</p>
+
+<p>After meeting with Dr. Westman, and some pre-diet planning, June 8th, 2017, marked my first “official” day of switching my diet to low-carb. Since then, I’ve made some mistakes, I’ve never “cheated,” and have come to love this way of eating. Thanks to Dr. Westman’s steady guidance, I’ve come all the way around to his simple “dirty lazy” approach, as some call it. See the end of this article for more information on Dr. Westman.</p>
+
+<p>I entered low-carb eating a skeptic and now I’m convinced after having lived the change and the growing body of evidence that low-carb is not only safe, but might be the best way for optimal health for most of us.</p>
+
+<p>How big a change has it been? Well,</p>
+
+<h3 id="in-june-of-2014-i">In June of 2014, I</h3>
+<ul>
+  <li>Weighed +290 pounds. I was clinically obese.</li>
+  <li>The old and failed method of Calories-In-Calories-Out (CICO) dieting, i.e., tracked 85% of what I ate and made sure I was under my suggested total caloric requirements</li>
+  <li>Exercised more than 60 minutes a day, five times a week.</li>
+  <li>Limited my variety of exercise, since my joints prevented me from jumping or other similar movements</li>
+  <li>Snored like a chainsaw</li>
+  <li>I had a 46” waist, and wore an XXL shirt</li>
+  <li>My blood pressure was high, and my GP was ready to prescribe medication</li>
+  <li>My triglycerides were high and my cholesterol levels were unhealthy</li>
+</ul>
+
+<h3 id="today">Today:</h3>
+<ul>
+  <li>Weigh 230 pounds</li>
+  <li>Following Page Four for health management</li>
+  <li>No tracking of calories or exercise.</li>
+  <li>Eat delicious food until I’m full</li>
+  <li>I don’t eat sugar or starches</li>
+  <li>Exercise 30 - 45 minutes a day</li>
+  <li>No more snoring</li>
+  <li>38” waist, L shirt</li>
+  <li>blood pressure and vitals are excellent</li>
+  <li>On no medications</li>
+</ul>
+
+<p>Many people warned me against a high-fat, low-carb eating plan. I don’t doubt they all meant well, but this old school thinking is keeping so many people from better health.</p>
+
+<p>Their intent doesn’t matter — they’re wrong. This is why I go on and on about low-carb.</p>
+
+<p>Oh, by the way, if you’re so inclined, check out Dr. Westman’s Page Four, which you can buy here for $10: <a href="https://drericwestman.blog/page-4/">https://drericwestman.blog/page-4/</a> It is a very specific and easy-to-follow low-carb guidance for sane people.</p>
+
+<p>It’s the best $10 you’ll ever spend.</p>]]></content><author><name>Kyle Skrinak</name></author><category term="LCHF" /><summary type="html"><![CDATA[Join me as I celebrate three years of low-carb living. At the three-year mark, it’s safe to say the yo-yo dieting has stopped.]]></summary></entry></feed>
