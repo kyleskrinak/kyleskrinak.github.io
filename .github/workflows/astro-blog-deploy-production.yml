@@ -1,4 +1,4 @@
-name: Production Build & Deploy
+name: [astro-blog] Deploy Production
 
 on:
   push:

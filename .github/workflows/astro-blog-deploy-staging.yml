@@ -1,5 +1,5 @@
-# Sample workflow for building and deploying a static site to GitHub Pages
-name: Deploy static content to Pages
+# Astro Blog - Deploy to GitHub Pages (Staging)
+name: [astro-blog] Deploy Staging
 
 on:
   push:
