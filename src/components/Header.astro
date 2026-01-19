@@ -6,6 +6,7 @@ import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
+import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 
 const { pathname } = Astro.url;
@@ -43,7 +44,7 @@ const isActive = (path: string) => {
     ]}
   >
     <a
-      href="/"
+      href={linkWithBase("/")}
       class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"
     >
       {SITE.title}
@@ -72,17 +73,17 @@ const isActive = (path: string) => {
         ]}
       >
         <li class="col-span-2">
-          <a href="/posts" class:list={{ "active-nav": isActive("/posts") }}>
+          <a href={linkWithBase("/posts")} class:list={{ "active-nav": isActive("/posts") }}>
             Posts
           </a>
         </li>
         <li class="col-span-2">
-          <a href="/tags" class:list={{ "active-nav": isActive("/tags") }}>
+          <a href={linkWithBase("/tags")} class:list={{ "active-nav": isActive("/tags") }}>
             Tags
           </a>
         </li>
         <li class="col-span-2">
-          <a href="/about" class:list={{ "active-nav": isActive("/about") }}>
+          <a href={linkWithBase("/about")} class:list={{ "active-nav": isActive("/about") }}>
             About
           </a>
         </li>
@@ -90,7 +91,7 @@ const isActive = (path: string) => {
           SITE.showArchives && (
             <li class="col-span-2">
               <LinkButton
-                href="/archives"
+                href={linkWithBase("/archives")}
                 class:list={[
                   "focus-outline flex justify-center p-3 sm:p-1",
                   {
@@ -108,7 +109,7 @@ const isActive = (path: string) => {
         }
         <li class="col-span-1 flex items-center justify-center">
           <LinkButton
-            href="/search"
+            href={linkWithBase("/search")}
             class:list={[
               "focus-outline flex p-3 sm:p-1",
               { "[&>svg]:stroke-accent": isActive("/search") },
