@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          GITHUB_REF: ${{ github.ref }}
+          BUILD_ENV: staging
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
