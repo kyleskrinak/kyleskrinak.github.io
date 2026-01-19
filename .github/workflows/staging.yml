@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy to GitHub Pages
+  build:
+    name: Build and Commit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,8 +28,10 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+      - name: Commit and push dist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/ -f
+          git commit -m "build: Generate dist for staging" || echo "No changes to commit"
+          git push
