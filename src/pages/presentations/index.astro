@@ -1,0 +1,80 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { linkWithBase } from "@/utils/linkWithBase";
+import { SITE } from "@/config";
+import presentations from "@/data/presentations.json";
+
+// Sort presentations by date, newest first
+const sortedPresentations = presentations.sort((a, b) =>
+  new Date(b.date).getTime() - new Date(a.date).getTime()
+);
+
+// Group presentations by type
+const groupedByType = sortedPresentations.reduce((acc, pres) => {
+  if (!acc[pres.type]) acc[pres.type] = [];
+  acc[pres.type].push(pres);
+  return acc;
+}, {} as Record<string, typeof presentations>);
+
+const typeLabels: Record<string, string> = {
+  conference: "Conference Presentations",
+  technical: "Technical Presentations",
+  meeting: "Meeting Presentations"
+};
+---
+
+<Layout
+  title={`Presentations | ${SITE.title}`}
+  description="Collection of presentations and talks"
+>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    <h1 class="text-2xl font-semibold sm:text-3xl">Presentations</h1>
+
+    <section class="app-prose mt-8">
+      <p>A collection of presentations and talks I've given at conferences, meetings, and technical events.</p>
+    </section>
+
+    {
+      Object.entries(groupedByType).map(([type, items]) => (
+        <section class="mt-12">
+          <h2 class="text-xl font-semibold tracking-wide mb-6">
+            {typeLabels[type] || type}
+          </h2>
+          <ul class="space-y-6">
+            {items.map((pres) => (
+              <li class="border-b border-border pb-6">
+                <a
+                  href={linkWithBase(`/presentations/${pres.id}/`)}
+                  class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 hover:underline"
+                >
+                  {pres.title}
+                </a>
+                <p class="text-sm text-foreground/70 mt-1">
+                  {new Date(pres.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}
+                </p>
+                <p class="text-foreground/80 mt-2">{pres.description}</p>
+                <div class="flex flex-wrap gap-2 mt-3">
+                  {pres.tags.map((tag) => (
+                    <span class="inline-block text-xs bg-foreground/10 text-foreground/70 px-2 py-1 rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </main>
+  <Footer />
+</Layout>

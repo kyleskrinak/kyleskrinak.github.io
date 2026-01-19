@@ -1,0 +1,90 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { linkWithBase } from "@/utils/linkWithBase";
+import { SITE } from "@/config";
+import presentations from "@/data/presentations.json";
+
+interface Props {
+  id: string;
+}
+
+export function getStaticPaths() {
+  return presentations.map((pres) => ({
+    params: { id: pres.id },
+    props: { id: pres.id }
+  }));
+}
+
+const { id } = Astro.props;
+const presentation = presentations.find((p) => p.id === id);
+
+if (!presentation) {
+  return Astro.redirect("/404");
+}
+
+const htmlFile = `/presentations/${id}.html`;
+---
+
+<Layout
+  title={`${presentation.title} | ${SITE.title}`}
+  description={presentation.description}
+>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    <div class="mb-8">
+      <a
+        href={linkWithBase("/presentations/")}
+        class="text-accent hover:underline"
+      >
+        ← Back to Presentations
+      </a>
+    </div>
+
+    <h1 class="text-2xl font-semibold sm:text-3xl mb-2">
+      {presentation.title}
+    </h1>
+    <p class="text-sm text-foreground/70 mb-6">
+      {new Date(presentation.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })}
+    </p>
+
+    <div class="flex flex-wrap gap-2 mb-8">
+      {presentation.tags.map((tag) => (
+        <span class="inline-block text-xs bg-foreground/10 text-foreground/70 px-3 py-1 rounded">
+          {tag}
+        </span>
+      ))}
+    </div>
+
+    <p class="text-foreground/80 mb-8">{presentation.description}</p>
+
+    <div class="bg-background border border-border rounded-lg p-6 mb-8">
+      <p class="mb-4 text-sm text-foreground/80">
+        Click the button below to open the full presentation in fullscreen mode.
+      </p>
+      <a
+        href={htmlFile}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-accent text-background px-6 py-3 rounded font-medium hover:opacity-90 transition-opacity"
+      >
+        View Presentation →
+      </a>
+    </div>
+
+    <div class="prose prose-invert max-w-none">
+      <p class="text-sm text-foreground/60 italic">
+        This presentation is displayed in a separate window. Use arrow keys or
+        click to navigate through the slides.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</Layout>

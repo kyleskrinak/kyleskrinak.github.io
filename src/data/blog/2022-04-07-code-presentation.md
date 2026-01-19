@@ -19,4 +19,4 @@ This presentation highlights Duke University's **Code+** cocurricular program, a
 - Building inclusive technology communities
 - Duke's commitment to DEI initiatives
 
-**View the full presentation:** [Code+ at DrupalCon 2022](/presentations/code-presentation.html)
+**View the full presentation:** [Code+ at DrupalCon 2022](/presentations/code-presentation/)

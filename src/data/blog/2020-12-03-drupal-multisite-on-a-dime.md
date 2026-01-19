@@ -21,4 +21,4 @@ This talk covers how Trinity Technology Services adopted CI/CD practices for man
 - DevOps integration with Composer and version control
 - Configuration management in Drupal 8+
 
-**View the full presentation:** [Drupal Multisite on a Dime](/presentations/drupal-multisite-on-a-dime.html)
+**View the full presentation:** [Drupal Multisite on a Dime](/presentations/drupal-multisite-on-a-dime/)
