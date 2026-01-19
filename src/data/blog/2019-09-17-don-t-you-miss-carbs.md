@@ -4,7 +4,7 @@ author: Kyle Skrinak
 pubDatetime: 2019-09-17T00:00:00Z
 featured: false
 draft: false
-description: "Imagine asking an alcoholic; "Don't you miss alcohol?"
+description: "Imagine asking an alcoholic if they miss alcohol - that is how I feel about carbs"
 ---
 
 It's a common question for me these days. After talking about my weight-loss, severely reducing my carb intake, and how I must remain low-carb to do so, my interlocutor nearly always will press me;

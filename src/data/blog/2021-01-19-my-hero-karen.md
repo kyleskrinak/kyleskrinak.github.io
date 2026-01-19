@@ -4,7 +4,7 @@ author: Kyle Skrinak
 pubDatetime: 2021-01-19T00:00:00Z
 featured: false
 draft: false
-description: "My squatting calves, trembling and tiptoe, are eager to get me out of there. Karen and I agreed &mdash; my only option is for me to jump and for Karen to "catch" me.<br/><br/> The two adult men, across the street, continue to savor their evening’s spectacle."
+description: "My squatting calves, trembling and tiptoe, are eager to get me out of there. Karen and I agreed on a daring plan."
 ---
 
 <style>
