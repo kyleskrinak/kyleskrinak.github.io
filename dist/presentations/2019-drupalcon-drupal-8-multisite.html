@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2019 DrupalCon Drupal 8 Multisite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: fadeIn 0.5s;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide.slide-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .slide-content {
+            font-size: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .slide h3 {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .slide ul {
+            list-style-position: inside;
+            margin: 1rem 0;
+        }
+
+        .slide li {
+            margin: 0.5rem 0;
+            margin-left: 2rem;
+        }
+
+        .slide a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .slide p {
+            margin: 1rem 0;
+        }
+
+        .slide code {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .slide pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .slide pre code {
+            background: none;
+            padding: 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .slide hr {
+            border: none;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 1.5rem 0;
+        }
+
+        .slide table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .slide table thead {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .slide table th,
+        .slide table td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .slide table tbody tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .slide table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 25px;
+            border-radius: 50px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .home-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+
+        .home-link:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 10;
+            transition: width 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px;
+            }
+            .slide h1 {
+                font-size: 2rem;
+            }
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+            .slide-content {
+                font-size: 1rem;
+            }
+            .controls {
+                padding: 10px 15px;
+            }
+            button {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="home-link">← Home</a>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="presentation-container" id="container">
+        
+        <section class="slide slide-title">
+          <div class="slide-content">
+            <h3>Our DevOps Approach to Multisite and Drupal 8</h3>
+<hr>
+<h5>A high-level overview</h5>
+<p>of how we’re using DevOps to</p>
+<h6>pimp our stack</h6>
+
+          </div>
+          <div class="slide-number">1 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h4>Kyle Skrinak, I.T. Manager</h4>
+<p>Web Development and Systems Administration<br>
+<a href="https://people.duke.edu/~kds38">https://people.duke.edu/~kds38</a><br>
+<em>(nom de cyber: @screenack)</em></p>
+<hr>
+<h6>Trinity College of Arts &amp; Sciences <em>at</em></h6>
+<h5>Duke University</h5>
+<hr>
+<h6>This presentation:</h6>
+<p><a href="http://bit.ly/DC19-HES">http://bit.ly/DC19-HES</a></p>
+
+          </div>
+          <div class="slide-number">2 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Meet the team</h3>
+<hr>
+<ul>
+<li>Two Drupal website designers and developers</li>
+<li>Two Symfony custom application developers</li>
+<li>Three sysadmins, including one Drupal lead</li>
+<li>Host 380 websites, including 108 Drupal websites</li>
+<li>Highly normalized platform — branding, features, and content</li>
+<li>Support third-party developed websites</li>
+<li>Plus a bevy of other web and sysadmin-related support</li>
+<li>We maintain an excellent support reputation</li>
+</ul>
+
+          </div>
+          <div class="slide-number">3 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Current Infrastructure</h3>
+<hr>
+<ul>
+<li>Duke OIT provided VM’s</li>
+<li>RHEL7</li>
+<li>MySQL &gt; MariaDB</li>
+<li>PHP’s aggressive EoL change</li>
+<li>Shibboleth SSO</li>
+<li>Third-party integrations: e.g., Qualtrics forms and Box for storage</li>
+<li>108 websites on a clustered server pair</li>
+<li>A varnish and a pound load balancer.</li>
+<li>A staging and production server per website</li>
+</ul>
+
+          </div>
+          <div class="slide-number">4 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Our Drupal 7 workflow</h3>
+<hr>
+<ul>
+<li>Ansible pulls Drupal core updates from d.o.</li>
+<li>Three git repos for code
+<ul>
+<li>Global
+<ol>
+<li>Our <strong>sites/all</strong> <em>(contrib modules, themes, and libraries)</em> repo</li>
+<li><strong>Trinity-level theme</strong> <em>(Omega-based)</em> repo at sites/all/themes</li>
+</ol>
+</li>
+<li>per website
+<ol>
+<li><strong>Website repo</strong> <em>(theme, modules, libraries)</em> in the<br>
+<code>sites/\&lt;sitename&gt;</code> directory</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><code>drush</code>, <code>git</code> and <code>ansible</code> to manage our stack cluster</li>
+</ul>
+
+          </div>
+          <div class="slide-number">5 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>What of Sleeping Dogs?</h3>
+<hr>
+<ul>
+<li>Our mature workflow serves our customers and ourselves well…</li>
+<li>…but it fails us, moving forward</li>
+<li>Shifting external requirements continue to mount
+<ul>
+<li>Web accessibility and responsive design</li>
+<li>Our security posture</li>
+<li>Integrate CI/CD and QA</li>
+<li>Increasingly rapid stack updates</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+          <div class="slide-number">6 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Enter DevOps</h3>
+<hr>
+<h5>What is DevOps?</h5>
+<ul>
+<li>To radically yet <em>seamlessly</em> change our workflow</li>
+<li>Rethink roles, rules, interactions, expectations</li>
+<li>Stay current with tool and paradigm shifts</li>
+<li>Learning from our peers and contributing back</li>
+<li>Maintain and improve our service reputation</li>
+</ul>
+
+          </div>
+          <div class="slide-number">7 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Has DevOps Helped Us?</h3>
+<hr>
+<h4>Yes.</h4>
+<blockquote>
+<p><em>“Achieving extraordinary results<br>
+from ordinary people.”</em></p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">8 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>DevOps?</h3>
+<hr>
+<h4>You’re Soaking in It</h4>
+<ul>
+<li>Bi-weekly DevOps meeting
+<ul>
+<li>New concerns and opportunities</li>
+<li>New tools</li>
+<li>Paradigm shifts</li>
+<li>Changing individual roles</li>
+</ul>
+</li>
+<li>Refactor our distribution and workflow</li>
+<li>Cross-discipline training</li>
+<li>Presentations on new proposals and tech</li>
+</ul>
+
+          </div>
+          <div class="slide-number">9 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Why multisite?</h3>
+<hr>
+<ul>
+<li>Misleading FUD on multisite</li>
+<li>Stable</li>
+<li>n-factor reduction in duplicate stack code</li>
+<li>Faster and inexpensive code updates</li>
+</ul>
+
+          </div>
+          <div class="slide-number">10 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Preparing for Drupal 8</h3>
+<hr>
+<ul>
+<li>Confirm continued D.O. support for multisite past 9.x
+<ul>
+<li>Yep: <a href="https://www.drupal.org/project/drupal/issues/2306013">https://www.drupal.org/project/drupal/issues/2306013</a></li>
+</ul>
+</li>
+<li>Confirm our understanding of Drupal 8 multisite
+<ul>
+<li>Yep: <a href="https://people.duke.edu/~kds38/drupal/drupal-8-multisite-documentation/">https://people.duke.edu/~kds38/drupal/drupal-8-multisite-documentation/</a> <strong>BUT</strong></li>
+</ul>
+</li>
+<li><code>composer</code> replaces <code>drush</code> for managing Drupal</li>
+<li>A “pure” composer-based workflow conflicts with
+<ul>
+<li>Managing the individual website instances</li>
+<li>JavaScript library dependency resolution</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+          <div class="slide-number">11 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>How, then?</h3>
+<hr>
+<h4>Distribution reference</h4>
+<ul>
+<li>Maintain a “reference” D8 installation for managing core, based on the Drupal Project composer template
+<ul>
+<li><a href="https://github.com/drupal-composer/drupal-project">https://github.com/drupal-composer/drupal-project</a></li>
+</ul>
+</li>
+<li>Run <code>composer update</code> against the reference
+<ul>
+<li>If there are updates, this will also update the <code>composer.lock</code> file</li>
+</ul>
+</li>
+<li>Commit the <code>composer.lock</code> file updates to the core git repo</li>
+</ul>
+
+          </div>
+          <div class="slide-number">12 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h4>Core and Code Deployment</h4>
+<hr>
+<h5>Switch from <code>ansible</code> to <code>GitLab CE CI/CD</code></h5>
+<ul>
+<li>The value of recent GitLab updates</li>
+<li>Trigger deployment updates from the GitLab UI.</li>
+</ul>
+<blockquote>
+<p>Oops… NoOps!</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">13 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h4>Core and Code Deployment</h4>
+<hr>
+<h5>Use a GitLab’s CI/CD to</h5>
+<ul>
+<li><code>composer install</code> with the updated lock file to distributed D8 cores.
+<ul>
+<li>Far less expensive than <code>composer update</code> on all cores.</li>
+</ul>
+</li>
+<li>Run QA tests as part of a build process
+<ul>
+<li>(Still in development)</li>
+</ul>
+</li>
+<li>Consistently run deployment scripts</li>
+<li>Deploy website code to our staging and production servers</li>
+</ul>
+
+          </div>
+          <div class="slide-number">14 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h4>Core and Website Updates</h4>
+<hr>
+<h5>Run a <code>pipeline</code> on targeted servers</h5>
+<ul>
+<li>For all child sites:
+<ul>
+<li>Move website to maintenance mode</li>
+<li>Database and code backup for all child websites</li>
+</ul>
+</li>
+<li>Pull composer.lock file</li>
+<li>Composer install (core only)</li>
+<li>For all child sites:
+<ul>
+<li>Drupal database update</li>
+<li>Cache rebuild</li>
+</ul>
+</li>
+<li>Reapply permissions on core or website directories only</li>
+</ul>
+
+          </div>
+          <div class="slide-number">15 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>GitLab CI/CD Demo</h3>
+<hr>
+<p><a href="https://www.youtube.com/embed/_3wf9p9v5ik">Link</a></p>
+
+          </div>
+          <div class="slide-number">16 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Features and Benefits</h3>
+<hr>
+<ul>
+<li>Eliminates need for manual deployment</li>
+<li>“True” push-button deployment for our devs</li>
+<li>Consistent deployment execution</li>
+<li>Consistent state restoration</li>
+<li>Easy access to deployment logs by all</li>
+</ul>
+
+          </div>
+          <div class="slide-number">17 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Hindsight = 20/20</h3>
+<hr>
+<ul>
+<li>Base our distribution on Acquia’s Lightning distribution
+<ul>
+<li><a href="https://github.com/acquia/lightning">https://github.com/acquia/lightning</a></li>
+</ul>
+</li>
+<li>Build an installation profile</li>
+</ul>
+
+          </div>
+          <div class="slide-number">18 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>What’s Next?</h3>
+<hr>
+<ul>
+<li>Library management: big hairy eyeball</li>
+<li>Implement varnish and pound for D8</li>
+<li>Build and maintain our own installation profile</li>
+<li>Trigger deployments with commit tags</li>
+<li>Improve integration of website-level configuration management</li>
+<li>Backport what we can to our D7 workflow</li>
+</ul>
+
+          </div>
+          <div class="slide-number">19 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Questions?</h3>
+<hr>
+<blockquote>
+<p>?</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">20 / 21</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Thank You!</h3>
+<hr>
+<blockquote>
+<p>!</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">21 / 21</div>
+        </section>
+      
+    </div>
+
+    <div class="controls">
+        <button onclick="prevSlide()">← Previous</button>
+        <button onclick="nextSlide()">Next →</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            // Update progress bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert('Could not enter fullscreen: ' + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
