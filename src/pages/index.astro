@@ -42,19 +42,33 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
       </a>
 
       <p>
-        AstroPaper is a minimal, responsive, accessible and SEO-friendly Astro
-        blog theme. This theme follows best practices and provides accessibility
-        out of the box. Light and dark mode are supported by default. Moreover,
-        additional color schemes can also be configured.
+        Hello and thanks for stopping by. Despite being a full-on Drupal fan, I <LinkButton
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          href="/blog/2016-10-31-first-blog-post/"
+        >
+          started this blog in 2016
+        </LinkButton> as an exercise in using <LinkButton
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          href="https://jekyllrb.com/"
+        >
+          Jekyll
+        </LinkButton>, a static website generator and with the <LinkButton
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          href="https://mmistakes.github.io/minimal-mistakes/"
+        >
+          Minimal Mistakes
+        </LinkButton> theme. By doing so, I discovered I could easily create a feature-rich web blog only serving HTML resources. No PHP, Python, or the like, running on the server.
       </p>
       <p class="mt-2">
-        Read the blog posts or check
-        <LinkButton
+        As for my interests; by day, I manage web development and system administration. Otherwise, I am a fan of low-carb eating, as the pages of this blog reflect. I use these topics as excuses for writing on my blog as an excuse to write in Markdown and NeoVim. And write.
+      </p>
+      <p class="mt-2">
+        Currently, I am the Senior Manager of the Digital Experience Platform Team for <LinkButton
           class="underline decoration-dashed underline-offset-4 hover:text-accent"
-          href="https://github.com/satnaing/astro-paper#readme"
+          href="https://www.gilead.com/"
         >
-          README
-        </LinkButton> for more info.
+          Gilead Sciences
+        </LinkButton>. Our team is responsible for the reliable hosting and management of Gilead's websites. Our main Content Management System is Sitecore and Azure and we also support PHP and static websites on Amazon Web Services.
       </p>
       {
         // only display if at least one social link is enabled

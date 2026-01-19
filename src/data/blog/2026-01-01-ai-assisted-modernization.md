@@ -2,7 +2,7 @@
 title: "AI-Assisted Modernization: Two Days, Ten Years Strong"
 author: Kyle Skrinak
 pubDatetime: 2026-01-01T00:00:00Z
-featured: false
+featured: true
 draft: false
 tags:
   - ai
