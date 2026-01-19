@@ -30,9 +30,9 @@ jobs:
         run: npm ci
 
       - name: Build site
-        run: npm run build
+        run: npm run build:ci
         env:
-          GITHUB_REF: ${{ github.ref }}
+          BUILD_ENV: production
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

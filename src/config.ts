@@ -1,5 +1,12 @@
+// Determine environment: production (main branch) or staging (staging branch)
+const buildEnv = process.env.BUILD_ENV || "production";
+const isProduction = buildEnv === "production";
+const website = isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io/astro-blog/";
+
+console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);
+
 export const SITE = {
-  website: "https://kyle.skrinak.com/", // production domain
+  website,
   author: "Kyle Skrinak",
   profile: "https://github.com/kyleskrinak",
   desc: "Senior Manager, Digital Experience Platform for Gilead Sciences",

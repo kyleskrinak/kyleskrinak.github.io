@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npm run build
+        run: npm run build:ci
         env:
           BUILD_ENV: staging
       - name: Setup Pages
