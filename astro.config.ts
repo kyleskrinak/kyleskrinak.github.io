@@ -12,7 +12,11 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import { SITE } from "./src/config";
 
 // https://astro.build/config
+const buildEnv = process.env.BUILD_ENV || "production";
+const base = buildEnv === "staging" ? "/astro-blog/" : "/";
+
 export default defineConfig({
+  base,
   site: SITE.website,
   integrations: [
     sitemap({
