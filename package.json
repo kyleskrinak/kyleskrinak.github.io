@@ -4,15 +4,27 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist --output-subdir _pagefind",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:presentations": "node build-presentations.js",
+    "presentations:dev": "cd slidev-presentations && npm run dev",
+    "presentations:build": "cd slidev-presentations && npm run build",
+    "presentations:export": "cd slidev-presentations && npm run export"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
     "astro": "^5.16.11",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "markdown-it-table-of-contents": "^1.1.0",
+    "pagefind": "^1.4.0",
     "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "typescript": "^5.3.3"
   }
 }

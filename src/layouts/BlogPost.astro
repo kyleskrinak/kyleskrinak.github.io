@@ -2,13 +2,25 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
+import DisqusComments from '../components/DisqusComments.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
+import GoogleAnalytics from '../components/GoogleAnalytics.astro';
 import Header from '../components/Header.astro';
+import SocialShare from '../components/SocialShare.astro';
+import { getOptimizedImage } from '../lib/images';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props extends CollectionEntry<'blog'>['data'] {
+	slug?: string;
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const props = Astro.props as any;
+const { title, description, pubDate, updatedDate, slug = '' } = props;
+const image = props.image as string | undefined;
+const alt = props.alt as string | undefined;
+
+// Get optimized image metadata for Astro Image component
+const optimizedImage = getOptimizedImage(image);
 ---
 
 <html lang="en">
@@ -57,10 +69,20 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
 	<body>
 		<Header />
+		<GoogleAnalytics />
 		<main>
 			<article>
 				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+					{optimizedImage && (
+						<Image
+							src={optimizedImage}
+							alt={alt || 'Blog post hero image'}
+							width={1200}
+							height={600}
+							quality={85}
+							format="webp"
+						/>
+					)}
 				</div>
 				<div class="prose">
 					<div class="title">
@@ -78,6 +100,8 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 						<hr />
 					</div>
 					<slot />
+					<SocialShare {title} {slug} {description} />
+					<DisqusComments {slug} {title} />
 				</div>
 			</article>
 		</main>

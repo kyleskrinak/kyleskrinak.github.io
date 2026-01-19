@@ -1,0 +1,26 @@
+---
+/**
+ * MDX Layout for Blog Posts
+ * Provides custom components to MDX files
+ */
+import type { CollectionEntry } from 'astro:content';
+import BlogPost from './BlogPost.astro';
+import FbMigrate from '@/components/FbMigrate.astro';
+import Figure from '@/components/Figure.astro';
+
+interface Props {
+  entry: CollectionEntry<'blog'>;
+}
+
+const { entry } = Astro.props;
+
+// Export components for use in MDX
+export const components = {
+  FbMigrate,
+  Figure,
+};
+---
+
+<BlogPost entry={entry}>
+  <slot />
+</BlogPost>

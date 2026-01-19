@@ -1,0 +1,90 @@
+---
+interface Props {
+	title: string;
+	slug: string;
+	description?: string;
+}
+
+const { title, slug, description } = Astro.props;
+const pageUrl = `https://kyle.skrinak.com/blog/${slug}/`;
+const encodedUrl = encodeURIComponent(pageUrl);
+const encodedTitle = encodeURIComponent(title);
+const encodedDesc = encodeURIComponent(description || title);
+
+const socialLinks = [
+	{
+		name: 'Twitter',
+		url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+		icon: '𝕏',
+	},
+	{
+		name: 'Facebook',
+		url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+		icon: 'f',
+	},
+	{
+		name: 'LinkedIn',
+		url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+		icon: 'in',
+	},
+	{
+		name: 'Email',
+		url: `mailto:?subject=${encodedTitle}&body=${encodedDesc}%0A%0A${encodedUrl}`,
+		icon: '✉',
+	},
+];
+---
+
+<div class="social-share">
+	<p>Share this post:</p>
+	<ul class="social-links">
+		{
+			socialLinks.map((link) => (
+				<li>
+					<a href={link.url} target="_blank" rel="noopener noreferrer" title={`Share on ${link.name}`}>
+						{link.name}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	.social-share {
+		margin: 2rem 0;
+		padding: 1rem;
+		background-color: rgb(var(--gray-light-ish, 240, 240, 240));
+		border-radius: 8px;
+	}
+
+	.social-share p {
+		margin: 0 0 1rem 0;
+		font-weight: 600;
+	}
+
+	.social-links {
+		display: flex;
+		gap: 1rem;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		flex-wrap: wrap;
+	}
+
+	.social-links a {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		background-color: rgb(var(--accent));
+		color: white;
+		border-radius: 4px;
+		text-decoration: none;
+		font-size: 0.9rem;
+		transition: 0.2s ease;
+	}
+
+	.social-links a:hover {
+		opacity: 0.8;
+		transform: translateY(-2px);
+	}
+</style>

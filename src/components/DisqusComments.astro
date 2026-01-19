@@ -1,0 +1,42 @@
+---
+interface Props {
+	slug: string;
+	title: string;
+}
+
+const { slug, title } = Astro.props;
+const shortname = 'kds38-duke-blog';
+---
+
+<div id="disqus_thread"></div>
+<script>
+	const disqusShortname = 'kds38-duke-blog';
+	const pageUrl = window.location.href;
+	const pageIdentifier = document.currentScript?.dataset.slug || 'unknown';
+
+	window.disqus_config = function () {
+		this.page.url = pageUrl;
+		this.page.identifier = pageIdentifier;
+	};
+
+	(function () {
+		const d = document;
+		const s = d.createElement('script');
+		s.src = 'https://' + disqusShortname + '.disqus.com/embed.js';
+		s.setAttribute('data-timestamp', new Date().getTime());
+		(d.head || d.body).appendChild(s);
+	})();
+</script>
+<noscript
+	>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript"
+		>comments powered by Disqus.</a
+	></noscript
+>
+
+<style>
+	#disqus_thread {
+		margin-top: 2rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgb(var(--gray-light));
+	}
+</style>

@@ -1,0 +1,56 @@
+/* Pagefind UI Styling */
+#search-container {
+	margin: 2rem 0;
+	padding: 1rem;
+	background: rgb(var(--gray-light-ish, 240, 240, 240));
+	border-radius: 8px;
+}
+
+#search-input {
+	width: 100%;
+	max-width: 500px;
+	padding: 0.75rem;
+	font-size: 1rem;
+	border: 2px solid rgb(var(--accent));
+	border-radius: 4px;
+	outline: none;
+	transition: box-shadow 0.2s ease;
+}
+
+#search-input:focus {
+	box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+}
+
+#search-results {
+	margin-top: 1rem;
+}
+
+.pagefind-ui {
+	--font-base: inherit;
+	--text: rgb(var(--gray-dark));
+	--border: rgb(var(--gray-light));
+	--background: white;
+	--accent: rgb(var(--accent));
+}
+
+.pagefind-ui__result {
+	margin: 1rem 0;
+	padding: 1rem;
+	border: 1px solid rgb(var(--gray-light));
+	border-radius: 4px;
+}
+
+.pagefind-ui__result-title a {
+	color: rgb(var(--accent));
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.pagefind-ui__result-title a:hover {
+	text-decoration: underline;
+}
+
+.pagefind-ui__result-excerpt {
+	color: rgb(var(--gray-dark));
+	font-size: 0.9rem;
+}

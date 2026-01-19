@@ -1,0 +1,39 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Search from '../components/Search.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Search - ${SITE_TITLE}`} description="Search all blog posts" />
+		<style>
+			main {
+				width: 960px;
+				max-width: calc(100% - 2rem);
+				margin: 2rem auto;
+			}
+			h1 {
+				margin-top: 0;
+			}
+			@media (max-width: 720px) {
+				main {
+					width: 100%;
+					padding: 0 1rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Search Blog Posts</h1>
+			<p>Use the search box below to find posts by keyword, title, or content.</p>
+			<Search />
+		</main>
+		<Footer />
+	</body>
+</html>

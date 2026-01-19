@@ -1,0 +1,58 @@
+---
+/**
+ * FbMigrate Component
+ * Displays a notice that content was migrated from Facebook Notes
+ *
+ * Usage in MDX:
+ * <FbMigrate fb_url="https://..." original_date="August 1st, 2009" />
+ */
+
+interface Props {
+  fb_url: string;
+  original_date: string;
+}
+
+const { fb_url, original_date } = Astro.props;
+---
+
+<div class="notice notice--info">
+  <em>
+    <strong>Note:</strong>
+    I originally posted this on my Facebook account on
+    <a href={fb_url}>{original_date}</a>. However, Facebook is getting rid of
+    their "notes" blog-like ability, so I've moved this content to my blog, with
+    some edits for clarity.
+  </em>
+</div>
+
+<style>
+  .notice {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #3498db;
+    background-color: #ecf0f1;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .notice--info {
+    border-left-color: #3498db;
+    background-color: #d5edf7;
+  }
+
+  .notice em {
+    display: block;
+  }
+
+  .notice strong {
+    font-weight: 700;
+  }
+
+  .notice a {
+    color: #0366d6;
+    text-decoration: none;
+  }
+
+  .notice a:hover {
+    text-decoration: underline;
+  }
+</style>

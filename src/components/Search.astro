@@ -1,0 +1,55 @@
+---
+import '../styles/search.css';
+---
+
+<div id="search-container">
+	<input
+		id="search-input"
+		type="search"
+		placeholder="Search posts..."
+		aria-label="Search posts"
+	/>
+	<div id="search-results"></div>
+</div>
+
+<script is:inline>
+	// Simple search implementation using Pagefind
+	if (window.pagefind) {
+		const searchInput = document.getElementById('search-input');
+		const searchResults = document.getElementById('search-results');
+
+		if (searchInput) {
+			searchInput.addEventListener('input', async (e) => {
+				const query = e.target.value;
+
+				if (query.length < 2) {
+					searchResults.innerHTML = '';
+					return;
+				}
+
+				try {
+					const search = await window.pagefind.search(query);
+					const results = await Promise.all(search.results.map((r) => r.data()));
+
+					if (results.length === 0) {
+						searchResults.innerHTML = '<p>No results found</p>';
+						return;
+					}
+
+					searchResults.innerHTML = results
+						.map(
+							(result) => `
+						<div class="search-result">
+							<a href="${result.url}">${result.title}</a>
+							<p>${result.excerpt}</p>
+						</div>
+					`
+						)
+						.join('');
+				} catch (error) {
+					console.error('Search error:', error);
+				}
+			});
+		}
+	}
+</script>

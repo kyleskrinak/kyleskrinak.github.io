@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	const tags = new Set<string>();
+
+	posts.forEach((post) => {
+		if (post.data.tags) {
+			post.data.tags.forEach((tag) => {
+				tags.add(tag);
+			});
+		}
+	});
+
+	return Array.from(tags).map((tag) => ({
+		params: { tag: tag.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-') },
+		props: { tag },
+	}));
+}
+
+interface Props {
+	tag: string;
+}
+
+const { tag } = Astro.props;
+const posts = (await getCollection('blog'))
+	.filter((post) => post.data.tags?.includes(tag))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`${tag} - ${SITE_TITLE}`} description={`Posts tagged with: ${tag}`} />
+		<style>
+			main {
+				width: 960px;
+			}
+			h1 {
+				margin: 2rem 0 1rem 0;
+			}
+			ul {
+				list-style-type: none;
+				padding: 0;
+				margin: 1rem 0;
+			}
+			ul li {
+				margin-bottom: 1rem;
+				padding-bottom: 1rem;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			ul li:last-child {
+				border-bottom: none;
+			}
+			.post-title {
+				font-size: 1.5rem;
+				margin: 0.5rem 0;
+			}
+			.post-date {
+				color: rgb(var(--gray));
+				font-size: 0.9rem;
+			}
+			a {
+				text-decoration: none;
+				color: rgb(var(--accent));
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+			@media (max-width: 720px) {
+				main {
+					width: 100%;
+					padding: 0 1rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Tag: {tag}</h1>
+			<p>{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
+			<ul>
+				{
+					posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								<h3 class="post-title">{post.data.title}</h3>
+							</a>
+							<p class="post-date">
+								<FormattedDate date={post.data.pubDate} />
+							</p>
+							{post.data.description && <p>{post.data.description}</p>}
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>

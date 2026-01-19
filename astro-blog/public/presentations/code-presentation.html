@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DrupalCon 2022 Code+ Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: fadeIn 0.5s;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide.slide-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .slide-content {
+            font-size: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .slide h3 {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .slide ul {
+            list-style-position: inside;
+            margin: 1rem 0;
+        }
+
+        .slide li {
+            margin: 0.5rem 0;
+            margin-left: 2rem;
+        }
+
+        .slide a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .slide p {
+            margin: 1rem 0;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 25px;
+            border-radius: 50px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .home-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+
+        .home-link:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 10;
+            transition: width 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px;
+            }
+            .slide h1 {
+                font-size: 2rem;
+            }
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+            .slide-content {
+                font-size: 1rem;
+            }
+            .controls {
+                padding: 10px 15px;
+            }
+            button {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="home-link">← Home</a>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="presentation-container" id="container">
+        
+        <section class="slide slide-title">
+          <div class="slide-content">
+            theme: duke<br/>title: DrupalCon 2022 Code+ Presentation<br/>subtitle: My presentation to DrupalCon 2022 on Duke’s Code+ cocurricular project, which promotes undergraduate diversity, equity, and inclusion<br/>date: 2022-04-06 15:21 -0500<br/>transition: slide<br/>layout: cover
+          </div>
+          <div class="slide-number">1 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>Duke University’s</h3></p><p>#### Code+</p><p>co-curricular program
+          </div>
+          <div class="slide-number">2 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            promoting undergraduate</p><p>#### Diversity / Equity / Inclusion
+          </div>
+          <div class="slide-number">3 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            Link to presentation: <a href="https://duke.is/b9tbe" target="_blank">https://duke.is/b9tbe</a>
+          </div>
+          <div class="slide-number">4 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Kyle Skrinak</p><p><a href="https://www.drupal.org/u/screenack" target="_blank">https://www.drupal.org/u/screenack</a></p><p>Senior Manager, I.T., Duke Web Services Development and Support</p><p>#### Duke University</p><p><a href="https://people.duke.edu/~kds38" target="_blank">https://people.duke.edu/~kds38</a>
+          </div>
+          <div class="slide-number">5 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            Our team builds, hosts, and maintains over 250 Drupal websites, including multisite, headless, and other websites and applications.
+          </div>
+          <div class="slide-number">6 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### What is Code+?
+          </div>
+          <div class="slide-number">7 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <iframe height="585" width="780" src="https://warpwire.duke.edu/w/q8cGAA/?info=0&cc_load_policy=1&controls=0" frameborder="0" scrolling="0" allow="autoplay <em>; encrypted-media</em>; fullscreen <em>; picture-in-picture</em>;" allowfullscreen></iframe>
+          </div>
+          <div class="slide-number">8 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Origins for the Drupal module project
+          </div>
+          <div class="slide-number">9 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * A re-org at Duke<br/>* Office of Information Technology’s call for Code+ projects<br/>* A mutually-beneficial project<br/>  * Supports the Code+ team, Drupal, Open Source, and Duke<br/>* Duke maintains an internally-developed module on D.O. in need of attention<br/>  * AKA “BasicShib” <a href="https://www.drupal.org/project/basicshib" target="_blank">https://www.drupal.org/project/basicshib</a><br/>* A Duke need: integrate Grouper with Shibboleth</p><p><!-- Note: Summer Experience Co-Curricular Project
+          </div>
+          <div class="slide-number">10 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is born
+          </div>
+          <div class="slide-number">11 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * Draft and submit my proposal <br/>* Lots of edits<br/>* Code+ administrators accepted my proposal
+          </div>
+          <div class="slide-number">12 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is born
+          </div>
+          <div class="slide-number">13 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            ##### Drupal Module for Software Design and Development</p><p>The Drupal open-source software platform provides an opportunity for those who wish to design, develop, release, and finally maintain a non-commercial software project. A team of students will work with Duke’s Office of Information Technology and other partners across campus to develop a Drupal module to extend the functionality of the existing framework to create an application. Students will work with Drupal 9 to extend Symfony’s PHP object model paradigm. This allows students to work within a fully compliant Object-Oriented Programming, or OOP, paradigm.
+          </div>
+          <div class="slide-number">14 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">15 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-1.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">16 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">17 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-2.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">18 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">19 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-3.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">20 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">21 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-4.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">22 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">23 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-5.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">24 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### A Code+ Project is Born
+          </div>
+          <div class="slide-number">25 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            !<a href="/assets/images/Code+/Code+Workflow-6.svg" target="_blank">workflow</a>
+          </div>
+          <div class="slide-number">26 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Project Parameters
+          </div>
+          <div class="slide-number">27 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * Code+ administrators assigns five students to project<br/>* We discuss project, training, and software requirements<br/>  * Lando for development.<br/>  * Identify common means for collaboration.<br/>* Daily check-in and check-out on Microsoft Teams and Zoom<br/>  * We had a mix of on-campus and remote students across time zones.<br/>  * Encourage team collaboration on a standard platform.
+          </div>
+          <div class="slide-number">28 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Project Parameters
+          </div>
+          <div class="slide-number">29 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * Weekly individual one-on-ones and daily team scrums<br/>* The team is to provide regular updates to the stakeholders on progress<br/>* Encourage the team to become familiar with project management principles and tools
+          </div>
+          <div class="slide-number">30 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Project schedule
+          </div>
+          <div class="slide-number">31 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * Weeks 1 - 3: Training<br/>  * One week more for Symfony and Drupal training<br/>* Weeks 4 - 6: Software discovery, requirements, and first stakeholder’s meeting<br/>* Weeks 7 - 9: Software development and presentation of the project’s effort<br/>* Week 10: Practice for and the final presentation to project stakeholders, corporate sponsors, project leads, and their fellow Code+ members in the cohort
+          </div>
+          <div class="slide-number">32 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Project Challenges
+          </div>
+          <div class="slide-number">33 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * What on earth is Drupal?<br/>  * Well, about that<br/>* Rising sophomores who have never collaborated in this fashion<br/>  * A highly effective team<br/>* Uneven engagement and enthusiasm<br/>  * In the end, all were “all in.”<br/>* No initial team cohesion<br/>  * Genuine team bonding and fondness
+          </div>
+          <div class="slide-number">34 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Help from the Duke and Drupal community
+          </div>
+          <div class="slide-number">35 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            I asked for help, and the Drupal community responded!</p><p>* Marc Isaacson (<a href="https://www.drupal.org/u/vegantriathlete" target="_blank">vegantriathlete</a>), Precious McKoy (<a href="https://www.drupal.org/u/mckoypr" target="_blank">mckoypr</a>), Jay Beaton (<a href="https://www.drupal.org/u/jrb" target="_blank">jrb</a>), Iain Hadgraft (<a href="https://drupal.org/u/iaha" target="_blank">iaha</a>), Eric Sembrat (<a href="https://drupal.org/u/webbeh" target="_blank">webbeh</a>)</p><p>* The team also asked questions on the Slack Drupal channel <a href="https://drupal.slack.com/archives/C1BMUQ9U6" target="_blank">#contribute</a> with strong community engagement.
+          </div>
+          <div class="slide-number">36 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### The presentation
+          </div>
+          <div class="slide-number">37 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <iframe width="1024" height="580" src="https://www.youtube-nocookie.com/embed/CyFxF8fJWUY?start=28&cc_load_policy=1&rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="slide-number">38 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### The Team Lead Experience
+          </div>
+          <div class="slide-number">39 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            * Exhilarating<br/>* Exhausting<br/>* Great team feedback<br/>* Learned a great deal<br/>* Collaborating with generous community<br/>* My wholehearted endorsement<br/>* Doing another project in 2022
+          </div>
+          <div class="slide-number">40 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h3>References</h3></p><p>* The Code+ website: <a href="https://codeplus.duke.edu" target="_blank">https://codeplus.duke.edu</a><br/>* The Code+ LinkedIn page: <a href="https://www.linkedin.com/company/duke-code-plus-program/" target="_blank">https://www.linkedin.com/company/duke-code-plus-program/</a><br/>* The BasicShib Drupal.org project page: <a href="https://www.drupal.org/project/basicshib" target="_blank">https://www.drupal.org/project/basicshib</a><br/>* The team's presentation on YouTube: <a href="https://youtu.be/CyFxF8fJWUY" target="_blank">https://youtu.be/CyFxF8fJWUY</a>
+          </div>
+          <div class="slide-number">41 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Questions?
+          </div>
+          <div class="slide-number">42 / 43</div>
+        </section>
+      
+
+        <section class="slide ">
+          <div class="slide-content">
+            #### Thank you!
+          </div>
+          <div class="slide-number">43 / 43</div>
+        </section>
+      
+    </div>
+
+    <div class="controls">
+        <button onclick="prevSlide()">← Previous</button>
+        <button onclick="nextSlide()">Next →</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            // Update progress bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert('Could not enter fullscreen: ' + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

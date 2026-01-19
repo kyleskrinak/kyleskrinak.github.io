@@ -1,0 +1,20 @@
+---
+import BlogPost from './BlogPost.astro';
+import Figure from '../components/Figure.astro';
+import FbMigrate from '../components/FbMigrate.astro';
+
+interface Props {
+	title: string;
+	description?: string;
+	pubDate: Date;
+	updatedDate?: Date;
+	heroImage?: string;
+	slug?: string;
+}
+
+const { title, description, pubDate, updatedDate, heroImage, slug = '' } = Astro.props;
+---
+
+<BlogPost {title} {description} {pubDate} {updatedDate} {heroImage} {slug}>
+	<slot />
+</BlogPost>

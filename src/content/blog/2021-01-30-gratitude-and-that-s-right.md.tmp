@@ -1,0 +1,63 @@
+
+<!-- Component Styles -->
+<style>
+.notice {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #3498db;
+  background-color: #ecf0f1;
+  border-radius: 0 3px 3px 0;
+}
+
+.notice--info {
+  border-left-color: #3498db;
+  background-color: #d5edf7;
+}
+
+.notice em {
+  display: block;
+}
+
+.notice strong {
+  font-weight: 700;
+}
+
+.notice a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.notice a:hover {
+  text-decoration: underline;
+}
+
+.figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.figure__image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.figure__caption {
+  font-size: 0.9em;
+  color: #666;
+  font-style: italic;
+  padding: 0 1rem;
+}
+
+.figure__caption a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.figure__caption a:hover {
+  text-decoration: underline;
+}
+</style>
+

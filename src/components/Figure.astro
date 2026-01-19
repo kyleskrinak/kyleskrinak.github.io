@@ -1,0 +1,65 @@
+---
+/**
+ * Figure Component
+ * Displays an image with caption and optional alt text
+ * Replaces Jekyll's {% include figure %} include
+ *
+ * Usage in MDX:
+ * <Figure
+ *   image_path="/assets/images/example.jpg"
+ *   alt="Description"
+ *   caption="Image caption text"
+ * />
+ *
+ * Captions with HTML are automatically detected and rendered:
+ * <Figure
+ *   image_path="/assets/images/example.jpg"
+ *   alt="Description"
+ *   caption="Quote by <a href='https://...'>Tim Ferriss</a>"
+ * />
+ */
+
+interface Props {
+  image_path: string;
+  alt: string;
+  caption?: string;
+}
+
+const { image_path, alt, caption } = Astro.props;
+---
+
+<figure class="figure">
+  <img src={image_path} alt={alt} class="figure__image" />
+  {caption && <figcaption class="figure__caption" set:html={caption} />}
+</figure>
+
+<style>
+  .figure {
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+
+  .figure__image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .figure__caption {
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
+    padding: 0 1rem;
+  }
+
+  .figure__caption a {
+    color: #0366d6;
+    text-decoration: none;
+  }
+
+  .figure__caption a:hover {
+    text-decoration: underline;
+  }
+</style>
