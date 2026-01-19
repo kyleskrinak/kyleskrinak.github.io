@@ -10,6 +10,13 @@ const isProduction = buildEnv === 'production';
 const site = isProduction ? 'https://kyle.skrinak.com' : 'https://kyleskrinak.github.io';
 const base = isProduction ? '/' : '/astro-blog/';
 
+// Debug logging
+console.log('🔍 Build Configuration:');
+console.log(`   BUILD_ENV: "${process.env.BUILD_ENV}" (detected) → buildEnv: "${buildEnv}"`);
+console.log(`   isProduction: ${isProduction}`);
+console.log(`   site: ${site}`);
+console.log(`   base: ${base}`);
+
 // https://astro.build/config
 export default defineConfig({
 	site,

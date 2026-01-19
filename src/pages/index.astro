@@ -3,7 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { SITE_DESCRIPTION, SITE_TITLE, createPath } from '../consts';
 import { getCollection } from 'astro:content';
 
 const allBlogPosts = (await getCollection('blog'))
@@ -84,7 +84,7 @@ const allBlogPosts = (await getCollection('blog'))
 			<section class="hero">
 				<h1>{SITE_TITLE}</h1>
 				<p>{SITE_DESCRIPTION}</p>
-				<p>Based in Apex, NC | <a href="/blog">Read all posts</a></p>
+				<p>Based in Apex, NC | <a href={createPath('/blog')}>Read all posts</a></p>
 			</section>
 
 			<section class="recent-posts">
@@ -96,13 +96,13 @@ const allBlogPosts = (await getCollection('blog'))
 								<FormattedDate date={post.data.pubDate} />
 							</div>
 							<h3 class="post-title">
-								<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+								<a href={createPath(`/blog/${post.id}/`)}>{post.data.title}</a>
 							</h3>
 							{post.data.description && <p>{post.data.description}</p>}
 						</article>
 					))
 				}
-				<a href="/blog" class="cta-link">View All Posts →</a>
+				<a href={createPath('/blog')} class="cta-link">View All Posts →</a>
 			</section>
 		</main>
 		<Footer />
