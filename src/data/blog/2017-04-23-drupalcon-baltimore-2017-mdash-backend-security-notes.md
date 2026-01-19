@@ -6,7 +6,7 @@ featured: false
 draft: false
 tags:
   - Drupalcon Baltimore 2017
-description: "See the <a href="https://security.duke.edu/">Duke University IT Security Office</a> for comprehensive security standards..."
+description: "See the Duke University IT Security Office for comprehensive security standards..."
 ---
 
 
