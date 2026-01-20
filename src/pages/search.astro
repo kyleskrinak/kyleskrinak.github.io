@@ -44,46 +44,64 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
             `;
         }
 
-        // Import PagefindUI and initialize with correct bundle path
-        // @ts-expect-error — Missing types for @pagefind/default-ui package.
-        const { PagefindUI } = await import("@pagefind/default-ui");
+        // Load pagefind library dynamically with correct path
+        const pagefindScript = document.createElement("script");
+        pagefindScript.src = bundlePath + "pagefind.js";
+        pagefindScript.async = true;
 
-        // Init pagefind ui with explicit bundle path
-        const search = new PagefindUI({
-          element: "#pagefind-search",
-          bundlePath: bundlePath,
-          showImages: false,
-          showSubResults: true,
-          processTerm: function (term: string) {
-            params.set("q", term); // Update the `q` parameter in the URL
-            history.replaceState(history.state, "", "?" + params.toString()); // Push the new URL without reloading
+        pagefindScript.onload = async () => {
+          try {
+            // @ts-expect-error — Missing types for @pagefind/default-ui package.
+            const { PagefindUI } = await import("@pagefind/default-ui");
 
-            const backUrl = pageFindSearch?.dataset?.backurl;
-            sessionStorage.setItem("backUrl", backUrl + "?" + params.toString());
+            // Init pagefind ui with bundle path for resource loading
+            const search = new PagefindUI({
+              element: "#pagefind-search",
+              bundlePath: bundlePath,
+              showImages: false,
+              showSubResults: true,
+              processTerm: function (term: string) {
+                params.set("q", term);
+                history.replaceState(history.state, "", "?" + params.toString());
 
-            return term;
-          },
-        });
+                const backUrl = pageFindSearch?.dataset?.backurl;
+                sessionStorage.setItem("backUrl", backUrl + "?" + params.toString());
 
-        // If search param exists (eg: search?q=astro), trigger search
-        const query = params.get("q");
-        if (query) {
-          search.triggerSearch(query);
-        }
+                return term;
+              },
+            });
 
-        // Reset search param if search input is cleared
-        const searchInput = document.querySelector(".pagefind-ui__search-input");
-        const clearButton = document.querySelector(".pagefind-ui__search-clear");
-        searchInput?.addEventListener("input", resetSearchParam);
-        clearButton?.addEventListener("click", resetSearchParam);
+            // If search param exists, trigger search
+            const query = params.get("q");
+            if (query) {
+              search.triggerSearch(query);
+            }
 
-        function resetSearchParam(e: Event) {
-          if ((e.target as HTMLInputElement)?.value.trim() === "") {
-            history.replaceState(history.state, "", window.location.pathname);
+            // Reset search param if search input is cleared
+            const searchInput = document.querySelector(".pagefind-ui__search-input");
+            const clearButton = document.querySelector(".pagefind-ui__search-clear");
+            searchInput?.addEventListener("input", resetSearchParam);
+            clearButton?.addEventListener("click", resetSearchParam);
+
+            function resetSearchParam(e: Event) {
+              if ((e.target as HTMLInputElement)?.value.trim() === "") {
+                history.replaceState(history.state, "", window.location.pathname);
+              }
+            }
+          } catch (error) {
+            console.error("Failed to initialize PagefindUI:", error);
+            pageFindSearch.innerHTML = '<p>Error initializing search. Please refresh the page.</p>';
           }
-        }
+        };
+
+        pagefindScript.onerror = () => {
+          console.error("Failed to load pagefind script from:", bundlePath);
+          pageFindSearch.innerHTML = '<p>Error loading search. Please refresh the page.</p>';
+        };
+
+        document.head.appendChild(pagefindScript);
       } catch (error) {
-        console.error("Failed to initialize search:", error);
+        console.error("Failed to start search initialization:", error);
         pageFindSearch.innerHTML = '<p>Error loading search. Please refresh the page.</p>';
       }
     });
