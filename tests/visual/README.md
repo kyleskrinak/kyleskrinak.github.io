@@ -83,10 +83,10 @@ npm run test:visual:report
 
 ### 48 Hours Before Launch
 ```bash
-# 1. Generate baselines from local
+# 1. Generate baselines from local dev
 npm run test:visual:baseline
 
-# 2. Verify all tests pass
+# 2. Verify all local tests pass
 npm run test:visual
 
 # 3. Review HTML report
@@ -95,28 +95,43 @@ npm run test:visual:report
 
 ### 24 Hours Before Launch
 ```bash
-# 1. Deploy staging build
-# 2. Test staging renders identically to local
+# 1. Deploy staging build (with BUILD_ENV=staging in GitHub Actions)
+# 2. Test staging renders correctly
 npm run test:visual:staging
 
-# 3. Review differences (should be none)
+# 3. Review report - staging may differ from local due to base path
+# Expected: Layout variations due to /astro-blog/ base path, but no broken images/content
 npm run test:visual:report
+
+# 4. Verify key pages load correctly:
+#    - https://kyleskrinak.github.io/astro-blog/ (home)
+#    - https://kyleskrinak.github.io/astro-blog/posts/ (blog archive)
+#    - https://kyleskrinak.github.io/astro-blog/about.html (about)
 ```
 
 ### Launch Day
 ```bash
 # 1. Deploy to production
-# 2. Final validation
+# 2. Production should use base path "/"
+# 3. Run visual tests against production
 npm run test:visual:production
 
-# 3. Compare to staging (should match)
+# 4. Production should match local baselines (same base path "/")
 npm run test:visual:report
+
+# 5. Spot-check key URLs:
+#    - https://kyle.skrinak.com/ (home)
+#    - https://kyle.skrinak.com/posts/ (blog archive)
+#    - Test Jekyll redirects: https://kyle.skrinak.com/2025/09/19/modernizing-an-old-jekyll-blog-with-github-actions-and-ai/
 ```
 
 ### Post-Launch
 ```bash
 # Run weekly to catch regressions
 npm run test:visual:production
+
+# Compare to baseline report
+npm run test:visual:report
 ```
 
 ## Understanding Test Results
@@ -162,6 +177,43 @@ npm run test:visual:baseline
 Re-generates screenshots as new baselines (after code changes).
 
 ## Environment-Specific Testing
+
+### Important: Base Path Configuration
+
+This blog uses **environment-specific base paths** set in `astro.config.ts`:
+- **Local/Production**: `base: "/"`
+- **Staging (GitHub Pages)**: `base: "/astro-blog/"`
+
+This means **local and staging render differently by design**. Asset paths, links, and layout may vary based on the environment.
+
+### Baseline Management by Environment
+
+Each environment should have its own baseline set:
+
+```
+tests/visual/__screenshots__/                  # Local dev baselines
+  ├── home-desktop-chromium-darwin.png
+  ├── home-mobile-chromium-darwin.png
+  └── ... (36 baseline images)
+```
+
+**Generate baselines for each environment:**
+
+```bash
+# Local dev (base = "/")
+npm run test:visual:baseline
+
+# Staging (base = "/astro-blog/" + GitHub Pages subdirectory)
+npm run test:visual:staging
+
+# Production (base = "/" at kyle.skrinak.com)
+npm run test:visual:production
+```
+
+**Expected behavior:**
+- Local tests should always pass when compared to local baselines
+- Staging tests may show layout differences due to base path redirects
+- Production tests should match staging (same base path configuration)
 
 ### Testing Multiple Browsers
 Config includes Chromium and mobile browsers. To test Firefox:
