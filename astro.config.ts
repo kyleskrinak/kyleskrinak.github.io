@@ -9,6 +9,7 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
+import { rehypeImageOptimization } from "./src/lib/rehype-components";
 import { SITE } from "./src/config/index";
 
 // https://astro.build/config
@@ -25,6 +26,7 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],
+    rehypePlugins: [rehypeImageOptimization],
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },
