@@ -1,4 +1,4 @@
-name: [astro-blog] Deploy Production
+name: '[astro-blog] Deploy Production'
 
 on:
   push:

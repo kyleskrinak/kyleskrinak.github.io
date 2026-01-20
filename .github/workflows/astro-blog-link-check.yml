@@ -1,4 +1,4 @@
-name: [astro-blog] Link Check
+name: '[astro-blog] Link Check'
 
 on:
   schedule:
