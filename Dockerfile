@@ -1,17 +1,18 @@
-# Base stage for building the static files
-FROM node:lts AS base
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Copy package files
+COPY package*.json ./
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Install dependencies
+RUN npm ci
 
+# Copy project files
 COPY . .
-RUN pnpm run build
 
-# Runtime stage for serving the application
-FROM nginx:mainline-alpine-slim AS runtime
-COPY --from=base /app/dist /usr/share/nginx/html
-EXPOSE 80
+# Build the project
+RUN npm run build:ci
+
+# Optional: Serve the built site (for testing)
+# CMD ["npm", "run", "preview"]

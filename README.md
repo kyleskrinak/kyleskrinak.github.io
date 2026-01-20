@@ -133,6 +133,72 @@ docker build -t astropaper .
 docker run -p 4321:80 astropaper
 ```
 
+## 🔧 Development Workflow
+
+### Setup
+
+First-time setup:
+
+```bash
+# Run the setup script
+./scripts/setup.sh
+
+# Or manually install dependencies
+npm install
+```
+
+### Building & Testing
+
+This project uses a local Docker build test to ensure builds work in GitHub Actions before pushing.
+
+**Quick workflow:**
+
+```bash
+# Test locally first (fast feedback)
+make local-test
+
+# Test in Docker (matches CI environment)
+make docker-test
+
+# Test both and push to GitHub
+make push
+```
+
+**Available commands:**
+
+```bash
+make help           # Show all available commands
+make local-test     # Build locally with npm (~15s)
+make docker-test    # Build in Docker (~30s)
+make test           # Run both tests
+make push           # Test both, then push to GitHub
+make clean          # Remove Docker test image
+```
+
+### Development Workflow
+
+1. **Make changes** to the codebase
+2. **Test locally**: `npm run build:ci` (fast feedback)
+3. **Fix any issues**
+4. **When ready to push**: `make push` (tests both locally and in Docker)
+5. **Or push without testing**: `git push origin staging` (bypasses hook)
+
+### Pre-push Hook
+
+A git pre-push hook automatically runs the Docker build test before pushing. To bypass it (not recommended):
+
+```bash
+git push --no-verify
+```
+
+### Docker Build Caching
+
+The Docker build test caches images intelligently:
+- First run: ~30 seconds (builds image)
+- Subsequent runs: ~1 second (uses cache)
+- Cache is cleared when Dockerfile changes
+- Manual clean: `make clean`
+
 ## Google Site Verification (optional)
 
 You can easily add your [Google Site Verification HTML tag](https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag) in AstroPaper using an environment variable. This step is optional. If you don't add the following environment variable, the google-site-verification tag won't appear in the HTML `<head>` section.
