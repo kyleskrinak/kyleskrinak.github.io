@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+
+/**
+ * Dynamic redirect route for Jekyll URL format
+ *
+ * Maps old Jekyll URLs:
+ *   /2025/09/19/modernizing-an-old-jekyll-blog/
+ *
+ * To new Astro URLs:
+ *   /posts/2025-09-19-modernizing-an-old-jekyll-blog/
+ *
+ * Returns 301 permanent redirects for SEO
+ */
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  return posts.map(post => {
+    // Post ID format: "2025-09-19-modernizing-an-old-jekyll-blog"
+    const parts = post.id.split('-');
+
+    // Extract year, month, day
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+
+    // Join remaining parts as slug
+    const postSlug = parts.slice(3).join('-');
+
+    return {
+      params: {
+        year,
+        month,
+        day,
+        slug: postSlug,
+      },
+      props: { post },
+    };
+  });
+}
+
+const { post } = Astro.props;
+
+// Redirect to new URL with 301 permanent redirect
+return Astro.redirect(`/posts/${post.id}`, 301);
+---
