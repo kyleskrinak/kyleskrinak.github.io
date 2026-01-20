@@ -49,11 +49,22 @@ See [File Structure](./file-structure.md) for detailed explanation of the projec
 
 See [Tech Stack](./tech-stack.md) for libraries and tools used.
 
+## Writing Content
+
+Ready to add new blog posts?
+
+- **[Creating Posts Cheat Sheet](./creating-posts.md)** - Quick guide for writing new blog posts
+  - File naming convention
+  - Frontmatter template
+  - Markdown examples
+  - Publishing workflow
+
 ## Next Steps
 
 - **Want to understand the project better?** Read [File Structure](./file-structure.md)
 - **Need to deploy?** See [Deployment Guide](../operations/deployment.md)
 - **Have questions?** Check [Troubleshooting](../operations/troubleshooting.md)
+- **Writing a post?** See [Creating Posts](./creating-posts.md)
 
 ---
 
