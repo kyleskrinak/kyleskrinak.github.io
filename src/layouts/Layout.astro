@@ -59,10 +59,10 @@ const structuredData = {
     <meta name="viewport" content="width=device-width" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/x-icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+    <link rel="icon" type="image/png" sizes="96x96" href={`${import.meta.env.BASE_URL}favicon-96x96.png`} />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
+    <link rel="manifest" href={`${import.meta.env.BASE_URL}site.webmanifest`} />
 
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
