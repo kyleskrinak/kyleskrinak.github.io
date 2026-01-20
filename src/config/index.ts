@@ -19,7 +19,7 @@ export const SITE = {
   showArchives: true,
   showBackButton: true, // show back button in post detail
   editPost: {
-    enabled: true,
+    enabled: false,
     text: "Edit on GitHub",
     url: "https://github.com/kyleskrinak/astro-blog/edit/staging/",
   },
