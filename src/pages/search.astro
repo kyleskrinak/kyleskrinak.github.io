@@ -29,20 +29,10 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     const onIdle = window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
     onIdle(async () => {
-      // Determine the correct bundle path based on environment
-      const basePath = import.meta.env.BASE_URL || "/";
-      const bundlePath = basePath.endsWith("/") ? basePath + "_pagefind/" : basePath + "/_pagefind/";
-
-      // Load pagefind library script dynamically
-      const pagefindScript = document.createElement("script");
-      pagefindScript.src = bundlePath + "pagefind.js";
-      pagefindScript.async = true;
-      document.head.appendChild(pagefindScript);
-
-      // Wait for pagefind to load, then initialize UI
-      pagefindScript.onload = async () => {
-        // @ts-expect-error — Missing types for @pagefind/default-ui package.
-        const { PagefindUI } = await import("@pagefind/default-ui");
+      try {
+        // Determine the correct bundle path based on environment
+        const basePath = import.meta.env.BASE_URL || "/";
+        const bundlePath = basePath.endsWith("/") ? basePath + "_pagefind/" : basePath + "/_pagefind/";
 
         // Display warning in dev mode
         if (import.meta.env.DEV) {
@@ -54,9 +44,14 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
             `;
         }
 
-        // Init pagefind ui
+        // Import PagefindUI and initialize with correct bundle path
+        // @ts-expect-error — Missing types for @pagefind/default-ui package.
+        const { PagefindUI } = await import("@pagefind/default-ui");
+
+        // Init pagefind ui with explicit bundle path
         const search = new PagefindUI({
           element: "#pagefind-search",
+          bundlePath: bundlePath,
           showImages: false,
           showSubResults: true,
           processTerm: function (term: string) {
@@ -87,12 +82,10 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
             history.replaceState(history.state, "", window.location.pathname);
           }
         }
-      };
-
-      pagefindScript.onerror = () => {
-        console.error("Failed to load pagefind script from:", bundlePath);
+      } catch (error) {
+        console.error("Failed to initialize search:", error);
         pageFindSearch.innerHTML = '<p>Error loading search. Please refresh the page.</p>';
-      };
+      }
     });
   }
 
