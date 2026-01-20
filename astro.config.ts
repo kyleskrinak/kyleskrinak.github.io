@@ -9,7 +9,7 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
-import { SITE } from "./src/config";
+import { SITE } from "./src/config/index";
 
 // https://astro.build/config
 const buildEnv = process.env.BUILD_ENV || "production";
