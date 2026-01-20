@@ -1,15 +1,25 @@
-name: '[astro-blog] Link Check'
+name: Linkwatch (external link rot)
 
 on:
   schedule:
-    # Run daily at 6:23 AM UTC
-    - cron: '23 6 * * *'
-  workflow_dispatch:
+    # Nightly UTC; adjust if you prefer a different time.
+    - cron: "23 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: linkwatch
+  cancel-in-progress: true
 
 jobs:
-  check-links:
-    name: Validate Links
+  linkwatch:
+    name: Build site + check external links
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,25 +39,56 @@ jobs:
       - name: Install link checker
         run: npm install -g broken-link-checker
 
-      - name: Check links
+      - name: Check external links
         id: check-links
         continue-on-error: true
         run: |
-          blc http://localhost:8080 -r --exclude-external > link-report.txt 2>&1 || true
+          npx broken-link-checker --recursive dist/ --exclude-external > link-report.txt 2>&1 || true
           cat link-report.txt
 
-      - name: Create issue if links broken
-        if: failure() && steps.check-links.outcome == 'failure'
+      # If the link check step fails, create/update a single tracking issue.
+      - name: Create or update link rot report issue
+        if: failure()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('link-report.txt', 'utf8');
+            const title = "External link rot report";
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Broken Links Detected',
-              body: `Automated link validation found broken links:\n\n\`\`\`\n${report}\n\`\`\``,
-              labels: ['bug', 'link-validation']
+            const body =
+              `Linkwatch detected external link failures.\n\n` +
+              `- Workflow run: ${runUrl}\n` +
+              `- Branch/ref: ${context.ref}\n` +
+              `- Commit: ${context.sha}\n\n` +
+              `Report:\n\`\`\`\n${report}\n\`\`\`\n\n` +
+              `Review the job logs for the failing URLs and update/ignore as appropriate.`;
+
+            // Find an existing open issue with the exact title.
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
             });
+
+            const existing = issues.data.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body
+              });
+            }

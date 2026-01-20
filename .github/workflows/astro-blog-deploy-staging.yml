@@ -1,5 +1,4 @@
-# Astro Blog - Deploy to GitHub Pages (Staging)
-name: '[astro-blog] Deploy Staging'
+name: Staging (GitHub Pages)
 
 on:
   push:
