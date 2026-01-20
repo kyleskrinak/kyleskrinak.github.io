@@ -16,7 +16,10 @@
     "test:visual:baseline": "playwright test --config=playwright.config.ts --update-snapshots",
     "test:visual:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test --config=playwright.config.ts",
     "test:visual:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test --config=playwright.config.ts",
-    "test:visual:report": "playwright show-report"
+    "test:visual:report": "playwright show-report",
+    "test:console": "playwright test tests/console-errors.spec.ts",
+    "test:console:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test tests/console-errors.spec.ts",
+    "test:console:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/console-errors.spec.ts"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
