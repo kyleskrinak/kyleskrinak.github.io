@@ -1,4 +1,4 @@
-name: '[astro-blog] Deploy Production'
+name: Production (AWS S3 + CloudFront)
 
 on:
   push:
@@ -53,42 +53,52 @@ jobs:
           name: dist
           path: ./dist
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Sync to S3
+      # Step 1: push long-lived assets first
+      - name: Sync assets to S3 (1y immutable)
         run: |
-          # Sync all files with default cache control (5 minutes for HTML)
-          aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
+          aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
             --delete \
-            --cache-control "public, max-age=300" \
-            --exclude "*.js" \
-            --exclude "*.css" \
-            --exclude "_pagefind/*"
+            --only-show-errors \
+            --exclude "*" \
+            --include "_astro/*" \
+            --include "_astro/**" \
+            --cache-control "max-age=31536000,public,immutable"
 
-          # Sync assets with long cache (1 year for immutable assets)
-          aws s3 sync dist/_astro/ s3://${{ secrets.AWS_S3_BUCKET }}/_astro/ \
-            --cache-control "public, max-age=31536000, immutable"
+      # Step 2: push pagefind assets (also long-lived)
+      - name: Sync pagefind assets to S3 (1y immutable)
+        run: |
+          aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
+            --delete \
+            --only-show-errors \
+            --exclude "*" \
+            --include "_pagefind/*" \
+            --include "_pagefind/**" \
+            --cache-control "max-age=31536000,public,immutable"
 
-          # Sync pagefind assets with long cache
-          aws s3 sync dist/_pagefind/ s3://${{ secrets.AWS_S3_BUCKET }}/_pagefind/ \
-            --cache-control "public, max-age=31536000, immutable"
-
-          # Sync JS and CSS with medium cache (1 hour)
-          aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
-            --cache-control "public, max-age=3600" \
-            --include "*.js" \
-            --include "*.css" \
-            --exclude "*" || true
+      # Step 3: push everything else (HTML + non-asset files) with a short cache
+      # Excluding assets prevents this step from overwriting the long-lived headers from steps 1-2.
+      - name: Sync HTML to S3 (5m cache)
+        run: |
+          aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
+            --delete \
+            --only-show-errors \
+            --exclude "_astro/*" \
+            --exclude "_astro/**" \
+            --exclude "_pagefind/*" \
+            --exclude "_pagefind/**" \
+            --cache-control "max-age=300,public"
 
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
+            --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/" "/index.html" "/sitemap.xml" "/feed.xml"
 
       - name: Deployment Summary
         run: |
