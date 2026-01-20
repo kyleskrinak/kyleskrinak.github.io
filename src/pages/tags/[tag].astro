@@ -31,7 +31,7 @@ interface Props {
 const { tag } = Astro.props;
 const posts = (await getCollection('blog'))
 	.filter((post) => post.data.tags?.includes(tag))
-	.sort((a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf());
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <!doctype html>
@@ -94,7 +94,7 @@ const posts = (await getCollection('blog'))
 								<h3 class="post-title">{post.data.title}</h3>
 							</a>
 							<p class="post-date">
-								<FormattedDate date={post.data.pubDatetime} />
+								<FormattedDate date={post.data.pubDate} />
 							</p>
 							{post.data.description && <p>{post.data.description}</p>}
 						</li>

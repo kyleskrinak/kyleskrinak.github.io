@@ -29,10 +29,10 @@ const {
   description,
   ogImage: initOgImage,
   canonicalURL,
-  pubDatetime,
-  modDatetime,
+  pubDate,
+  updatedDate,
   timezone,
-  tags,
+  tags = [],
   hideEditPost,
 } = post.data;
 
@@ -61,8 +61,8 @@ const layoutProps = {
   title: `${title} | ${SITE.title}`,
   author,
   description,
-  pubDatetime,
-  modDatetime,
+  pubDate,
+  updatedDate,
   canonicalURL,
   ogImage,
   scrollSmooth: true,
@@ -98,7 +98,7 @@ const nextPost =
       {title}
     </h1>
     <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
+      <Datetime {pubDate} {updatedDate} {timezone} size="lg" />
       <span
         aria-hidden="true"
         class:list={[
