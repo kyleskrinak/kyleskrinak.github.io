@@ -22,7 +22,7 @@ const blog = defineCollection({
 });
 
 const pages = defineCollection({
-	type: 'content',
+	loader: glob({ base: './src/content/pages', pattern: '**/*.{md,mdx}' }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string().optional(),
