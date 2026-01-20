@@ -11,7 +11,12 @@
     "astro": "astro",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:visual": "playwright test --config=playwright.config.ts",
+    "test:visual:baseline": "playwright test --config=playwright.config.ts --update-snapshots",
+    "test:visual:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test --config=playwright.config.ts",
+    "test:visual:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test --config=playwright.config.ts",
+    "test:visual:report": "playwright show-report"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
@@ -31,6 +36,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
     "@pagefind/default-ui": "^1.4.0",
+    "@playwright/test": "^1.57.0",
     "@shikijs/transformers": "^3.20.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
