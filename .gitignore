@@ -30,3 +30,11 @@ pnpm-debug.log*
 playwright-report/
 test-results/
 .auth/
+
+# Lighthouse and audit reports (generated, not source)
+lighthouse-reports/
+
+# Audit scripts (generated locally, not source)
+run_audits.sh
+run_correct_audits.sh
+run_final_audits.sh
