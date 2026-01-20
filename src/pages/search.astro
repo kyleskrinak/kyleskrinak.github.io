@@ -44,8 +44,9 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
             `;
         }
 
-        // Load pagefind library dynamically with correct path
+        // Load pagefind library as a module so import.meta works
         const pagefindScript = document.createElement("script");
+        pagefindScript.type = "module";
         pagefindScript.src = bundlePath + "pagefind.js";
         pagefindScript.async = true;
 
