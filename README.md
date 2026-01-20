@@ -1,247 +1,171 @@
-# AstroPaper 📄
+# Kyle Skrinak's Blog
 
-![AstroPaper](public/astropaper-og.jpg)
-[![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/community/file/1356898632249991861)
-![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![GitHub](https://img.shields.io/github/license/satnaing/astro-paper?color=%232F3741&style=for-the-badge)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white&style=for-the-badge)](https://conventionalcommits.org)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=for-the-badge)](http://commitizen.github.io/cz-cli/)
+A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with improved performance and features.
 
-AstroPaper is a minimal, responsive, accessible and SEO-friendly Astro blog theme. This theme is designed and crafted based on [my personal blog](https://satnaing.dev/blog).
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Astro](https://img.shields.io/badge/Astro-purple?style=for-the-badge&logo=astro&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-Read [the blog posts](https://astro-paper.pages.dev/posts/) or check [the README Documentation Section](#-documentation) for more info.
+**Live Sites**:
+- 🚀 [Production](https://kyle.skrinak.com/) - Main blog
+- 🧪 [Staging](https://kyleskrinak.github.io/astro-blog/) - Testing environment
 
-## 🔥 Features
+## ✨ Features
 
-- [x] type-safe markdown
-- [x] super fast performance
-- [x] accessible (Keyboard/VoiceOver)
-- [x] responsive (mobile ~ desktops)
-- [x] SEO-friendly
-- [x] light & dark mode
-- [x] fuzzy search
-- [x] draft posts & pagination
-- [x] sitemap & rss feed
-- [x] followed best practices
-- [x] highly customizable
-- [x] dynamic OG image generation for blog posts [#15](https://github.com/satnaing/astro-paper/pull/15) ([Blog Post](https://astro-paper.pages.dev/posts/dynamic-og-image-generation-in-astropaper-blog-posts/))
+- ⚡ **Super fast** - Optimized Astro build with <2s load times
+- 🎨 **Beautiful** - Responsive design that works on all devices
+- 🌙 **Dark mode** - Light and dark theme toggle
+- 🔍 **Full-text search** - Powered by Pagefind
+- ♿ **Accessible** - WCAG 2.1 compliant
+- 📱 **Mobile-first** - Perfect on phones, tablets, desktops
+- 📊 **SEO-friendly** - Sitemaps, RSS feeds, canonical URLs
+- 🎯 **TypeScript** - Type-safe markdown and configuration
 
-_Note: I've tested screen-reader accessibility of AstroPaper using **VoiceOver** on Mac and **TalkBack** on Android. I couldn't test all other screen-readers out there. However, accessibility enhancements in AstroPaper should be working fine on others as well._
+## 📚 Documentation
 
-## ✅ Lighthouse Score
+All project documentation is organized in the `/docs` directory. Start here:
 
-<p align="center">
-  <a href="https://pagespeed.web.dev/report?url=https%3A%2F%2Fastro-paper.pages.dev%2F&form_factor=desktop">
-    <img width="710" alt="AstroPaper Lighthouse Score" src="AstroPaper-lighthouse-score.svg">
-  </a>
-</p>
+**👀 [Documentation Hub](./docs/index.md)** - Navigation and overview
 
-## 🚀 Project Structure
+### By Role:
 
-Inside of AstroPaper, you'll see the following folders and files:
+| Role | Start Here |
+|------|-----------|
+| 👨‍💻 **Developer** | [Getting Started](./docs/getting-started/) |
+| 🚀 **DevOps** | [Operations & Deployment](./docs/operations/) |
+| 📖 **Understanding Project** | [Migration History](./docs/migration/) |
+| 🧪 **QA/Testing** | [Testing Guide](./docs/testing/) |
+| 🎯 **Ready to Launch?** | [Launch Status](./docs/launch/) |
+
+### Quick Links:
+
+- [Local Setup](./docs/getting-started/) - Run locally in 5 minutes
+- [Deployment Guide](./docs/operations/deployment.md) - How to deploy
+- [Special Features](./docs/features/special-implementations.md) - Custom implementations
+- [Performance Analysis](./docs/migration/jekyll-astro-comparison.md) - Jekyll vs Astro comparison
+- [Pre-Launch Checklist](./docs/launch/pre-launch-gaps.md) - Launch readiness
+
+## 🚀 Quick Start
 
 ```bash
-/
-├── public/
-│   ├── pagefind/ # auto-generated when build
-│   ├── favicon.svg
-│   └── astropaper-og.jpg
-├── src/
-│   ├── assets/
-│   │   ├── icons/
-│   │   └── images/
-│   ├── components/
-│   ├── data/
-│   │   └── blog/
-│   │       └── some-blog-posts.md
-│   ├── layouts/
-│   ├── pages/
-│   ├── scripts/
-│   ├── styles/
-│   ├── utils/
-│   ├── config.ts
-│   ├── constants.ts
-│   ├── content.config.ts
-│   ├── env.d.ts
-│   └── remark-collapse.d.ts
-└── astro.config.ts
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# Visit http://localhost:3000
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🛠️ Common Commands
 
-Any static assets, like images, can be placed in the `public/` directory.
+```bash
+npm run dev              # Start development server
+npm run build            # Build production site
+npm run preview          # Preview production build
+npm run lint             # Check code quality
+npm run format           # Auto-format code
+npm run test:console     # Check for console errors
+npm run test:visual      # Visual regression testing
+```
 
-All blog posts are stored in `src/data/blog` directory.
+## 📊 Project Structure
 
-## 📖 Documentation
-
-Documentation can be read in two formats\_ _markdown_ & _blog post_.
-
-- Configuration - [markdown](src/data/blog/how-to-configure-astropaper-theme.md) | [blog post](https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/)
-- Add Posts - [markdown](src/data/blog/adding-new-post.md) | [blog post](https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/)
-- Customize Color Schemes - [markdown](src/data/blog/customizing-astropaper-theme-color-schemes.md) | [blog post](https://astro-paper.pages.dev/posts/customizing-astropaper-theme-color-schemes/)
-- Predefined Color Schemes - [markdown](src/data/blog/predefined-color-schemes.md) | [blog post](https://astro-paper.pages.dev/posts/predefined-color-schemes/)
+```
+/
+├── docs/                    # 📚 All documentation (see docs/index.md)
+├── src/
+│   ├── content/
+│   │   ├── blog/           # 36 blog posts (markdown)
+│   │   └── pages/          # Static pages
+│   ├── components/         # Reusable components
+│   ├── layouts/            # Page layouts
+│   ├── pages/              # Dynamic routes
+│   ├── styles/             # Global styles
+│   └── config/             # Configuration
+├── public/
+│   ├── favicon.ico         # Favicon variants
+│   ├── apple-touch-icon.png
+│   └── site.webmanifest    # PWA manifest
+├── tests/                  # Test suites
+├── reports/                # Generated test reports
+└── package.json
+```
 
 ## 💻 Tech Stack
 
-**Main Framework** - [Astro](https://astro.build/)  
-**Type Checking** - [TypeScript](https://www.typescriptlang.org/)  
-**Styling** - [TailwindCSS](https://tailwindcss.com/)  
-**UI/UX** - [Figma Design File](https://www.figma.com/community/file/1356898632249991861)  
-**Static Search** - [FuseJS](https://pagefind.app/)  
-**Icons** - [Tablers](https://tabler-icons.io/)  
-**Code Formatting** - [Prettier](https://prettier.io/)  
-**Deployment** - [Cloudflare Pages](https://pages.cloudflare.com/)  
-**Illustration in About Page** - [https://freesvgillustration.com](https://freesvgillustration.com/)  
-**Linting** - [ESLint](https://eslint.org)
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [Astro](https://astro.build/) |
+| **Styling** | [TailwindCSS](https://tailwindcss.com/) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Search** | [Pagefind](https://pagefind.app/) |
+| **Testing** | [Playwright](https://playwright.dev/) |
+| **Deployment** | GitHub Pages (staging) + AWS S3/CloudFront (production) |
+| **CI/CD** | GitHub Actions |
 
-## 👨🏻‍💻 Running Locally
+## 📈 Performance
 
-You can start using this project locally by running the following command in your desired directory:
+**Lighthouse Scores** (Production):
+- Performance: 97
+- Accessibility: 100
+- Best Practices: 100
+- SEO: 100
 
-```bash
-# pnpm
-pnpm create astro@latest --template satnaing/astro-paper
+See [Performance Analysis](./docs/migration/jekyll-astro-comparison.md) for detailed comparison.
 
-# npm
-npm create astro@latest -- --template satnaing/astro-paper
+## 🚢 Deployment
 
-# yarn
-yarn create astro --template satnaing/astro-paper
+Two deployment pipelines:
 
-# bun
-bun create astro@latest -- --template satnaing/astro-paper
-```
+1. **Staging**: Push to `staging` branch → GitHub Pages
+2. **Production**: Push to `main` branch → AWS S3 + CloudFront
 
-Then start the project by running the following commands:
+See [Deployment Guide](./docs/operations/deployment.md) for details.
 
-```bash
-# install dependencies if you haven't done so in the previous step.
-pnpm install
-
-# start running the project
-pnpm run dev
-```
-
-As an alternative approach, if you have Docker installed, you can use Docker to run this project locally. Here's how:
+## 🧪 Testing
 
 ```bash
-# Build the Docker image
-docker build -t astropaper .
+# Console error testing (before pushing)
+npm run dev              # Terminal 1
+npm run test:console     # Terminal 2
 
-# Run the Docker container
-docker run -p 4321:80 astropaper
+# Visual regression testing
+npm run test:visual
+
+# Against staging environment
+npm run test:console:staging
+
+# Against production environment
+npm run test:console:production
 ```
 
-## 🔧 Development Workflow
+See [Testing Guide](./docs/testing/) for more.
 
-### Setup
+## 📋 Version History
 
-First-time setup:
+See [CHANGELOG.md](./CHANGELOG.md) for detailed release history.
 
-```bash
-# Run the setup script
-./scripts/setup.sh
+## 📝 License
 
-# Or manually install dependencies
-npm install
-```
-
-### Building & Testing
-
-This project uses a local Docker build test to ensure builds work in GitHub Actions before pushing.
-
-**Quick workflow:**
-
-```bash
-# Test locally first (fast feedback)
-make local-test
-
-# Test in Docker (matches CI environment)
-make docker-test
-
-# Test both and push to GitHub
-make push
-```
-
-**Available commands:**
-
-```bash
-make help           # Show all available commands
-make local-test     # Build locally with npm (~15s)
-make docker-test    # Build in Docker (~30s)
-make test           # Run both tests
-make push           # Test both, then push to GitHub
-make clean          # Remove Docker test image
-```
-
-### Development Workflow
-
-1. **Make changes** to the codebase
-2. **Test locally**: `npm run build:ci` (fast feedback)
-3. **Fix any issues**
-4. **When ready to push**: `make push` (tests both locally and in Docker)
-5. **Or push without testing**: `git push origin staging` (bypasses hook)
-
-### Pre-push Hook
-
-A git pre-push hook automatically runs the Docker build test before pushing. To bypass it (not recommended):
-
-```bash
-git push --no-verify
-```
-
-### Docker Build Caching
-
-The Docker build test caches images intelligently:
-- First run: ~30 seconds (builds image)
-- Subsequent runs: ~1 second (uses cache)
-- Cache is cleared when Dockerfile changes
-- Manual clean: `make clean`
-
-## Google Site Verification (optional)
-
-You can easily add your [Google Site Verification HTML tag](https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag) in AstroPaper using an environment variable. This step is optional. If you don't add the following environment variable, the google-site-verification tag won't appear in the HTML `<head>` section.
-
-```bash
-# in your environment variable file (.env)
-PUBLIC_GOOGLE_SITE_VERIFICATION=your-google-site-verification-value
-```
-
-> See [this discussion](https://github.com/satnaing/astro-paper/discussions/334#discussioncomment-10139247) for adding AstroPaper to the Google Search Console.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-> **_Note!_** For `Docker` commands we must have it [installed](https://docs.docker.com/engine/install/) in your machine.
-
-| Command                              | Action                                                                                                                           |
-| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm install`                       | Installs dependencies                                                                                                            |
-| `pnpm run dev`                       | Starts local dev server at `localhost:4321`                                                                                      |
-| `pnpm run build`                     | Build your production site to `./dist/`                                                                                          |
-| `pnpm run preview`                   | Preview your build locally, before deploying                                                                                     |
-| `pnpm run format:check`              | Check code format with Prettier                                                                                                  |
-| `pnpm run format`                    | Format codes with Prettier                                                                                                       |
-| `pnpm run sync`                      | Generates TypeScript types for all Astro modules. [Learn more](https://docs.astro.build/en/reference/cli-reference/#astro-sync). |
-| `pnpm run lint`                      | Lint with ESLint                                                                                                                 |
-| `docker compose up -d`               | Run AstroPaper on docker, You can access with the same hostname and port informed on `dev` command.                              |
-| `docker compose run app npm install` | You can run any command above into the docker container.                                                                         |
-| `docker build -t astropaper .`       | Build Docker image for AstroPaper.                                                                                               |
-| `docker run -p 4321:80 astropaper`   | Run AstroPaper on Docker. The website will be accessible at `http://localhost:4321`.                                             |
-| `docker run -p 4321:4321 astro-blog:test npm run preview -- --host 0.0.0.0` | Preview the built site from the test Docker image at `http://localhost:4321` |
-
-> **_Warning!_** Windows PowerShell users may need to install the [concurrently package](https://www.npmjs.com/package/concurrently) if they want to [run diagnostics](https://docs.astro.build/en/reference/cli-reference/#astro-check) during development (`astro check --watch & astro dev`). For more info, see [this issue](https://github.com/satnaing/astro-paper/issues/113).
-
-## ✨ Feedback & Suggestions
-
-If you have any suggestions/feedback, you can contact me via [my email](mailto:contact@satnaing.dev). Alternatively, feel free to open an issue if you find bugs or want to request new features.
-
-## 📜 License
-
-Licensed under the MIT License, Copyright © 2025
+Licensed under the MIT License. See [LICENSE](./LICENSE) file for details.
 
 ---
 
-Made with 🤍 by [Sat Naing](https://satnaing.dev) 👨🏻‍💻 and [contributors](https://github.com/satnaing/astro-paper/graphs/contributors).
+## 🤔 Need Help?
+
+1. **Getting started?** → [Getting Started Guide](./docs/getting-started/)
+2. **Something not working?** → [Troubleshooting](./docs/operations/troubleshooting.md)
+3. **Want to understand why something works this way?** → [Migration History](./docs/migration/)
+4. **Ready to launch?** → [Launch Checklist](./docs/launch/pre-launch-gaps.md)
+
+**All documentation is in `/docs`** - start with [docs/index.md](./docs/index.md).
+
+---
+
+Made with ❤️ for my blog. Based on [AstroPaper](https://github.com/satnaing/astro-paper) theme.
