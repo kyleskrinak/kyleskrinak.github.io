@@ -34,12 +34,31 @@ const optimizedImage = getOptimizedImage(image);
 			}
 			.hero-image {
 				width: 100%;
+				margin-bottom: 2em;
 			}
 			.hero-image img {
 				display: block;
 				margin: 0 auto;
 				border-radius: 12px;
 				box-shadow: var(--box-shadow);
+				max-width: 100%;
+				height: auto;
+			}
+			@media (max-width: 768px) {
+				.hero-image {
+					margin-bottom: 1.5em;
+				}
+				.hero-image img {
+					border-radius: 8px;
+				}
+			}
+			@media (max-width: 480px) {
+				.hero-image {
+					margin-bottom: 1em;
+				}
+				.hero-image img {
+					border-radius: 6px;
+				}
 			}
 			.prose {
 				width: 720px;
@@ -81,6 +100,9 @@ const optimizedImage = getOptimizedImage(image);
 							height={600}
 							quality={85}
 							format="webp"
+							sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+							loading="eager"
+							decoding="sync"
 						/>
 					)}
 				</div>

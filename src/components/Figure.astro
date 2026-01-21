@@ -1,7 +1,10 @@
 ---
+import { Image } from 'astro:assets';
+import { getOptimizedImage } from '../lib/images';
+
 /**
  * Figure Component
- * Displays an image with caption and optional alt text
+ * Displays an optimized image with caption and optional alt text
  * Replaces Jekyll's {% include figure %} include
  *
  * Usage in MDX:
@@ -9,6 +12,7 @@
  *   image_path="/assets/images/example.jpg"
  *   alt="Description"
  *   caption="Image caption text"
+ *   lazy={true}
  * />
  *
  * Captions with HTML are automatically detected and rendered:
@@ -17,19 +21,48 @@
  *   alt="Description"
  *   caption="Quote by <a href='https://...'>Tim Ferriss</a>"
  * />
+ *
+ * Props:
+ * - image_path: Path to image file
+ * - alt: Alt text for accessibility
+ * - caption: Optional caption (supports HTML)
+ * - lazy: Enable lazy loading (default: true)
  */
 
 interface Props {
   image_path: string;
   alt: string;
   caption?: string;
+  lazy?: boolean;
 }
 
-const { image_path, alt, caption } = Astro.props;
+const { image_path, alt, caption, lazy = true } = Astro.props;
+
+// Try to get optimized image from map, fallback to direct path
+const optimizedImage = getOptimizedImage(image_path);
 ---
 
 <figure class="figure">
-  <img src={image_path} alt={alt} class="figure__image" />
+  {optimizedImage ? (
+    <Image
+      src={optimizedImage}
+      alt={alt}
+      class="figure__image"
+      quality={85}
+      format="webp"
+      loading={lazy ? 'lazy' : 'eager'}
+      decoding="async"
+    />
+  ) : (
+    // Fallback for images not in the map (e.g., external URLs)
+    <img
+      src={image_path}
+      alt={alt}
+      class="figure__image figure__image--fallback"
+      loading={lazy ? 'lazy' : 'eager'}
+      decoding="async"
+    />
+  )}
   {caption && <figcaption class="figure__caption" set:html={caption} />}
 </figure>
 
@@ -37,29 +70,67 @@ const { image_path, alt, caption } = Astro.props;
   .figure {
     margin: 1.5rem 0;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .figure__image {
+  /* Optimized image from Astro Image component */
+  :global(.figure img) {
     max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    border-radius: 8px;
     display: block;
     margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  :global(.figure img:hover) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Fallback for non-optimized images */
+  .figure__image--fallback {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .figure__image--fallback:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   .figure__caption {
     font-size: 0.9em;
-    color: #666;
+    color: rgb(var(--gray));
     font-style: italic;
     padding: 0 1rem;
+    max-width: 90%;
+    line-height: 1.5;
   }
 
   .figure__caption a {
-    color: #0366d6;
+    color: rgb(var(--accent));
     text-decoration: none;
   }
 
   .figure__caption a:hover {
     text-decoration: underline;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .figure {
+      margin: 1rem 0;
+    }
+
+    .figure__caption {
+      padding: 0 0.5rem;
+      font-size: 0.85em;
+    }
   }
 </style>

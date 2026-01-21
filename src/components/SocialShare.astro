@@ -6,7 +6,9 @@ interface Props {
 }
 
 const { title, slug, description } = Astro.props;
-const pageUrl = `https://kyle.skrinak.com/blog/${slug}/`;
+// Construct full URL with base path
+const baseUrl = import.meta.env.BASE_URL || '/';
+const pageUrl = new URL(`${baseUrl}blog/${slug}/`, Astro.site).href;
 const encodedUrl = encodeURIComponent(pageUrl);
 const encodedTitle = encodeURIComponent(title);
 const encodedDesc = encodeURIComponent(description || title);

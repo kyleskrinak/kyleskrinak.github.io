@@ -1,62 +1,171 @@
-# Astro Starter Kit: Blog
+# Kyle Skrinak's Blog
 
-```sh
-npm create astro@latest -- --template blog
+A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with improved performance and features.
+
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Astro](https://img.shields.io/badge/Astro-purple?style=for-the-badge&logo=astro&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+**Live Sites**:
+- 🚀 [Production](https://kyle.skrinak.com/) - Main blog
+- 🧪 [Staging](https://kyleskrinak.github.io/astro-blog/) - Testing environment
+
+## ✨ Features
+
+- ⚡ **Super fast** - Optimized Astro build with <2s load times
+- 🎨 **Beautiful** - Responsive design that works on all devices
+- 🌙 **Dark mode** - Light and dark theme toggle
+- 🔍 **Full-text search** - Powered by Pagefind
+- ♿ **Accessible** - WCAG 2.1 compliant
+- 📱 **Mobile-first** - Perfect on phones, tablets, desktops
+- 📊 **SEO-friendly** - Sitemaps, RSS feeds, canonical URLs
+- 🎯 **TypeScript** - Type-safe markdown and configuration
+
+## 📚 Documentation
+
+All project documentation is organized in the `/docs` directory. Start here:
+
+**👀 [Documentation Hub](./docs/index.md)** - Navigation and overview
+
+### By Role:
+
+| Role | Start Here |
+|------|-----------|
+| 👨‍💻 **Developer** | [Getting Started](./docs/getting-started/) |
+| 🚀 **DevOps** | [Operations & Deployment](./docs/operations/) |
+| 📖 **Understanding Project** | [Migration History](./docs/migration/) |
+| 🧪 **QA/Testing** | [Testing Guide](./docs/testing/) |
+| 🎯 **Ready to Launch?** | [Launch Status](./docs/launch/) |
+
+### Quick Links:
+
+- [Local Setup](./docs/getting-started/) - Run locally in 5 minutes
+- [Deployment Guide](./docs/operations/deployment.md) - How to deploy
+- [Special Features](./docs/features/special-implementations.md) - Custom implementations
+- [Performance Analysis](./docs/migration/jekyll-astro-comparison.md) - Jekyll vs Astro comparison
+- [Pre-Launch Checklist](./docs/launch/pre-launch-gaps.md) - Launch readiness
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# Visit http://localhost:3000
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🛠️ Common Commands
 
-Features:
+```bash
+npm run dev              # Start development server
+npm run build            # Build production site
+npm run preview          # Preview production build
+npm run lint             # Check code quality
+npm run format           # Auto-format code
+npm run test:console     # Check for console errors
+npm run test:visual      # Visual regression testing
+```
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+## 📊 Project Structure
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-├── public/
+```
+/
+├── docs/                    # 📚 All documentation (see docs/index.md)
 ├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+│   ├── content/
+│   │   ├── blog/           # 36 blog posts (markdown)
+│   │   └── pages/          # Static pages
+│   ├── components/         # Reusable components
+│   ├── layouts/            # Page layouts
+│   ├── pages/              # Dynamic routes
+│   ├── styles/             # Global styles
+│   └── config/             # Configuration
+├── public/
+│   ├── favicon.ico         # Favicon variants
+│   ├── apple-touch-icon.png
+│   └── site.webmanifest    # PWA manifest
+├── tests/                  # Test suites
+├── reports/                # Generated test reports
+└── package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 💻 Tech Stack
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [Astro](https://astro.build/) |
+| **Styling** | [TailwindCSS](https://tailwindcss.com/) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Search** | [Pagefind](https://pagefind.app/) |
+| **Testing** | [Playwright](https://playwright.dev/) |
+| **Deployment** | GitHub Pages (staging) + AWS S3/CloudFront (production) |
+| **CI/CD** | GitHub Actions |
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## 📈 Performance
 
-Any static assets, like images, can be placed in the `public/` directory.
+**Lighthouse Scores** (Production):
+- Performance: 97
+- Accessibility: 100
+- Best Practices: 100
+- SEO: 100
 
-## 🧞 Commands
+See [Performance Analysis](./docs/migration/jekyll-astro-comparison.md) for detailed comparison.
 
-All commands are run from the root of the project, from a terminal:
+## 🚢 Deployment
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Two deployment pipelines:
 
-## 👀 Want to learn more?
+1. **Staging**: Push to `staging` branch → GitHub Pages
+2. **Production**: Push to `main` branch → AWS S3 + CloudFront
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+See [Deployment Guide](./docs/operations/deployment.md) for details.
 
-## Credit
+## 🧪 Testing
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+```bash
+# Console error testing (before pushing)
+npm run dev              # Terminal 1
+npm run test:console     # Terminal 2
+
+# Visual regression testing
+npm run test:visual
+
+# Against staging environment
+npm run test:console:staging
+
+# Against production environment
+npm run test:console:production
+```
+
+See [Testing Guide](./docs/testing/) for more.
+
+## 📋 Version History
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed release history.
+
+## 📝 License
+
+Licensed under the MIT License. See [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🤔 Need Help?
+
+1. **Getting started?** → [Getting Started Guide](./docs/getting-started/)
+2. **Something not working?** → [Troubleshooting](./docs/operations/troubleshooting.md)
+3. **Want to understand why something works this way?** → [Migration History](./docs/migration/)
+4. **Ready to launch?** → [Launch Checklist](./docs/launch/pre-launch-gaps.md)
+
+**All documentation is in `/docs`** - start with [docs/index.md](./docs/index.md).
+
+---
+
+Made with ❤️ for my blog. Based on [AstroPaper](https://github.com/satnaing/astro-paper) theme.

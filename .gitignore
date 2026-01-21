@@ -1,37 +1,34 @@
-# build output
-dist/
-# generated types
-.astro/
-
 # dependencies
 node_modules/
+.npm
+npm-debug.log
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# build output
+dist/
+.astro/
 
-
-# environment variables
+# environment
 .env
-.env.production
+.env.local
 
-# macOS-specific files
-.DS_Store
-
-# jetbrains setting folder
+# IDE
+.vscode/
 .idea/
 
-# test and audit reports
-lighthouse-reports/
+# OS
+.DS_Store
+Thumbs.db
+
+# Test outputs
 playwright-report/
 test-results/
+.playwright/
 
-# docker cache
-.docker-cache/
-
-# audit scripts (generated)
+# Artifacts & reports
+lighthouse-reports/
 run_audits.sh
 run_correct_audits.sh
 run_final_audits.sh
+
+# Cache
+.docker-cache/

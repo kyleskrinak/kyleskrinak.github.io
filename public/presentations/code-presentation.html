@@ -27,24 +27,29 @@
             justify-content: center;
         }
 
+        .slides-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
         .slide {
             position: absolute;
             width: 100%;
             height: 100%;
             padding: 60px;
+            top: 0;
+            left: 0;
             display: none;
             flex-direction: column;
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             animation: fadeIn 0.5s;
+            overflow-y: auto;
         }
 
         .slide.active {
             display: flex;
-        }
-
-        .slide.slide-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .slide-content {
@@ -65,6 +70,18 @@
 
         .slide h3 {
             font-size: 2rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .slide h4 {
+            font-size: 1.75rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .slide h5 {
+            font-size: 1.5rem;
             margin-bottom: 0.8rem;
             margin-top: 1rem;
         }
@@ -144,6 +161,17 @@
             background: rgba(0, 0, 0, 0.15);
         }
 
+        .slide img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+
+        .slide iframe {
+            max-width: 100%;
+            margin: 1rem 0;
+        }
+
         .slide-number {
             position: absolute;
             bottom: 20px;
@@ -209,6 +237,7 @@
             background: rgba(255, 255, 255, 0.5);
             z-index: 10;
             transition: width 0.3s;
+            width: 0%;
         }
 
         @keyframes fadeIn {
@@ -240,21 +269,22 @@
     </style>
 </head>
 <body>
-    <a href="/" class="home-link">← Home</a>
+    <a href="../../index.html" class="home-link">← Home</a>
     <div class="progress-bar" id="progressBar"></div>
 
     <div class="presentation-container" id="container">
-        
+        <div class="slides-wrapper">
+
         <section class="slide slide-title">
           <div class="slide-content">
-            <h3>Duke University’s</h3>
+            <h3>Duke University's</h3>
 <h4>Code+</h4>
 <p>co-curricular program</p>
 
           </div>
           <div class="slide-number">1 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -264,7 +294,7 @@
           </div>
           <div class="slide-number">2 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -273,7 +303,7 @@
           </div>
           <div class="slide-number">3 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -286,7 +316,7 @@
           </div>
           <div class="slide-number">4 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -295,7 +325,7 @@
           </div>
           <div class="slide-number">5 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -304,7 +334,7 @@
           </div>
           <div class="slide-number">6 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -312,7 +342,7 @@
           </div>
           <div class="slide-number">7 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -321,13 +351,13 @@
           </div>
           <div class="slide-number">8 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
             <ul>
 <li>A re-org at Duke</li>
-<li>Office of Information Technology’s call for Code+ projects</li>
+<li>Office of Information Technology's call for Code+ projects</li>
 <li>A mutually-beneficial project
 <ul>
 <li>Supports the Code+ team, Drupal, Open Source, and Duke</li>
@@ -335,16 +365,16 @@
 </li>
 <li>Duke maintains an internally-developed module on D.O. in need of attention
 <ul>
-<li>AKA “BasicShib” <a href="https://www.drupal.org/project/basicshib">https://www.drupal.org/project/basicshib</a></li>
+<li>AKA "BasicShib" <a href="https://www.drupal.org/project/basicshib">https://www.drupal.org/project/basicshib</a></li>
 </ul>
 </li>
 <li>A Duke need: integrate Grouper with Shibboleth</li>
 </ul>
-<!-- Note: Summer Experience Co-Curricular Project
+
           </div>
           <div class="slide-number">9 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -353,7 +383,7 @@
           </div>
           <div class="slide-number">10 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -366,7 +396,7 @@
           </div>
           <div class="slide-number">11 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -375,17 +405,17 @@
           </div>
           <div class="slide-number">12 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
             <h5>Drupal Module for Software Design and Development</h5>
-<p>The Drupal open-source software platform provides an opportunity for those who wish to design, develop, release, and finally maintain a non-commercial software project. A team of students will work with Duke’s Office of Information Technology and other partners across campus to develop a Drupal module to extend the functionality of the existing framework to create an application. Students will work with Drupal 9 to extend Symfony’s PHP object model paradigm. This allows students to work within a fully compliant Object-Oriented Programming, or OOP, paradigm.</p>
+<p>The Drupal open-source software platform provides an opportunity for those who wish to design, develop, release, and finally maintain a non-commercial software project. A team of students will work with Duke's Office of Information Technology and other partners across campus to develop a Drupal module to extend the functionality of the existing framework to create an application. Students will work with Drupal 9 to extend Symfony's PHP object model paradigm. This allows students to work within a fully compliant Object-Oriented Programming, or OOP, paradigm.</p>
 
           </div>
           <div class="slide-number">13 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -394,7 +424,7 @@
           </div>
           <div class="slide-number">14 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -403,7 +433,7 @@
           </div>
           <div class="slide-number">15 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -412,7 +442,7 @@
           </div>
           <div class="slide-number">16 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -421,7 +451,7 @@
           </div>
           <div class="slide-number">17 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -430,7 +460,7 @@
           </div>
           <div class="slide-number">18 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -439,7 +469,7 @@
           </div>
           <div class="slide-number">19 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -448,7 +478,7 @@
           </div>
           <div class="slide-number">20 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -457,7 +487,7 @@
           </div>
           <div class="slide-number">21 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -466,7 +496,7 @@
           </div>
           <div class="slide-number">22 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -475,7 +505,7 @@
           </div>
           <div class="slide-number">23 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -484,7 +514,7 @@
           </div>
           <div class="slide-number">24 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -493,7 +523,7 @@
           </div>
           <div class="slide-number">25 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -502,7 +532,7 @@
           </div>
           <div class="slide-number">26 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -525,7 +555,7 @@
           </div>
           <div class="slide-number">27 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -534,170 +564,156 @@
           </div>
           <div class="slide-number">28 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
             <ul>
-<li>Weekly individual one-on-ones and daily team scrums</li>
-<li>The team is to provide regular updates to the stakeholders on progress</li>
-<li>Encourage the team to become familiar with project management principles and tools</li>
+<li>Respect each Code+ team's individual working style</li>
+<li>Regular checkin and feedback from leadership</li>
+<li>Encourage independence and team ownership</li>
+<li>Be approachable and available</li>
 </ul>
 
           </div>
           <div class="slide-number">29 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <h4>Project schedule</h4>
+            <h4>Project Parameters</h4>
 
           </div>
           <div class="slide-number">30 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
             <ul>
-<li>Weeks 1 - 3: Training
-<ul>
-<li>One week more for Symfony and Drupal training</li>
-</ul>
-</li>
-<li>Weeks 4 - 6: Software discovery, requirements, and first stakeholder’s meeting</li>
-<li>Weeks 7 - 9: Software development and presentation of the project’s effort</li>
-<li>Week 10: Practice for and the final presentation to project stakeholders, corporate sponsors, project leads, and their fellow Code+ members in the cohort</li>
+<li>Code+ administrators assigns five students to project</li>
+<li>A project manager (Code+ administrator)</li>
+<li>Me: Project director, guiding direction, providing mentoring, and supporting the team</li>
+<li>Supporting partners from OIT</li>
 </ul>
 
           </div>
           <div class="slide-number">31 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <h4>Project Challenges</h4>
+            <h4>Project Successes</h4>
 
           </div>
           <div class="slide-number">32 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
             <ul>
-<li>What on earth is Drupal?
-<ul>
-<li>Well, about that</li>
-</ul>
-</li>
-<li>Rising sophomores who have never collaborated in this fashion
-<ul>
-<li>A highly effective team</li>
-</ul>
-</li>
-<li>Uneven engagement and enthusiasm
-<ul>
-<li>In the end, all were “all in.”</li>
-</ul>
-</li>
-<li>No initial team cohesion
-<ul>
-<li>Genuine team bonding and fondness</li>
-</ul>
-</li>
+<li>A dedicated, highly-talented team</li>
+<li>Students developed knowledge in our software ecosystem</li>
+<li>Students developed professional development and communication skills</li>
+<li>Project deliverable: A Drupal module published on Drupal.org</li>
+<li>Open source software contributions</li>
+<li>Supporting undergraduates</li>
 </ul>
 
           </div>
           <div class="slide-number">33 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <h4>Help from the Duke and Drupal community</h4>
+            <h4>Project Outcomes</h4>
 
           </div>
           <div class="slide-number">34 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <p>I asked for help, and the Drupal community responded!</p>
-<ul>
-<li>
-<p>Marc Isaacson (<a href="https://www.drupal.org/u/vegantriathlete">vegantriathlete</a>), Precious McKoy (<a href="https://www.drupal.org/u/mckoypr">mckoypr</a>), Jay Beaton (<a href="https://www.drupal.org/u/jrb">jrb</a>), Iain Hadgraft (<a href="https://drupal.org/u/iaha">iaha</a>), Eric Sembrat (<a href="https://drupal.org/u/webbeh">webbeh</a>)</p>
-</li>
-<li>
-<p>The team also asked questions on the Slack Drupal channel <a href="https://drupal.slack.com/archives/C1BMUQ9U6">#contribute</a> with strong community engagement.</p>
-</li>
+            <ul>
+<li>BasicShib Module Requirements and Learning Curve</li>
+<li>Module Maintenance Updates</li>
+<li>New Features Development</li>
+<li>Testing and Quality Assurance</li>
+<li>Team collaboration improvements</li>
 </ul>
 
           </div>
           <div class="slide-number">35 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <h4>The presentation</h4>
+            <h4>Challenges, Learnings, and Next Steps</h4>
 
           </div>
           <div class="slide-number">36 / 42</div>
         </section>
-      
 
-        <section class="slide ">
-          <div class="slide-content">
-            <iframe width="1024" height="580" src="https://www.youtube-nocookie.com/embed/CyFxF8fJWUY?start=28&cc_load_policy=1&rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
-          <div class="slide-number">37 / 42</div>
-        </section>
-      
-
-        <section class="slide ">
-          <div class="slide-content">
-            <h4>The Team Lead Experience</h4>
-
-          </div>
-          <div class="slide-number">38 / 42</div>
-        </section>
-      
 
         <section class="slide ">
           <div class="slide-content">
             <ul>
-<li>Exhilarating</li>
-<li>Exhausting</li>
-<li>Great team feedback</li>
-<li>Learned a great deal</li>
-<li>Collaborating with generous community</li>
-<li>My wholehearted endorsement</li>
-<li>Doing another project in 2022</li>
+<li>Software development in an enterprise environment</li>
+<li>Open source community contribution</li>
+<li>Time management and project planning</li>
+<li>Professional communication and mentoring</li>
+</ul>
+
+          </div>
+          <div class="slide-number">37 / 42</div>
+        </section>
+
+
+        <section class="slide ">
+          <div class="slide-content">
+            <h4>Challenges, Learnings, and Next Steps</h4>
+
+          </div>
+          <div class="slide-number">38 / 42</div>
+        </section>
+
+
+        <section class="slide ">
+          <div class="slide-content">
+            <ul>
+<li>Difficulty in planning time for mentoring and team support</li>
+<li>Communication in a multi-timezone environment with MS Teams and Zoom</li>
+<li>Complexity of the BasicShib module architecture</li>
+<li>Team changes during the summer</li>
 </ul>
 
           </div>
           <div class="slide-number">39 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
-            <h3>References</h3>
+            <ul>
+<li>A re-org at Duke</li>
+<li>Office of Information Technology's call for Code+ projects</li>
+<li>A mutually-beneficial project
 <ul>
-<li>The Code+ website: <a href="https://codeplus.duke.edu">https://codeplus.duke.edu</a></li>
-<li>The Code+ LinkedIn page: <a href="https://www.linkedin.com/company/duke-code-plus-program/">https://www.linkedin.com/company/duke-code-plus-program/</a></li>
-<li>The BasicShib <a href="http://Drupal.org">Drupal.org</a> project page: <a href="https://www.drupal.org/project/basicshib">https://www.drupal.org/project/basicshib</a></li>
-<li>The team’s presentation on YouTube: <a href="https://youtu.be/CyFxF8fJWUY">https://youtu.be/CyFxF8fJWUY</a></li>
+<li>Supports the Code+ team, Drupal, Open Source, and Duke</li>
+</ul>
+</li>
 </ul>
 
           </div>
           <div class="slide-number">40 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -706,7 +722,7 @@
           </div>
           <div class="slide-number">41 / 42</div>
         </section>
-      
+
 
         <section class="slide ">
           <div class="slide-content">
@@ -715,7 +731,8 @@
           </div>
           <div class="slide-number">42 / 42</div>
         </section>
-      
+
+        </div>
     </div>
 
     <div class="controls">
@@ -726,25 +743,30 @@
 
     <script>
         let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
-
-        function showSlide(n) {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (n + totalSlides) % totalSlides;
-            slides[currentSlide].classList.add('active');
-
-            // Update progress bar
-            const progress = ((currentSlide + 1) / totalSlides) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
+        let slides = document.querySelectorAll('.slide');
+        let totalSlides = slides.length;
 
         function nextSlide() {
-            showSlide(currentSlide + 1);
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide();
         }
 
         function prevSlide() {
-            showSlide(currentSlide - 1);
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide();
+        }
+
+        function showSlide() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            let progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
         }
 
         function toggleFullscreen() {
@@ -757,17 +779,16 @@
             }
         }
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 nextSlide();
             } else if (e.key === 'ArrowLeft') {
-                prevSlide();
+                window.prevSlide();
             }
         });
 
         // Initialize
-        showSlide(0);
+        showSlide();
     </script>
 </body>
 </html>

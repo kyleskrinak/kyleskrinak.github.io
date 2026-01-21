@@ -46,9 +46,9 @@ Of course, I wouldn&#39;t bother asking an Asian restaurant. I&#39;d focus on th
 
 Southern cooking, especially when the kitchen has lard or butter, can be the most accommodating on LCHF. It can also be terrible. The early 90&#39;s movie, &quot;My Cousin Vinny,&quot; mocks southern cooking, but, as we&#39;ve learned, Vinny&#39;s critique was way off, and now the joke&#39;s on us: 
 
-{% include video id="RuY-JRvlcKk" provider="youtube" %}
+<iframe width="560" height="315" src="https://www.youtube.com/embed/RuY-JRvlcKk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-One of my most memorable LCHF meals was at a southern-style restaurant in [Albany, GA](https://www.facebook.com/Pearlys-Famous-Country-Cooking-111689535534146/? __tn__ =%2Cdk%2CP-R&amp;eid=ARCScpidjXeUbz2CN1fVnAzqDk3loIvebaml1rFEtBHjFUDlBAXqptcDLIvzvZTwKkV6z8CUzrKFmeiI&amp;fref=tag). They relished serving me with a side of butter. Bon Appetite!
+One of my most memorable LCHF meals was at a southern-style restaurant in [Albany, GA](https://www.facebook.com/Pearlys-Famous-Country-Cooking-111689535534146/). They relished serving me with a side of butter. Bon Appetite!
 
 This question eliminates every, or nearly every, chain restaurant. That realization was difficult for me. I used to love On the Border. That was my &quot;go to&quot; for Father&#39;s Day, my birthday, and other artificial reasons in between. The Bordurrito was a go-to fav, the massive carb fest that thing was. It is thanks to OtB that I now know what [_&quot;Phase Butter,&quot;_](https://www.amazon.com/Phase-Liquid-Butter-Alternative-Pack/dp/B01C3JVC2K "Phase Butter") is, and that it _&quot;tastes just like butter.&quot;_ 
 
@@ -56,7 +56,7 @@ Uh-huh, to which I say;
 
 ## It&#39;s not nice to fool an LCHF&#39;er
 
-{% include video id="ijVijP-CDVI" provider="youtube" %}
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ijVijP-CDVI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 _I'm not sure how I can taste the difference, and Mother Nature can't, but, hey, whatever._
 
