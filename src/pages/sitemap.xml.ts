@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ site }) => {
     "presentations",
     "categories",
     "tags",
-    ...posts.map((post) => `posts/${post.slug}`),
+    ...posts.map((post) => `posts/${post.id.replace(/\.mdx?$/, "")}`),
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
