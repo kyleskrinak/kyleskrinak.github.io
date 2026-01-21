@@ -22,3 +22,16 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# test and audit reports
+lighthouse-reports/
+playwright-report/
+test-results/
+
+# docker cache
+.docker-cache/
+
+# audit scripts (generated)
+run_audits.sh
+run_correct_audits.sh
+run_final_audits.sh
