@@ -25,7 +25,7 @@ if (!presentation) {
   return Astro.redirect("/404");
 }
 
-const htmlFile = `/presentations/${id}.html`;
+const htmlFile = linkWithBase(`/presentations/${id}.html`);
 ---
 
 <Layout
