@@ -1,7 +1,8 @@
 // Determine environment: production (main branch) or staging (staging branch)
 const buildEnv = process.env.BUILD_ENV || "production";
+const siteUrl = process.env.SITE_URL; // Allow explicit override for deployment environments
 const isProduction = buildEnv === "production";
-const website = isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io/astro-blog/";
+const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io/astro-blog/");
 
 console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);
 
