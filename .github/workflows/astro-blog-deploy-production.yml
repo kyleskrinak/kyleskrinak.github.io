@@ -3,7 +3,7 @@ name: Production (AWS S3 + CloudFront)
 on:
   push:
     branches:
-      - main
+      - staging
   workflow_dispatch:
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
     name: Deploy to AWS S3 & CloudFront
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -105,3 +105,34 @@ jobs:
           echo "✓ Deployment Complete"
           echo "Site: https://kyle.skrinak.com"
           echo "Build ID: ${{ needs.build.outputs.build-id }}"
+
+  deploy-to-pages:
+    name: Deploy to GitHub Pages (kyleskrinak.github.io)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
