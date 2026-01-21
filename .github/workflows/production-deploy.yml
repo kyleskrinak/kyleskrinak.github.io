@@ -1,92 +1,73 @@
-name: Production Build & Deploy
+name: Production (AWS S3 + CloudFront)
 
 on:
+  push:
+    branches: ["main"]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build
+  build-and-deploy:
+    name: Build, verify, deploy
     runs-on: ubuntu-latest
-    outputs:
-      build-id: ${{ github.run_id }}-${{ github.run_number }}
+    environment:
+      name: production
+      url: https://kyle.skrinak.com
+    permissions:
+      contents: read
+      id-token: write  # needed for OIDC -> AWS
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build site
-        run: npm run build
+        run: npm run build:ci
+        env:
+          BUILD_ENV: production
+          SITE_URL: https://kyle.skrinak.com/
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: ./dist
-          retention-days: 1
-
-  deploy:
-    name: Deploy to AWS S3 & CloudFront
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
-          path: ./dist
-
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Sync to S3
+      # Step 1: push long-lived assets first
+      - name: Sync assets to S3 (1y immutable)
         run: |
-          # Sync all files with default cache control (5 minutes for HTML)
-          aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
+          aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
             --delete \
-            --cache-control "public, max-age=300" \
-            --exclude "*.js" \
-            --exclude "*.css" \
-            --exclude "_pagefind/*"
+            --only-show-errors \
+            --exclude "*" \
+            --include "_astro/*" \
+            --include "_pagefind/*" \
+            --cache-control "max-age=31536000,public,immutable"
 
-          # Sync assets with long cache (1 year for immutable assets)
-          aws s3 sync dist/_astro/ s3://${{ secrets.AWS_S3_BUCKET }}/_astro/ \
-            --cache-control "public, max-age=31536000, immutable"
-
-          # Sync pagefind assets with long cache
-          aws s3 sync dist/_pagefind/ s3://${{ secrets.AWS_S3_BUCKET }}/_pagefind/ \
-            --cache-control "public, max-age=31536000, immutable"
-
-          # Sync JS and CSS with medium cache (1 hour)
-          aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
-            --cache-control "public, max-age=3600" \
-            --include "*.js" \
-            --include "*.css" \
-            --exclude "*" || true
+      # Step 2: push everything else (HTML + non-asset files) with a short cache
+      # Excluding assets prevents this step from overwriting the long-lived headers from step 1.
+      - name: Sync HTML to S3 (5m cache)
+        run: |
+          aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
+            --delete \
+            --only-show-errors \
+            --exclude "_astro/*" \
+            --exclude "_pagefind/*" \
+            --cache-control "max-age=300,public"
 
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-
-      - name: Deployment Summary
-        run: |
-          echo "✓ Deployment Complete"
-          echo "Site: https://kyle.skrinak.com"
-          echo "Build ID: ${{ needs.build.outputs.build-id }}"
+            --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/"

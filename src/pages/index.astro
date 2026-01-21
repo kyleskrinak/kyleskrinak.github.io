@@ -1,110 +1,107 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
-import { getCollection } from 'astro:content';
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Socials from "@/components/Socials.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import Card from "@/components/Card.astro";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { linkWithBase } from "@/utils/linkWithBase";
+import IconRss from "@/assets/icons/IconRss.svg";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import { SITE } from "@/config";
+import { SOCIALS } from "@/config/constants";
 
-const allBlogPosts = (await getCollection('blog'))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 5);
+const posts = await getCollection("blog");
+
+const sortedPosts = getSortedPosts(posts);
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			.hero {
-				padding: 2em 0;
-				text-align: center;
-				margin-bottom: 3em;
-			}
-			.hero h1 {
-				font-size: 2.5em;
-				margin-bottom: 0.5em;
-			}
-			.hero p {
-				font-size: 1.1em;
-				color: rgb(var(--gray));
-				max-width: 600px;
-				margin: 1em auto;
-			}
-			.recent-posts {
-				margin: 3em 0;
-			}
-			.recent-posts h2 {
-				margin-bottom: 1.5em;
-				padding-bottom: 0.5em;
-				border-bottom: 2px solid rgb(var(--gray-light));
-			}
-			.post-item {
-				margin-bottom: 2em;
-				padding-bottom: 2em;
-				border-bottom: 1px solid rgb(var(--gray-light));
-			}
-			.post-item:last-child {
-				border-bottom: none;
-			}
-			.post-title {
-				margin: 0.5em 0;
-				font-size: 1.5em;
-			}
-			.post-title a {
-				text-decoration: none;
-				color: var(--accent);
-			}
-			.post-title a:hover {
-				text-decoration: underline;
-			}
-			.post-date {
-				color: rgb(var(--gray));
-				font-size: 0.9em;
-				margin-bottom: 0.5em;
-			}
-			.cta-link {
-				display: inline-block;
-				margin-top: 1em;
-				padding: 0.5em 1em;
-				background-color: var(--accent);
-				color: white;
-				text-decoration: none;
-				border-radius: 4px;
-				transition: background-color 0.2s;
-			}
-			.cta-link:hover {
-				background-color: var(--accent-dark);
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section class="hero">
-				<h1>{SITE_TITLE}</h1>
-				<p>{SITE_DESCRIPTION}</p>
-				<p>Based in Apex, NC | <a href="/blog">Read all posts</a></p>
-			</section>
+<Layout>
+  <Header />
+  <main id="main-content" data-layout="index" class="app-layout">
+    <section id="hero" class:list={["pt-8 pb-6", "border-b border-border"]}>
+      <a
+        target="_blank"
+        href={linkWithBase("/rss.xml")}
+        class="inline-block"
+        aria-label="rss feed"
+        title="RSS Feed"
+      >
+        <IconRss
+          width={20}
+          height={20}
+          class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
+        />
+        <span class="sr-only">RSS Feed</span>
+      </a>
 
-			<section class="recent-posts">
-				<h2>Recent Posts</h2>
-				{
-					allBlogPosts.map((post) => (
-						<article class="post-item">
-							<div class="post-date">
-								<FormattedDate date={post.data.pubDate} />
-							</div>
-							<h3 class="post-title">
-								<a href={`/blog/${post.id}/`}>{post.data.title}</a>
-							</h3>
-							{post.data.description && <p>{post.data.description}</p>}
-						</article>
-					))
-				}
-				<a href="/blog" class="cta-link">View All Posts →</a>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+      <p>
+        Welcome to my blog. My goal here is to share what I'm learning rather than advocate for any particular stack or solution. I have fun trying new technologies and approaches, and I enjoy documenting those experiences here. Whether it's web development, infrastructure, low-carb cooking, or whatever else I'm exploring, this is where I write about the journey.
+      </p>
+      {
+        // only display if at least one social link is enabled
+        SOCIALS.length > 0 && (
+          <div class="mt-4 flex max-sm:flex-col sm:items-center">
+            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">Social Links:</div>
+            <Socials />
+          </div>
+        )
+      }
+    </section>
+
+    {
+      featuredPosts.length > 0 && (
+        <section
+          id="featured"
+          class:list={[
+            "pt-12 pb-6",
+            { "border-b border-border": recentPosts.length > 0 },
+          ]}
+        >
+          <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
+          <ul>
+            {featuredPosts.map(data => (
+              <Card variant="h3" {...data} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="pt-12 pb-6">
+          <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
+          <ul>
+            {recentPosts.map(
+              (data, index) =>
+                index < SITE.postPerIndex && <Card variant="h3" {...data} />
+            )}
+          </ul>
+        </section>
+      )
+    }
+
+    <div class="my-8 text-center">
+      <LinkButton href={linkWithBase("/posts/")}>
+        All Posts
+        <IconArrowRight class="inline-block rtl:-rotate-180" />
+      </LinkButton>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout) {
+      sessionStorage.setItem("backUrl", "/");
+    }
+  });
+</script>

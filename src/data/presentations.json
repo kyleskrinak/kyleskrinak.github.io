@@ -1,0 +1,66 @@
+[
+  {
+    "id": "wohd",
+    "title": "What I did at DrupalCon 2022",
+    "date": "2022-05-04",
+    "description": "A summary of my experience and learnings from attending DrupalCon 2022 in Portland",
+    "type": "conference",
+    "tags": ["drupalcon", "conference"]
+  },
+  {
+    "id": "code-presentation",
+    "title": "Code+ at DrupalCon 2022",
+    "date": "2022-04-07",
+    "description": "Presentation on Code+ initiative at DrupalCon 2022",
+    "type": "conference",
+    "tags": ["drupalcon", "drupal"]
+  },
+  {
+    "id": "drupal-multisite-on-a-dime",
+    "title": "Drupal Multisite on a Dime",
+    "date": "2020-12-03",
+    "description": "Building scalable Drupal multisite installations on a budget",
+    "type": "technical",
+    "tags": ["drupal", "multisite", "architecture"]
+  },
+  {
+    "id": "2019-drupalcon-drupal-8-multisite",
+    "title": "Drupal 8 Multisite",
+    "date": "2019-04-07",
+    "description": "DrupalCon 2019 presentation on Drupal 8 multisite configuration",
+    "type": "conference",
+    "tags": ["drupalcon", "drupal", "multisite"]
+  },
+  {
+    "id": "drupal-intro",
+    "title": "Drupal Introduction",
+    "date": "2020-03-05",
+    "description": "Introduction to Drupal concepts and architecture",
+    "type": "technical",
+    "tags": ["drupal", "introduction"]
+  },
+  {
+    "id": "tts-profile-mgmt",
+    "title": "TTS Profile Management",
+    "date": "2019-07-20",
+    "description": "Managing profiles in TTS systems",
+    "type": "technical",
+    "tags": ["systems", "profile-management"]
+  },
+  {
+    "id": "2019-Feb-SLG",
+    "title": "February 2019 SLG Presentation",
+    "date": "2019-02-12",
+    "description": "Presentation at SLG meeting in February 2019",
+    "type": "meeting",
+    "tags": ["slg"]
+  },
+  {
+    "id": "bundle-test",
+    "title": "Bundle Test",
+    "date": "2018-12-28",
+    "description": "Testing bundle configurations",
+    "type": "technical",
+    "tags": ["testing"]
+  }
+]

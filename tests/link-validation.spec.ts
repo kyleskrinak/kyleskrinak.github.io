@@ -80,4 +80,36 @@ test.describe('Link Validation', () => {
 		expect(response?.status()).toBe(200);
 		expect(response?.headers()['content-type']).toContain('xml');
 	});
+
+	test('presentations index page loads', async ({ page }) => {
+		await page.goto('http://localhost:3000/presentations', { waitUntil: 'networkidle' });
+		await expect(page.locator('h1')).toContainText('Presentations');
+
+		// Check that at least one presentation link exists
+		const presLinks = page.locator('a[href^="/presentations/"]');
+		expect(await presLinks.count()).toBeGreaterThan(0);
+	});
+
+	test('presentation detail pages load with valid links', async ({ page }) => {
+		await page.goto('http://localhost:3000/presentations', { waitUntil: 'networkidle' });
+
+		// Get the first presentation link
+		const firstPresLink = page.locator('a[href^="/presentations/"][href$="/"]').first();
+		const href = await firstPresLink.getAttribute('href');
+
+		if (href) {
+			await page.goto(`http://localhost:3000${href}`, { waitUntil: 'networkidle' });
+
+			// Check that the "View Presentation" button exists and has valid href
+			const viewButton = page.locator('a:has-text("View Presentation")');
+			await expect(viewButton).toBeVisible();
+
+			const presHref = await viewButton.getAttribute('href');
+			expect(presHref).toMatch(/^\/.*\.html$/);
+
+			// Verify the presentation HTML file exists
+			const response = await page.goto(`http://localhost:3000${presHref}`, { waitUntil: 'networkidle' });
+			expect(response?.status()).toBe(200);
+		}
+	});
 });

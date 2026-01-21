@@ -1,8 +1,30 @@
-import { Root, Element } from 'hast';
 import { visit } from 'unist-util-visit';
 
+/**
+ * Rehype plugin to enhance images with lazy loading and optimization
+ * Adds loading="lazy" and decoding="async" to all img tags
+ */
+export function rehypeImageOptimization() {
+	return function transformer(tree) {
+		visit(tree, 'element', (node) => {
+			if (node.tagName === 'img') {
+				// Add lazy loading if not already present
+				if (!node.properties?.loading) {
+					node.properties = node.properties || {};
+					node.properties.loading = 'lazy';
+				}
+				// Add async decoding
+				if (!node.properties?.decoding) {
+					node.properties = node.properties || {};
+					node.properties.decoding = 'async';
+				}
+			}
+		});
+	};
+}
+
 export function rehypeComponents() {
-	return (tree: Root) => {
+	return function transformer(tree) {
 		visit(tree, 'text', (node, index, parent) => {
 			if (!node.value) return;
 
