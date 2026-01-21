@@ -25,6 +25,7 @@ pnpm-debug.log*
 
 # Docker build cache
 .docker-cache
+.docker-cache/
 
 # Playwright test artifacts (but keep __screenshots__ for baselines)
 playwright-report/
