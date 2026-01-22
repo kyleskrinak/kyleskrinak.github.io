@@ -35,20 +35,7 @@ const pages = defineCollection({
 	}),
 });
 
-const presentations = defineCollection({
-	type: 'content',
-	schema: z.object({
-		title: z.string(),
-		description: z.string().optional(),
-		date: z.coerce.date(),
-		author: z.string().optional(),
-		theme: z.enum(['default', 'reveal-duke']).optional(),
-		tags: z.array(z.string()).optional(),
-	}),
-});
-
 export const collections = {
 	blog,
 	pages,
-	presentations,
 };
