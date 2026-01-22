@@ -6,6 +6,7 @@ npm-debug.log
 # build output
 dist/
 .astro/
+public/_pagefind/
 
 # environment
 .env
