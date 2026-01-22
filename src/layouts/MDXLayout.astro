@@ -1,6 +1,5 @@
 ---
 import BlogPost from './BlogPost.astro';
-import Figure from '../components/Figure.astro';
 import FbMigrate from '../components/FbMigrate.astro';
 
 interface Props {
@@ -15,6 +14,6 @@ interface Props {
 const { title, description, pubDate, updatedDate, heroImage, slug = '' } = Astro.props;
 ---
 
-<BlogPost {title} {description} {pubDate} {updatedDate} {heroImage} {slug}>
+<BlogPost title={title} description={description} pubDate={pubDate} updatedDate={updatedDate} image={heroImage} alt={undefined} slug={slug}>
 	<slot />
 </BlogPost>

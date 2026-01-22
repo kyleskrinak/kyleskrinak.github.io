@@ -33,12 +33,14 @@ const {
   canonicalURL,
   pubDate,
   updatedDate,
-  timezone,
   tags = [],
   hideEditPost,
   image,
   alt,
 } = post.data;
+
+// timezone is optional and may not exist on all posts
+const timezone = (post.data as any).timezone;
 
 // Get optimized image metadata for hero image display
 const optimizedImage = getOptimizedImage(image);
@@ -50,8 +52,8 @@ let ogImageUrl: string | undefined;
 // Determine OG image source
 if (typeof initOgImage === "string") {
   ogImageUrl = initOgImage; // Remote OG image (absolute URL)
-} else if (initOgImage?.src) {
-  ogImageUrl = initOgImage.src; // Local asset
+} else if (initOgImage && typeof initOgImage === 'object' && 'src' in initOgImage) {
+  ogImageUrl = (initOgImage as any).src; // Local asset
 }
 
 // Use dynamic OG image if enabled and no remote|local ogImage

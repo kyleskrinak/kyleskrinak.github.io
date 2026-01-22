@@ -10,9 +10,9 @@ import Header from '../components/Header.astro';
 import SocialShare from '../components/SocialShare.astro';
 import { getOptimizedImage } from '../lib/images';
 
-interface Props extends CollectionEntry<'blog'>['data'] {
+type Props = CollectionEntry<'blog'>['data'] & {
 	slug?: string;
-}
+};
 
 const props = Astro.props as any;
 const { title, description, pubDate, updatedDate, slug = '' } = props;

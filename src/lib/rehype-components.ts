@@ -1,11 +1,12 @@
 import { visit } from 'unist-util-visit';
+import type { Root, Element } from 'hast';
 
 /**
  * Rehype plugin to enhance images with lazy loading and optimization
  * Adds loading="lazy" and decoding="async" to all img tags
  */
 export function rehypeImageOptimization() {
-	return function transformer(tree) {
+	return function transformer(tree: Root) {
 		visit(tree, 'element', (node) => {
 			if (node.tagName === 'img') {
 				// Add lazy loading if not already present
@@ -24,7 +25,7 @@ export function rehypeImageOptimization() {
 }
 
 export function rehypeComponents() {
-	return function transformer(tree) {
+	return function transformer(tree: Root) {
 		visit(tree, 'text', (node, index, parent) => {
 			if (!node.value) return;
 
@@ -33,7 +34,7 @@ export function rehypeComponents() {
 				/<Figure\s+image_path="([^"]*)"\s+alt="([^"]*)"\s+(?:caption="([^"]*)")?\s*\/>/
 			);
 			if (figureMatch) {
-				const [fullMatch, imagePath, alt, caption] = figureMatch;
+				const [, imagePath, alt, caption] = figureMatch;
 				const figure: Element = {
 					type: 'element',
 					tagName: 'figure',
@@ -48,17 +49,17 @@ export function rehypeComponents() {
 								className: ['figure__image'],
 							},
 							children: [],
-						},
-					],
+						} as Element,
+					] as Element[],
 				};
 
 				if (caption) {
-					figure.children?.push({
+					(figure.children as Element[]).push({
 						type: 'element',
 						tagName: 'figcaption',
 						properties: { className: ['figure__caption'] },
-						children: [{ type: 'html', value: caption }],
-					});
+						children: [{ type: 'text', value: caption }] as any,
+					} as Element);
 				}
 
 				if (parent && index !== undefined) {
@@ -71,7 +72,7 @@ export function rehypeComponents() {
 				/<FbMigrate\s+fb_url="([^"]*)"\s+original_date="([^"]*)"\s*\/>/
 			);
 			if (fbMatch) {
-				const [fullMatch, fbUrl, originalDate] = fbMatch;
+				const [, fbUrl, originalDate] = fbMatch;
 				const notice: Element = {
 					type: 'element',
 					tagName: 'div',
@@ -86,8 +87,8 @@ export function rehypeComponents() {
 									type: 'element',
 									tagName: 'strong',
 									properties: {},
-									children: [{ type: 'text', value: 'Note:' }],
-								},
+									children: [{ type: 'text', value: 'Note:' }] as any,
+								} as Element,
 								{
 									type: 'text',
 									value: '\n    I originally posted this on my Facebook account on\n    ',
@@ -96,15 +97,15 @@ export function rehypeComponents() {
 									type: 'element',
 									tagName: 'a',
 									properties: { href: fbUrl },
-									children: [{ type: 'text', value: originalDate }],
-								},
+									children: [{ type: 'text', value: originalDate }] as any,
+								} as Element,
 								{
 									type: 'text',
 									value: '. However, Facebook is getting rid of\n    their "notes" blog-like ability, so I\'ve moved this content to my blog, with\n    some edits for clarity.',
 								},
-							],
-						},
-					],
+							] as any,
+						} as Element,
+					] as Element[],
 				};
 
 				if (parent && index !== undefined) {

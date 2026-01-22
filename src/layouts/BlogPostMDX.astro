@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, description, pubDate, updatedDate, image, alt, slug } = entry.data;
+const { title, description, pubDate, updatedDate, image, alt } = entry.data;
 
 // Export components for use in MDX
 export const components = {
@@ -22,6 +22,6 @@ export const components = {
 };
 ---
 
-<BlogPost title={title} description={description} pubDate={pubDate} updatedDate={updatedDate} image={image} alt={alt} slug={slug || entry.id}>
+<BlogPost {...entry.data} slug={entry.id}>
   <slot />
 </BlogPost>
