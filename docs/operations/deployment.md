@@ -199,3 +199,40 @@ Build size and performance metrics:
 - All pages: ~40 HTML files
 
 Monitor in GitHub Actions logs.
+## Troubleshooting
+
+### Build Fails with "cannot stat 'dist/pagefind'"
+
+**Error**:
+```
+cp: cannot stat 'dist/pagefind': No such file or directory
+Error: Process completed with exit code 1
+```
+
+**Root Cause**: The `npm run build` script references the wrong Pagefind output directory
+
+**Solution**: Verify your build script matches the `pagefind.json` configuration:
+- Config specifies: `output_subdir: "_pagefind"` (with underscore)
+- Script should use: `cp -r dist/_pagefind public/` (with underscore)
+
+See [Build & Configuration Guide](./build-configuration.md) for details.
+
+### Pagefind Search Not Working
+
+**Symptoms**: Search functionality missing or broken in production
+
+**Check**:
+1. Verify search assets exist: `aws s3 ls s3://kyle.skrinak.com/_pagefind/`
+2. Check CloudFront distribution includes `_pagefind/*` paths
+3. Verify `pagefind.json` config is correct
+4. Check browser console for errors
+
+**Reference**: [Build & Configuration Guide](./build-configuration.md#critical-configuration-pagefind)
+
+### Deployment Stuck or Not Progressing
+
+**Check**:
+1. View workflow logs: GitHub Actions → Production workflow
+2. Verify AWS credentials are valid
+3. Check AWS IAM role permissions
+4. Ensure S3 bucket exists and is accessible
