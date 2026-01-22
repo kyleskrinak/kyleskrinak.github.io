@@ -1,8 +1,10 @@
 <!-- Google Analytics for GA4 -->
 <script>
+	// @ts-ignore - dataLayer is provided by Google Analytics
 	window.dataLayer = window.dataLayer || [];
-	function gtag() {
-		dataLayer.push(arguments);
+	function gtag(...args: any[]) {
+		// @ts-ignore
+		window.dataLayer.push(args);
 	}
 	gtag('js', new Date());
 	gtag('config', 'G-XXXXX', {
