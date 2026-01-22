@@ -10,20 +10,20 @@ const shortname = 'kds38-duke-blog';
 
 <div id="disqus_thread"></div>
 <script>
-	const disqusShortname = 'kds38-duke-blog';
-	const pageUrl = window.location.href;
-	const pageIdentifier = document.currentScript?.dataset.slug || 'unknown';
-
+	// @ts-ignore - disqus_config is provided by Disqus library
 	window.disqus_config = function () {
+		const pageUrl = window.location.href;
+		const pageIdentifier = document.currentScript?.dataset.slug || 'unknown';
 		this.page.url = pageUrl;
 		this.page.identifier = pageIdentifier;
 	};
 
 	(function () {
+		const disqusShortname = 'kds38-duke-blog';
 		const d = document;
 		const s = d.createElement('script');
 		s.src = 'https://' + disqusShortname + '.disqus.com/embed.js';
-		s.setAttribute('data-timestamp', new Date().getTime());
+		s.setAttribute('data-timestamp', new Date().getTime().toString());
 		(d.head || d.body).appendChild(s);
 	})();
 </script>

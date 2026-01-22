@@ -2,7 +2,6 @@
 // All blog post hero images imported here for type-safe, optimized image handling
 
 import momMe from '../assets/images/19-10-31-mom-me.jpg';
-import historicalDress from '../assets/images/190111-historical-dress.JPG';
 import megaphone from '../assets/images/190831-megaphone.jpg';
 import fathersday from '../assets/images/20160619-fathersday.jpg';
 import jekyllGarden from '../assets/images/21-04-02-jekyll-garden.jpg';
@@ -20,7 +19,6 @@ import type { ImageMetadata } from 'astro';
 // Map filenames to imported image modules for dynamic lookup
 export const imageMap: Record<string, ImageMetadata> = {
 	'19-10-31-mom-me.jpg': momMe,
-	'190111-historical-dress.JPG': historicalDress,
 	'190831-megaphone.jpg': megaphone,
 	'20160619-fathersday.jpg': fathersday,
 	'21-04-02-jekyll-garden.jpg': jekyllGarden,
