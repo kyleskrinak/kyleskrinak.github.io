@@ -2,6 +2,10 @@
 
 This section covers deploying, maintaining, and troubleshooting the Astro blog in production.
 
+## Build & Configuration
+
+- **[Build & Configuration Guide](./build-configuration.md)** - Build scripts, Pagefind setup, and debugging
+
 ## Deployment
 
 - **[Deployment Guide](./deployment.md)** - Complete instructions for staging and production deployments
