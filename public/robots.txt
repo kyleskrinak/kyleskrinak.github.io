@@ -1,0 +1,5 @@
+# Disallow crawling on staging environment (GitHub Pages)
+# Production domain (kyle.skrinak.com) may have a different robots.txt
+
+User-agent: *
+Disallow: /
