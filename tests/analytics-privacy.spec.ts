@@ -1,0 +1,121 @@
+import { test, expect } from "@playwright/test";
+
+const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000";
+
+/**
+ * Test Cloudflare Analytics privacy signal detection
+ * Verifies that the beacon respects DNT and GPC signals
+ *
+ * Usage:
+ *   npm run build && npm run preview  # In terminal 1
+ *   npx playwright test tests/analytics-privacy.spec.ts   # In terminal 2
+ */
+
+test.describe("Cloudflare Analytics Privacy Signals", () => {
+  test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
+    // Mock navigator properties with no privacy signals
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => null,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => undefined,
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+
+    // Wait a moment for script injection
+    await page.waitForTimeout(500);
+
+    // Check if beacon script was added to the page
+    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(1);
+  });
+
+  test("should NOT load beacon when DNT is '1'", async ({ page, context }) => {
+    // Mock navigator.doNotTrack to return "1"
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => "1",
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => undefined,
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForTimeout(500);
+
+    // Beacon script should NOT be present
+    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(0);
+  });
+
+  test("should NOT load beacon when DNT is 'yes'", async ({ page, context }) => {
+    // Mock navigator.doNotTrack to return "yes"
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => "yes",
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => undefined,
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForTimeout(500);
+
+    // Beacon script should NOT be present
+    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(0);
+  });
+
+  test("should NOT load beacon when GPC is true", async ({ page, context }) => {
+    // Mock navigator.globalPrivacyControl to return true
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => null,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => ({ valueOf: () => true }),
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForTimeout(500);
+
+    // Beacon script should NOT be present
+    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(0);
+  });
+
+  test("should NOT load beacon when both DNT and GPC are enabled", async ({ page, context }) => {
+    // Mock both privacy signals as enabled
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => "1",
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => ({ valueOf: () => true }),
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForTimeout(500);
+
+    // Beacon script should NOT be present
+    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(0);
+  });
+});

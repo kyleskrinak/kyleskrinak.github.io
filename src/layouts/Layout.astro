@@ -194,7 +194,8 @@ const structuredData = {
       <script is:inline define:vars={{ token: PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN }}>
         // Respect user privacy signals: bail if DNT or GPC is enabled
         const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
-        const gpc = navigator.globalPrivacyControl === true;
+        // Use optional chaining: globalPrivacyControl has limited browser support.
+        const gpc = navigator.globalPrivacyControl?.valueOf() === true;
         
         if (!dnt && !gpc) {
           const script = document.createElement("script");
