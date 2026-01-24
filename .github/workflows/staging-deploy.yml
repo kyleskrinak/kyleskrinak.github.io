@@ -36,6 +36,7 @@ jobs:
         env:
           BUILD_ENV: production
           SITE_URL: https://kyleskrinak.github.io/
+          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_STAGING }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
