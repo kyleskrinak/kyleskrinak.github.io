@@ -59,6 +59,38 @@ npm run test:console:production
      • [404] Failed to load: https://kyleskrinak.github.io/astro-blog/site.webmanifest
 ```
 
+## Analytics Privacy Signal Testing
+
+**Purpose**: Verify that Cloudflare Web Analytics respects user privacy signals (Do Not Track and Global Privacy Control).
+
+**When to run**: After making changes to analytics loading logic or before merging privacy-related features.
+
+### Running Locally
+
+```bash
+# Terminal 1: Build and preview (analytics only loads in production builds)
+npm run build && npm run preview
+
+# Terminal 2: Run the test
+npx playwright test tests/analytics-privacy.spec.ts
+```
+
+### What It Tests
+
+✅ **No Privacy Signals**: Beacon loads when neither DNT nor GPC is set
+✅ **DNT = "0"**: Beacon loads when user explicitly consents to tracking
+✅ **DNT = "1"**: Beacon does NOT load when Do Not Track is enabled
+✅ **DNT = "yes"**: Beacon does NOT load (alternative DNT value)
+✅ **GPC = true**: Beacon does NOT load when Global Privacy Control is enabled
+✅ **Both Enabled**: Beacon does NOT load when both signals are present
+
+### Key Implementation Details
+
+- Tests mock `navigator.doNotTrack` and `navigator.globalPrivacyControl` properties
+- Uses deterministic waits (`waitForLoadState`) instead of fixed timeouts
+- Validates presence/absence of the beacon script element in the DOM
+- GPC has limited browser support (primarily Firefox and privacy-focused browsers)
+
 ## Visual Regression Testing
 
 **Purpose**: Ensure UI hasn't changed unexpectedly across browser updates or code changes.

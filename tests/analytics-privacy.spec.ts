@@ -26,12 +26,31 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
     });
 
     await page.goto(BASE_URL);
-
-    // Wait a moment for script injection
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
     // Check if beacon script was added to the page
-    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(1);
+  });
+
+  test("should load beacon when DNT is '0' (explicit consent)", async ({ page, context }) => {
+    // Mock navigator.doNotTrack to return "0" (explicit consent to tracking)
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => "0",
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => undefined,
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForLoadState("networkidle");
+
+    // Beacon script should be present (DNT=0 means user consents to tracking)
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
     await expect(beaconScript).toHaveCount(1);
   });
 
@@ -49,10 +68,10 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
     });
 
     await page.goto(BASE_URL);
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
     // Beacon script should NOT be present
-    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
     await expect(beaconScript).toHaveCount(0);
   });
 
@@ -70,10 +89,10 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
     });
 
     await page.goto(BASE_URL);
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
     // Beacon script should NOT be present
-    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
     await expect(beaconScript).toHaveCount(0);
   });
 
@@ -85,16 +104,16 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
         configurable: true,
       });
       Object.defineProperty(navigator, "globalPrivacyControl", {
-        get: () => ({ valueOf: () => true }),
+        get: () => true,
         configurable: true,
       });
     });
 
     await page.goto(BASE_URL);
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
     // Beacon script should NOT be present
-    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
     await expect(beaconScript).toHaveCount(0);
   });
 
@@ -106,16 +125,16 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
         configurable: true,
       });
       Object.defineProperty(navigator, "globalPrivacyControl", {
-        get: () => ({ valueOf: () => true }),
+        get: () => true,
         configurable: true,
       });
     });
 
     await page.goto(BASE_URL);
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
     // Beacon script should NOT be present
-    const beaconScript = await page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
     await expect(beaconScript).toHaveCount(0);
   });
 });

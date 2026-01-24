@@ -195,7 +195,7 @@ const structuredData = {
         // Respect user privacy signals: bail if DNT or GPC is enabled
         const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
         // Use optional chaining: globalPrivacyControl has limited browser support.
-        const gpc = navigator.globalPrivacyControl?.valueOf() === true;
+        const gpc = navigator.globalPrivacyControl === true;
         
         if (!dnt && !gpc) {
           const script = document.createElement("script");
