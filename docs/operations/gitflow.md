@@ -4,64 +4,69 @@ This document defines the branching strategy and PR workflow for the astro-blog 
 
 ## Branch Structure
 
-- **`develop`**: Main integration branch for local feature development. All features and fixes branch from here. Base for PR workflow during active development.
+- **`develop`**: Main integration branch for active feature development. Permissive; allows direct commits or feature branch merges (no PR required). Fastest iteration.
 - **`staging`**: Pre-production testing environment. Receives validated features from `develop`. Deploys to GitHub Pages. Tests the next release candidate before promoting to `main`.
 - **`main`**: Production-ready code, always stable. Receives only validated releases from `staging`. Deploys to kyle.skrinak.com via AWS S3 + CloudFront.
-- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` via PR, then integrated into `staging` for testing, and finally promoted to `main` for release.
+- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` (PR optional), then integrated to `staging` for testing via PR, and finally promoted to `main` for release via PR.
 
 ## Key Rules
 
-1. **`develop` is the main integration branch**: All feature work starts and ends here. It's the base branch for PRs during development.
-2. **`staging` is the pre-release candidate**: After features are integrated into `develop`, `develop` is periodically merged to `staging` for validation in the staging environment.
-3. **`main` is always production-ready**: Only validated releases from `staging` merge to `main`. Always stable, always the current production state.
-4. **All changes flow through PRs**: No direct commits to `develop`, `staging`, or `main`.
-5. **Feature branches are temporary**: Delete after merge to `develop`.
-6. **ALL changes use feature branches** — even docs, config, or internal updates. Never commit directly to `develop`, `staging`, or `main`.
+1. **`develop` is the main integration branch**: All feature work starts and ends here. It's permissive for active development.
+2. **`develop` is flexible**: Use feature branches + direct merge (no PR required), or push directly. Choose what works for your workflow.
+3. **`staging` is the pre-release candidate**: Requires PR. After features are validated in `develop`, `develop` is merged to `staging` via PR for final testing before production.
+4. **`main` is always production-ready**: Requires PR. Only validated releases from `staging` merge to `main` via PR. Always stable, always the current production state.
+5. **Feature branches on `develop` are temporary**: Delete after merge.
+6. **`staging` and `main` are strict**: All changes flow through PRs to these branches. No direct commits or pushes.
 
-## Critical Reminder: Feature Branch Discipline
+## Workflow: Develop (Relaxed)
 
-**Pattern (always)**:
+**Pattern for `develop` (either approach works)**:
 ```
-feature/xyz → PR to develop → validate locally → merge to develop → integrate to staging → validate on staging → PR to main → tag & release
+# Option 1: Direct push (quick fixes, docs, chores)
+git checkout develop && git pull origin develop
+make changes, commit
+git push origin develop
+
+# Option 2: Feature branch + merge (larger changes, features)
+feature/xyz → merge to develop (no PR required) → validate locally
+```
+
+**Pattern for `staging` and `main` (strict)**:
+```
+develop → PR to staging → validate on staging → PR to main → tag & release
 ```
 
 **Anti-patterns (never)**:
-- ❌ Committing docs directly to `develop`, `staging`, or `main`
-- ❌ Merging branches without a PR
-- ❌ Direct commits to `develop`, `staging`, or `main`
-- ❌ Skipping the PR step
-- ❌ Skipping local validation before promoting to staging
+- ❌ Direct commits to `staging` or `main`
+- ❌ Pushing directly to `staging` or `main`
+- ❌ Merging to `staging` or `main` without a PR
+- ❌ Skipping validation before promoting to staging/main
 
-**Why**: Maintains an auditable change history, ensures all code is reviewed, and prevents merge conflicts downstream. Every change, no matter how small, deserves the full workflow.
+**Why**: `develop` is your active integration branch; it's fast-moving and can afford to be permissive. `staging` and `main` gate releases and must be audited via PRs to ensure quality and traceability.
 
 ## Before You Begin: Prerequisite State
 
-Ensure your local and remote branches are aligned before starting new feature work:
+Before starting new feature work, verify that `staging` and `main` are aligned (and no pending PRs are blocking release). `develop` can be ahead, which is normal for active feature development.
 
 ```bash
-# Verify all three branches are at the same commit
+# Check branch alignment
 git fetch origin
 echo "main:" && git rev-parse origin/main
-echo "develop:" && git rev-parse origin/develop
 echo "staging:" && git rev-parse origin/staging
 ```
 
-All three SHAs should match. If not:
+`staging` and `main` SHAs should match. If not:
 
-1. Check for pending PRs targeting main or staging that need merging.
-2. Sync branches forward if any are behind:
+1. Check for pending PRs targeting `staging` or `main` that need merging first.
+2. If PRs are merged, pull and verify alignment:
    ```bash
-   git checkout develop
-   git pull origin main
-   git push origin develop
-   
    git checkout staging
+   git pull origin staging
+   git checkout main
    git pull origin main
-   git push origin staging
    ```
-3. Verify all three are aligned again before starting feature work.
 
-**Why**: Aligned branches prevent merge conflicts and ensure a clean integration flow. Only start feature development when all three branches reflect the same production state.
+**Why**: `staging` and `main` must always be in sync for release readiness. `develop` can be ahead (that's where active work happens), but release gates must be clean. No pending PRs means releases are ready to flow.
 
 ## Workflow: Feature Development
 
@@ -92,62 +97,48 @@ Commit messages should be clear and match the scope of work.
 git push -u origin feature/your-feature-name
 ```
 
-### 4. Open PR: Feature → Develop
+### 4. Merge to Develop (Two Options)
 
-- **Base**: `develop`
-- **Head**: `feature/your-feature-name`
-- **Use the PR template** (auto-populated; fill in checklist items)
-- **Link related issues** if applicable
-
-**PR Checklist (auto-filled by template):**
-
-- [ ] Code review completed (logic, security, conventions, no hardcoded secrets).
-- [ ] Local build succeeds: `npm run build`.
-- [ ] CI passes on the branch.
-- [ ] Staging CI environment variables are configured (if needed).
-- [ ] Feature validated on staging deployment.
-- [ ] Changelog updated (if user-facing changes).
-- [ ] No TypeScript/ESLint errors.
-
-**Approval:** At least one reviewer must approve (can be yourself during solo development).
-
-### 5. Merge to Develop
-
-Once approved and CI passes:
-
+**Option A: Direct merge (quick fixes, small changes)**
 ```bash
-# Via GitHub UI: Click "Merge pull request"
-# Or via CLI:
 git checkout develop
 git pull origin develop
 git merge --no-ff feature/your-feature-name
 git push origin develop
+git branch -d feature/your-feature-name
 ```
+
+**Option B: Open PR (larger changes, want review)**
+- **Base**: `develop`
+- **Head**: `feature/your-feature-name`
+- Use the PR template (optional) if you want a record.
+- Merge and delete the branch.
 
 **Notes:**
 - Use `--no-ff` to preserve merge commits for clear history.
-- Delete the feature branch after merge.
+- Delete the feature branch after merge (both options).
+- Local build should succeed: `npm run build`.
+- CI should pass on the branch.
 
-### 6. Integrate Develop → Staging (When Ready for Testing)
+### 5. Integrate Develop → Staging (When Ready for Testing)
 
-When you have a set of features ready to validate in the staging environment:
+When you have a set of features ready to validate in the staging environment, open a PR from `develop` to `staging`:
 
 ```bash
-git checkout staging
-git pull origin staging
-git merge --no-ff develop
-git push origin staging
+gh pr create --base staging --head develop --title "chore: sync staging with develop for testing"
 ```
 
-Staging CI automatically builds and deploys to GitHub Pages. Staging will be deindexed (robots.txt blocks crawlers; no effect on functionality).
+Or via GitHub UI: Open a PR with base `staging`, head `develop`.
 
-### 7. Validate on Staging
+Once approved and CI passes, merge the PR. Staging CI automatically builds and deploys to GitHub Pages. Staging will be deindexed (robots.txt blocks crawlers; no effect on functionality).
+
+### 6. Validate on Staging
 
 - Feature works as expected in the staging environment.
 - Check Cloudflare analytics dashboard if applicable (if you provided a staging token).
 - Wait for ≥ 1 day if needed to ensure stability.
 
-### 8. Open PR: Staging → Main (Release PR)
+### 7. Open PR: Staging → Main (Release PR)
 
 Once staging is stable and validated:
 
@@ -166,26 +157,22 @@ Once staging is stable and validated:
 
 **Approval:** Requires strict approval; must be confident in the release.
 
-### 9. Merge to Main & Tag Release
+### 8. Merge to Main & Tag Release
 
-Once approved:
+Once approved and CI passes, merge via GitHub UI. Then tag:
 
 ```bash
-# Via GitHub UI: Click "Merge pull request"
-# Or via CLI:
 git checkout main
 git pull origin main
-git merge --no-ff staging
-git push origin main
 
 # Tag the release
-git tag -a vX.Y.Z -m "Release: Add Cloudflare analytics"
+git tag -a vX.Y.Z -m "Release: description"
 git push origin vX.Y.Z
 ```
 
 **Production deployment triggers automatically**: AWS production workflow runs `npm run build:ci` and publishes to S3 + CloudFront.
 
-### 10. Sync Develop Back After Release (if needed)
+### 9. Sync Develop Back After Release (if needed)
 
 After the release merge, if there are any commits on `main` that aren't on `develop`, sync them:
 
@@ -348,7 +335,9 @@ Once complete, merge `staging` → `main`, tag, and deploy.
 
 ### Q: Can I commit directly to `develop`, `staging`, or `main`?
 
-A: No. All changes flow through PRs. This ensures review, CI validation, and audit trails.
+A: **`develop`**: Yes. Direct commits and pushes are allowed for fast iteration. Use feature branches + direct merge, or push directly.
+
+**`staging` and `main`**: No. All changes require PRs for audit, validation, and release control.
 
 ### Q: What if I need an urgent production fix?
 
