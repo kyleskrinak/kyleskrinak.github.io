@@ -1,5 +1,6 @@
-# Disallow crawling on staging environment (GitHub Pages)
-# Production domain (kyle.skrinak.com) may have a different robots.txt
+# Note: Dynamic robots.txt route at src/pages/robots.txt.ts governs actual behavior.
+# This static file is a safe fallback mirroring production settings.
 
 User-agent: *
-Disallow: /
+Allow: /
+Sitemap: /sitemap-index.xml
