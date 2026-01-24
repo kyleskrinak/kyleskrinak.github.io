@@ -82,6 +82,7 @@ npx playwright test tests/analytics-privacy.spec.ts
 ✅ **DNT = "1"**: Beacon does NOT load when Do Not Track is enabled
 ✅ **DNT = "yes"**: Beacon does NOT load (alternative DNT value)
 ✅ **GPC = true**: Beacon does NOT load when Global Privacy Control is enabled
+✅ **GPC = false**: Beacon loads when GPC is explicitly disabled
 ✅ **Both Enabled**: Beacon does NOT load when both signals are present
 
 ### Key Implementation Details

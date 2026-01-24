@@ -54,6 +54,27 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
     await expect(beaconScript).toHaveCount(1);
   });
 
+  test("should load beacon when GPC is explicitly false", async ({ page, context }) => {
+    // Mock navigator.globalPrivacyControl to return false explicitly
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "doNotTrack", {
+        get: () => null,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "globalPrivacyControl", {
+        get: () => false,
+        configurable: true,
+      });
+    });
+
+    await page.goto(BASE_URL);
+    await page.waitForLoadState("networkidle");
+
+    // Beacon script should be present when GPC is explicitly disabled
+    const beaconScript = page.locator('script[src*="cloudflareinsights.com/beacon.min.js"]');
+    await expect(beaconScript).toHaveCount(1);
+  });
+
   test("should NOT load beacon when DNT is '1'", async ({ page, context }) => {
     // Mock navigator.doNotTrack to return "1"
     await context.addInitScript(() => {
