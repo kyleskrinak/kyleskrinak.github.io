@@ -1,7 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
-import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
+import { PUBLIC_GOOGLE_SITE_VERIFICATION, PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN } from "astro:env/client";
 import { SITE } from "@/config";
 import "@/styles/global.css";
 
@@ -141,6 +141,11 @@ const structuredData = {
       )
     }
 
+    {/* Deindex staging: noindex,nofollow on non-production */}
+    {!import.meta.env.PROD && (
+      <meta name="robots" content="noindex,nofollow" />
+    )}
+
     <ClientRouter />
 
     <!-- Minimal inline script to prevent FOUC - sets theme immediately -->
@@ -178,5 +183,14 @@ const structuredData = {
 
     <!-- Load full theme logic -->
     <script src="../scripts/theme.ts"></script>
+
+    {/* Cloudflare Web Analytics: production-only beacon */}
+    {import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN}"}`}
+      ></script>
+    )}
   </body>
 </html>
