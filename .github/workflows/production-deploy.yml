@@ -32,11 +32,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Cloudflare production token presence
+        run: |
+          if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
+            echo "Cloudflare production token is set (masked)."
+          else
+            echo "Cloudflare production token is NOT set."
+          fi
+        env:
+          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
+
       - name: Build site
         run: npm run build:ci
         env:
           BUILD_ENV: production
+          PUBLIC_DEPLOY_ENV: production
           SITE_URL: https://kyle.skrinak.com/
+          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
