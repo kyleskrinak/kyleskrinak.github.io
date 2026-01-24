@@ -193,13 +193,16 @@ const structuredData = {
     {import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN && (
       <script is:inline define:vars={{ token: PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN }}>
         // Respect user privacy signals: bail if DNT or GPC is enabled
-        const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
-        // Use optional chaining: globalPrivacyControl has limited browser support.
-        const gpc = navigator.globalPrivacyControl === true;
+        const dnt =
+          typeof navigator !== "undefined" &&
+          (navigator.doNotTrack === "1" || navigator.doNotTrack === "yes");
+        // Guard for missing navigator/globalPrivacyControl: support varies by environment.
+        const gpc =
+          typeof navigator !== "undefined" && navigator.globalPrivacyControl === true;
         
         if (!dnt && !gpc) {
           const script = document.createElement("script");
-          script.defer = true;
+          script.async = true;
           script.src = "https://static.cloudflareinsights.com/beacon.min.js";
           script.setAttribute("data-cf-beacon", JSON.stringify({ token }));
           document.body.appendChild(script);
