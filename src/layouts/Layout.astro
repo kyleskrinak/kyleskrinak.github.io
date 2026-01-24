@@ -189,13 +189,21 @@ const structuredData = {
     <!-- Load full theme logic -->
     <script src="../scripts/theme.ts"></script>
 
-    {/* Cloudflare Web Analytics: beacon loads in production builds when a token is provided (staging can supply a staging token for validation) */}
+    {/* Cloudflare Web Analytics: beacon loads in production builds when a token is provided and user hasn't signaled DNT/GPC */}
     {import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN && (
-      <script
-        defer
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={JSON.stringify({ token: PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN })}
-      ></script>
+      <script is:inline define:vars={{ token: PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN }}>
+        // Respect user privacy signals: bail if DNT or GPC is enabled
+        const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
+        const gpc = navigator.globalPrivacyControl === true;
+        
+        if (!dnt && !gpc) {
+          const script = document.createElement("script");
+          script.defer = true;
+          script.src = "https://static.cloudflareinsights.com/beacon.min.js";
+          script.setAttribute("data-cf-beacon", JSON.stringify({ token }));
+          document.body.appendChild(script);
+        }
+      </script>
     )}
   </body>
 </html>
