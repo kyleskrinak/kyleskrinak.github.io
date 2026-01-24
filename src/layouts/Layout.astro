@@ -141,8 +141,8 @@ const structuredData = {
       )
     }
 
-    {/* Deindex staging: noindex,nofollow on non-production */}
-    {!import.meta.env.PROD && (
+    {/* Deindex staging: noindex,nofollow when no Cloudflare token is present */}
+    {!PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN && (
       <meta name="robots" content="noindex,nofollow" />
     )}
 
