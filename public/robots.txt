@@ -1,6 +1,0 @@
-# Note: Dynamic robots.txt route at src/pages/robots.txt.ts governs actual behavior.
-# This static file is a safe fallback mirroring production settings.
-
-User-agent: *
-Allow: /
-Sitemap: /sitemap-index.xml
