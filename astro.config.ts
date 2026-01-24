@@ -60,6 +60,11 @@ export default defineConfig({
         context: "client",
         optional: true,
       }),
+      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
     },
   },
   experimental: {
