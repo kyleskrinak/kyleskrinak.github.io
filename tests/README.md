@@ -69,10 +69,15 @@ npm run test:console:production
 
 ```bash
 # Terminal 1: Build and preview (analytics only loads in production builds)
-npm run build && npm run preview
+# IMPORTANT: Set PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN for the beacon loader to be included.
+# A dummy non-empty value is sufficient for validating gating logic:
+PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
 
 # Terminal 2: Run the test
 npx playwright test tests/analytics-privacy.spec.ts
+
+# Alternative: Use the convenience scripts for staging/production:
+npm run test:analytics:staging  # or test:analytics:prod
 ```
 
 ### What It Tests
