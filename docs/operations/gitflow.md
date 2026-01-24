@@ -14,6 +14,22 @@ This document defines the branching strategy and PR workflow for the astro-blog 
 2. **`staging` always reflects the next release candidate**: It may be ahead of `main` during development, but after approval it merges to `main` and the two sync.
 3. **All changes flow through PRs**: No direct commits to `main` or `staging`.
 4. **Feature branches are temporary**: Delete after merge.
+5. **ALL changes use feature branches** — even docs, config, or internal updates. Never commit directly to `staging` or `main`.
+
+## Critical Reminder: Feature Branch Discipline
+
+**Pattern (always)**:
+```
+feature/xyz → PR to staging → validate → merge to staging → PR to main → tag & release
+```
+
+**Anti-patterns (never)**:
+- ❌ Committing docs directly to `staging`
+- ❌ Merging `main` → `staging` without a feature branch
+- ❌ Direct commits to `main` or `staging`
+- ❌ Skipping the PR step
+
+**Why**: Maintains an auditable change history, ensures all code is reviewed, and prevents merge conflicts downstream. Every change, no matter how small, deserves the full workflow.
 
 ## Workflow: Feature Development
 
