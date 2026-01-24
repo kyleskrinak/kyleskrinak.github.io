@@ -7,6 +7,9 @@ const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000"
  * Verifies that the beacon respects DNT and GPC signals
  *
  * Usage:
+ *   # Ensure PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN is set for the preview build.
+ *   # A dummy non-empty value is sufficient if you only need to validate the gating logic, e.g.:
+ *   #   PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
  *   npm run build && npm run preview  # In terminal 1
  *   npx playwright test tests/analytics-privacy.spec.ts   # In terminal 2
  */
