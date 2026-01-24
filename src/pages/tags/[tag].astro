@@ -83,7 +83,7 @@ const posts = (await getCollection('blog'))
 	</head>
 	<body>
 		<Header />
-		<main>
+		<main id="main-content">
 			<h1>Tag: {tag}</h1>
 			<p>{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
 			<ul>

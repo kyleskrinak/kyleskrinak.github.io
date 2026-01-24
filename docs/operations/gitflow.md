@@ -4,10 +4,10 @@ This document defines the branching strategy and PR workflow for the astro-blog 
 
 ## Branch Structure
 
-- **`develop`**: Main integration branch for local feature development. All features and fixes branch from here. Base for PR workflow during active development.
+- **`develop`**: Main integration branch for active feature development. Permissive; allows direct commits or feature branch merges (no PR required). Fastest iteration.
 - **`staging`**: Pre-production testing environment. Receives validated features from `develop`. Deploys to GitHub Pages. Tests the next release candidate before promoting to `main`.
 - **`main`**: Production-ready code, always stable. Receives only validated releases from `staging`. Deploys to kyle.skrinak.com via AWS S3 + CloudFront.
-- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` via PR, then integrated into `staging` for testing, and finally promoted to `main` for release.
+- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` (PR optional), then integrated to `staging` for testing via PR, and finally promoted to `main` for release via PR.
 
 ## Key Rules
 
@@ -335,7 +335,9 @@ Once complete, merge `staging` → `main`, tag, and deploy.
 
 ### Q: Can I commit directly to `develop`, `staging`, or `main`?
 
-A: No. All changes flow through PRs. This ensures review, CI validation, and audit trails.
+A: **`develop`**: Yes. Direct commits and pushes are allowed for fast iteration. Use feature branches + direct merge, or push directly.
+
+**`staging` and `main`**: No. All changes require PRs for audit, validation, and release control.
 
 ### Q: What if I need an urgent production fix?
 
