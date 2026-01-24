@@ -34,6 +34,35 @@ feature/xyz → PR to develop → validate locally → merge to develop → inte
 
 **Why**: Maintains an auditable change history, ensures all code is reviewed, and prevents merge conflicts downstream. Every change, no matter how small, deserves the full workflow.
 
+## Before You Begin: Prerequisite State
+
+Ensure your local and remote branches are aligned before starting new feature work:
+
+```bash
+# Verify all three branches are at the same commit
+git fetch origin
+echo "main:" && git rev-parse origin/main
+echo "develop:" && git rev-parse origin/develop
+echo "staging:" && git rev-parse origin/staging
+```
+
+All three SHAs should match. If not:
+
+1. Check for pending PRs targeting main or staging that need merging.
+2. Sync branches forward if any are behind:
+   ```bash
+   git checkout develop
+   git pull origin main
+   git push origin develop
+   
+   git checkout staging
+   git pull origin main
+   git push origin staging
+   ```
+3. Verify all three are aligned again before starting feature work.
+
+**Why**: Aligned branches prevent merge conflicts and ensure a clean integration flow. Only start feature development when all three branches reflect the same production state.
+
 ## Workflow: Feature Development
 
 ### 1. Create a Feature Branch
