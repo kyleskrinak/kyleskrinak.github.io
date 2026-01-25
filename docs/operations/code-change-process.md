@@ -17,12 +17,12 @@ Find all files that interact with or depend on the area you're changing:
 - **Direct dependencies**: Files you'll modify
 - **Configuration files**: Environment variables, build config, feature flags
 - **Related logic**: Files in different layers that use the same patterns (e.g., robots.txt + Layout meta tags)
-- **Documentation**: Gitflow docs, deployment docs, architectural notes
+- **Documentation**: GitFlow docs, deployment docs, architectural notes
 
 **Example**: Changing SEO indexing logic requires checking:
-- Layout.astro (meta tags)
-- robots.txt.ts (crawling directives)
-- Environment config (PUBLIC_DEPLOY_ENV, isStaging logic)
+- Layout.astro (meta tags, astro:env/client imports for PUBLIC_DEPLOY_ENV)
+- robots.txt.ts (crawling directives, isStaging logic)
+- .env.example (environment variables reference)
 - Deployment docs (if environment behavior changed)
 
 ### 2. Document Assumptions
@@ -153,22 +153,52 @@ npm run build
 **Scenario**: Add a feature flag to gate analytics loading
 
 ### Exploration
-- Check: Layout.astro (where script loads), environment config (what variables exist), deployment.md (how flags work)
-- Document: Current behavior (always loads in production), intended behavior (only load if token provided), related env vars
+- Check: Layout.astro (where inline beacon script loads, lines 193-211), src/layouts/Layout.astro (astro:env/client imports), .env.example (available variables), deployment.md (how flags work)
+- Document: Current behavior (beacon always loads in production), intended behavior (only load if token provided and user hasn't signaled DNT/GPC), related env vars
 
 ### Planning
-- Propose: Use PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN presence as the gate
-- Get approval: Makes sense, aligns with existing pattern
+- Propose: Use PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN presence as the gate, respect navigator.doNotTrack and navigator.globalPrivacyControl
+- Get approval: Makes sense, aligns with existing pattern and privacy standards
 
 ### Implementation
-- Update: Layout.astro (add conditional), verify: scripts/analytics.ts (no changes needed), check: docs (deployment.md already explains env vars)
-- Commit: All changes together with clear message explaining the gate logic
+- Update: Layout.astro (add conditional around lines 193-211 beacon code), verify: no other files affected, check: docs (deployment.md already explains env vars)
+- Commit: All changes with clear message explaining the gate logic and privacy signal checks
 
 ### Verification
 - Cross-file: Layout uses token check, no conflicts elsewhere
 - Docs: deployment.md already covers env vars, no updates needed
 - Build: npm run build passes
 - Ready to merge
+
+## Dogfooding: Documentation Must Follow the Process
+
+This document defines the code change process. The document itself must follow this process when being created or updated.
+
+**When updating code-change-process.md**:
+
+1. **Explore** - Identify all related documentation and code examples
+   - Find related docs: gitflow.md, build-configuration.md, deployment.md
+   - Verify code examples exist and match reality (e.g., `scripts/analytics.ts` must exist or be replaced)
+   - Check consistency with actual codebase patterns
+
+2. **Plan** - Document changes before writing
+   - List what needs to be updated (capitalization, examples, cross-references)
+   - Verify examples work with real files in the codebase
+   - Get approval before updating the document itself
+
+3. **Implement** - Update with consistency
+   - Reference actual files that exist
+   - Use real line numbers and paths
+   - Update the document in the same commit as related code changes
+   - Verify all examples match current codebase state
+
+4. **Verify** - Self-check the updated document
+   - Every example file must exist in the codebase
+   - Every code snippet must match real code patterns
+   - All cross-references (e.g., "GitFlow docs") must match actual filenames
+   - The document must not contradict itself or other docs
+
+**Failure to dogfood means the process document becomes outdated and unreliable.** If this doc says "reference related files" but its own examples don't, it loses credibility.
 
 ## Questions
 
