@@ -2,6 +2,11 @@
 
 This section covers deploying, maintaining, and troubleshooting the Astro blog in production.
 
+## Development & Process
+
+- **[Code Change Process](./code-change-process.md)** - Systematic approach to code changes: explore, plan, implement, verify
+- **[GitFlow Workflow](./gitflow.md)** - Branching strategy and PR workflow for features and releases
+
 ## Build & Configuration
 
 - **[Build & Configuration Guide](./build-configuration.md)** - Build scripts, Pagefind setup, and debugging
