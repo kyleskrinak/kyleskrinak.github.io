@@ -71,6 +71,8 @@ const structuredData = {
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
     <link rel="manifest" href={`${import.meta.env.BASE_URL}site.webmanifest.json`} />
 
+    {/* Canonical link: tells search engines and tools where the "true" content lives.
+        Can point to this page or to an external canonical URL via the canonicalURL prop. */}
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -148,8 +150,12 @@ const structuredData = {
       )
     }
 
-    {/* Deindex staging builds explicitly via deploy env flag */}
-    {isStaging && <meta name="robots" content="noindex,nofollow" />}
+    {/* Staging is deindexed to prevent preview builds from appearing in search results.
+        Production is indexed normally (default behavior). Canonical link tag above can
+        optionally point to external content if needed. */}
+    {isStaging && (
+      <meta name="robots" content="noindex,nofollow" />
+    )}
 
     <ClientRouter />
 
