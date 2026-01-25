@@ -153,15 +153,15 @@ npm run build
 **Scenario**: Add a feature flag to gate analytics loading
 
 ### Exploration
-- Check: Layout.astro (where inline beacon script loads, lines 193-211), src/layouts/Layout.astro (astro:env/client imports), .env.example (available variables), deployment.md (how flags work)
-- Document: Current behavior (beacon always loads in production), intended behavior (only load if token provided and user hasn't signaled DNT/GPC), related env vars
+- Check: Layout.astro (analytics behavior, existing conditional logic), src/layouts/Layout.astro (astro:env/client imports), .env.example (available variables), deployment.md (how flags work)
+- Document: Current behavior (beacon loads based on token presence and privacy signals), intended behavior (add additional gate), related env vars
 
 ### Planning
 - Propose: Use PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN presence as the gate, respect navigator.doNotTrack and navigator.globalPrivacyControl
 - Get approval: Makes sense, aligns with existing pattern and privacy standards
 
 ### Implementation
-- Update: Layout.astro (add conditional around lines 193-211 beacon code), verify: no other files affected, check: docs (deployment.md already explains env vars)
+- Update: Layout.astro (modify analytics conditional logic), verify: no other files affected, check: docs (deployment.md already explains env vars)
 - Commit: All changes with clear message explaining the gate logic and privacy signal checks
 
 ### Verification
@@ -178,7 +178,7 @@ This document defines the code change process. The document itself must follow t
 
 1. **Explore** - Identify all related documentation and code examples
    - Find related docs: gitflow.md, build-configuration.md, deployment.md
-   - Verify code examples exist and match reality (e.g., `scripts/analytics.ts` must exist or be replaced)
+   - Verify code examples exist and match reality (e.g., any referenced file paths must be accurate)
    - Check consistency with actual codebase patterns
 
 2. **Plan** - Document changes before writing
