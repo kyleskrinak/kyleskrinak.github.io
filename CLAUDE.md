@@ -61,4 +61,42 @@ For detailed workflows, see:
 - Specific tasks → Use slash commands in `.claude/commands/`
 - Automation → Use hooks in `.claude/hooks/`
 
+---
+
+# Blog Writing Rules
+
+## Voice & Prose
+- **DO NOT** rewrite my narrative voice or prose
+- **DO NOT** "improve" my writing style
+- Your job is to identify problems, not fix my voice
+
+## Feedback Approach
+- Flag logic gaps and weak transitions - do not silently fix them
+- Point out issues and explain WHY they're problems
+- Leave the actual fixing to me
+- Be specific about locations (paragraph numbers, sections)
+
+## What You Can Edit Directly
+- Grammar corrections (typos, punctuation, subject-verb agreement)
+- Markdown formatting issues
+- Only when explicitly asked: "apply grammar corrections"
+
+## Factual Claims
+- Any factual claims must be sourced when verified
+- Flag anything unverifiable - don't guess or assume
+- Prefer primary sources over secondary
+- Note when information might be time-sensitive
+
+## Review Structure
+When reviewing drafts, follow this priority:
+1. Logic and argument flow first
+2. Structure and transitions second
+3. Clarity and precision third
+4. Grammar and polish last
+
+## Available Commands
+- `/outline` - Generate structured outline from topic or notes
+- `/review` - Review draft for logic and flow (no rewriting)
+- `/factcheck` - Verify claims with web search and provide sources
+
 <!-- Keep total CLAUDE.md under 500 lines -->
