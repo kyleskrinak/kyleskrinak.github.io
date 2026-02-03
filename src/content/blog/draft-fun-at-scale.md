@@ -46,12 +46,12 @@ When I started my blog, it was a novel and fun way for me to "get the word out."
 - The shift: not doing it alone anymore
 
 **Performance validation:** [Brief, proof of scale]
-- +42.8 point Lighthouse improvement
-- One page: 0 (broken) → 97
-- Desktop: 38.7 → 90.7 (+52 points)
-- Mobile: 58.7 → 92.3 (+33.6 points)
+- +30.5 point Lighthouse improvement average
+- Desktop: 58.5 → 87.5 (+29 points)
+- Mobile: 56.5 → 88.5 (+32 points)
+- Best page: Vim for Writers (60→98 desktop, 58→100 mobile)
 - Link: `docs/migration/jekyll-astro-comparison.md`
-- Point: Dramatic improvement at full blog scale
+- Point: Consistent improvement at full blog scale
 
 **Transition:** Just when I thought I was done, I discovered the second half...
 
