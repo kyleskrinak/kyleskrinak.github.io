@@ -76,7 +76,7 @@ some edits for clarity.
 </em>
 </div>
 
-This is the conclusion to “<a href="/personal/two-guys-watch-a-burning-house/">Two Guys Watch a Burning Building.</a>” I like this title better. The burning house, and attendant ne’er-do-wells, are incidental. That’s Karen, on the left, above.
+This is the conclusion to "<a href="/blog/2021-01-18-two-guys-watch-a-burning-house/">Two Guys Watch a Burning Building.</a>" I like this title better. The burning house, and attendant ne'er-do-wells, are incidental. That's Karen, on the left, above.
 
 <figure class="figure">
 <img src="/assets/images/88-walnut-roof.jpg" alt="My perch, 40-some years ago, after some significant renovation, and shrubs." class="figure__image" />
@@ -109,4 +109,4 @@ Our house was a charred blemish on E. Walnut Street for several months afterward
 
 My Mom has been through quite a struggle. I’m unclear on how Mom figured all this out while single-handedly raising her family. She has told me, many times, “I never signed up for this.” The only way I can make sense of all this is this; “It is amazing what we can do in love.”
 
-Postscript, January 23rd, 2021. My Mom passed away on October 29th, 2019, two-some years after I wrote this. I wrote a eulogy honoring her extraordinary life that you can read <a href="/personal/lorraine-barbara-kubik-skrinak/">here</a>.
+Postscript, January 23rd, 2021. My Mom passed away on October 29th, 2019, two-some years after I wrote this. I wrote a eulogy honoring her extraordinary life that you can read <a href="/blog/2019-10-31-lorraine-barbara-kubik-skrinak/">here</a>.
