@@ -1,38 +1,24 @@
 # Jekyll → Astro Migration: Lighthouse Performance Comparison
 
-**Date**: 2026-01-20  
-**Testing Scope**: 3 worst-performing Jekyll pages vs. Astro equivalents  
+**Date**: 2026-01-20
+**Testing Scope**: Sample Jekyll pages vs. Astro equivalents
 **Test Platforms**: Desktop & Mobile
 
 ---
 
 ## Executive Summary
 
-The migration from Jekyll to Astro delivers **dramatic performance improvements** across all tested pages:
+The migration from Jekyll to Astro delivers **significant performance improvements** across all tested pages:
 
-- **Average Desktop Improvement**: +45 points
-- **Average Mobile Improvement**: +34 points
-- **Worst Performer Improvement**: First Blog Post (0→97 desktop, 63→100 mobile)
+- **Average Desktop Improvement**: +29 points
+- **Average Mobile Improvement**: +32 points
+- **Best Improvement**: Vim for Writers (60→98 desktop, 58→100 mobile)
 
 ---
 
 ## Detailed Results
 
-### Page 1: First Blog Post
-**Posted**: 2016-10-31  
-**Original Category**: Personal Productivity
-
-| Metric | Jekyll | Astro | Improvement | Change |
-|--------|--------|-------|-------------|--------|
-| **Desktop Score** | 0 | 97 | +97 | Restored from broken state |
-| **Mobile Score** | 63 | 100 | +37 | Near perfect |
-| **Average Score** | 31.5 | 98.5 | +67 | **213% improvement** |
-
-**Key Insight**: Jekyll version was completely broken on desktop (0 score). Astro achieves near-perfect scores on both platforms.
-
----
-
-### Page 2: Duke Meetup
+### Page 1: Duke Meetup
 **Posted**: 2017-02-13  
 **Original Category**: Drupal
 
@@ -46,7 +32,7 @@ The migration from Jekyll to Astro delivers **dramatic performance improvements*
 
 ---
 
-### Page 3: Vim for Writers
+### Page 2: Vim for Writers
 **Posted**: 2017-02-09  
 **Original Category**: Personal Productivity
 
@@ -64,17 +50,17 @@ The migration from Jekyll to Astro delivers **dramatic performance improvements*
 
 ```
 ┌─────────────────────────────────────────┐
-│ AGGREGATE STATISTICS (3 Worst Pages)   │
+│ AGGREGATE STATISTICS (2 Pages)         │
 ├─────────────────────────────────────────┤
-│ Jekyll Average (Desktop):    38.7       │
-│ Astro Average (Desktop):     90.7       │
-│ Desktop Improvement:         +52.0 pts  │
+│ Jekyll Average (Desktop):    58.5       │
+│ Astro Average (Desktop):     87.5       │
+│ Desktop Improvement:         +29.0 pts  │
 │                                         │
-│ Jekyll Average (Mobile):     58.7       │
-│ Astro Average (Mobile):      92.3       │
-│ Mobile Improvement:          +33.6 pts  │
+│ Jekyll Average (Mobile):     56.5       │
+│ Astro Average (Mobile):      88.5       │
+│ Mobile Improvement:          +32.0 pts  │
 │                                         │
-│ Overall Average Improvement: +42.8 pts  │
+│ Overall Average Improvement: +30.5 pts  │
 └─────────────────────────────────────────┘
 ```
 
@@ -152,11 +138,11 @@ All tests were conducted on:
 
 ## Recommendation
 
-The data unambiguously supports completing the Jekyll → Astro migration:
+The data supports completing the Jekyll → Astro migration:
 
-✅ **Performance**: 42.8 point average improvement  
-✅ **Reliability**: Restored broken pages (First Blog Post)  
-✅ **Scale**: Improvements apply to all 35+ blog posts  
+✅ **Performance**: 30.5 point average improvement
+✅ **Consistency**: Solid improvements across desktop and mobile
+✅ **Scale**: Improvements apply to all 35+ blog posts
 ✅ **User Impact**: Measurable faster load times across all platforms  
 
 **Next Steps**:

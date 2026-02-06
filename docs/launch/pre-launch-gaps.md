@@ -131,7 +131,7 @@ curl -I https://kyle.skrinak.com/2025/09/19/modernizing-an-old-jekyll-blog-with-
 **Gap**: Need to verify search engine optimization basics
 
 **Action Required**:
-- [ ] Verify sitemap is accessible at `/sitemap-index.xml`
+- [ ] Verify sitemap is accessible at `/sitemap.xml` (NOTE: filename is `sitemap.xml`, NOT `sitemap-index.xml`)
 - [ ] Check robots.txt allows search engine crawling
 - [ ] Verify canonical URLs are set on all pages
 - [ ] Test Open Graph meta tags on sample posts

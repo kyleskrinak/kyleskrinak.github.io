@@ -78,6 +78,7 @@ npm run test:visual      # Visual regression testing
 
 ```
 /
+├── design/                  # 🎨 Graphic source files (not deployed)
 ├── docs/                    # 📚 All documentation (see docs/index.md)
 ├── src/
 │   ├── content/
