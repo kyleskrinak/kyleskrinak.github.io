@@ -95,4 +95,4 @@ I pass through Kris’s room to his two smallish windows. I snap out of my dream
 Amidst the chaos, I notice two adult men, across Walnut Street, casually watching, having found their evening’s diversion. Karen and I now scramble to figure out how to get me out of there.
 
 
-<a href="/personal/my-hero-karen/">Continued…</a>
+<a href="/blog/2021-01-19-my-hero-karen/">Continued…</a>

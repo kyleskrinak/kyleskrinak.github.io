@@ -10,6 +10,7 @@ import confusedMeme from '../assets/images/confusedmeme.jpg';
 import drupalLogo from '../assets/images/drupal_logo.png';
 import emptyDining from '../assets/images/empty_dining.jpg';
 import flatpanbake from '../assets/images/flatpanbake.jpg';
+import funAtScale from '../assets/images/fun-at-scale.svg';
 import hotTub from '../assets/images/hot_tub.jpg';
 import punchCard from '../assets/images/punch_card.jpg';
 import typewriterToLaptop from '../assets/images/typewriter-to-laptop.jpg';
@@ -27,6 +28,7 @@ export const imageMap: Record<string, ImageMetadata> = {
 	'drupal_logo.png': drupalLogo,
 	'empty_dining.jpg': emptyDining,
 	'flatpanbake.jpg': flatpanbake,
+	'fun-at-scale.svg': funAtScale,
 	'hot_tub.jpg': hotTub,
 	'punch_card.jpg': punchCard,
 	'typewriter-to-laptop.jpg': typewriterToLaptop,

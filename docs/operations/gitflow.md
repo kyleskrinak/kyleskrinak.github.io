@@ -185,6 +185,97 @@ git push origin develop
 
 Typically this isn't needed if all changes flow through `develop` first, but do this if hotfixes are applied directly to `main`.
 
+## Branch Cleanup & Maintenance
+
+After features are merged and releases are promoted, old branches accumulate on the remote. Regular cleanup keeps the repository clean and reduces confusion about which branches are active.
+
+### When to Clean Up
+
+- After a feature branch is merged to `develop` (immediate cleanup recommended)
+- After a release is merged to `main` and tagged
+- During milestone completion or monthly maintenance
+- When branches clutter the branch list for new contributors
+
+### Identifying Merged Branches
+
+List branches that have been merged to `develop`:
+
+```bash
+git branch --merged develop
+```
+
+List branches merged to `staging`:
+
+```bash
+git branch --merged staging
+```
+
+List branches merged to `main`:
+
+```bash
+git branch --merged main
+```
+
+**Safe to delete**: Any branch listed that is not the current branch and is not `develop`, `staging`, or `main`.
+
+### Safe Deletion Process
+
+Branches tied to merged PRs are safe to delete. Always delete both locally and on `origin`:
+
+```bash
+# Delete locally
+git branch -d feature/your-feature-name
+
+# Delete on remote (origin)
+git push origin --delete feature/your-feature-name
+```
+
+**Notes:**
+- Use `-d` (lowercase) to refuse deletion if the branch hasn't been fully merged. Use `-D` (uppercase) only if you're certain the branch should be discarded.
+- Deleting the remote branch does not affect the commit history; the commits remain in the merge commit of the branch that integrated it.
+
+### Common Cleanup Scenarios
+
+**Cleanup after merge to develop:**
+
+```bash
+# After PR is merged
+git checkout develop
+git pull origin develop
+git branch -d feature/your-feature-name
+git push origin --delete feature/your-feature-name
+```
+
+**Cleanup old feature branches in bulk:**
+
+```bash
+# Show merged branches (safe to delete)
+git branch -r --merged develop | grep -v main | grep -v staging | grep -v develop
+
+# Bulk delete (use carefully!)
+git branch -r --merged develop | grep -v main | grep -v staging | grep -v develop | \
+  sed 's|origin/||' | xargs -I {} git push origin --delete {}
+```
+
+**Cleanup local branches only:**
+
+```bash
+# Delete local branches that have been merged to develop
+git branch --merged develop | grep -v develop | xargs -I {} git branch -d {}
+```
+
+### Branches to Never Delete
+
+- ✅ `main` (production)
+- ✅ `staging` (pre-release)
+- ✅ `develop` (active integration)
+
+### Cleanup Frequency
+
+- **After every release**: Delete feature branches that were promoted.
+- **Monthly**: Run `git branch --merged develop` to identify and remove stale branches.
+- **Before major milestones**: Clean up to reduce noise for new contributors.
+
 ## Environment Variables
 
 ### Local Development
@@ -349,7 +440,7 @@ A: We use merge commits (`--no-ff`) to preserve history. Rebase can work for fea
 
 ### Q: How do I clean up old feature branches?
 
-A: After merge, delete locally and on origin:
+A: See [Branch Cleanup & Maintenance](#branch-cleanup--maintenance) for detailed guidance on identifying merged branches, safe deletion, and bulk cleanup strategies. Quick reference:
 
 ```bash
 git branch -d feature/your-feature-name

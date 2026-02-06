@@ -1,15 +1,8 @@
 ---
 title: Low Carb Living
-author: Kyle Skrinak
-permalink: /pages/my-low-carb.html
-toc: true
-description: For decades, dieticians, nutritionists, and advocacy groups have poorly advised us — and most certainly me — about what is a healthy diet. By ignoring this mainstream nutritional advice, the food pyramid, and other common myths about what’s healthy, and shifting to a nearly inverse paradigm, I’ve been able to lose weight, keep it off, and improve my health markers.
-excerpt: Better living by cutting out sugar and starch
-comments: true
+description: For decades, dieticians, nutritionists, and advocacy groups have poorly advised us — and most certainly me — about what is a healthy diet. By ignoring this mainstream nutritional advice, the food pyramid, and other common myths about what's healthy, and shifting to a nearly inverse paradigm, I've been able to lose weight, keep it off, and improve my health markers.
 image: /assets/images/181008-butter.JPG
-categories:
-  - "LCHF"
-redirect_from: /pages/my-lchf
+alt: Butter on a cutting board
 ---
 
 
@@ -86,39 +79,6 @@ I came for weight loss and found a healthier way of living.
 * Anything by [Nina Teicholz](https://ninateicholz.com/ "Nina Teicholz’s website")
   * I highly recommend her book, [“THE BIG FAT SURPRISE; Why Butter, Meat & Cheese Belong in a Healthy Diet”](https://thebigfatsurprise.com/ "website for her Big Fat Surprise book") which explains how we got here and offers possible remedies.
 
-## My most recent low-carb-related posts
+## My Low-Carb Blog Posts
 
-<div class="relatedPosts">
-  
-{% assign maxRelated = 8 %}
-{% assign minCommonTags =  1 %}
-{% assign maxRelatedCounter = 0 %}
-
-{% for post in site.posts %}
-
-    {% assign sameTagCount = 0 %}
-    {% assign commonTags = '' %}
-
-    {% for category in post.categories %}
-      {% if post.url != page.url %}
-        {% if page.categories contains category %}
-          {% assign sameTagCount = sameTagCount | plus: 1 %}
-          {% capture tagmarkup %} <span class="label label-default">{{ category }}</span> {% endcapture %}
-          {% assign commonTags = commonTags | append: tagmarkup %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-
-    {% if sameTagCount >= minCommonTags %}
-      <div>
-      <p><a href="{{ post.url }}">{{ post.title }}</a></p>
-      </div>
-      {% assign maxRelatedCounter = maxRelatedCounter | plus: 1 %}
-      {% if maxRelatedCounter >= maxRelated %}
-        {% break %}
-      {% endif %}
-    {% endif %}
-
-  {% endfor %}
-
-</div>
+You can find all my LCHF-related posts by searching for "LCHF" or "low carb" on the [blog](/posts) or using the [search feature](/search).
