@@ -80,20 +80,38 @@ function validateLinks() {
 				// Remove query strings and fragments for file checking
 				const urlPart = link.split('?')[0].split('#')[0];
 
-				// Determine the actual file path
-				let normalizedPath;
-				if (urlPart === '/' || urlPart === '') {
-					normalizedPath = '/index.html';
-				} else if (urlPart.endsWith('.html') || urlPart.endsWith('.xml') || urlPart.endsWith('.svg') || urlPart.endsWith('.woff')) {
-					// File with extension - use as-is
-					normalizedPath = urlPart;
-				} else {
-					// Directory - add index.html
-					normalizedPath = urlPart.endsWith('/') ? `${urlPart}index.html` : `${urlPart}/index.html`;
-				}
+				// Static asset file extensions that should be checked as-is
+				const staticAssetExtensions = [
+					'.html', '.xml', '.svg',                    // Documents
+					'.css', '.js', '.map',                       // Styles & Scripts
+					'.png', '.jpg', '.jpeg', '.webp', '.gif', '.avif', '.ico',  // Images
+					'.woff', '.woff2', '.ttf', '.eot',          // Fonts
+					'.json', '.txt',                             // Data files
+				];
 
-				// Resolve the file path
-				const resolvedPath = path.join(distDir, normalizedPath);
+				// Determine the actual file path
+				let resolvedPath;
+				const hasStaticExtension = staticAssetExtensions.some(ext => urlPart.endsWith(ext));
+
+				// Handle relative paths (../ or ./)
+				if (urlPart.startsWith('../') || urlPart.startsWith('./')) {
+					// Resolve relative to the current file's directory
+					const fileDir = path.dirname(file);
+					resolvedPath = path.resolve(fileDir, urlPart);
+				} else {
+					// Absolute path from site root
+					let normalizedPath;
+					if (urlPart === '/' || urlPart === '') {
+						normalizedPath = '/index.html';
+					} else if (hasStaticExtension) {
+						// File with recognized extension - use as-is
+						normalizedPath = urlPart;
+					} else {
+						// Directory - add index.html
+						normalizedPath = urlPart.endsWith('/') ? `${urlPart}index.html` : `${urlPart}/index.html`;
+					}
+					resolvedPath = path.join(distDir, normalizedPath);
+				}
 
 				if (!fs.existsSync(resolvedPath)) {
 					brokenLinks.add({

@@ -1,0 +1,28 @@
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "thinking": {
+    "enabled": true,
+    "budget": 8000
+  },
+  "context": {
+    "auto_compact_threshold": 0.85,
+    "max_file_size": 500
+  },
+  "ui": {
+    "status_line": {
+      "show_token_count": true,
+      "show_cost": true
+    }
+  },
+  "mcp": {
+    "servers": {}
+  },
+  "comments": {
+    "model": "Use Sonnet 4.5 by default (cheaper than Opus)",
+    "thinking_budget": "Reduced from default 31999 to 8000 tokens for simple tasks",
+    "auto_compact": "Trigger at 85% instead of 95% to maintain quality",
+    "max_file_size": "Warn before reading files >500 lines",
+    "status_line": "Show token usage continuously for awareness",
+    "mcp_servers": "Add MCP servers here only when needed - each adds token overhead"
+  }
+}

@@ -112,6 +112,8 @@ Filename format: `YYYY-MM-DD-descriptive-name.jpg`
 
 Example: `2026-01-20-astro-logo.jpg`
 
+**Note**: For graphic source files (PSD, AI, Sketch, etc.), store them in `/design` instead. Only production-ready, optimized images belong in `src/assets/images/`.
+
 ### Reference images in posts
 
 From a post in `src/content/blog/`:
