@@ -90,7 +90,7 @@ const posts = (await getCollection('blog'))
 				{
 					posts.map((post) => (
 						<li>
-							<a href={createPath(`/blog/${post.id}/`)}>
+							<a href={createPath(`/posts/${post.id}/`)}>
 								<h3 class="post-title">{post.data.title}</h3>
 							</a>
 							<p class="post-date">
