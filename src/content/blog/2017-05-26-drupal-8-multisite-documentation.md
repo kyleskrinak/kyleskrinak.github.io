@@ -8,13 +8,10 @@ comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
-description: '{:.no_toc}'
+description: 'Documentation on Drupal 8 multisite configuration based on code review of Drupal 8.3.2'
 ---
 
-
-
 ## Summary
-{:.no_toc}
 
 In order to better understand what adopting Drupal 8 multisite means, I have reviewed the code base for Drupal 8.3.2 for all references related to 'multisite' or multi-site' in the comments of the Drupal code.
 
@@ -22,11 +19,6 @@ In order to better understand what adopting Drupal 8 multisite means, I have rev
   * We could continue with our git repo-based module and sites workflow?
 * I'm unclear what a composer workflow for multisite will look like.
 * JS/PHP library management in Drupal 8?
-
-## Table of Contents
-{:.no_toc}
-* TOC
-{:toc}
 
 ## from the README.txt in docroot 
 
@@ -38,11 +30,11 @@ For this to work you need the file sites/sites.php to exist. Make a copy of the 
 
 <pre>$ cp sites/example.sites.php sites/sites.php</pre>
 
-You create additional site configurations in subdirectories within the 'sites' directory. You must include a 'settings.php' file, in each subdirectory which specifies the configuration settings. The easiest way to create additional sites is to copy file 'default.settings.php' from the 'sites/default' directory into the new site directory with file name 'settings.php' and modify as appropriate. You copy the new directory name from the site's URL. The configuration for www.example.com will be in 'sites/example.com/settings.php' (note that you'll omit 'www.' if users can access your site at http://example.com/).
+You create additional site configurations in subdirectories within the 'sites' directory. You must include a 'settings.php' file, in each subdirectory which specifies the configuration settings. The easiest way to create additional sites is to copy file 'default.settings.php' from the 'sites/default' directory into the new site directory with file name 'settings.php' and modify as appropriate. You copy the new directory name from the site's URL. The configuration for `www.example.com` will be in 'sites/example.com/settings.php' (note that you'll omit 'www.' if users can access your site at `http://example.com/`).
 
 <pre>$ cp sites/default/defaults.settings.php sites/example.com/settings.php</pre>
 
-Sites do not have to have a different domain. You can also use subdomains and subdirectories for Drupal sites. For example, you may define example.com, sub.example.com, and sub.example.com/site3 as independent Drupal sites. The setup for a configuration such as this would look like the following:
+Sites do not have to have a different domain. You can also use subdomains and subdirectories for Drupal sites. For example, you may define example.com, `sub.example.com`, and `sub.example.com/site3` as independent Drupal sites. The setup for a configuration such as this would look like the following:
 
 <ul>
   <li>sites/default/settings.php </li>
@@ -51,7 +43,7 @@ Sites do not have to have a different domain. You can also use subdomains and su
   <li>sites/sub.example.com.site3/settings.php</li>
 </ul>
 
-When searching for a site configuration (for example www.sub.example.com/site3), Drupal will search for configuration files in the following order, using the first configuration it finds:
+When searching for a site configuration (for example `www.sub.example.com/site3`), Drupal will search for configuration files in the following order, using the first configuration it finds:
 
 <ul>
   <li>sites/www.sub.example.com.site3/settings.php </li>
@@ -63,9 +55,9 @@ When searching for a site configuration (for example www.sub.example.com/site3),
   <li>sites/default/settings.php</li>
 </ul>
 
-If you are installing on a non-standard port, the port number is treated as the deepest subdomain. For example: http://www.example.com:8080/ could be loaded from sites/8080.www.example.com/. The port number will be removed according to the pattern above if no port-specific configuration is found, just like a real subdomain.
+If you are installing on a non-standard port, the port number is treated as the deepest subdomain. For example: `http://www.example.com:8080/` could be loaded from `sites/8080.www.example.com/`. The port number will be removed according to the pattern above if no port-specific configuration is found, just like a real subdomain.
 
-Each site configuration can have its own site-specific modules and themes in addition to those installed in the standard 'modules' and 'themes' directories. To use site-specific modules or themes, simply create a 'modules' or 'themes' directory within the site configuration directory. For example, if sub.example.com has a custom theme and a custom module that should not be accessible to other sites, the setup would look like this:
+Each site configuration can have its own site-specific modules and themes in addition to those installed in the standard 'modules' and 'themes' directories. To use site-specific modules or themes, simply create a 'modules' or 'themes' directory within the site configuration directory. For example, if `sub.example.com` has a custom theme and a custom module that should not be accessible to other sites, the setup would look like this:
 
 <ul>
   <li>sites/sub.example.com/ </li>
@@ -82,11 +74,11 @@ Do not mix downloaded or custom modules and themes with Drupal's core modules an
 
 ### from the modules/README.txt file
 
-In multisite configurations, modules found in this directory are available to all sites. You may also put modules in the sites/all/modules directory, and the versions in sites/all/modules will take precedence over versions of the same module that are here. Alternatively, the sites/your_site_name/modules directory pattern may be used to restrict modules to a specific site instance.
+In multisite configurations, modules found in this directory are available to all sites. You may also put modules in the sites/all/modules directory, and the versions in sites/all/modules will take precedence over versions of the same module that are here. Alternatively, the `sites/your_site_name/modules` directory pattern may be used to restrict modules to a specific site instance.
 
 ### from the themes/README.txt file
 
-In multisite configurations, themes found in this directory are available to all sites. You may also put themes in the sites/all/themes directory, and the versions in sites/all/themes will take precedence over versions of the same themes that are here. Alternatively, the sites/your_site_name/themes directory pattern may be used to restrict themes to a specific site instance.
+In multisite configurations, themes found in this directory are available to all sites. You may also put themes in the sites/all/themes directory, and the versions in sites/all/themes will take precedence over versions of the same themes that are here. Alternatively, the `sites/your_site_name/themes` directory pattern may be used to restrict themes to a specific site instance.
 
 ### from the profiles/README.txt file
 
