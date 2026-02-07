@@ -41,7 +41,7 @@ The summit organizer’s have posted the day’s schedule, [here](https://live-s
 
 ### Gian Wild
 
-[Her presentation](https://app.prezentt.com/presentations/1674/public/slides/1)
+[Her presentation](https://web.archive.org/web/20240416045446/https://app.prezentt.com/presentations/1674/public/slides/1)
 
 ### Accessibility Oz
 
