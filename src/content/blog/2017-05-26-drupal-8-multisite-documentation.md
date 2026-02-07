@@ -30,7 +30,7 @@ For this to work you need the file sites/sites.php to exist. Make a copy of the 
 
 <pre>$ cp sites/example.sites.php sites/sites.php</pre>
 
-You create additional site configurations in subdirectories within the 'sites' directory. You must include a 'settings.php' file, in each subdirectory which specifies the configuration settings. The easiest way to create additional sites is to copy file 'default.settings.php' from the 'sites/default' directory into the new site directory with file name 'settings.php' and modify as appropriate. You copy the new directory name from the site's URL. The configuration for `www.example.com` will be in 'sites/example.com/settings.php' (note that you'll omit 'www.' if users can access your site at `http://example.com/`).
+You create additional site configurations in subdirectories within the 'sites' directory. You must include a 'settings.php' file, in each subdirectory which specifies the configuration settings. The easiest way to create additional sites is to copy file 'default.settings.php' from the 'sites/default' directory into the new site directory with file name 'settings.php' and modify as appropriate. You copy the new directory name from the site's URL. The configuration for `www.example.com` will be in 'sites/example.com/settings.php' (note that you'll omit `'www.'` if users can access your site at `http://example.com/`).
 
 <pre>$ cp sites/default/defaults.settings.php sites/example.com/settings.php</pre>
 
