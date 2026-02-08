@@ -48,7 +48,7 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
           *  `chmod 600 *`
           *  `chmod 644 *.pub`
       * `sudo apt-get update && sudo apt-get install build-essential binutils file openssl libssl-dev`  
-         *(brew won't install without this, see this <a href="https://github.com/Homebrew/linuxbrew-core/issues/13596">link</a>)*
+         *(brew won't install without this, see this <a href="https://web.archive.org/web/20190629064424/https://github.com/Homebrew/linuxbrew-core/issues/13596">link</a>)*
       * `sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"`
       * It is import to add the linuxbrew path to profile for this to work
       * Helpful cleanup commands:
