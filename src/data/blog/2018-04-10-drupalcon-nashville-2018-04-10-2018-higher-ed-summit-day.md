@@ -43,7 +43,7 @@ description: "* New in 8.5"
 * Define or share your release workflow for every tool
 
 
-## [Getting closer to your customer: Using Drupal in the last mile](https://events.drupal.org/node/20838)
+## [Getting closer to your customer: Using Drupal in the last mile](https://events.drupal.org/nashville2018.html)
 
 * How to better align the back and front end of development
 * Using the tour module to provide user tips to sites
