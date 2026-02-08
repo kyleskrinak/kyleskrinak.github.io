@@ -13,7 +13,7 @@ const { tag, tagName, size = "lg" } = Astro.props;
 
 <li>
   <a
-    href={linkWithBase(`/tags/${encodeURIComponent(tag)}/`)}
+    href={linkWithBase(`/tags/${tag}/`)}
     transition:name={tag}
     class:list={[
       "flex items-center gap-0.5",
