@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, createPath } from '@/config/consts';
+import { slugifyStr } from '@/utils/slugify';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -19,7 +20,7 @@ export async function getStaticPaths() {
 	});
 
 	return Array.from(tags).map((tag) => ({
-		params: { tag: tag.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-') },
+		params: { tag: slugifyStr(tag) },
 		props: { tag },
 	}));
 }
@@ -90,7 +91,7 @@ const posts = (await getCollection('blog'))
 				{
 					posts.map((post) => (
 						<li>
-							<a href={createPath(`/blog/${post.id}/`)}>
+							<a href={createPath(`/posts/${post.id}/`)}>
 								<h3 class="post-title">{post.data.title}</h3>
 							</a>
 							<p class="post-date">

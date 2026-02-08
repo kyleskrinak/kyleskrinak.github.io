@@ -77,7 +77,7 @@ I came for weight loss and found a healthier way of living.
 * Anything by [Gary Taubes](https://garytaubes.com/ "Gary Taubes’ website").
   *  If you only read one work of his, make it his New York Times article ["What If It’s All Been a Big Fat Lie?"](https://www.nytimes.com/2002/07/07/magazine/what-if-it-s-all-been-a-big-fat-lie.html "Gary Taubes’ launching salvo against the standard American diet") This article kicked off broader acknowledgment that we're dangerously heading down the wrong path on the science and practice of nutrition.
 * Anything by [Nina Teicholz](https://ninateicholz.com/ "Nina Teicholz’s website")
-  * I highly recommend her book, [“THE BIG FAT SURPRISE; Why Butter, Meat & Cheese Belong in a Healthy Diet”](https://thebigfatsurprise.com/ "website for her Big Fat Surprise book") which explains how we got here and offers possible remedies.
+  * I highly recommend her book, [“THE BIG FAT SURPRISE; Why Butter, Meat & Cheese Belong in a Healthy Diet”](https://ninateicholz.com/about/the-big-fat-surprise/ "website for her Big Fat Surprise book") which explains how we got here and offers possible remedies.
 
 ## My Low-Carb Blog Posts
 
