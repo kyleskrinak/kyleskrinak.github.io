@@ -22,7 +22,7 @@ This year, we:
 * Concluding thoughts
 * A closing mixer with a networking game that was surprisingly effective. Even considering the introverted nature of Higher Ed IT professionals.
 
-The summit organizer’s have posted the day’s schedule, [here](https://live-seattle-hes.pantheonsite.io/schedule).
+_Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissioned and the content was never archived._
 
 
 ## EduDU
