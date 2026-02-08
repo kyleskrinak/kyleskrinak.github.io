@@ -42,6 +42,28 @@ npx playwright install chromium
 - Local development: Requires display (headed browser will open)
 - CI/CD: Requires Xvfb or headless display server
 
+### 3. HTTPS Certificate Validation
+
+By default, browser verification uses **strict TLS validation** to catch certificate issues.
+
+To bypass HTTPS errors (useful for testing bot-detected sites):
+
+```bash
+PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
+```
+
+**Trade-offs**:
+- ✅ **Strict (default)**: Catches expired/invalid certificates, follows documented guidelines
+- ⚠️ **Bypass (`PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true`)**: Helps test bot-detected sites, but may miss cert issues
+
+**When to use bypass**:
+- Testing sites with known bot detection that also have cert warnings
+- Verifying if a failure is due to TLS vs actual broken link
+
+**Do NOT bypass for**:
+- Regular link checking (use default strict validation)
+- Sites that fail with actual cert errors (document as broken)
+
 ## Overview
 
 We use a two-tier approach to verify external links:
@@ -68,6 +90,14 @@ This automatically:
 5. Suggests ignore list updates
 
 **Use this for regular link checking.**
+
+**Optional: Bypass HTTPS validation**
+
+If testing bot-detected sites with certificate warnings:
+
+```bash
+PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
+```
 
 ### Manual Checks
 
@@ -124,11 +154,18 @@ node scripts/verify-links-with-browser.js \
   "https://example.com/url2"
 ```
 
+**Optional: Bypass HTTPS validation**
+```bash
+PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/verify-links-with-browser.js \
+  "https://example.com/url"
+```
+
 This script:
 - Launches real Chromium browser (not headless HTTP requests)
 - Handles JavaScript redirects
 - Bypasses bot detection (in most cases)
 - Reports final status and any redirects
+- Uses strict TLS validation by default (set env var to bypass)
 
 ### Step 3: Take Action Based on Results
 
