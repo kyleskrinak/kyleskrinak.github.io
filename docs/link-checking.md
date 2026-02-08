@@ -2,6 +2,46 @@
 
 This document describes the two-tier link verification process for the blog.
 
+## Prerequisites
+
+Before running link checks, you need:
+
+### 1. htmltest Binary
+
+htmltest is not an npm package - it's a standalone Go binary. Install it:
+
+**macOS (Homebrew)**:
+```bash
+brew install htmltest
+```
+
+**Linux / macOS (manual)**:
+```bash
+# Download latest release
+curl -sL https://github.com/wjdp/htmltest/releases/latest/download/htmltest_$(uname -s)_$(uname -m).tar.gz | tar -xz
+sudo mv htmltest /usr/local/bin/
+```
+
+**Windows (manual)**:
+Download from https://github.com/wjdp/htmltest/releases and add to PATH.
+
+**Verify installation**:
+```bash
+htmltest --version
+```
+
+### 2. Playwright Browsers (for headed mode)
+
+The two-tier system uses headed Chromium for browser verification:
+
+```bash
+npx playwright install chromium
+```
+
+**GUI Requirements**:
+- Local development: Requires display (headed browser will open)
+- CI/CD: Requires Xvfb or headless display server
+
 ## Overview
 
 We use a two-tier approach to verify external links:

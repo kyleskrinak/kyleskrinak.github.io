@@ -24,6 +24,17 @@ if (!existsSync(DIST_DIR)) {
   process.exit(1);
 }
 
+// Check if htmltest is installed
+try {
+  execSync('htmltest --version', { stdio: 'ignore' });
+} catch (error) {
+  console.error('❌ Error: htmltest binary not found.');
+  console.error('   Install htmltest first. See docs/link-checking.md for instructions.');
+  console.error('   macOS: brew install htmltest');
+  console.error('   Linux: https://github.com/wjdp/htmltest/releases\n');
+  process.exit(1);
+}
+
 console.log('🔍 Starting automated two-tier link checking...\n');
 console.log('━'.repeat(60));
 console.log('TIER 1: htmltest (fast HTTP checks)');
@@ -31,7 +42,6 @@ console.log('━'.repeat(60));
 
 // Run htmltest and capture output
 let htmltestOutput;
-let htmltestFailed = false;
 
 try {
   htmltestOutput = execSync('htmltest', {
@@ -41,7 +51,6 @@ try {
   console.log('✅ All links passed htmltest!\n');
   process.exit(0);
 } catch (error) {
-  htmltestFailed = true;
   htmltestOutput = error.stdout + error.stderr;
 }
 
@@ -65,8 +74,9 @@ const failedUrls = [...new Set(
 )];
 
 if (failedUrls.length === 0) {
-  console.log('\n✅ htmltest reported errors but no external URLs found to verify.\n');
-  process.exit(0);
+  console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
+  console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
+  process.exit(1);
 }
 
 console.log('\n━'.repeat(60));
