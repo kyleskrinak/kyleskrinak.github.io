@@ -10,15 +10,15 @@ test.describe('Link Validation', () => {
 
 		// Check that key elements exist
 		await expect(page.locator('h1')).toContainText('Kyle Skrinak');
-		await expect(page.locator('a[href="/blog"]')).toBeVisible();
+		await expect(page.locator('a[href="/posts"]')).toBeVisible();
 	});
 
-	test('blog index page loads', async ({ page }) => {
-		await page.goto('http://localhost:3000/blog', { waitUntil: 'networkidle' });
-		await expect(page.locator('h1')).toContainText('Blog');
+	test('posts index page loads', async ({ page }) => {
+		await page.goto('http://localhost:3000/posts', { waitUntil: 'networkidle' });
+		await expect(page.locator('h1')).toContainText('Posts');
 
-		// Check that at least one blog post link exists
-		const postLinks = page.locator('a[href^="/blog/"]');
+		// Check that at least one post link exists
+		const postLinks = page.locator('a[href^="/posts/"]');
 		expect(await postLinks.count()).toBeGreaterThan(0);
 	});
 
@@ -32,11 +32,11 @@ test.describe('Link Validation', () => {
 		await expect(page.locator('h1')).toContainText('Search');
 	});
 
-	test('sample blog post loads', async ({ page }) => {
-		await page.goto('http://localhost:3000/blog', { waitUntil: 'networkidle' });
+	test('sample post loads', async ({ page }) => {
+		await page.goto('http://localhost:3000/posts', { waitUntil: 'networkidle' });
 
 		// Get the first post link and navigate to it
-		const firstPostLink = page.locator('a[href^="/blog/"]').first();
+		const firstPostLink = page.locator('a[href^="/posts/"]').first();
 		const href = await firstPostLink.getAttribute('href');
 
 		if (href) {
