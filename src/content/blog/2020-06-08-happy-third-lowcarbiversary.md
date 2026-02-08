@@ -107,6 +107,6 @@ Many people warned me against a high-fat, low-carb eating plan. I don’t doubt 
 
 Their intent doesn’t matter &mdash; they’re wrong. This is why I go on and on about low-carb.
 
-Oh, by the way, if you’re so inclined, check out Dr. Westman’s Page Four, which you can buy here for $10: <a href="https://drericwestman.blog/page-4/">https://drericwestman.blog/page-4/</a> It is a very specific and easy-to-follow low-carb guidance for sane people.
+Oh, by the way, if you’re so inclined, check out Dr. Westman’s Page Four, which you can buy here for $10: <a href="https://ericwestmanmd.com/page-4/">https://ericwestmanmd.com/page-4/</a> It is a very specific and easy-to-follow low-carb guidance for sane people.
 
 It’s the best $10 you’ll ever spend.
