@@ -5,10 +5,5 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
-  - "drupal.org"
-  - "onedrive.live.com"
-  - "nytimes.com"
-  - "inc.com"
-  - "hhs.gov"
-  - "parade.com"
-  - "microsoft.com/en-us/store"
+  - "drupal.org"  # Returns 403 to automated tools, works in browsers
+  - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
