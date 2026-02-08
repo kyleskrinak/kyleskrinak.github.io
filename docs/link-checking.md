@@ -13,7 +13,25 @@ This approach minimizes false positives from bot detection while maintaining com
 
 ## Running Link Checks
 
-### Standard Check (Tier 1)
+### Automated Two-Tier Check (Recommended)
+
+```bash
+npm run build
+npm run check:links
+```
+
+This automatically:
+1. Runs htmltest (Tier 1 - fast HTTP checks)
+2. Extracts failed URLs
+3. Verifies failures with real browser (Tier 2 - Playwright)
+4. Reports which URLs work and which are actually broken
+5. Suggests ignore list updates
+
+**Use this for regular link checking.**
+
+### Manual Checks
+
+#### Standard Check (Tier 1 only)
 
 ```bash
 npm run build
@@ -96,6 +114,33 @@ The URL is legitimately broken. Options:
 4. **Add to ignore list** if it's a known issue (e.g., `windowsupdate.microsoft.com` requires Windows Update client)
 
 ## Example Workflow
+
+### Using Automated Check (Recommended)
+
+```bash
+# 1. Build and run automated check
+npm run build
+npm run check:links
+
+# Output automatically:
+# - Runs htmltest
+# - Verifies failures with browser
+# - Reports results with suggested actions:
+#
+# ✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):
+#   - "example.com"
+#
+# ❌ URLs that are actually broken (need manual fixes):
+#   - https://other.example.com/page
+#     Reason: net::ERR_NAME_NOT_RESOLVED
+
+# 2. Update .htmltest.yml with suggested domains
+# 3. Fix broken links in content
+# 4. Re-run check
+npm run check:links
+```
+
+### Using Manual Process
 
 ```bash
 # 1. Build and test

@@ -25,7 +25,8 @@
     "test:analytics:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/analytics-privacy.spec.ts",
     "test:links": "htmltest",
     "test:links:verbose": "htmltest -l 3",
-    "test:links:browser": "node scripts/verify-links-with-browser.js"
+    "test:links:browser": "node scripts/verify-links-with-browser.js",
+    "check:links": "node scripts/check-links.js"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
