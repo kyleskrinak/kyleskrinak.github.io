@@ -38,11 +38,10 @@ A playful “what if” session with VS Code’s integrated Copilot turned into 
 
 1) **Documentation is a necessary guardrail.** The novelty and ease of natural-language interaction lead to a false sense of “memory and intuition.” Without a persistent context, the AI will re-analyze the same situation differently.
 **My learning:** Lead with your documentation. Keep workflow docs up to date and ensure I always reference them in prompts. Here is where I keep my work instructions for this blog.
-   - CONTRIBUTING: <https://github.com/kyleskrinak/jekyll-blog/blob/main/.github/CONTRIBUTING.md>
-   - BRANCH_PROTECTION: <https://github.com/kyleskrinak/jekyll-blog/blob/main/.github/BRANCH_PROTECTION.md>
-   - README: <https://github.com/kyleskrinak/jekyll-blog/blob/main/README.md>
-   - MAINTAINERS_NOTE (Reveal menu): <https://github.com/kyleskrinak/jekyll-blog/blob/main/assets/reveal/plugin/menu/MAINTAINERS_NOTE.txt>
-   - CHANGELOG: <https://github.com/kyleskrinak/jekyll-blog/blob/main/CHANGELOG.md>
+   - README: <https://github.com/kyleskrinak/kyleskrinak.github.io/blob/main/README.md>
+   - CHANGELOG: <https://github.com/kyleskrinak/kyleskrinak.github.io/blob/main/CHANGELOG.md>
+   - Documentation: <https://github.com/kyleskrinak/kyleskrinak.github.io/tree/main/docs>
+   - GitFlow Guide: <https://github.com/kyleskrinak/kyleskrinak.github.io/blob/main/docs/operations/gitflow.md>
 
 2) **Hallucinations remain a critical issue.** Roughly 1 in 3 prompts were problematic: confusing staging vs. main, implying I had completed the MM4 upgrade, trying to create blog files outside the documented workflow, ignoring that Reveal.js was already self-hosted, and even honoring an errant note I’d included about “.htmlproofer.yml.” Newsflash - you can become the parent of your own project's hallucinations. **Mitigation:** always human-in-the-loop—review → approve/reject → execute.
 
