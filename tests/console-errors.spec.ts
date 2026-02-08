@@ -17,7 +17,7 @@ const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000"
 
 const PAGES_TO_TEST = [
   { path: "/", title: "Home" },
-  { path: "/blog/", title: "Blog" },
+  { path: "/posts/", title: "Posts" },
   { path: "/search/", title: "Search" },
   { path: "/about/", title: "About" },
   { path: "/posts/2016-10-31-first-blog-post/", title: "Sample Post" },
