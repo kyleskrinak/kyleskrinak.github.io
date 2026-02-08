@@ -47,6 +47,13 @@ async function verifyUrl(page, url) {
 
 console.log('🔍 Launching real Chromium browser to verify URLs...\n');
 
+// HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
+// Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
+const ignoreHTTPSErrors = process.env.PLAYWRIGHT_IGNORE_HTTPS_ERRORS === 'true';
+if (ignoreHTTPSErrors) {
+  console.log('⚠️  HTTPS certificate validation disabled (PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true)\n');
+}
+
 const browser = await chromium.launch({ headless: false });
 const results = [];
 
@@ -56,9 +63,7 @@ for (const url of urls) {
   // Use fresh context for each URL to avoid navigation conflicts
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    // Intentionally ignore HTTPS errors to prioritize bot detection bypass over strict TLS validation
-    // This helps verify that bot-blocked sites are still accessible to real users
-    ignoreHTTPSErrors: true
+    ignoreHTTPSErrors
   });
   const page = await context.newPage();
 
