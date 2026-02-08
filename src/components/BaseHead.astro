@@ -12,7 +12,9 @@ interface Props {
 	image?: ImageMetadata;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Properly encode special characters in pathname for canonical URL
+const encodedPathname = Astro.url.pathname.split('/').map(segment => encodeURIComponent(segment)).join('/');
+const canonicalURL = new URL(encodedPathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
 

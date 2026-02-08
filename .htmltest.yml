@@ -1,0 +1,8 @@
+DirectoryPath: "dist"
+CheckExternal: true
+CheckInternal: true
+IgnoreCanonicalBrokenLinks: false
+IgnoreAltMissing: false
+IgnoreDirectoryMissingTrailingSlash: true
+IgnoreURLs:
+  - "drupal.org"
