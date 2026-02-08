@@ -355,7 +355,7 @@ function generateHtml(title, slides) {
     <a href="/" class="home-link">← Home</a>
     <div class="progress-bar" id="progressBar"></div>
 
-    <div class="presentation-container" id="container">
+    <div class="presentation-container" id="container" data-pagefind-body>
         ${slideHtml}
     </div>
 

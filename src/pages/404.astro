@@ -4,9 +4,12 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import { SITE } from "@/config";
+
+// 404 pages should have canonical pointing to homepage
+const canonicalURL = new URL("/", Astro.site);
 ---
 
-<Layout title={`404 Not Found | ${SITE.title}`}>
+<Layout title={`404 Not Found | ${SITE.title}`} canonicalURL={canonicalURL.href}>
   <Header />
 
   <main

@@ -16,7 +16,7 @@ For our Drupal @ Duke meetup, here are my top five take-aways from this year's D
 
 ## 1) Web accessibility
 
-Web accessibility has become front-and-center, both in academic shops, hence this opening panel, and commercial as we saw with later sessions. The Higher Ed Summit, which is easily my favorite aspect to DrupalCon, had a panel discussion, which included no less than Duke&rsquo;s own [Joel Crawford-Smith](https://www.linkedin.com/in/joel-crawford-smith-02307b77/) as they discussed the current web accessibility landscape, pitfalls, perils and promises. I have two DCN videos that I hope to watch soon related to accessibility.
+Web accessibility has become front-and-center, both in academic shops, hence this opening panel, and commercial as we saw with later sessions. The Higher Ed Summit, which is easily my favorite aspect to DrupalCon, had a panel discussion, which included no less than Duke&rsquo;s own [Joel Crawford-Smith](https://www.linkedin.com/in/joel-crawford-smith-cpwa-02307b77/) as they discussed the current web accessibility landscape, pitfalls, perils and promises. I have two DCN videos that I hope to watch soon related to accessibility.
 
 ## 2) [The Dries Keynote](https://www.youtube.com/watch?v=8HkOdpNT8Ec)
 

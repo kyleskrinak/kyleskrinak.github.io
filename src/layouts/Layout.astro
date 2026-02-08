@@ -21,13 +21,19 @@ type Props = {
   scrollSmooth?: boolean;
 };
 
+// Strip trailing slash from pathname to match Astro's link generation (except root)
+let pathname = Astro.url.pathname;
+if (pathname !== '/' && pathname.endsWith('/')) {
+  pathname = pathname.slice(0, -1);
+}
+
 const {
   title = SITE.title,
   author = SITE.author,
   profile = SITE.profile,
   description = SITE.desc,
   ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
-  canonicalURL = new URL(Astro.url.pathname, Astro.url),
+  canonicalURL = new URL(pathname, Astro.site),
   pubDate,
   updatedDate,
   scrollSmooth = false,
