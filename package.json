@@ -24,7 +24,8 @@
     "test:analytics:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test tests/analytics-privacy.spec.ts",
     "test:analytics:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/analytics-privacy.spec.ts",
     "test:links": "htmltest",
-    "test:links:verbose": "htmltest -l 3"
+    "test:links:verbose": "htmltest -l 3",
+    "test:links:browser": "node scripts/verify-links-with-browser.js"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",

@@ -1,0 +1,169 @@
+# Link Checking Process
+
+This document describes the two-tier link verification process for the blog.
+
+## Overview
+
+We use a two-tier approach to verify external links:
+
+1. **Tier 1: htmltest** - Fast, automated link checking via HTTP requests
+2. **Tier 2: Playwright** - Real browser verification for links that fail htmltest
+
+This approach minimizes false positives from bot detection while maintaining comprehensive link checking.
+
+## Running Link Checks
+
+### Standard Check (Tier 1)
+
+```bash
+npm run build
+npm run test:links
+```
+
+This runs `htmltest` against the built site. It checks:
+- Internal links
+- External links
+- Canonical URLs
+- Hash anchors
+
+### Configuration
+
+Link checking is configured in `.htmltest.yml`:
+
+```yaml
+DirectoryPath: "dist"
+CheckExternal: true
+CheckInternal: true
+IgnoreCanonicalBrokenLinks: false
+IgnoreAltMissing: false
+IgnoreDirectoryMissingTrailingSlash: true
+IgnoreURLs:
+  - "drupal.org"         # Legitimate 403 responses
+  - "onedrive.live.com"  # Works in browsers, blocks bots
+  - "nytimes.com"        # Works in browsers, blocks bots
+  # ... etc
+```
+
+## Handling Link Check Failures
+
+When `npm run test:links` reports errors:
+
+### Step 1: Identify Error Types
+
+Common error types:
+- **404 Not Found** - Content moved or deleted
+- **403 Forbidden** - Bot blocking or access restrictions
+- **TLS errors** - Certificate issues
+- **Timeouts** - Slow or unavailable sites
+
+### Step 2: Browser Verification (Tier 2)
+
+For URLs that fail htmltest, verify them with a real browser:
+
+```bash
+node scripts/verify-links-with-browser.js \
+  "https://example.com/url1" \
+  "https://example.com/url2"
+```
+
+This script:
+- Launches real Chromium browser (not headless HTTP requests)
+- Handles JavaScript redirects
+- Bypasses bot detection (in most cases)
+- Reports final status and any redirects
+
+### Step 3: Take Action Based on Results
+
+#### If Browser Verification Succeeds ✅
+
+The URL works for real users but fails automated checks. Add domain to `.htmltest.yml`:
+
+```yaml
+IgnoreURLs:
+  - "example.com"  # Works in browsers, blocks bots
+```
+
+#### If Browser Verification Fails ❌
+
+The URL is legitimately broken. Options:
+
+1. **Update the link** if content moved (use Web Archive or search for new location)
+2. **Add explanatory note** if site is permanently offline:
+   ```markdown
+   _Note: The original site has been decommissioned and content was never archived._
+   ```
+3. **Remove the link** if it no longer adds value
+4. **Add to ignore list** if it's a known issue (e.g., `windowsupdate.microsoft.com` requires Windows Update client)
+
+## Example Workflow
+
+```bash
+# 1. Build and test
+npm run build
+npm run test:links
+
+# Output shows 5 errors
+
+# 2. Extract failed URLs from output and verify with browser
+node scripts/verify-links-with-browser.js \
+  "https://www.example.com/article" \
+  "https://other.example.com/page"
+
+# 3. Browser verification shows:
+#    ✅ example.com - works (add to ignore list)
+#    ❌ other.example.com - fails (update content)
+
+# 4. Update .htmltest.yml
+# 5. Fix broken link in content
+# 6. Re-run test
+npm run test:links
+```
+
+## Ignore List Guidelines
+
+Add domains to `IgnoreURLs` when:
+- ✅ URL works in real browsers
+- ✅ URL fails automated checks (403, bot detection)
+- ✅ Site is legitimate and trustworthy
+- ✅ Content is still valuable to readers
+
+Do NOT add to ignore list when:
+- ❌ URL returns 404
+- ❌ Site is permanently offline
+- ❌ Content has moved to new URL
+- ❌ TLS certificate is invalid/expired
+
+## Common Ignore List Domains
+
+| Domain | Reason |
+|--------|--------|
+| `drupal.org` | Returns 403 to automated tools, works in browsers |
+| `nytimes.com` | Aggressive bot detection |
+| `linkedin.com` | Returns 999 status to block scrapers |
+| `microsoft.com/store` | Bot detection |
+| Government sites (`.gov`) | Often block automated tools for security |
+
+## Maintenance
+
+- Review ignore list quarterly
+- Remove domains if sites change their bot policies
+- Update this documentation when process changes
+- Keep `.htmltest.yml` comments up to date with reasons
+
+## Troubleshooting
+
+### htmltest shows false positives
+
+Run browser verification. If URL works, add to ignore list.
+
+### Browser verification times out
+
+Increase timeout in `scripts/verify-links-with-browser.js` (default: 30s).
+
+### Too many link errors after migration
+
+Batch verify all external links, update systematically.
+
+### Link works sometimes, fails other times
+
+Intermittent failures suggest rate limiting. Add to ignore list if consistently works in browsers.
