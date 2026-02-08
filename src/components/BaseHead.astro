@@ -12,14 +12,14 @@ interface Props {
 	image?: ImageMetadata;
 }
 
-// Properly encode special characters in pathname for canonical URL
+// Normalize pathname for canonical URL
 // Strip trailing slash to match Astro's link generation (except for root)
+// Note: Astro.url.pathname is already percent-encoded, no need to encode again
 let pathname = Astro.url.pathname;
 if (pathname !== '/' && pathname.endsWith('/')) {
   pathname = pathname.slice(0, -1);
 }
-const encodedPathname = pathname.split('/').map(segment => encodeURIComponent(segment)).join('/');
-const canonicalURL = new URL(encodedPathname, Astro.site);
+const canonicalURL = new URL(pathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
 

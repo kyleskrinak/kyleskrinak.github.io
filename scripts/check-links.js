@@ -68,7 +68,11 @@ const failedUrls = [...new Set(
   failedLines
     .map(line => {
       const matches = line.match(urlPattern);
-      return matches ? matches[matches.length - 1] : null;
+      if (!matches) return null;
+      // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
+      let url = matches[matches.length - 1];
+      url = url.replace(/["':)\]]+$/, '');
+      return url;
     })
     .filter(url => url !== null)
 )];
@@ -118,6 +122,8 @@ const results = [];
 for (const url of failedUrls) {
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    // Intentionally ignore HTTPS errors to prioritize bot detection bypass over strict TLS validation
+    // This helps verify that bot-blocked sites are still accessible to real users
     ignoreHTTPSErrors: true
   });
   const page = await context.newPage();
