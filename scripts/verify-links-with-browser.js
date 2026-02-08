@@ -56,6 +56,8 @@ for (const url of urls) {
   // Use fresh context for each URL to avoid navigation conflicts
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    // Intentionally ignore HTTPS errors to prioritize bot detection bypass over strict TLS validation
+    // This helps verify that bot-blocked sites are still accessible to real users
     ignoreHTTPSErrors: true
   });
   const page = await context.newPage();
