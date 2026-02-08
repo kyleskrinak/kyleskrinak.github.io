@@ -72,7 +72,8 @@ if (failedUrls.length === 0) {
 console.log('\n━'.repeat(60));
 console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
 console.log('━'.repeat(60));
-console.log('Launching Chromium to verify failed URLs...\n');
+console.log('Launching Chromium in headed mode to verify failed URLs...\n');
+console.log('⚠️  Browser windows will open during verification.\n');
 
 // Browser verification function
 async function verifyUrl(page, url) {
@@ -100,8 +101,8 @@ async function verifyUrl(page, url) {
   }
 }
 
-// Run browser verification
-const browser = await chromium.launch({ headless: true });
+// Run browser verification (headed mode to avoid bot detection)
+const browser = await chromium.launch({ headless: false });
 const results = [];
 
 for (const url of failedUrls) {

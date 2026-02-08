@@ -47,7 +47,7 @@ async function verifyUrl(page, url) {
 
 console.log('🔍 Launching real Chromium browser to verify URLs...\n');
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: false });
 const results = [];
 
 for (const url of urls) {
