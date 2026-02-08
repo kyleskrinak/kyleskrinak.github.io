@@ -37,7 +37,7 @@ npm run test:console:production
 ✅ **Console Errors**: Catches JavaScript errors and warnings
 ✅ **404 Resources**: Detects failed resource loads (images, manifests, etc.)
 ✅ **Favicon Files**: Verifies all favicon variants are accessible
-✅ **Key Pages**: Tests home, blog, search, about, and sample post
+✅ **Key Pages**: Tests home, posts, search, about, and sample post
 
 ### Example Output
 
@@ -45,7 +45,7 @@ npm run test:console:production
 📄 Testing: Home (/)
    ✅ No console errors
 
-📄 Testing: Blog (/blog/)
+📄 Testing: Posts (/posts/)
    ✅ No console errors
 
 📄 Testing: Search (/search/)
