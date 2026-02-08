@@ -12,7 +12,14 @@ interface Props {
 	image?: ImageMetadata;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Properly encode special characters in pathname for canonical URL
+// Strip trailing slash to match Astro's link generation (except for root)
+let pathname = Astro.url.pathname;
+if (pathname !== '/' && pathname.endsWith('/')) {
+  pathname = pathname.slice(0, -1);
+}
+const encodedPathname = pathname.split('/').map(segment => encodeURIComponent(segment)).join('/');
+const canonicalURL = new URL(encodedPathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
 
