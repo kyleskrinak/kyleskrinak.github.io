@@ -6,10 +6,11 @@ import LinkButton from "@/components/LinkButton.astro";
 import { SITE } from "@/config";
 
 // 404 pages should have canonical pointing to homepage
-const canonicalURL = new URL("/", Astro.site);
+// Use BASE_URL to preserve staging path (e.g., /astro-blog/)
+const canonicalURL = new URL(import.meta.env.BASE_URL, Astro.site).href;
 ---
 
-<Layout title={`404 Not Found | ${SITE.title}`} canonicalURL={canonicalURL.href}>
+<Layout title={`404 Not Found | ${SITE.title}`} canonicalURL={canonicalURL}>
   <Header />
 
   <main

@@ -94,19 +94,19 @@ working.forEach(r => {
 });
 
 if (failed.length > 0) {
-  console.log(`\n❌ Failed: ${failed.length}`);
-  console.log('\nSuggested additions to .htmltest.yml IgnoreURLs:');
-  failed.forEach(r => {
-    const domain = new URL(r.url).hostname;
-    console.log(`  - "${domain}"`);
-  });
-  console.log('\nFailed URLs:');
+  console.log(`\n❌ Still failing in real browser: ${failed.length}`);
+  console.log('\nFailed URLs (do NOT add these to IgnoreURLs; they appear to be genuinely broken):');
   failed.forEach(r => {
     console.log(`   - ${r.url}`);
     if (r.error) {
       console.log(`     Reason: ${r.error}`);
     }
   });
+  console.log('\nSuggested actions:');
+  console.log('  1. Check if content moved (try Web Archive)');
+  console.log('  2. Update link to new location');
+  console.log('  3. Add explanatory note if permanently offline');
+  console.log('  4. Remove link if no longer valuable');
 }
 
 console.log('');

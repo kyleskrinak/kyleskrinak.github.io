@@ -33,7 +33,7 @@ const {
   profile = SITE.profile,
   description = SITE.desc,
   ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
-  canonicalURL = new URL(pathname, Astro.site),
+  canonicalURL = new URL(pathname, Astro.site).href,
   pubDate,
   updatedDate,
   scrollSmooth = false,
