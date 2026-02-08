@@ -69,8 +69,8 @@ description: "How stumbling into a morning routine became surprisingly transform
 </style>
 
 <figure class="figure">
-<img src="/assets/images/win_the_day_33423.jpg" alt="Quote by Tim Ferriss, image from https://www.inc.com/chris-winfield/5-morning-rituals-that-help-you-win-the-day-.html" class="figure__image" />
-<figcaption class="figure__caption">Quote by Tim Ferriss, image from <a href='https://www.inc.com/chris-winfield/5-morning-rituals-that-help-you-win-the-day-.html'>inc.com</a></figcaption>
+<img src="/assets/images/win_the_day_33423.jpg" alt="Quote by Tim Ferriss, image from https://web.archive.org/web/20251210184747/https://www.inc.com/chris-winfield/5-morning-rituals-that-help-you-win-the-day-.html" class="figure__image" />
+<figcaption class="figure__caption">Quote by Tim Ferriss, image from <a href='https://web.archive.org/web/20251210184747/https://www.inc.com/chris-winfield/5-morning-rituals-that-help-you-win-the-day-.html'>inc.com</a></figcaption>
 </figure>
 
 My morning routine precedes my LCHF way of eating by about a year. My routine, itself, reflects the gradual development of decades of experience, self-reflection and formation. It helped me to be open to, and steel myself, for the change I needed to make. My being sufficiently motivated to try something as “radical” as a high-fat diet was necessary for my subsequent success.
