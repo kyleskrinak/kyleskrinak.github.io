@@ -114,33 +114,35 @@ if (ignoreHTTPSErrors) {
 const browser = await chromium.launch({ headless });
 const results = [];
 
-for (const url of failedUrls) {
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    ignoreHTTPSErrors
-  });
-  const page = await context.newPage();
+try {
+  for (const url of failedUrls) {
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      ignoreHTTPSErrors
+    });
+    const page = await context.newPage();
 
-  console.log(`Checking: ${url}`);
-  const result = await verifyUrl(page, url);
-  results.push(result);
+    console.log(`Checking: ${url}`);
+    const result = await verifyUrl(page, url);
+    results.push(result);
 
-  if (result.success) {
-    console.log(`  ✅ ${result.status} - Works in browser`);
-    if (result.redirected) {
-      console.log(`  → Redirects to: ${result.finalUrl}`);
+    if (result.success) {
+      console.log(`  ✅ ${result.status} - Works in browser`);
+      if (result.redirected) {
+        console.log(`  → Redirects to: ${result.finalUrl}`);
+      }
+    } else {
+      console.log(`  ❌ Failed in browser`);
+      if (result.error) {
+        console.log(`  → ${result.error}`);
+      }
     }
-  } else {
-    console.log(`  ❌ Failed in browser`);
-    if (result.error) {
-      console.log(`  → ${result.error}`);
-    }
+
+    await context.close();
   }
-
-  await context.close();
+} finally {
+  await browser.close();
 }
-
-await browser.close();
 
 // Generate report
 console.log('\n━'.repeat(60));
