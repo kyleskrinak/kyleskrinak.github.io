@@ -8,7 +8,7 @@ import { slugifyStr } from "./slugify";
  * @param includeBase - whether to include `/posts` in return value
  * @returns blog post path
  *   - includeBase=true: leading slash and trailing slash are enforced (e.g., `/posts/slug/`)
- *   - includeBase=false: returns a clean route segment with no leading/trailing slashes (e.g., `posts/slug`)
+ *   - includeBase=false: returns a clean route segment with no leading/trailing slashes (e.g., `slug`)
  */
 export function getPath(
   id: string,
