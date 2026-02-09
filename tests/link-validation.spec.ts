@@ -69,7 +69,8 @@ test.describe('Link Validation', () => {
 		const href = await firstPostLink.getAttribute('href');
 
 		if (href) {
-			await page.goto(`${BASE_URL}${href}`, { waitUntil: 'networkidle' });
+			const resolvedUrl = new URL(href, BASE_URL).toString();
+			await page.goto(resolvedUrl, { waitUntil: 'networkidle' });
 			await expect(page.locator('article')).toBeVisible();
 
 			const canonical = await getCanonicalHref(page);
@@ -130,7 +131,8 @@ test.describe('Link Validation', () => {
 		const href = await firstPresLink.getAttribute('href');
 
 		if (href) {
-			await page.goto(`${BASE_URL}${href}`, { waitUntil: 'networkidle' });
+			const resolvedUrl = new URL(href, BASE_URL).toString();
+			await page.goto(resolvedUrl, { waitUntil: 'networkidle' });
 
 			// Check that the "View Presentation" button exists and has valid href
 			const viewButton = page.locator('a:has-text("View Presentation")');
@@ -140,7 +142,7 @@ test.describe('Link Validation', () => {
 			expect(presHref).toMatch(/^\/.*\.html$/);
 
 			// Verify the presentation HTML file exists
-			const response = await page.goto(`${BASE_URL}${presHref}`, { waitUntil: 'networkidle' });
+			const response = await page.goto(new URL(presHref, BASE_URL).toString(), { waitUntil: 'networkidle' });
 			expect(response?.status()).toBe(200);
 		}
 	});

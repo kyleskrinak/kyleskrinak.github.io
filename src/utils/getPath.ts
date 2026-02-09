@@ -31,5 +31,10 @@ export function getPath(
     ? [basePath, slug].join("/")
     : [basePath, ...pathSegments, slug].join("/");
 
-  return path.endsWith("/") ? path : `${path}/`;
+  if (!includeBase) {
+    return path.replace(/^\/+/, "").replace(/\/+$/, "");
+  }
+
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return normalized.endsWith("/") ? normalized : `${normalized}/`;
 }
