@@ -5,6 +5,7 @@ import '../styles/global.css';
 import type { ImageMetadata } from 'astro';
 import FallbackImage from '../assets/blog-placeholder-1.jpg';
 import { SITE_TITLE, createPath } from '@/config/consts';
+import { canonicalizePathname } from '@/utils/canonicalizePathname';
 
 interface Props {
 	title: string;
@@ -17,10 +18,7 @@ interface Props {
 // Preserve trailing slash for root ('/') and BASE_URL (e.g., '/astro-blog/' on staging)
 // Note: Astro.url.pathname is already percent-encoded, no need to encode again
 const basePathname = import.meta.env.BASE_URL;
-let pathname = Astro.url.pathname;
-if (pathname !== '/' && pathname !== basePathname && pathname.endsWith('/')) {
-  pathname = pathname.slice(0, -1);
-}
+const pathname = canonicalizePathname(Astro.url.pathname, basePathname);
 const canonicalURL = new URL(pathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
