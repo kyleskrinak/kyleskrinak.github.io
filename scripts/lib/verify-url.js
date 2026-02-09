@@ -24,7 +24,7 @@ export async function verifyUrl(page, url) {
       status,
       finalUrl: page.url(),
       redirected: page.url() !== url,
-      success: response && response.ok()
+      success: !!(response && response.ok())
     };
   } catch (error) {
     return {
