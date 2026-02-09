@@ -4,6 +4,10 @@ import path from 'path';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
 
+const getCanonicalHref = async (page: import('@playwright/test').Page) => {
+	return await page.locator('link[rel="canonical"]').getAttribute('href');
+};
+
 // Test that all important pages load without errors
 test.describe('Link Validation', () => {
 	test('home page loads', async ({ page }) => {
@@ -12,30 +16,36 @@ test.describe('Link Validation', () => {
 
 		// Check that key elements exist
 		await expect(page.locator('h1')).toContainText('Kyle Skrinak');
-		await expect(page.locator('a[href="/posts"]')).toBeVisible();
+		await expect(page.locator('a[href="/posts/"]')).toBeVisible();
+
+		const canonical = await getCanonicalHref(page);
+		expect(canonical).toMatch(/\/$/);
 	});
 
 	test('posts index page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/posts`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/posts/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Posts');
 
 		// Check that at least one post link exists
 		const postLinks = page.locator('a[href^="/posts/"]');
 		expect(await postLinks.count()).toBeGreaterThan(0);
+
+		const canonical = await getCanonicalHref(page);
+		expect(canonical).toMatch(/\/$/);
 	});
 
 	test('about page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/about`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/about/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('About');
 	});
 
 	test('search page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/search`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/search/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Search');
 	});
 
 	test('sample post loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/posts`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/posts/`, { waitUntil: 'networkidle' });
 
 		// Get the first post link and navigate to it
 		const firstPostLink = page.locator('a[href^="/posts/"]').first();
@@ -44,18 +54,21 @@ test.describe('Link Validation', () => {
 		if (href) {
 			await page.goto(`${BASE_URL}${href}`, { waitUntil: 'networkidle' });
 			await expect(page.locator('article')).toBeVisible();
+
+			const canonical = await getCanonicalHref(page);
+			expect(canonical).toMatch(/\/$/);
 		}
 	});
 
 	test('category page loads', async ({ page }) => {
 		// Test a known category
-		await page.goto(`${BASE_URL}/categories/drupal`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/categories/drupal/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Category');
 	});
 
 	test('tag page loads', async ({ page }) => {
 		// Test a known tag
-		await page.goto(`${BASE_URL}/tags/drupal`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/tags/drupal/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Tag');
 	});
 
@@ -84,7 +97,7 @@ test.describe('Link Validation', () => {
 	});
 
 	test('presentations index page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/presentations`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/presentations/`, { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Presentations');
 
 		// Check that at least one presentation link exists
@@ -93,7 +106,7 @@ test.describe('Link Validation', () => {
 	});
 
 	test('presentation detail pages load with valid links', async ({ page }) => {
-		await page.goto(`${BASE_URL}/presentations`, { waitUntil: 'networkidle' });
+		await page.goto(`${BASE_URL}/presentations/`, { waitUntil: 'networkidle' });
 
 		// Get the first presentation link
 		const firstPresLink = page.locator('a[href^="/presentations/"][href$="/"]').first();
