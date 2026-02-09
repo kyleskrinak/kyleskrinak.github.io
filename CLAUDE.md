@@ -31,10 +31,23 @@ DO NOT read or reference files in:
 - Summarize findings concisely
 
 ## Development Philosophy
-- This is a MVP project
+
+### Code Categories
+**MVP Features** (UI, content, blog posts):
+- Simple solutions, iterate fast
+- Hardcode reasonable defaults
+- Don't over-engineer
+
+**Infrastructure** (scripts, build, CI/CD, tooling):
+- Production-grade from start
+- Configurable (not hardcoded)
+- Proper error handling required
+- Must work in CI/CD environments
+- Resource cleanup (try/finally for processes/connections)
+
+### General Principles
 - Start with simplest solution that works
-- Don't over-engineer or add unnecessary abstractions
-- Hardcode reasonable defaults vs complex config
+- Don't add unnecessary abstractions
 - Skip edge case handling unless critical
 - Ask: "Would copying be easier than generalizing?" If yes, copy.
 
@@ -43,6 +56,48 @@ DO NOT read or reference files in:
 - Make minimal edits to accomplish goal
 - Commit after each working change
 - Use descriptive commit messages
+
+## Verification Protocol
+
+**After making ANY code change:**
+
+1. **Search for ALL instances** before claiming "fixed"
+   ```bash
+   # Before fixing:
+   grep -rn "pattern" src/ scripts/ public/
+
+   # After fixing ALL instances:
+   grep -rn "pattern" src/ scripts/ public/  # MUST return zero results
+   ```
+
+2. **Check side effects:**
+   - Documentation referencing changed files?
+   - PR description mentioning changed behavior?
+   - Related files with similar patterns?
+   - Other files in same directory?
+
+3. **Never commit without verification**
+
+## Review Response Protocol
+
+**When addressing review comments:**
+
+1. **Identify ROOT issue, not just the line**
+   - Comment mentions line 25 → Find the pattern/issue CLASS
+   - Example: "Line 25 uses /" → Issue is "hardcoded root paths break BASE_URL"
+
+2. **Search for ALL instances of that issue**
+   ```bash
+   grep -rn 'href="/"' src/ public/ scripts/
+   ```
+
+3. **Fix ALL instances in ONE commit**
+
+4. **Verify zero results remain**
+
+5. **Update related artifacts** (docs, PR description, tests)
+
+**Never fix "just that line" - fix the entire issue class.**
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
