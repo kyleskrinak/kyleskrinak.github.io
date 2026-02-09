@@ -44,7 +44,7 @@ const getCanonicalHref = async (page: import('@playwright/test').Page) => {
 test.describe('Link Validation', () => {
 	test('home page loads', async ({ page }) => {
 		await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
-		expect(page).toHaveTitle(/Kyle Skrinak/);
+		await expect(page).toHaveTitle(/Kyle Skrinak/);
 
 		// Check that key elements exist
 		await expect(page.locator('h1')).toContainText('Kyle Skrinak');
@@ -152,10 +152,11 @@ test.describe('Link Validation', () => {
 			await expect(viewButton).toBeVisible();
 
 			const presHref = await viewButton.getAttribute('href');
+			expect(presHref, 'Expected View Presentation href to be non-null').not.toBeNull();
 			expect(presHref).toMatch(/^\/.*\.html$/);
 
 			// Verify the presentation HTML file exists
-			const response = await page.goto(resolveUrl(presHref), { waitUntil: 'networkidle' });
+			const response = await page.goto(resolveUrl(presHref!), { waitUntil: 'networkidle' });
 			expect(response?.status()).toBe(200);
 		}
 	});
