@@ -3,6 +3,13 @@ import fs from 'fs';
 import path from 'path';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
+const basePathname = (() => {
+	const pathname = new URL(BASE_URL).pathname;
+	if (pathname === '/' || pathname === '') return '';
+	return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+})();
+
+const withBasePath = (path: string) => `${basePathname}${path}`;
 
 const getCanonicalHref = async (page: import('@playwright/test').Page) => {
 	const canonicalLocator = page.locator('link[rel="canonical"]');
@@ -26,7 +33,7 @@ test.describe('Link Validation', () => {
 
 		// Check that key elements exist
 		await expect(page.locator('h1')).toContainText('Kyle Skrinak');
-		await expect(page.locator('a[href="/posts/"]')).toBeVisible();
+		await expect(page.locator(`a[href="${withBasePath('/posts/')}"]`)).toBeVisible();
 
 		const canonical = await getCanonicalHref(page);
 		expect(canonical).toMatch(/\/$/);
@@ -37,7 +44,7 @@ test.describe('Link Validation', () => {
 		await expect(page.locator('h1')).toContainText('Posts');
 
 		// Check that at least one post link exists
-		const postLinks = page.locator('a[href^="/posts/"]');
+		const postLinks = page.locator(`a[href^="${withBasePath('/posts/')}"]`);
 		expect(await postLinks.count()).toBeGreaterThan(0);
 
 		const canonical = await getCanonicalHref(page);
@@ -58,7 +65,7 @@ test.describe('Link Validation', () => {
 		await page.goto(`${BASE_URL}/posts/`, { waitUntil: 'networkidle' });
 
 		// Get the first post link and navigate to it
-		const firstPostLink = page.locator('a[href^="/posts/"]').first();
+		const firstPostLink = page.locator(`a[href^="${withBasePath('/posts/')}"]`).first();
 		const href = await firstPostLink.getAttribute('href');
 
 		if (href) {
@@ -111,7 +118,7 @@ test.describe('Link Validation', () => {
 		await expect(page.locator('h1')).toContainText('Presentations');
 
 		// Check that at least one presentation link exists
-		const presLinks = page.locator('a[href^="/presentations/"]');
+		const presLinks = page.locator(`a[href^="${withBasePath('/presentations/')}"]`);
 		expect(await presLinks.count()).toBeGreaterThan(0);
 	});
 
@@ -119,7 +126,7 @@ test.describe('Link Validation', () => {
 		await page.goto(`${BASE_URL}/presentations/`, { waitUntil: 'networkidle' });
 
 		// Get the first presentation link
-		const firstPresLink = page.locator('a[href^="/presentations/"][href$="/"]').first();
+		const firstPresLink = page.locator(`a[href^="${withBasePath('/presentations/')}"][href$="/"]`).first();
 		const href = await firstPresLink.getAttribute('href');
 
 		if (href) {
