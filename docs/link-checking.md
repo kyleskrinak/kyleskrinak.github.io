@@ -305,7 +305,7 @@ Run browser verification. If URL works, add to ignore list.
 
 ### Browser verification times out
 
-Increase timeout in `scripts/verify-links-with-browser.js` (default: 30s).
+Increase timeout in `scripts/lib/verify-url.js` (default: 30s).
 
 ### Too many link errors after migration
 
