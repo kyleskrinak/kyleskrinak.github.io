@@ -14,6 +14,7 @@
 import { execSync } from 'child_process';
 import { chromium } from 'playwright';
 import { existsSync } from 'fs';
+import { verifyUrl } from './lib/verify-url.js';
 
 const DIST_DIR = 'dist';
 
@@ -86,40 +87,24 @@ if (failedUrls.length === 0) {
 console.log('\n━'.repeat(60));
 console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
 console.log('━'.repeat(60));
-console.log('Launching Chromium in headed mode to verify failed URLs...\n');
-console.log('⚠️  Browser windows will open during verification.\n');
+// Browser mode: Defaults to headless (works in CI)
+// Set PLAYWRIGHT_HEADED=true for headed mode (better bot detection bypass)
+const headless = process.env.PLAYWRIGHT_HEADED !== 'true';
 
-// Browser verification function
-async function verifyUrl(page, url) {
-  try {
-    const response = await page.goto(url, {
-      waitUntil: 'load',
-      timeout: 30000
-    });
-
-    const status = response ? response.status() : 'NO_RESPONSE';
-
-    return {
-      url,
-      status,
-      finalUrl: page.url(),
-      redirected: page.url() !== url,
-      success: response && response.ok()
-    };
-  } catch (error) {
-    return {
-      url,
-      error: error.message,
-      success: false
-    };
-  }
-}
-
-// Run browser verification (headed mode to avoid bot detection)
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
 const ignoreHTTPSErrors = process.env.PLAYWRIGHT_IGNORE_HTTPS_ERRORS === 'true';
-const browser = await chromium.launch({ headless: false });
+
+console.log(`Launching Chromium in ${headless ? 'headless' : 'headed'} mode to verify failed URLs...\n`);
+if (!headless) {
+  console.log('⚠️  Browser windows will open during verification.\n');
+}
+if (ignoreHTTPSErrors) {
+  console.log('⚠️  HTTPS certificate validation disabled (PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true)\n');
+}
+
+// Run browser verification
+const browser = await chromium.launch({ headless });
 const results = [];
 
 for (const url of failedUrls) {
