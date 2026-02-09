@@ -5,7 +5,17 @@ import path from 'path';
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
 
 const getCanonicalHref = async (page: import('@playwright/test').Page) => {
-	return await page.locator('link[rel="canonical"]').getAttribute('href');
+	const canonicalLocator = page.locator('link[rel="canonical"]');
+	const count = await canonicalLocator.count();
+	expect(
+		count,
+		'Expected exactly one <link rel="canonical"> element on the page'
+	).toBe(1);
+
+	const href = await canonicalLocator.first().getAttribute('href');
+	expect(href, 'Expected canonical link to have a non-null href attribute').not.toBeNull();
+
+	return href!;
 };
 
 // Test that all important pages load without errors
