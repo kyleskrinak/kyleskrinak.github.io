@@ -30,19 +30,34 @@ Download from https://github.com/wjdp/htmltest/releases and add to PATH.
 htmltest --version
 ```
 
-### 2. Playwright Browsers (for headed mode)
+### 2. Playwright Browsers
 
-The two-tier system uses headed Chromium for browser verification:
+The two-tier system uses Chromium for browser verification:
 
 ```bash
 npx playwright install chromium
 ```
 
-**GUI Requirements**:
-- Local development: Requires display (headed browser will open)
-- CI/CD: Requires Xvfb or headless display server
+### 3. Browser Mode Configuration
 
-### 3. HTTPS Certificate Validation
+By default, browser verification runs in **headless mode** (works in CI/CD without display).
+
+To use headed mode (better bot detection bypass, but requires display):
+
+```bash
+PLAYWRIGHT_HEADED=true npm run check:links
+```
+
+**Trade-offs**:
+- ✅ **Headless (default)**: Works in CI/CD, Docker, SSH sessions without GUI
+- ⚠️ **Headed (`PLAYWRIGHT_HEADED=true`)**: Better bot detection bypass, requires display/Xvfb
+
+**When to use headed mode**:
+- Local troubleshooting of bot-detected sites
+- Sites with sophisticated JavaScript-based bot detection
+- When headless mode gives false negatives
+
+### 4. HTTPS Certificate Validation
 
 By default, browser verification uses **strict TLS validation** to catch certificate issues.
 
@@ -91,12 +106,17 @@ This automatically:
 
 **Use this for regular link checking.**
 
-**Optional: Bypass HTTPS validation**
-
-If testing bot-detected sites with certificate warnings:
+**Optional Environment Variables:**
 
 ```bash
+# Use headed mode (better bot bypass, requires display)
+PLAYWRIGHT_HEADED=true npm run check:links
+
+# Bypass HTTPS validation (for cert-warning sites)
 PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
+
+# Combine both
+PLAYWRIGHT_HEADED=true PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 ```
 
 ### Manual Checks
@@ -154,18 +174,23 @@ node scripts/verify-links-with-browser.js \
   "https://example.com/url2"
 ```
 
-**Optional: Bypass HTTPS validation**
+**Optional Environment Variables:**
 ```bash
+# Use headed mode
+PLAYWRIGHT_HEADED=true node scripts/verify-links-with-browser.js \
+  "https://example.com/url"
+
+# Bypass HTTPS validation
 PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/verify-links-with-browser.js \
   "https://example.com/url"
 ```
 
 This script:
-- Launches real Chromium browser (not headless HTTP requests)
+- Launches Chromium browser (headless by default, headed with PLAYWRIGHT_HEADED=true)
 - Handles JavaScript redirects
-- Bypasses bot detection (in most cases)
+- Can bypass bot detection (better in headed mode)
 - Reports final status and any redirects
-- Uses strict TLS validation by default (set env var to bypass)
+- Uses strict TLS validation by default (set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass)
 
 ### Step 3: Take Action Based on Results
 
