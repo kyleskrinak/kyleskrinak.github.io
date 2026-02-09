@@ -27,10 +27,14 @@ export function getPath(
   const blogId = id.split("/");
   const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
 
-  // If not inside the sub-dir, simply return the file path
-  if (!pathSegments || pathSegments.length < 1) {
-    return [basePath, slug].join("/");
+  const path = !pathSegments || pathSegments.length < 1
+    ? [basePath, slug].join("/")
+    : [basePath, ...pathSegments, slug].join("/");
+
+  if (!includeBase) {
+    return path.replace(/^\/+/, "").replace(/\/+$/, "");
   }
 
-  return [basePath, ...pathSegments, slug].join("/");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return normalized.endsWith("/") ? normalized : `${normalized}/`;
 }

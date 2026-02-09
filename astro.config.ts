@@ -20,6 +20,7 @@ const base = buildEnv === "staging" ? "/astro-blog/" : "/";
 export default defineConfig({
   base,
   site: SITE.website,
+  trailingSlash: "always",
   integrations: [
     // Sitemap is generated via custom endpoint (src/pages/sitemap.xml.ts)
   ],
