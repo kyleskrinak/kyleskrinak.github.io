@@ -14,7 +14,7 @@ interface Props {
 }
 
 // Normalize pathname for canonical URL
-// Strip trailing slash to match Astro's link generation
+// Ensure trailing slash to match directory-style URLs
 // Preserve trailing slash for root ('/') and BASE_URL (e.g., '/astro-blog/' on staging)
 // Note: Astro.url.pathname is already percent-encoded, no need to encode again
 const basePathname = import.meta.env.BASE_URL;
