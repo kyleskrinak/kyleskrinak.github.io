@@ -120,7 +120,7 @@ test.describe('Link Validation', () => {
 	});
 
 	test('sitemap exists and is valid', async ({ page }) => {
-		const response = await page.goto(resolveUrl('/sitemap-index.xml'));
+		const response = await page.goto(resolveUrl('/sitemap.xml'));
 		expect(response?.status()).toBe(200);
 		expect(response?.headers()['content-type']).toContain('xml');
 	});
