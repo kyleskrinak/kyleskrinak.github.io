@@ -52,7 +52,14 @@ try {
   console.log('✅ All links passed htmltest!\n');
   process.exit(0);
 } catch (error) {
-  htmltestOutput = error.stdout + error.stderr;
+  // Safely convert stdout/stderr to strings (defensive against buffers/undefined)
+  const stdout = error && error.stdout != null
+    ? (Buffer.isBuffer(error.stdout) ? error.stdout.toString('utf-8') : String(error.stdout))
+    : '';
+  const stderr = error && error.stderr != null
+    ? (Buffer.isBuffer(error.stderr) ? error.stderr.toString('utf-8') : String(error.stderr))
+    : '';
+  htmltestOutput = stdout + stderr;
 }
 
 console.log(htmltestOutput);
