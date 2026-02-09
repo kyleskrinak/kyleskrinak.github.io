@@ -1,3 +1,7 @@
+---
+description: Verify root cause and exhaustively fix patterns
+---
+
 # /verify-fix
 
 After making changes to fix an issue, run this verification checklist:
@@ -9,10 +13,13 @@ After making changes to fix an issue, run this verification checklist:
 ## 2. Exhaustive Search
 ```bash
 # Search for ALL instances of the pattern
-grep -rn "pattern" src/ scripts/ public/ docs/
+grep -rn "pattern" src/ scripts/ public/
 
 # After fixing, verify zero results
-grep -rn "pattern" src/ scripts/ public/ docs/  # MUST be empty
+grep -rn "pattern" src/ scripts/ public/  # MUST be empty
+
+# If the task explicitly involves docs, include docs/
+# grep -rn "pattern" src/ scripts/ public/ docs/
 ```
 
 ## 3. Side Effects Check
