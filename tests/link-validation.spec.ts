@@ -1,6 +1,4 @@
 import { test, expect } from '@playwright/test';
-import fs from 'fs';
-import path from 'path';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
 const basePathname = (() => {
@@ -9,7 +7,22 @@ const basePathname = (() => {
 	return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 })();
 
-const withBasePath = (path: string) => `${basePathname}${path}`;
+const withBasePath = (hrefPath: string) => `${basePathname}${hrefPath}`;
+const resolveUrl = (hrefPath: string) => {
+	if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(hrefPath)) {
+		return new URL(hrefPath).toString();
+	}
+
+	let effectivePath = hrefPath;
+
+	if (hrefPath.startsWith('/')) {
+		if (basePathname && !hrefPath.startsWith(`${basePathname}/`) && hrefPath !== basePathname) {
+			effectivePath = `${basePathname}${hrefPath}`;
+		}
+	}
+
+	return new URL(effectivePath, BASE_URL).toString();
+};
 
 const getCanonicalHref = async (page: import('@playwright/test').Page) => {
 	const canonicalLocator = page.locator('link[rel="canonical"]');
@@ -28,8 +41,8 @@ const getCanonicalHref = async (page: import('@playwright/test').Page) => {
 // Test that all important pages load without errors
 test.describe('Link Validation', () => {
 	test('home page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
-		expect(page).toHaveTitle(/Kyle Skrinak/);
+		await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
+		await expect(page).toHaveTitle(/Kyle Skrinak/);
 
 		// Check that key elements exist
 		await expect(page.locator('h1')).toContainText('Kyle Skrinak');
@@ -40,7 +53,7 @@ test.describe('Link Validation', () => {
 	});
 
 	test('posts index page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/posts/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/posts/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Posts');
 
 		// Check that at least one post link exists
@@ -52,41 +65,39 @@ test.describe('Link Validation', () => {
 	});
 
 	test('about page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/about/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/about/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('About');
 	});
 
 	test('search page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/search/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/search/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Search');
 	});
 
 	test('sample post loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/posts/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/posts/'), { waitUntil: 'networkidle' });
 
 		// Get the first post link and navigate to it
 		const firstPostLink = page.locator(`a[href^="${withBasePath('/posts/')}"]`).first();
 		const href = await firstPostLink.getAttribute('href');
+		expect(href, 'Expected first post link to have a non-null href').not.toBeNull();
 
-		if (href) {
-			const resolvedUrl = new URL(href, BASE_URL).toString();
-			await page.goto(resolvedUrl, { waitUntil: 'networkidle' });
-			await expect(page.locator('article')).toBeVisible();
+		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
+		await expect(page.locator('article')).toBeVisible();
 
-			const canonical = await getCanonicalHref(page);
-			expect(canonical).toMatch(/\/$/);
-		}
+		const canonical = await getCanonicalHref(page);
+		expect(canonical).toMatch(/\/$/);
 	});
 
 	test('category page loads', async ({ page }) => {
 		// Test a known category
-		await page.goto(`${BASE_URL}/categories/drupal/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/categories/drupal/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Category');
 	});
 
 	test('tag page loads', async ({ page }) => {
 		// Test a known tag
-		await page.goto(`${BASE_URL}/tags/drupal/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/tags/drupal/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Tag');
 	});
 
@@ -98,24 +109,24 @@ test.describe('Link Validation', () => {
 			}
 		});
 
-		await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
 		expect(errors).toEqual([]);
 	});
 
 	test('rss feed exists and is valid', async ({ page }) => {
-		const response = await page.goto(`${BASE_URL}/rss.xml`);
+		const response = await page.goto(resolveUrl('/rss.xml'));
 		expect(response?.status()).toBe(200);
 		expect(response?.headers()['content-type']).toContain('xml');
 	});
 
 	test('sitemap exists and is valid', async ({ page }) => {
-		const response = await page.goto(`${BASE_URL}/sitemap-index.xml`);
+		const response = await page.goto(resolveUrl('/sitemap-index.xml'));
 		expect(response?.status()).toBe(200);
 		expect(response?.headers()['content-type']).toContain('xml');
 	});
 
 	test('presentations index page loads', async ({ page }) => {
-		await page.goto(`${BASE_URL}/presentations/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1')).toContainText('Presentations');
 
 		// Check that at least one presentation link exists
@@ -124,26 +135,25 @@ test.describe('Link Validation', () => {
 	});
 
 	test('presentation detail pages load with valid links', async ({ page }) => {
-		await page.goto(`${BASE_URL}/presentations/`, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
 
 		// Get the first presentation link
 		const firstPresLink = page.locator(`a[href^="${withBasePath('/presentations/')}"][href$="/"]`).first();
 		const href = await firstPresLink.getAttribute('href');
+		expect(href, 'Expected first presentation link to have a non-null href').not.toBeNull();
 
-		if (href) {
-			const resolvedUrl = new URL(href, BASE_URL).toString();
-			await page.goto(resolvedUrl, { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
 
-			// Check that the "View Presentation" button exists and has valid href
-			const viewButton = page.locator('a:has-text("View Presentation")');
-			await expect(viewButton).toBeVisible();
+		// Check that the "View Presentation" button exists and has valid href
+		const viewButton = page.locator('a:has-text("View Presentation")');
+		await expect(viewButton).toBeVisible();
 
-			const presHref = await viewButton.getAttribute('href');
-			expect(presHref).toMatch(/^\/.*\.html$/);
+		const presHref = await viewButton.getAttribute('href');
+		expect(presHref, 'Expected View Presentation href to be non-null').not.toBeNull();
+		expect(presHref).toMatch(/^\/.*\.html$/);
 
-			// Verify the presentation HTML file exists
-			const response = await page.goto(new URL(presHref, BASE_URL).toString(), { waitUntil: 'networkidle' });
-			expect(response?.status()).toBe(200);
-		}
+		// Verify the presentation HTML file exists
+		const response = await page.goto(resolveUrl(presHref!), { waitUntil: 'networkidle' });
+		expect(response?.status()).toBe(200);
 	});
 });
