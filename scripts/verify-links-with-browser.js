@@ -39,36 +39,38 @@ if (ignoreHTTPSErrors) {
 const browser = await chromium.launch({ headless });
 const results = [];
 
-for (const url of urls) {
-  console.log(`Checking: ${url}`);
+try {
+  for (const url of urls) {
+    console.log(`Checking: ${url}`);
 
-  // Use fresh context for each URL to avoid navigation conflicts
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    ignoreHTTPSErrors
-  });
-  const page = await context.newPage();
+    // Use fresh context for each URL to avoid navigation conflicts
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      ignoreHTTPSErrors
+    });
+    const page = await context.newPage();
 
-  const result = await verifyUrl(page, url);
-  results.push(result);
+    const result = await verifyUrl(page, url);
+    results.push(result);
 
-  if (result.success) {
-    console.log(`✅ ${result.status} - SUCCESS`);
-    if (result.redirected) {
-      console.log(`   → Redirected to: ${result.finalUrl}`);
+    if (result.success) {
+      console.log(`✅ ${result.status} - SUCCESS`);
+      if (result.redirected) {
+        console.log(`   → Redirected to: ${result.finalUrl}`);
+      }
+    } else {
+      console.log(`❌ FAILED`);
+      if (result.error) {
+        console.log(`   Error: ${result.error}`);
+      }
     }
-  } else {
-    console.log(`❌ FAILED`);
-    if (result.error) {
-      console.log(`   Error: ${result.error}`);
-    }
+    console.log('');
+
+    await context.close();
   }
-  console.log('');
-
-  await context.close();
+} finally {
+  await browser.close();
 }
-
-await browser.close();
 
 // Summary
 console.log('\n📊 SUMMARY');
