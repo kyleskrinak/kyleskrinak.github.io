@@ -1,6 +1,4 @@
 import { test, expect } from '@playwright/test';
-import fs from 'fs';
-import path from 'path';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
 const basePathname = (() => {
@@ -82,14 +80,13 @@ test.describe('Link Validation', () => {
 		// Get the first post link and navigate to it
 		const firstPostLink = page.locator(`a[href^="${withBasePath('/posts/')}"]`).first();
 		const href = await firstPostLink.getAttribute('href');
+		expect(href, 'Expected first post link to have a non-null href').not.toBeNull();
 
-		if (href) {
-			await page.goto(resolveUrl(href), { waitUntil: 'networkidle' });
-			await expect(page.locator('article')).toBeVisible();
+		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
+		await expect(page.locator('article')).toBeVisible();
 
-			const canonical = await getCanonicalHref(page);
-			expect(canonical).toMatch(/\/$/);
-		}
+		const canonical = await getCanonicalHref(page);
+		expect(canonical).toMatch(/\/$/);
 	});
 
 	test('category page loads', async ({ page }) => {
@@ -143,21 +140,20 @@ test.describe('Link Validation', () => {
 		// Get the first presentation link
 		const firstPresLink = page.locator(`a[href^="${withBasePath('/presentations/')}"][href$="/"]`).first();
 		const href = await firstPresLink.getAttribute('href');
+		expect(href, 'Expected first presentation link to have a non-null href').not.toBeNull();
 
-		if (href) {
-			await page.goto(resolveUrl(href), { waitUntil: 'networkidle' });
+		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
 
-			// Check that the "View Presentation" button exists and has valid href
-			const viewButton = page.locator('a:has-text("View Presentation")');
-			await expect(viewButton).toBeVisible();
+		// Check that the "View Presentation" button exists and has valid href
+		const viewButton = page.locator('a:has-text("View Presentation")');
+		await expect(viewButton).toBeVisible();
 
-			const presHref = await viewButton.getAttribute('href');
-			expect(presHref, 'Expected View Presentation href to be non-null').not.toBeNull();
-			expect(presHref).toMatch(/^\/.*\.html$/);
+		const presHref = await viewButton.getAttribute('href');
+		expect(presHref, 'Expected View Presentation href to be non-null').not.toBeNull();
+		expect(presHref).toMatch(/^\/.*\.html$/);
 
-			// Verify the presentation HTML file exists
-			const response = await page.goto(resolveUrl(presHref!), { waitUntil: 'networkidle' });
-			expect(response?.status()).toBe(200);
-		}
+		// Verify the presentation HTML file exists
+		const response = await page.goto(resolveUrl(presHref!), { waitUntil: 'networkidle' });
+		expect(response?.status()).toBe(200);
 	});
 });
