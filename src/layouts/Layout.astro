@@ -7,6 +7,7 @@ import {
   PUBLIC_DEPLOY_ENV,
 } from "astro:env/client";
 import { SITE } from "@/config";
+import { canonicalizePathname } from "@/utils/canonicalizePathname";
 import "@/styles/global.css";
 
 type Props = {
@@ -21,13 +22,18 @@ type Props = {
   scrollSmooth?: boolean;
 };
 
+// Strip trailing slash from pathname to match Astro's link generation
+// Preserve trailing slash for root ('/') and BASE_URL (e.g., '/astro-blog/' on staging)
+const basePathname = import.meta.env.BASE_URL;
+const pathname = canonicalizePathname(Astro.url.pathname, basePathname);
+
 const {
   title = SITE.title,
   author = SITE.author,
   profile = SITE.profile,
   description = SITE.desc,
   ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
-  canonicalURL = new URL(Astro.url.pathname, Astro.url),
+  canonicalURL = new URL(pathname, Astro.site).href,
   pubDate,
   updatedDate,
   scrollSmooth = false,

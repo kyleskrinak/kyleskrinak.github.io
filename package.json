@@ -22,7 +22,10 @@
     "test:console:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/console-errors.spec.ts",
     "test:analytics": "playwright test tests/analytics-privacy.spec.ts",
     "test:analytics:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test tests/analytics-privacy.spec.ts",
-    "test:analytics:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/analytics-privacy.spec.ts"
+    "test:analytics:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test tests/analytics-privacy.spec.ts",
+    "test:links": "htmltest",
+    "test:links:verbose": "htmltest -l 3",
+    "check:links": "node scripts/check-links.js"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
@@ -51,6 +54,8 @@
     "eslint": "^9.39.2",
     "eslint-plugin-astro": "^1.5.0",
     "globals": "^16.5.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-table-of-contents": "^1.1.0",
     "pagefind": "^1.4.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
