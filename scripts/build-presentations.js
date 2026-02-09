@@ -352,7 +352,7 @@ function generateHtml(title, slides) {
     </style>
 </head>
 <body>
-    <a href="../" class="home-link">← Home</a>
+    <a href="../index.html" class="home-link">← Home</a>
     <div class="progress-bar" id="progressBar"></div>
 
     <div class="presentation-container" id="container" data-pagefind-body>
