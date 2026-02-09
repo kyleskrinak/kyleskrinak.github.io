@@ -10,7 +10,21 @@ const basePathname = (() => {
 })();
 
 const withBasePath = (hrefPath: string) => `${basePathname}${hrefPath}`;
-const resolveUrl = (hrefPath: string) => new URL(hrefPath, BASE_URL).toString();
+const resolveUrl = (hrefPath: string) => {
+	if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(hrefPath)) {
+		return new URL(hrefPath).toString();
+	}
+
+	let effectivePath = hrefPath;
+
+	if (hrefPath.startsWith('/')) {
+		if (basePathname && !hrefPath.startsWith(`${basePathname}/`) && hrefPath !== basePathname) {
+			effectivePath = `${basePathname}${hrefPath}`;
+		}
+	}
+
+	return new URL(effectivePath, BASE_URL).toString();
+};
 
 const getCanonicalHref = async (page: import('@playwright/test').Page) => {
 	const canonicalLocator = page.locator('link[rel="canonical"]');
