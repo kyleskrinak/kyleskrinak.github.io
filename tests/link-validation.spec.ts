@@ -101,6 +101,11 @@ test.describe('Link Validation', () => {
 		await expect(page.locator('h1')).toContainText('Tag');
 	});
 
+	test('code-plus tag page loads', async ({ page }) => {
+		await page.goto(resolveUrl('/tags/code-plus/'), { waitUntil: 'networkidle' });
+		await expect(page.locator('h1')).toContainText('Tag');
+	});
+
 	test('no console errors on home page', async ({ page }) => {
 		const errors: string[] = [];
 		page.on('console', (msg) => {
