@@ -161,4 +161,17 @@ test.describe('Link Validation', () => {
 		const response = await page.goto(resolveUrl(presHref!), { waitUntil: 'networkidle' });
 		expect(response?.status()).toBe(200);
 	});
+
+	test('presentation home link points to canonical root', async ({ page }) => {
+		await page.goto(resolveUrl('/presentations/wohd.html'), { waitUntil: 'networkidle' });
+
+		const homeLink = page.locator('a.home-link');
+		await expect(homeLink).toBeVisible();
+
+		const href = await homeLink.getAttribute('href');
+		expect(href, 'Expected Home link to use a relative root path').toBe('../');
+
+		await homeLink.click();
+		await expect(page).toHaveURL(resolveUrl('/'));
+	});
 });
