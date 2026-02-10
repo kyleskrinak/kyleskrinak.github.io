@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { getPath } from '@/utils/getPath';
 
 /**
  * Dynamic redirect route for Jekyll URL format
@@ -43,5 +44,5 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 
 // Redirect to new URL with 301 permanent redirect
-return Astro.redirect(`/posts/${post.id}`, 301);
+return Astro.redirect(getPath(post.id, post.filePath), 301);
 ---

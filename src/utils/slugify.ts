@@ -12,12 +12,13 @@ const hasNonLatin = (str: string): boolean => /[^\x00-\x7F]/.test(str);
  * - For strings with non-Latin characters: use lodash.kebabcase (preserves non-Latin chars)
  */
 export const slugifyStr = (str: string): string => {
-  if (hasNonLatin(str)) {
+  const normalized = str.replace(/\+/g, " plus ");
+  if (hasNonLatin(normalized)) {
     // Preserve non-Latin characters (e.g., Burmese, Chinese, etc.)
-    return kebabcase(str);
+    return kebabcase(normalized);
   }
   // Handle Latin strings with better number/acronym handling
-  return slugify(str, { lower: true });
+  return slugify(normalized, { lower: true });
 };
 
 export const slugifyAll = (arr: string[]) => arr.map(str => slugifyStr(str));
