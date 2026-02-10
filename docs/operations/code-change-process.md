@@ -122,6 +122,7 @@ Before submitting for review:
 - [ ] No redundancy (e.g., explicit defaults that achieve nothing)
 - [ ] Comments explain intent and reference related files if applicable
 - [ ] Commit message accurately describes all changes
+- [ ] Tests updated or added for the new behavior (especially when links/routes change)
 
 ### Documentation Sync
 
