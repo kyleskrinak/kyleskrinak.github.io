@@ -10,10 +10,21 @@ import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 
 const { pathname } = Astro.url;
+const basePathname = import.meta.env.BASE_URL ?? "/";
+
+const stripBasePath = (path: string) => {
+  if (basePathname !== "/" && path.startsWith(basePathname)) {
+    return path.slice(basePathname.length - 1) || "/";
+  }
+  return path;
+};
 
 // Remove trailing slash from current pathname if exists
+const currentPathRaw = stripBasePath(pathname);
 const currentPath =
-  pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  currentPathRaw.endsWith("/") && currentPathRaw !== "/"
+    ? currentPathRaw.slice(0, -1)
+    : currentPathRaw;
 
 const isActive = (path: string) => {
   const currentPathArray = currentPath.split("/").filter(p => p.trim());
@@ -73,22 +84,22 @@ const isActive = (path: string) => {
         ]}
       >
         <li class="col-span-2">
-          <a href={linkWithBase("/posts")} class:list={{ "active-nav": isActive("/posts") }}>
+          <a href={linkWithBase("/posts/")} class:list={{ "active-nav": isActive("/posts") }}>
             Posts
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/tags")} class:list={{ "active-nav": isActive("/tags") }}>
+          <a href={linkWithBase("/tags/")} class:list={{ "active-nav": isActive("/tags") }}>
             Tags
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/about")} class:list={{ "active-nav": isActive("/about") }}>
+          <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>
             About
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/presentations")} class:list={{ "active-nav": isActive("/presentations") }}>
+          <a href={linkWithBase("/presentations/")} class:list={{ "active-nav": isActive("/presentations") }}>
             Presentations
           </a>
         </li>
@@ -96,7 +107,7 @@ const isActive = (path: string) => {
           SITE.showArchives && (
             <li class="col-span-2">
               <LinkButton
-                href={linkWithBase("/archives")}
+                href={linkWithBase("/archives/")}
                 class:list={[
                   "focus-outline flex justify-center p-3 sm:p-1",
                   {
@@ -114,7 +125,7 @@ const isActive = (path: string) => {
         }
         <li class="col-span-1 flex items-center justify-center">
           <LinkButton
-            href={linkWithBase("/search")}
+            href={linkWithBase("/search/")}
             class:list={[
               "focus-outline flex p-3 sm:p-1",
               { "[&>svg]:stroke-accent": isActive("/search") },
