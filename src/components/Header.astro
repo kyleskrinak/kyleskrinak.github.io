@@ -10,10 +10,21 @@ import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 
 const { pathname } = Astro.url;
+const basePathname = import.meta.env.BASE_URL ?? "/";
+
+const stripBasePath = (path: string) => {
+  if (basePathname !== "/" && path.startsWith(basePathname)) {
+    return path.slice(basePathname.length - 1) || "/";
+  }
+  return path;
+};
 
 // Remove trailing slash from current pathname if exists
+const currentPathRaw = stripBasePath(pathname);
 const currentPath =
-  pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  currentPathRaw.endsWith("/") && currentPathRaw !== "/"
+    ? currentPathRaw.slice(0, -1)
+    : currentPathRaw;
 
 const isActive = (path: string) => {
   const currentPathArray = currentPath.split("/").filter(p => p.trim());
