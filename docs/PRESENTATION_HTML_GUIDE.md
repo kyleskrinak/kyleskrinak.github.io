@@ -110,7 +110,7 @@ const htmlFile = linkWithBase(`/presentations/${id}.html`);
 
 **Link to Home**: Use relative path in presentation HTML:
 ```html
-<a href="../../index.html" class="home-link">← Home</a>
+<a href="../" class="home-link">← Home</a>
 ```
 
 ## Content Types That Work
