@@ -73,22 +73,22 @@ const isActive = (path: string) => {
         ]}
       >
         <li class="col-span-2">
-          <a href={linkWithBase("/posts")} class:list={{ "active-nav": isActive("/posts") }}>
+          <a href={linkWithBase("/posts/")} class:list={{ "active-nav": isActive("/posts") }}>
             Posts
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/tags")} class:list={{ "active-nav": isActive("/tags") }}>
+          <a href={linkWithBase("/tags/")} class:list={{ "active-nav": isActive("/tags") }}>
             Tags
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/about")} class:list={{ "active-nav": isActive("/about") }}>
+          <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>
             About
           </a>
         </li>
         <li class="col-span-2">
-          <a href={linkWithBase("/presentations")} class:list={{ "active-nav": isActive("/presentations") }}>
+          <a href={linkWithBase("/presentations/")} class:list={{ "active-nav": isActive("/presentations") }}>
             Presentations
           </a>
         </li>
@@ -96,7 +96,7 @@ const isActive = (path: string) => {
           SITE.showArchives && (
             <li class="col-span-2">
               <LinkButton
-                href={linkWithBase("/archives")}
+                href={linkWithBase("/archives/")}
                 class:list={[
                   "focus-outline flex justify-center p-3 sm:p-1",
                   {
@@ -114,7 +114,7 @@ const isActive = (path: string) => {
         }
         <li class="col-span-1 flex items-center justify-center">
           <LinkButton
-            href={linkWithBase("/search")}
+            href={linkWithBase("/search/")}
             class:list={[
               "focus-outline flex p-3 sm:p-1",
               { "[&>svg]:stroke-accent": isActive("/search") },
