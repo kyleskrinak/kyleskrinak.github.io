@@ -22,7 +22,12 @@ if (urls.length === 0) {
 
 // Browser mode: Defaults to headed (better bot detection bypass)
 // Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
-const headed = process.env.PLAYWRIGHT_HEADED !== 'false';
+// Auto-detect headless environments (CI, no display server)
+const isCI = process.env.CI === 'true';
+const hasDisplay = process.env.DISPLAY || process.env.WAYLAND_DISPLAY;
+const autoHeadless = isCI || !hasDisplay;
+const explicitHeaded = process.env.PLAYWRIGHT_HEADED === 'true';
+const headed = explicitHeaded || !autoHeadless;
 const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)

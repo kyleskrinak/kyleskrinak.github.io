@@ -147,12 +147,12 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
-  - "onedrive.live.com"  # Works in browsers, blocks bots
-  - "nytimes.com"        # Works in browsers, blocks bots
+  - "onedrive.live.com"  # Bot detection, works in real browsers
+  - "nytimes.com"        # Aggressive rate limiting, works in real browsers
   # ... etc
 ```
 
-**Note**: 403 responses are automatically withheld from ignore suggestions by the link checker script (see Tier 2 browser verification).
+**Note**: 403 responses and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
 
 ## Handling Link Check Failures
 
@@ -276,16 +276,19 @@ npm run test:links
 
 Add domains to `IgnoreURLs` when:
 - ✅ URL works in real browsers (verified with browser)
-- ✅ URL fails automated checks (e.g., 404, 403, bot detection, rate limiting)
+- ✅ URL fails automated checks **BUT has explicit status code** (404, 429, 503, etc.)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
-- ⚠️  **Exclusions**: 403 responses withheld by policy (handled separately); 404 in browser = genuinely broken (don't add)
+- ⚠️  **Never add** 403 responses (withheld by policy), connection errors, or URLs that also fail in browser
 
 Do NOT add to ignore list when:
-- ❌ URL fails browser verification (genuinely broken - 404, timeout, TLS error, etc.)
+- ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
 - ❌ Content has moved to new URL
 - ❌ Site is permanently offline
-- ⚠️  **Note**: 403 in browser = works (bot-blocking), never added by policy. Only htmltest-404s that succeed in browser are suggested; ignore if browser also returns 404.
+- ⚠️  **Policy Exclusions**: 
+  - 403 responses: withheld by policy (not added even if browser works)
+  - Connection/TLS errors (no status code): not suggested (real issues to investigate)
+  - 404 in both htmltest and browser: genuinely broken (don't ignore)
 
 ## Bot-Blocking Patterns
 
