@@ -52,10 +52,10 @@ PLAYWRIGHT_HEADED=false npm run check:links
 - ✅ **Headed (default)**: Better bot detection bypass, requires display
 - ⚠️ **Headless (`PLAYWRIGHT_HEADED=false`)**: Works in CI/CD, Docker, SSH sessions without GUI
 
-**When to use headed mode**:
-- Local troubleshooting of bot-detected sites
-- Sites with sophisticated JavaScript-based bot detection
-- When headless mode gives false negatives
+**When to use headless mode**:
+- CI/CD pipelines and automated checks without display
+- Server environments (Docker, SSH, remote machines)
+- When you want faster execution without browser UI
 
 ### 4. HTTPS Certificate Validation
 
@@ -74,6 +74,7 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 **When to use bypass**:
 - Testing sites with known bot detection that also have cert warnings
 - Verifying if a failure is due to TLS vs actual broken link
+- Local troubleshooting of bot-detected sites
 
 **Do NOT bypass for**:
 - Regular link checking (use default strict validation)
