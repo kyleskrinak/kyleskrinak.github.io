@@ -197,7 +197,7 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` unless the failure was a 403 response (we do not ignore 403s):
+The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` EXCEPT if the failure was a 403 response (we do not ignore 403s; all other status codes may be added):
 
 ```yaml
 IgnoreURLs:

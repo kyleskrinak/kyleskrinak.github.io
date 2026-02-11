@@ -33,7 +33,7 @@ feature/xyz → merge to develop (no PR required) → validate locally
 
 **Pattern for `staging` and `main` (main is strict)**:
 ```
-develop → PR to staging → validate on staging → PR to main → tag & release
+develop → merge/PR to staging → validate on staging → PR to main → tag & release
 ```
 
 **Anti-patterns (never)**:

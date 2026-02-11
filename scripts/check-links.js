@@ -232,7 +232,6 @@ if (broken.length > 0) {
   process.exit(1);
 }
 
-const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
 if (ignoreCandidates.length > 0) {
   console.log(`\n✅ All failed links work in browser - update ignore list\n`);
 } else if (working.length > 0) {
