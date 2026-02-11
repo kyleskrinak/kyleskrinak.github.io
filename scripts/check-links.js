@@ -82,9 +82,12 @@ const failedUrls = [...new Set(
       let url = matches[matches.length - 1];
       url = url.replace(/["':)\]]+$/, '');
 
-      if (!statusByUrl.has(url)) {
-        const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
-        statusByUrl.set(url, statusMatch ? Number(statusMatch[1]) : null);
+      const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
+      const newStatus = statusMatch ? Number(statusMatch[1]) : null;
+      const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
+      // Set status if first encounter, or overwrite null with actual status code
+      if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
+        statusByUrl.set(url, newStatus);
       }
 
       return url;
@@ -165,9 +168,11 @@ console.log(`   Total failures from htmltest: ${failedUrls.length}`);
 console.log(`   ✅ Working in real browser: ${working.length}`);
 console.log(`   ❌ Actually broken: ${broken.length}`);
 
+// Compute candidates in outer scope for use throughout reporting and exit logic
+const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
+const withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
+
 if (working.length > 0) {
-  const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
-  const withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
 
   if (ignoreCandidates.length > 0) {
     console.log('\n✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):');
