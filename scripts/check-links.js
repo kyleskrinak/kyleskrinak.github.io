@@ -254,6 +254,8 @@ if (broken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
+// Note: 403s that work in browser are withheld from ignore list by policy, but still represent
+// successful links (not broken), so they don't trigger exit(1). Only genuinely broken links fail.
 if (broken.length > 0) {
   console.log(`\n⚠️  ${broken.length} link(s) need manual attention\n`);
   process.exit(1);
