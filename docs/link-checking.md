@@ -276,19 +276,30 @@ npm run test:links
 
 Add domains to `IgnoreURLs` when:
 - ✅ URL works in real browsers (verified with browser)
-- ✅ URL fails automated checks (e.g., bot detection, rate limiting)
+- ✅ URL fails automated checks (e.g., 404, 403, bot detection, rate limiting)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
-- ⚠️  **NOT if the failure is a 403** (403 responses are automatically withheld by the link checker)
+- ⚠️  **Exclusions**: 403 responses withheld by policy (handled separately); 404 in browser = genuinely broken (don't add)
 
 Do NOT add to ignore list when:
-- ❌ URL returns 403 (automatically handled by script withhold policy)
-- ❌ URL returns 404 (content is gone)
-- ❌ Site is permanently offline
+- ❌ URL fails browser verification (genuinely broken - 404, timeout, TLS error, etc.)
 - ❌ Content has moved to new URL
-- ❌ TLS certificate is invalid/expired
+- ❌ Site is permanently offline
+- ⚠️  **Note**: 403 in browser = works (bot-blocking), never added by policy. Only htmltest-404s that succeed in browser are suggested; ignore if browser also returns 404.
 
-## Common Ignore List Domains
+## Bot-Blocking Patterns
+
+Sites may report different errors to bots vs real browsers:
+
+| Pattern | htmltest Reports | Browser Returns | Action |
+|---------|------------------|-----------------|--------|
+| **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
+| **Softer bot detection** | 404 | 200 OK | May add to ignore list (script suggests) |
+| **Rate limiting** | 429 | 200 OK | May add to ignore list |
+| **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
+| **Proxy issues** | 503 | 200 OK | May add to ignore list |
+
+**Key Rule**: Only add to ignore list if the URL **works in browser verification**. If browser also fails, the link is genuinely broken and should be fixed, not ignored.
 
 | Domain | Reason |
 |--------|--------|
