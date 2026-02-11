@@ -5,5 +5,5 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
-  - "drupal.org"  # Returns 403 to automated tools, works in browsers
-  - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
+  - "onedrive.live.com"  # Bot detection, works in real browsers
+  - "nytimes.com"  # Aggressive rate limiting, works in real browsers

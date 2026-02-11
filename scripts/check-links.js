@@ -106,7 +106,12 @@ console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
 console.log('━'.repeat(60));
 // Browser mode: Defaults to headed (better bot detection bypass)
 // Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
-const headed = process.env.PLAYWRIGHT_HEADED !== 'false';
+// Auto-detect headless environments (CI, no display server)
+const isCI = process.env.CI === 'true';
+const hasDisplay = process.env.DISPLAY || process.env.WAYLAND_DISPLAY;
+const autoHeadless = isCI || !hasDisplay;
+const explicitHeaded = process.env.PLAYWRIGHT_HEADED === 'true';
+const headed = explicitHeaded || !autoHeadless;
 const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
@@ -169,8 +174,14 @@ console.log(`   ✅ Working in real browser: ${working.length}`);
 console.log(`   ❌ Actually broken: ${broken.length}`);
 
 // Compute candidates in outer scope for use throughout reporting and exit logic
-const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
+// Include: URLs with explicit HTTP status (404, 429, 503, etc.) suggesting bot-blocking
+// Exclude: 403s (withheld by policy), null/undefined (TLS/connection errors)
+const ignoreCandidates = working.filter(r => {
+  const status = statusByUrl.get(r.url);
+  return status !== 403 && status !== null && status !== undefined;
+});
 const withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
+const connectionErrors = working.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
 
 if (working.length > 0) {
 
@@ -204,6 +215,17 @@ if (working.length > 0) {
     console.log('\nℹ️  URLs that work in browser but returned 403 in htmltest (not adding to IgnoreURLs):');
     console.log('━'.repeat(60));
     withheld403s.forEach(r => {
+      console.log(`  - ${r.url}`);
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
+  if (connectionErrors.length > 0) {
+    console.log('\n⚠️  URLs that work in browser but had connection/TLS errors in htmltest (investigate):');
+    console.log('━'.repeat(60));
+    connectionErrors.forEach(r => {
       console.log(`  - ${r.url}`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
