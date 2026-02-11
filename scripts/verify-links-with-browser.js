@@ -20,9 +20,10 @@ if (urls.length === 0) {
   process.exit(1);
 }
 
-// Browser mode: Defaults to headless (works in CI)
-// Set PLAYWRIGHT_HEADED=true for headed mode (better bot detection bypass)
-const headless = process.env.PLAYWRIGHT_HEADED !== 'true';
+// Browser mode: Defaults to headed (better bot detection bypass)
+// Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
+const headed = process.env.PLAYWRIGHT_HEADED !== 'false';
+const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)

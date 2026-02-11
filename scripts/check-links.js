@@ -72,6 +72,7 @@ const failedLines = htmltestOutput.split('\n').filter(line =>
   line.includes('tls:')
 );
 
+const statusByUrl = new Map();
 const failedUrls = [...new Set(
   failedLines
     .map(line => {
@@ -80,6 +81,12 @@ const failedUrls = [...new Set(
       // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
       let url = matches[matches.length - 1];
       url = url.replace(/["':)\]]+$/, '');
+
+      if (!statusByUrl.has(url)) {
+        const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
+        statusByUrl.set(url, statusMatch ? Number(statusMatch[1]) : null);
+      }
+
       return url;
     })
     .filter(url => url !== null)
@@ -94,9 +101,10 @@ if (failedUrls.length === 0) {
 console.log('\n━'.repeat(60));
 console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
 console.log('━'.repeat(60));
-// Browser mode: Defaults to headless (works in CI)
-// Set PLAYWRIGHT_HEADED=true for headed mode (better bot detection bypass)
-const headless = process.env.PLAYWRIGHT_HEADED !== 'true';
+// Browser mode: Defaults to headed (better bot detection bypass)
+// Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
+const headed = process.env.PLAYWRIGHT_HEADED !== 'false';
+const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
@@ -158,29 +166,45 @@ console.log(`   ✅ Working in real browser: ${working.length}`);
 console.log(`   ❌ Actually broken: ${broken.length}`);
 
 if (working.length > 0) {
-  console.log('\n✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):');
-  console.log('━'.repeat(60));
+  const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
+  const withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
 
-  const domains = [...new Set(working.map(r => {
-    try {
-      const url = new URL(r.url);
-      return url.hostname;
-    } catch {
-      return r.url;
-    }
-  }))];
+  if (ignoreCandidates.length > 0) {
+    console.log('\n✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):');
+    console.log('━'.repeat(60));
 
-  domains.forEach(domain => {
-    console.log(`  - "${domain}"`);
-  });
+    const domains = [...new Set(ignoreCandidates.map(r => {
+      try {
+        const url = new URL(r.url);
+        return url.hostname;
+      } catch {
+        return r.url;
+      }
+    }))];
 
-  console.log('\nFull URLs:');
-  working.forEach(r => {
-    console.log(`  - ${r.url}`);
-    if (r.redirected) {
-      console.log(`    → Redirects to: ${r.finalUrl}`);
-    }
-  });
+    domains.forEach(domain => {
+      console.log(`  - "${domain}"`);
+    });
+
+    console.log('\nFull URLs:');
+    ignoreCandidates.forEach(r => {
+      console.log(`  - ${r.url}`);
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
+  if (withheld403s.length > 0) {
+    console.log('\nℹ️  URLs that work in browser but returned 403 in htmltest (not adding to IgnoreURLs):');
+    console.log('━'.repeat(60));
+    withheld403s.forEach(r => {
+      console.log(`  - ${r.url}`);
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
 }
 
 if (broken.length > 0) {
@@ -206,9 +230,13 @@ console.log('\n' + '━'.repeat(60));
 if (broken.length > 0) {
   console.log(`\n⚠️  ${broken.length} link(s) need manual attention\n`);
   process.exit(1);
-} else if (working.length > 0) {
-  console.log(`\n✅ All failed links work in browser - update ignore list\n`);
-  process.exit(0);
-} else {
-  process.exit(0);
 }
+
+const ignoreCandidates = working.filter(r => statusByUrl.get(r.url) !== 403);
+if (ignoreCandidates.length > 0) {
+  console.log(`\n✅ All failed links work in browser - update ignore list\n`);
+} else if (working.length > 0) {
+  console.log(`\n✅ All failed links work in browser - no ignore list updates suggested\n`);
+}
+
+process.exit(0);

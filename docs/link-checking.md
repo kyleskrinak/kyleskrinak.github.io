@@ -40,17 +40,17 @@ npx playwright install chromium
 
 ### 3. Browser Mode Configuration
 
-By default, browser verification runs in **headless mode** (works in CI/CD without display).
+By default, browser verification runs in **headed mode** (best for bot detection bypass).
 
-To use headed mode (better bot detection bypass, but requires display):
+To use headless mode (CI/CD friendly, but more likely to hit bot detection):
 
 ```bash
-PLAYWRIGHT_HEADED=true npm run check:links
+PLAYWRIGHT_HEADED=false npm run check:links
 ```
 
 **Trade-offs**:
-- ✅ **Headless (default)**: Works in CI/CD, Docker, SSH sessions without GUI
-- ⚠️ **Headed (`PLAYWRIGHT_HEADED=true`)**: Better bot detection bypass, requires display/Xvfb
+- ✅ **Headed (default)**: Better bot detection bypass, requires display
+- ⚠️ **Headless (`PLAYWRIGHT_HEADED=false`)**: Works in CI/CD, Docker, SSH sessions without GUI
 
 **When to use headed mode**:
 - Local troubleshooting of bot-detected sites
@@ -109,14 +109,14 @@ This automatically:
 **Optional Environment Variables:**
 
 ```bash
-# Use headed mode (better bot bypass, requires display)
-PLAYWRIGHT_HEADED=true npm run check:links
+# Use headless mode (CI/CD friendly)
+PLAYWRIGHT_HEADED=false npm run check:links
 
 # Bypass HTTPS validation (for cert-warning sites)
 PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 
 # Combine both
-PLAYWRIGHT_HEADED=true PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
+PLAYWRIGHT_HEADED=false PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 ```
 
 ### Manual Checks
@@ -176,8 +176,8 @@ node scripts/verify-links-with-browser.js \
 
 **Optional Environment Variables:**
 ```bash
-# Use headed mode
-PLAYWRIGHT_HEADED=true node scripts/verify-links-with-browser.js \
+# Use headless mode
+PLAYWRIGHT_HEADED=false node scripts/verify-links-with-browser.js \
   "https://example.com/url"
 
 # Bypass HTTPS validation
@@ -186,7 +186,7 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/verify-links-with-browser.js \
 ```
 
 This script:
-- Launches Chromium browser (headless by default, headed with PLAYWRIGHT_HEADED=true)
+- Launches Chromium browser (headed by default, headless with PLAYWRIGHT_HEADED=false)
 - Handles JavaScript redirects
 - Can bypass bot detection (better in headed mode)
 - Reports final status and any redirects
@@ -196,7 +196,7 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml`:
+The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` unless the failure was a 403 response (we do not ignore 403s):
 
 ```yaml
 IgnoreURLs:
