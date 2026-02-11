@@ -7,16 +7,16 @@ This document defines the branching strategy and PR workflow for the astro-blog 
 - **`develop`**: Main integration branch for active feature development. Permissive; allows direct commits or feature branch merges (no PR required). Fastest iteration.
 - **`staging`**: Pre-production testing environment. Receives validated features from `develop`. Deploys to GitHub Pages. Tests the next release candidate before promoting to `main`.
 - **`main`**: Production-ready code, always stable. Receives only validated releases from `staging`. Deploys to kyle.skrinak.com via AWS S3 + CloudFront.
-- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` (PR optional), then integrated to `staging` for testing via PR, and finally promoted to `main` for release via PR.
+- **Feature branches**: Created off `develop` (e.g., `feature/analytics-cloudflare`). Merged back to `develop` (PR optional), then integrated to `staging` for testing (PR optional), and finally promoted to `main` for release via PR.
 
 ## Key Rules
 
 1. **`develop` is the main integration branch**: All feature work starts and ends here. It's permissive for active development.
 2. **`develop` is flexible**: Use feature branches + direct merge (no PR required), or push directly. Choose what works for your workflow.
-3. **`staging` is the pre-release candidate**: Requires PR. After features are validated in `develop`, `develop` is merged to `staging` via PR for final testing before production.
+3. **`staging` is the pre-release candidate**: PR optional. After features are validated in `develop`, `develop` is merged to `staging` for final testing before production.
 4. **`main` is always production-ready**: Requires PR. Only validated releases from `staging` merge to `main` via PR. Always stable, always the current production state.
 5. **Feature branches on `develop` are temporary**: Delete after merge.
-6. **`staging` and `main` are strict**: All changes flow through PRs to these branches. No direct commits or pushes.
+6. **`main` is strict**: All changes flow through PRs to `main`. No direct commits or pushes to `main`.
 
 ## Workflow: Develop (Relaxed)
 
@@ -31,22 +31,22 @@ git push origin develop
 feature/xyz → merge to develop (no PR required) → validate locally
 ```
 
-**Pattern for `staging` and `main` (strict)**:
+**Pattern for `staging` and `main` (main is strict)**:
 ```
 develop → PR to staging → validate on staging → PR to main → tag & release
 ```
 
 **Anti-patterns (never)**:
-- ❌ Direct commits to `staging` or `main`
-- ❌ Pushing directly to `staging` or `main`
-- ❌ Merging to `staging` or `main` without a PR
+- ❌ Direct commits to `main`
+- ❌ Pushing directly to `main`
+- ❌ Merging to `main` without a PR
 - ❌ Skipping validation before promoting to staging/main
 
-**Why**: `develop` is your active integration branch; it's fast-moving and can afford to be permissive. `staging` and `main` gate releases and must be audited via PRs to ensure quality and traceability.
+**Why**: `develop` is your active integration branch; it's fast-moving and can afford to be permissive. `staging` is a testing gate and can accept local merges; `main` must be audited via PRs to ensure quality and traceability.
 
 ## Before You Begin: Prerequisite State
 
-Before starting new feature work, verify that `staging` and `main` are aligned (and no pending PRs are blocking release). `develop` can be ahead, which is normal for active feature development.
+Before starting new feature work, if no release or hotfix is in progress, verify that `staging` and `main` are aligned (and no pending PRs are blocking release). `develop` can be ahead, which is normal for active feature development.
 
 ```bash
 # Check branch alignment
@@ -55,7 +55,7 @@ echo "main:" && git rev-parse origin/main
 echo "staging:" && git rev-parse origin/staging
 ```
 
-`staging` and `main` SHAs should match. If not:
+`staging` and `main` SHAs should match when no release or hotfix is in progress. If not:
 
 1. Check for pending PRs targeting `staging` or `main` that need merging first.
 2. If PRs are merged, pull and verify alignment:
@@ -66,7 +66,7 @@ echo "staging:" && git rev-parse origin/staging
    git pull origin main
    ```
 
-**Why**: `staging` and `main` must always be in sync for release readiness. `develop` can be ahead (that's where active work happens), but release gates must be clean. No pending PRs means releases are ready to flow.
+**Why**: `staging` and `main` must be in sync when you are not actively validating a release or hotfix. `develop` can be ahead (that's where active work happens), but release gates should be clean outside of those windows.
 
 ## Workflow: Feature Development
 
@@ -122,15 +122,15 @@ git branch -d feature/your-feature-name
 
 ### 5. Integrate Develop → Staging (When Ready for Testing)
 
-When you have a set of features ready to validate in the staging environment, open a PR from `develop` to `staging`:
+When you have a set of features ready to validate in the staging environment, merge `develop` to `staging` (local merge or PR):
 
 ```bash
 gh pr create --base staging --head develop --title "chore: sync staging with develop for testing"
 ```
 
-Or via GitHub UI: Open a PR with base `staging`, head `develop`.
+Or via GitHub UI: Open a PR with base `staging`, head `develop` (optional).
 
-Once approved and CI passes, merge the PR. Staging CI automatically builds and deploys to GitHub Pages. Staging will be deindexed (robots.txt blocks crawlers; no effect on functionality).
+Once merged and CI passes, staging automatically builds and deploys to GitHub Pages. Staging will be deindexed (robots.txt blocks crawlers; no effect on functionality).
 
 ### 6. Validate on Staging
 
@@ -428,7 +428,9 @@ Once complete, merge `staging` → `main`, tag, and deploy.
 
 A: **`develop`**: Yes. Direct commits and pushes are allowed for fast iteration. Use feature branches + direct merge, or push directly.
 
-**`staging` and `main`**: No. All changes require PRs for audit, validation, and release control.
+**`staging`**: Yes. Direct commits and local merges are allowed when you want fast iteration or to batch tests.
+
+**`main`**: No. All changes require PRs for audit, validation, and release control.
 
 ### Q: What if I need an urgent production fix?
 
