@@ -147,11 +147,12 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
-  - "drupal.org"         # Legitimate 403 responses
   - "onedrive.live.com"  # Works in browsers, blocks bots
   - "nytimes.com"        # Works in browsers, blocks bots
   # ... etc
 ```
+
+**Note**: 403 responses are automatically withheld from ignore suggestions by the link checker script (see Tier 2 browser verification).
 
 ## Handling Link Check Failures
 
@@ -197,12 +198,16 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` EXCEPT if the failure was a 403 response (we do not ignore 403s; all other status codes may be added):
+The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` only if:
+- The browser check succeeded (HTTP 200 or redirect)
+- The htmltest failure was NOT a 403 response (403s are automatically withheld by the script)
 
 ```yaml
 IgnoreURLs:
-  - "example.com"  # Works in browsers, blocks bots
+  - "example.com"  # Works in browsers, blocks bots (non-403 failure)
 ```
+
+Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
 
 #### If Browser Verification Fails ❌
 
