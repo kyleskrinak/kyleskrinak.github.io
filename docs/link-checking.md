@@ -275,13 +275,15 @@ npm run test:links
 ## Ignore List Guidelines
 
 Add domains to `IgnoreURLs` when:
-- ✅ URL works in real browsers
-- ✅ URL fails automated checks (403, bot detection)
+- ✅ URL works in real browsers (verified with browser)
+- ✅ URL fails automated checks (e.g., bot detection, rate limiting)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
+- ⚠️  **NOT if the failure is a 403** (403 responses are automatically withheld by the link checker)
 
 Do NOT add to ignore list when:
-- ❌ URL returns 404
+- ❌ URL returns 403 (automatically handled by script withhold policy)
+- ❌ URL returns 404 (content is gone)
 - ❌ Site is permanently offline
 - ❌ Content has moved to new URL
 - ❌ TLS certificate is invalid/expired
@@ -290,9 +292,9 @@ Do NOT add to ignore list when:
 
 | Domain | Reason |
 |--------|--------|
-| `drupal.org` | Returns 403 to automated tools, works in browsers |
-| `nytimes.com` | Aggressive bot detection |
+| `nytimes.com` | Aggressive bot detection (rate limiting) |
 | `linkedin.com` | Returns 999 status to block scrapers |
+| `onedrive.live.com` | Bot-blocking (works fine in real browser) |
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |
 
