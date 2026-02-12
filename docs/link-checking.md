@@ -219,7 +219,6 @@ The URL is legitimately broken. Options:
    _Note: The original site has been decommissioned and content was never archived._
    ```
 3. **Remove the link** if it no longer adds value
-4. **Add to ignore list** if it's a known issue (e.g., `windowsupdate.microsoft.com` requires Windows Update client)
 
 ## Example Workflow
 
