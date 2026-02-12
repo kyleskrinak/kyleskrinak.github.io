@@ -40,22 +40,22 @@ npx playwright install chromium
 
 ### 3. Browser Mode Configuration
 
-By default, browser verification runs in **headless mode** (works in CI/CD without display).
+By default, browser verification runs in **headed mode** (best for bot detection bypass).
 
-To use headed mode (better bot detection bypass, but requires display):
+To use headless mode (CI/CD friendly, but more likely to hit bot detection):
 
 ```bash
-PLAYWRIGHT_HEADED=true npm run check:links
+PLAYWRIGHT_HEADED=false npm run check:links
 ```
 
 **Trade-offs**:
-- ✅ **Headless (default)**: Works in CI/CD, Docker, SSH sessions without GUI
-- ⚠️ **Headed (`PLAYWRIGHT_HEADED=true`)**: Better bot detection bypass, requires display/Xvfb
+- ✅ **Headed (default)**: Better bot detection bypass, requires display
+- ⚠️ **Headless (`PLAYWRIGHT_HEADED=false`)**: Works in CI/CD, Docker, SSH sessions without GUI
 
-**When to use headed mode**:
-- Local troubleshooting of bot-detected sites
-- Sites with sophisticated JavaScript-based bot detection
-- When headless mode gives false negatives
+**When to use headless mode**:
+- CI/CD pipelines and automated checks without display
+- Server environments (Docker, SSH, remote machines)
+- When you want faster execution without browser UI
 
 ### 4. HTTPS Certificate Validation
 
@@ -74,6 +74,7 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 **When to use bypass**:
 - Testing sites with known bot detection that also have cert warnings
 - Verifying if a failure is due to TLS vs actual broken link
+- Local troubleshooting of bot-detected sites
 
 **Do NOT bypass for**:
 - Regular link checking (use default strict validation)
@@ -109,14 +110,14 @@ This automatically:
 **Optional Environment Variables:**
 
 ```bash
-# Use headed mode (better bot bypass, requires display)
-PLAYWRIGHT_HEADED=true npm run check:links
+# Use headless mode (CI/CD friendly)
+PLAYWRIGHT_HEADED=false npm run check:links
 
 # Bypass HTTPS validation (for cert-warning sites)
 PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 
 # Combine both
-PLAYWRIGHT_HEADED=true PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
+PLAYWRIGHT_HEADED=false PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 ```
 
 ### Manual Checks
@@ -146,11 +147,13 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
-  - "drupal.org"         # Legitimate 403 responses
-  - "onedrive.live.com"  # Works in browsers, blocks bots
-  - "nytimes.com"        # Works in browsers, blocks bots
+  - "onedrive.live.com"  # Bot detection, works in real browsers
+  - "nytimes.com"        # Aggressive rate limiting, works in real browsers
+  - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
   # ... etc
 ```
+
+**Note**: 403 responses and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
 
 ## Handling Link Check Failures
 
@@ -176,8 +179,8 @@ node scripts/verify-links-with-browser.js \
 
 **Optional Environment Variables:**
 ```bash
-# Use headed mode
-PLAYWRIGHT_HEADED=true node scripts/verify-links-with-browser.js \
+# Use headless mode
+PLAYWRIGHT_HEADED=false node scripts/verify-links-with-browser.js \
   "https://example.com/url"
 
 # Bypass HTTPS validation
@@ -186,7 +189,7 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/verify-links-with-browser.js \
 ```
 
 This script:
-- Launches Chromium browser (headless by default, headed with PLAYWRIGHT_HEADED=true)
+- Launches Chromium browser (headed by default, headless with PLAYWRIGHT_HEADED=false)
 - Handles JavaScript redirects
 - Can bypass bot detection (better in headed mode)
 - Reports final status and any redirects
@@ -196,12 +199,16 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml`:
+The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` only if:
+- The browser check succeeded (HTTP 200 or redirect)
+- The htmltest failure was NOT a 403 response (403s are automatically withheld by the script)
 
 ```yaml
 IgnoreURLs:
-  - "example.com"  # Works in browsers, blocks bots
+  - "example.com"  # Works in browsers, blocks bots (non-403 failure)
 ```
+
+Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
 
 #### If Browser Verification Fails ❌
 
@@ -269,24 +276,40 @@ npm run test:links
 ## Ignore List Guidelines
 
 Add domains to `IgnoreURLs` when:
-- ✅ URL works in real browsers
-- ✅ URL fails automated checks (403, bot detection)
+- ✅ URL works in real browsers (verified with browser)
+- ✅ URL fails automated checks **BUT has explicit status code** (404, 429, 503, etc.)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
+- ⚠️  **Never add** 403 responses (withheld by policy), connection errors, or URLs that also fail in browser
 
 Do NOT add to ignore list when:
-- ❌ URL returns 404
-- ❌ Site is permanently offline
+- ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
 - ❌ Content has moved to new URL
-- ❌ TLS certificate is invalid/expired
+- ❌ Site is permanently offline
+- ⚠️  **Policy Exclusions**: 
+  - 403 responses: withheld by policy (not added even if browser works)
+  - Connection/TLS errors (no status code): not suggested (real issues to investigate)
+  - 404 in both htmltest and browser: genuinely broken (don't ignore)
 
-## Common Ignore List Domains
+## Bot-Blocking Patterns
+
+Sites may report different errors to bots vs real browsers:
+
+| Pattern | htmltest Reports | Browser Returns | Action |
+|---------|------------------|-----------------|--------|
+| **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
+| **Softer bot detection** | 404 | 200 OK | May add to ignore list (script suggests) |
+| **Rate limiting** | 429 | 200 OK | May add to ignore list |
+| **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
+| **Proxy issues** | 503 | 200 OK | May add to ignore list |
+
+**Key Rule**: Only add to ignore list if the URL **works in browser verification**. If browser also fails, the link is genuinely broken and should be fixed, not ignored.
 
 | Domain | Reason |
 |--------|--------|
-| `drupal.org` | Returns 403 to automated tools, works in browsers |
-| `nytimes.com` | Aggressive bot detection |
+| `nytimes.com` | Aggressive bot detection (rate limiting) |
 | `linkedin.com` | Returns 999 status to block scrapers |
+| `onedrive.live.com` | Bot-blocking (works fine in real browser) |
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |
 
