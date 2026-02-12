@@ -20,9 +20,15 @@ if (urls.length === 0) {
   process.exit(1);
 }
 
-// Browser mode: Defaults to headless (works in CI)
-// Set PLAYWRIGHT_HEADED=true for headed mode (better bot detection bypass)
-const headless = process.env.PLAYWRIGHT_HEADED !== 'true';
+// Browser mode: Defaults to headed (better bot detection bypass)
+// Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
+// Auto-detect headless environments (CI, no display server)
+const isCI = process.env.CI === 'true';
+const hasDisplay = process.env.DISPLAY || process.env.WAYLAND_DISPLAY;
+const autoHeadless = isCI || !hasDisplay;
+const explicitHeaded = process.env.PLAYWRIGHT_HEADED === 'true';
+const headed = explicitHeaded || !autoHeadless;
+const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
