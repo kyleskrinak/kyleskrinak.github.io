@@ -11,6 +11,7 @@
  */
 
 import { chromium } from 'playwright';
+import { resolveBrowserMode } from './lib/browser-mode.js';
 import { verifyUrl } from './lib/verify-url.js';
 
 const urls = process.argv.slice(2);
@@ -20,15 +21,12 @@ if (urls.length === 0) {
   process.exit(1);
 }
 
-// Browser mode: Defaults to headed (better bot detection bypass)
-// Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
-// Auto-detect headless environments (CI, no display server)
-const isCI = process.env.CI === 'true';
-const hasDisplay = process.env.DISPLAY || process.env.WAYLAND_DISPLAY;
-const autoHeadless = isCI || !hasDisplay;
-const explicitHeaded = process.env.PLAYWRIGHT_HEADED === 'true';
-const headed = explicitHeaded || !autoHeadless;
-const headless = !headed;
+// Browser mode:
+// - Defaults to headed (better bot detection bypass)
+// - PLAYWRIGHT_HEADED=true  -> force headed
+// - PLAYWRIGHT_HEADED=false -> force headless
+// - Otherwise auto-detect headless environments (CI, no display server on Linux)
+const { headless } = resolveBrowserMode();
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
