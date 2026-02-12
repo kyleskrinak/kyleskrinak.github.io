@@ -41,11 +41,18 @@ npx playwright install chromium
 ### 3. Browser Mode Configuration
 
 By default, browser verification runs in **headed mode** (best for bot detection bypass).
+In CI or Linux environments without a display server, the scripts auto-fallback to headless.
 
-To use headless mode (CI/CD friendly, but more likely to hit bot detection):
+To force headless mode (CI/CD friendly, but more likely to hit bot detection):
 
 ```bash
 PLAYWRIGHT_HEADED=false npm run check:links
+```
+
+To force headed mode (override auto-detection):
+
+```bash
+PLAYWRIGHT_HEADED=true npm run check:links
 ```
 
 **Trade-offs**:
