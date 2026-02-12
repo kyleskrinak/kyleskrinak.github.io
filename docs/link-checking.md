@@ -149,6 +149,7 @@ IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers
   - "nytimes.com"        # Aggressive rate limiting, works in real browsers
+  - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
   # ... etc
 ```
 
