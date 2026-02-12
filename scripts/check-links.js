@@ -104,14 +104,26 @@ if (failedUrls.length === 0) {
 console.log('\n━'.repeat(60));
 console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
 console.log('━'.repeat(60));
-// Browser mode: Defaults to headed (better bot detection bypass)
-// Set PLAYWRIGHT_HEADED=false for headless mode (CI-friendly)
-// Auto-detect headless environments (CI, no display server)
+// Browser mode:
+// - Defaults to headed (better bot detection bypass)
+// - PLAYWRIGHT_HEADED=true  -> force headed
+// - PLAYWRIGHT_HEADED=false -> force headless
+// - Otherwise auto-detect headless environments (CI, no display server on Linux)
+const headedEnv = process.env.PLAYWRIGHT_HEADED;
 const isCI = process.env.CI === 'true';
-const hasDisplay = process.env.DISPLAY || process.env.WAYLAND_DISPLAY;
+const isLinux = process.platform === 'linux';
+const hasDisplay = isLinux ? Boolean(process.env.DISPLAY || process.env.WAYLAND_DISPLAY) : true;
 const autoHeadless = isCI || !hasDisplay;
-const explicitHeaded = process.env.PLAYWRIGHT_HEADED === 'true';
-const headed = explicitHeaded || !autoHeadless;
+let headed;
+
+if (headedEnv === 'true') {
+  headed = true;
+} else if (headedEnv === 'false') {
+  headed = false;
+} else {
+  headed = !autoHeadless;
+}
+
 const headless = !headed;
 
 // HTTPS error handling: Defaults to strict TLS validation (catches cert issues)
