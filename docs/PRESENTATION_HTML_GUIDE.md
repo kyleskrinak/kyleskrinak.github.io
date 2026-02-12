@@ -158,5 +158,5 @@ This ensures the HTML file URL is `/astro-blog/presentations/code-presentation.h
 1. **CSS Specificity Wars** - Let CSS be simple, don't fight it with !important rules
 2. **Forgotten linkWithBase()** - Always use it in presentation routes for subpath deployments
 3. **Hardcoded paths in HTML** - Use relative paths for home link, absolute for images/videos
-4. **Image path issues** - Images should use absolute paths like `/assets/images/code-plus/Code+Workflow-1.svg`
+4. **Image path issues** - Images should use absolute paths like `/assets/images/code-plus/code-plus-workflow-1.svg`
 5. **Overcomplicating JavaScript** - Simple forEach loop is sufficient, no need for complex state tracking
