@@ -162,6 +162,29 @@ test.describe('Link Validation', () => {
 		expect(response?.status()).toBe(200);
 	});
 
+	test('code presentation images load successfully', async ({ page }) => {
+		const failedRequests: string[] = [];
+
+		// Monitor network requests for image loading failures
+		page.on('response', response => {
+			const url = response.url();
+			if (url.includes('/assets/images/code-plus/') && response.status() !== 200) {
+				failedRequests.push(`${url} (${response.status()})`);
+			}
+		});
+
+		await page.goto(resolveUrl('/presentations/code-presentation.html'), {
+			waitUntil: 'networkidle',
+		});
+
+		// Verify no failed image requests
+		expect(failedRequests, 'All presentation images should load successfully').toEqual([]);
+
+		// Verify expected workflow images are present
+		const images = page.locator('img[src^="/assets/images/code-plus/"]');
+		expect(await images.count()).toBe(6);
+	});
+
 	test('presentation home link points to canonical root', async ({ page }) => {
 		await page.goto(resolveUrl('/presentations/wohd.html'), { waitUntil: 'networkidle' });
 
