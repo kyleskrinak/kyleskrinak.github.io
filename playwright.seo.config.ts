@@ -1,12 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright config for SEO and functional tests (non-visual regression tests)
- * These tests check meta tags, links, console errors, and analytics
+ * Playwright config for SEO meta tag tests
+ * Narrowly scoped to seo-meta-tags.spec.ts to avoid running tests
+ * with incompatible baseURL defaults (analytics/console expect :3000)
  */
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['**/*.spec.ts'],
+  testMatch: ['**/seo-meta-tags.spec.ts'],
   testIgnore: ['**/visual/**'],
 
   fullyParallel: true,
@@ -28,9 +29,15 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
-  },
+  // Only start dev server when testing against localhost
+  // When PLAYWRIGHT_TEST_BASE_URL points to staging/production, skip webServer
+  webServer:
+    process.env.PLAYWRIGHT_TEST_BASE_URL &&
+    !process.env.PLAYWRIGHT_TEST_BASE_URL.includes('localhost')
+      ? undefined
+      : {
+          command: 'npm run dev',
+          url: 'http://localhost:4321',
+          reuseExistingServer: !process.env.CI,
+        },
 });
