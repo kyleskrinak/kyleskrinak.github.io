@@ -6,10 +6,16 @@ const isStaging =
 	process.env.PUBLIC_DEPLOY_ENV === 'staging' ||
 	BASE_URL.includes('github.io');
 
+// Normalize base pathname to avoid double slashes (e.g., /site//tags/)
+const basePathname = (() => {
+	const pathname = new URL(BASE_URL).pathname;
+	if (pathname === '/' || pathname === '') return '';
+	return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+})();
+
 const resolveUrl = (path: string) => {
-	const basePathname = new URL(BASE_URL).pathname;
 	const effectivePath = path.startsWith('/') ? path : `/${path}`;
-	const fullPath = basePathname !== '/' ? `${basePathname}${effectivePath}` : effectivePath;
+	const fullPath = basePathname !== '' ? `${basePathname}${effectivePath}` : effectivePath;
 	return new URL(fullPath, BASE_URL).toString();
 };
 
@@ -119,20 +125,26 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		test('all pages have noindex,nofollow on staging', async ({ page }) => {
 			test.skip(!isStaging, 'This test only runs on staging');
 
-			// Test home page
-			await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
-			let robotsContent = await getRobotsMetaTag(page);
-			expect(robotsContent).toBe('noindex,nofollow');
+			// Test representative pages from each template type to ensure
+			// staging directives are enforced everywhere, including pages
+			// that don't use the Layout component
+			const stagingPages = [
+				'/', // home page
+				'/posts/2026-02-02-fun-at-scale/', // existing blog post
+				'/tags/', // tags index (system page)
+				'/tags/ai/', // representative tag detail page
+				'/posts/2/', // representative pagination page
+				'/presentations/wohd/', // representative presentation detail page
+			];
 
-			// Test a blog post
-			await page.goto(resolveUrl('/posts/2026-02-02-fun-at-scale/'), { waitUntil: 'networkidle' });
-			robotsContent = await getRobotsMetaTag(page);
-			expect(robotsContent).toBe('noindex,nofollow');
-
-			// Test a system page
-			await page.goto(resolveUrl('/tags/'), { waitUntil: 'networkidle' });
-			robotsContent = await getRobotsMetaTag(page);
-			expect(robotsContent).toBe('noindex,nofollow');
+			for (const pagePath of stagingPages) {
+				await page.goto(resolveUrl(pagePath), { waitUntil: 'networkidle' });
+				const robotsContent = await getRobotsMetaTag(page);
+				expect(
+					robotsContent,
+					`Expected ${pagePath} to have robots noindex,nofollow on staging`
+				).toBe('noindex,nofollow');
+			}
 		});
 	});
 
