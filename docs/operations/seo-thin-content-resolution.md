@@ -71,29 +71,54 @@ Rather than adding content to navigation pages or removing them entirely, we imp
      )}
      ```
 
-2. **Page Templates** (6 files)
+2. **Page Templates** (7 files)
    - `src/pages/tags/index.astro` - tag listing
    - `src/pages/tags/[tag].astro` - individual tag pages
+   - `src/pages/categories/[category].astro` - category pages
    - `src/pages/search.astro` - search functionality
    - `src/pages/posts/[...page].astro` - pagination
    - `src/pages/presentations/index.astro` - presentations listing
    - `src/pages/presentations/[id].astro` - presentation directory pages
+   - `src/pages/404.astro` - 404 error page
 
    Each now passes `noindex={true}` to the Layout component.
 
+3. **Sitemap Configuration** (`src/pages/sitemap.xml.ts`)
+   - Removed all noindex pages from sitemap
+   - Only includes indexable content:
+     - Static pages: home, about, archives, lchf
+     - Individual blog posts (35+)
+     - Presentation HTML files (8)
+   - Excludes: tags, categories, pagination, presentations listing, search, 404
+   - **Important**: Sitemap and noindex directives must be consistent to avoid mixed signals to search engines
+
 ### Test Coverage
 
-Created comprehensive test suite (`tests/seo-meta-tags.spec.ts`):
+Created comprehensive test suites:
+
+**SEO Meta Tags** (`tests/seo-meta-tags.spec.ts`):
 - ✅ Verifies system pages have `noindex,follow`
 - ✅ Verifies content pages have no robots tag
 - ✅ Verifies staging has `noindex,nofollow` on all pages
 - ✅ Validates canonical URLs across all page types
 
+**Sitemap Validation** (`tests/sitemap.spec.ts`):
+- ✅ Verifies indexable pages are included
+- ✅ Verifies noindex pages are excluded
+- ✅ Validates sitemap XML format
+- ✅ Checks for duplicates and completeness
+
 Run tests:
 ```bash
+# SEO meta tags
 npm run test:seo                    # Local development
 npm run test:seo:staging           # Against staging
 npm run test:seo:production        # Against production
+
+# Sitemap validation
+npm run test:sitemap               # Local development
+npm run test:sitemap:staging       # Against staging
+npm run test:sitemap:production    # Against production
 ```
 
 ---
