@@ -3,7 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Playwright config for SEO meta tag tests
  * Narrowly scoped to seo-meta-tags.spec.ts to avoid running tests
- * with incompatible baseURL defaults (analytics/console expect :3000)
+ * with incompatible baseURL defaults (analytics-privacy.spec.ts and
+ * console-errors.spec.ts both default to :3000, not :4321)
  */
 export default defineConfig({
   testDir: './tests',

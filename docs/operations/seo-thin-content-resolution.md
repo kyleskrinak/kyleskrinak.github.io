@@ -109,6 +109,12 @@ npm run test:seo:production        # Against production
 - `/tags/` - tag listing page
 - `/tags/ai/`, `/tags/astro/`, etc. - individual tag pages
 
+**Categories** (0 pages currently)
+- Category page template exists at `src/pages/categories/[category].astro`
+- Configured with `noindex={true}` for consistency with tags
+- Currently no blog posts use categories (all have `categories: []`)
+- Template ready for future use if categories are added
+
 **Pagination** (8 pages)
 - `/posts/2/` through `/posts/8/` - paginated post listings
 
