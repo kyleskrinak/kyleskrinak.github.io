@@ -162,7 +162,10 @@ const structuredData = {
         Production is indexed normally (default behavior). Canonical link tag above can
         optionally point to external content if needed.
         Related: src/pages/robots.txt.ts (staging: Disallow: /, production: Allow: /) */}
-    {(isStaging || noindex) && (
+    {isStaging && (
+      <meta name="robots" content="noindex,nofollow" />
+    )}
+    {!isStaging && noindex && (
       <meta name="robots" content="noindex,follow" />
     )}
 
