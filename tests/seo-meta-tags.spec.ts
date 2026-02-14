@@ -100,15 +100,11 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			expect(robotsContent).toBe('noindex,follow');
 		});
 
-		test('category pages have noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-			// NOTE: Currently no blog posts use categories (all have categories: [])
-			// so no category pages exist. This test is included for future-proofing.
-			// If a category page exists in the future, it will be tested here.
 
-			// Skip test if no category pages exist
-			test.skip(true, 'No category pages currently exist (all posts have empty categories array)');
-		});
+	// NOTE: Category pages test removed because no categories currently exist.
+	// The template at src/pages/categories/[category].astro is configured with
+	// noindex={true} for when categories are used. Add test when categories are
+	// populated in blog posts.
 	});
 
 	test.describe('Content Pages (should NOT have noindex)', () => {
@@ -201,6 +197,10 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 				if (!isStaging) {
 					// On production/localhost: expect production canonicals
 					const canonicalUrl = new URL(href!);
+					// IMPORTANT: Domain is intentionally hardcoded (not derived from config)
+					// to ensure staging canonicals point to production. If we derived from
+					// config, staging might use staging URL and this test would incorrectly pass.
+					// If the production domain changes, update this constant.
 					const expectedOrigin = 'https://kyle.skrinak.com';
 					expect(
 						canonicalUrl.origin,
