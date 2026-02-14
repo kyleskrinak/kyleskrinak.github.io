@@ -131,7 +131,9 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			test.skip(!isStaging, 'This test only runs on staging');
 			// NOTE: Local development behaves like production (isStaging=false),
 			// so staging-specific tests are skipped in local dev. To test staging
-			// behavior locally, set PLAYWRIGHT_DEPLOY_ENV=staging explicitly.
+			// behavior (including noindex,nofollow) locally, run the app with
+			// PUBLIC_DEPLOY_ENV=staging (and optionally PLAYWRIGHT_DEPLOY_ENV=staging
+			// so these staging-only tests are not skipped).
 
 			// Test representative pages from each template type to ensure
 			// staging directives are enforced everywhere, including pages
@@ -178,6 +180,20 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 				const href = await canonicalTag.getAttribute('href');
 				expect(href, `Expected canonical href on ${pagePath} to be non-null`).not.toBeNull();
 				expect(href, `Expected canonical href on ${pagePath} to be a valid URL`).toMatch(/^https?:\/\//);
+
+				// Verify canonical uses correct origin (production domain)
+				// This catches issues like staging canonicalizing to itself instead of production
+				if (!isStaging) {
+					// On production/localhost: expect production canonicals
+					const canonicalUrl = new URL(href!);
+					const expectedOrigin = 'https://kyle.skrinak.com';
+					expect(
+						canonicalUrl.origin,
+						`Expected ${pagePath} canonical to use production origin ${expectedOrigin}, got ${canonicalUrl.origin}`
+					).toBe(expectedOrigin);
+				}
+				// TODO: Staging currently canonicalizes to github.io but should point to production
+				// to avoid staging being indexed. Fix in separate PR.
 			}
 		});
 	});
