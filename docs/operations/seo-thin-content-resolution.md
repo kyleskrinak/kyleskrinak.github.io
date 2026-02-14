@@ -189,9 +189,11 @@ When adding new page types, ask:
 
 2. **What type of page is it?**
    - Content (posts, articles, presentations) → Index
-   - Navigation (tags, categories, archives) → Noindex,follow
+   - Navigation (tags, categories) → Noindex,follow
    - Functional (search, 404) → Noindex,follow
    - Admin/staging → Noindex,nofollow
+
+   **Note**: The primary `/archives/` page is an exception - it's kept indexed because it provides a unique chronological view distinct from simple paginated listings.
 
 3. **Should search engines follow links on this page?**
    - Usually yes (use `follow`) unless it's staging/admin
