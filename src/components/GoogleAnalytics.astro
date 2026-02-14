@@ -15,6 +15,7 @@ const shouldLoadGA = import.meta.env.PROD;
       const dnt =
         typeof navigator !== 'undefined' &&
         (navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes');
+      // Guard for missing navigator/globalPrivacyControl: support varies by environment.
       const gpc =
         typeof navigator !== 'undefined' && navigator.globalPrivacyControl === true;
 
