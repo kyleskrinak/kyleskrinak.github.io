@@ -1,12 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
+import Layout from '@/layouts/Layout.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE, createPath } from '@/config/consts';
+import { SITE_TITLE, createPath } from '@/config/consts';
 import { slugifyStr } from '@/utils/slugify';
-import { PUBLIC_DEPLOY_ENV } from 'astro:env/client';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -34,17 +33,11 @@ const { tag } = Astro.props;
 const posts = (await getCollection('blog'))
 	.filter((post) => post.data.tags?.includes(tag))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-const deployEnv = PUBLIC_DEPLOY_ENV ?? 'production';
-const isStaging = deployEnv === 'staging';
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={`${tag} - ${SITE_TITLE}`} description={`Posts tagged with: ${tag}`} />
-		{isStaging && <meta name="robots" content="noindex,nofollow" />}
-		{!isStaging && <meta name="robots" content="noindex,follow" />}
+<Layout title={`${tag} - ${SITE_TITLE}`} description={`Posts tagged with: ${tag}`} noindex={true}>
+	<Header />
+	<main id="main-content">
 		<style>
 			main {
 				width: 960px;
@@ -87,28 +80,23 @@ const isStaging = deployEnv === 'staging';
 				}
 			}
 		</style>
-	</head>
-	<body>
-		<Header />
-		<main id="main-content">
-			<h1>Tag: {tag}</h1>
-			<p>{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
-			<ul>
-				{
-					posts.map((post) => (
-						<li>
-							<a href={createPath(`/posts/${post.id}/`)}>
-								<h3 class="post-title">{post.data.title}</h3>
-							</a>
-							<p class="post-date">
-								<FormattedDate date={post.data.pubDate} />
-							</p>
-							{post.data.description && <p>{post.data.description}</p>}
-						</li>
-					))
-				}
-			</ul>
-		</main>
-		<Footer />
-	</body>
-</html>
+		<h1>Tag: {tag}</h1>
+		<p>{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
+		<ul>
+			{
+				posts.map((post) => (
+					<li>
+						<a href={createPath(`/posts/${post.id}/`)}>
+							<h3 class="post-title">{post.data.title}</h3>
+						</a>
+						<p class="post-date">
+							<FormattedDate date={post.data.pubDate} />
+						</p>
+						{post.data.description && <p>{post.data.description}</p>}
+					</li>
+				))
+			}
+		</ul>
+	</main>
+	<Footer />
+</Layout>
