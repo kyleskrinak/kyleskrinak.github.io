@@ -100,7 +100,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			expect(robotsContent).toBe('noindex,follow');
 		});
 
-
 	// NOTE: Category pages test removed because no categories currently exist.
 	// The template at src/pages/categories/[category].astro is configured with
 	// noindex={true} for when categories are used. Add test when categories are
