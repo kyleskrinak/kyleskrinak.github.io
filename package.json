@@ -26,6 +26,9 @@
     "test:seo": "playwright test --config=playwright.seo.config.ts tests/seo-meta-tags.spec.ts",
     "test:seo:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test --config=playwright.seo.config.ts tests/seo-meta-tags.spec.ts",
     "test:seo:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test --config=playwright.seo.config.ts tests/seo-meta-tags.spec.ts",
+    "test:sitemap": "playwright test --config=playwright.seo.config.ts tests/sitemap.spec.ts",
+    "test:sitemap:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test --config=playwright.seo.config.ts tests/sitemap.spec.ts",
+    "test:sitemap:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test --config=playwright.seo.config.ts tests/sitemap.spec.ts",
     "test:links": "htmltest",
     "test:links:verbose": "htmltest -l 3",
     "check:links": "node scripts/check-links.js"
