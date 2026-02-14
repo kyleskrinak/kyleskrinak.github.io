@@ -9,7 +9,12 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   testMatch: ['**/seo-meta-tags.spec.ts'],
-  testIgnore: ['**/visual/**'],
+  // Explicitly exclude tests with incompatible baseURL defaults
+  testIgnore: [
+    '**/visual/**',
+    '**/console-errors.spec.ts',
+    '**/analytics-privacy.spec.ts',
+  ],
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

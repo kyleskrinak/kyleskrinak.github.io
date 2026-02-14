@@ -107,6 +107,17 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 	// populated in blog posts.
 	});
 
+	test.describe('Functional Pages (should have noindex)', () => {
+		test('404 page has noindex,follow', async ({ page }) => {
+			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
+
+			await page.goto(resolveUrl('/404/'), { waitUntil: 'networkidle' });
+			const robotsContent = await getRobotsMetaTag(page);
+
+			expect(robotsContent).toBe('noindex,follow');
+		});
+	});
+
 	test.describe('Content Pages (should NOT have noindex)', () => {
 		test('home page has no robots meta tag', async ({ page }) => {
 			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
@@ -140,11 +151,10 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 	test.describe('Staging Environment', () => {
 		test('all pages have noindex,nofollow on staging', async ({ page }) => {
 			test.skip(!isStaging, 'This test only runs on staging');
-			// NOTE: Local development behaves like production (isStaging=false),
-			// so staging-specific tests are skipped in local dev. To test staging
-			// behavior (including noindex,nofollow) locally, run the app with
-			// PUBLIC_DEPLOY_ENV=staging (and optionally PLAYWRIGHT_DEPLOY_ENV=staging
-			// so these staging-only tests are not skipped).
+			// NOTE: To test staging behavior locally, set both environment variables:
+			//   PUBLIC_DEPLOY_ENV=staging (app renders staging meta tags)
+			//   PLAYWRIGHT_DEPLOY_ENV=staging (test suite runs staging-only tests)
+			// Example: PUBLIC_DEPLOY_ENV=staging PLAYWRIGHT_DEPLOY_ENV=staging npm run test:seo
 
 			// Test representative pages from each template type to ensure
 			// staging directives are enforced everywhere, including pages
@@ -192,7 +202,7 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 				expect(href, `Expected canonical href on ${pagePath} to be non-null`).not.toBeNull();
 				expect(href, `Expected canonical href on ${pagePath} to be a valid URL`).toMatch(/^https?:\/\//);
 
-				// Verify canonical uses correct origin (production domain)
+				// Verify canonical uses correct origin and path (production domain)
 				// This catches issues like staging canonicalizing to itself instead of production
 				if (!isStaging) {
 					// On production/localhost: expect production canonicals
@@ -206,6 +216,13 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 						canonicalUrl.origin,
 						`Expected ${pagePath} canonical to use production origin ${expectedOrigin}, got ${canonicalUrl.origin}`
 					).toBe(expectedOrigin);
+
+					// Verify the canonical path matches the page path (normalized to trailing slash)
+					const expectedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
+					expect(
+						canonicalUrl.pathname,
+						`Expected ${pagePath} canonical path to be ${expectedPath}, got ${canonicalUrl.pathname}`
+					).toBe(expectedPath);
 				}
 				// TODO: Staging currently canonicalizes to github.io but should point to production
 				// to avoid staging being indexed. Fix in separate PR.
