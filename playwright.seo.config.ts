@@ -1,14 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright config for SEO meta tag tests
- * Narrowly scoped to seo-meta-tags.spec.ts to avoid running tests
- * with incompatible baseURL defaults (analytics-privacy.spec.ts and
- * console-errors.spec.ts both default to :3000, not :4321)
+ * Playwright config for SEO-related tests (meta tags + sitemap)
+ * Narrowly scoped to SEO tests to avoid running tests with incompatible
+ * baseURL defaults (analytics-privacy.spec.ts and console-errors.spec.ts
+ * both default to :3000, not :4321)
  */
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['**/seo-meta-tags.spec.ts'],
+  testMatch: ['**/seo-meta-tags.spec.ts', '**/sitemap.spec.ts'],
   // Explicitly exclude tests with incompatible baseURL defaults
   testIgnore: [
     '**/visual/**',
