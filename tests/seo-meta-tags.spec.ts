@@ -100,15 +100,15 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			expect(robotsContent).toBe('noindex,follow');
 		});
 
-	test('category pages have noindex,follow', async ({ page }) => {
-		test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-		// NOTE: Currently no blog posts use categories (all have categories: [])
-		// so no category pages exist. This test is included for future-proofing.
-		// If a category page exists in the future, it will be tested here.
+		test('category pages have noindex,follow', async ({ page }) => {
+			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
+			// NOTE: Currently no blog posts use categories (all have categories: [])
+			// so no category pages exist. This test is included for future-proofing.
+			// If a category page exists in the future, it will be tested here.
 
-		// Skip test if no category pages exist
-		test.skip(true, 'No category pages currently exist (all posts have empty categories array)');
-	});
+			// Skip test if no category pages exist
+			test.skip(true, 'No category pages currently exist (all posts have empty categories array)');
+		});
 	});
 
 	test.describe('Content Pages (should NOT have noindex)', () => {
