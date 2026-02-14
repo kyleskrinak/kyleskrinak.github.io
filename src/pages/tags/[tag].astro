@@ -39,6 +39,7 @@ const posts = (await getCollection('blog'))
 <html lang="en">
 	<head>
 		<BaseHead title={`${tag} - ${SITE_TITLE}`} description={`Posts tagged with: ${tag}`} />
+		<meta name="robots" content="noindex,follow" />
 		<style>
 			main {
 				width: 960px;
