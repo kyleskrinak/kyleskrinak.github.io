@@ -149,7 +149,7 @@ The site implements targeted noindex directives to avoid thin content penalties:
   - Home page
   - About page
   - Presentation HTML files
-- **Staging**: `<meta name="robots" content="noindex,nofollow">` on ALL pages
+- **Staging**: `<meta name="robots" content="noindex,nofollow">` on all Astro-rendered pages (static HTML files in `public/` are not modified)
 
 Rationale: Navigation pages help users but provide no unique search value. Using `noindex,follow` prevents indexing while allowing search engines to discover content pages via links. This is the standard SEO approach for avoiding thin content penalties while maintaining crawlability.
 
