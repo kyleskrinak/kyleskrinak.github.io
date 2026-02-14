@@ -127,15 +127,39 @@ curl -I https://kyle.skrinak.com/2025/09/19/modernizing-an-old-jekyll-blog-with-
 ```
 
 #### 6. SEO Validation
-**Status**: Infrastructure ready, not validated
+**Status**: Infrastructure ready, noindex strategy implemented
 **Gap**: Need to verify search engine optimization basics
+
+**Completed**:
+- [x] Noindex meta tags added to thin content pages (tags, pagination, search, listings)
+- [x] Content pages (blog posts, presentations) remain fully indexed
+- [x] Staging environment de-indexed (noindex,nofollow on all pages)
+- [x] Test coverage added for robots meta tags (`npm run test:seo`)
+
+**Noindex Strategy**:
+The site implements targeted noindex directives to avoid thin content penalties:
+- **System/navigation pages**: `<meta name="robots" content="noindex,follow">`
+  - Tag pages (`/tags/`, `/tags/*/`)
+  - Pagination (`/posts/2/`, `/posts/3/`, etc.)
+  - Search page (`/search/`)
+  - Directory listings (`/presentations/`, `/posts/`)
+  - Presentation directory pages (`/presentations/*/`)
+- **Content pages**: No robots meta tag (fully indexed)
+  - Blog posts
+  - Home page
+  - About page
+  - Presentation HTML files
+- **Staging**: `<meta name="robots" content="noindex,nofollow">` on ALL pages
+
+Rationale: Navigation pages help users but provide no unique search value. Using `noindex,follow` prevents indexing while allowing search engines to discover content pages via links. This is the standard SEO approach for avoiding thin content penalties while maintaining crawlability.
 
 **Action Required**:
 - [ ] Verify sitemap is accessible at `/sitemap.xml` (NOTE: filename is `sitemap.xml`, NOT `sitemap-index.xml`)
 - [ ] Check robots.txt allows search engine crawling
-- [ ] Verify canonical URLs are set on all pages
+- [x] Verify canonical URLs are set on all pages (validated via `test:seo`)
 - [ ] Test Open Graph meta tags on sample posts
 - [ ] Submit sitemap to Google Search Console
+- [ ] Monitor Search Console for thin content warnings (should decrease)
 
 #### 7. Performance Baseline
 **Status**: No performance testing done
