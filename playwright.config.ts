@@ -45,9 +45,13 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
-  },
+  // Only start dev server when no explicit PLAYWRIGHT_TEST_BASE_URL is set
+  // When PLAYWRIGHT_TEST_BASE_URL is provided (staging/production/local), skip webServer
+  webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run dev',
+        url: 'http://localhost:4321',
+        reuseExistingServer: !process.env.CI,
+      },
 });
