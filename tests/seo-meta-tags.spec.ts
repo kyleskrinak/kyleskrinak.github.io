@@ -109,8 +109,8 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		test('blog posts have no robots meta tag', async ({ page }) => {
 			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
 
-			// Test a known blog post
-			await page.goto(resolveUrl('/posts/2026-02-02-fun-at-scale/'), { waitUntil: 'networkidle' });
+			// Test a blog post with past date for stability
+			await page.goto(resolveUrl('/posts/2018-04-07-drupalcon-nashville-2018/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
 			expect(robotsContent).toBeNull();
@@ -140,7 +140,7 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			// that don't use the Layout component
 			const stagingPages = [
 				'/', // home page
-				'/posts/2026-02-02-fun-at-scale/', // existing blog post
+				'/posts/2018-04-07-drupalcon-nashville-2018/', // blog post with past date
 				'/tags/', // tags index (system page)
 				'/tags/ai/', // representative tag detail page
 				'/posts/2/', // representative pagination page
