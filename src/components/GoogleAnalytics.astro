@@ -1,14 +1,37 @@
-<!-- Google Analytics for GA4 -->
-<script>
-	// @ts-ignore - dataLayer is provided by Google Analytics
-	window.dataLayer = window.dataLayer || [];
-	function gtag(...args: any[]) {
-		// @ts-ignore
-		window.dataLayer.push(args);
-	}
-	gtag('js', new Date());
-	gtag('config', 'G-XXXXX', {
-		anonymize_ip: true,
-	});
-</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXX"></script>
+---
+// Google Analytics measurement ID
+const GA_MEASUREMENT_ID = 'G-1EES7VJW1J';
+
+// Only load GA4 in production builds
+// Respects user privacy signals (DNT/GPC)
+const shouldLoadGA = import.meta.env.PROD;
+---
+
+{shouldLoadGA && (
+  <>
+    <!-- Google Analytics (GA4) -->
+    <script is:inline define:vars={{ measurementId: GA_MEASUREMENT_ID }}>
+      // Respect user privacy signals: bail if DNT or GPC is enabled
+      const dnt =
+        typeof navigator !== 'undefined' &&
+        (navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes');
+      // Guard for missing navigator/globalPrivacyControl: support varies by environment.
+      const gpc =
+        typeof navigator !== 'undefined' && navigator.globalPrivacyControl === true;
+
+      if (!dnt && !gpc) {
+        // Load gtag.js script
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + measurementId;
+        document.head.appendChild(script);
+
+        // Initialize dataLayer and gtag
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', measurementId);
+      }
+    </script>
+  </>
+)}
