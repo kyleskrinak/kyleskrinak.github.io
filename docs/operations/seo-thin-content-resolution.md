@@ -79,7 +79,7 @@ Rather than adding content to navigation pages or removing them entirely, we imp
    - `src/pages/presentations/index.astro` - presentations listing
    - `src/pages/presentations/[id].astro` - presentation directory pages
 
-   Each now passes `noindex={true}` to the Layout component (or adds meta tag directly for pages not using Layout).
+   Each now passes `noindex={true}` to the Layout component.
 
 ### Test Coverage
 
@@ -113,8 +113,10 @@ npm run test:seo:production        # Against production
 - `/posts/2/` through `/posts/8/` - paginated post listings
 
 **Directories** (2 pages)
-- `/presentations/` - presentations index
-- `/posts/` - posts index (page 1 of pagination)
+- `/presentations/` - presentations index (de-indexed)
+- `/posts/` - posts index (de-indexed)
+
+**Note**: `/archives/` is intentionally kept indexed (not de-indexed). While it's a directory page, it provides a unique chronological view of all posts that offers different value from simple paginated listings.
 
 **Presentation Directories** (8 pages)
 - `/presentations/wohd/`, `/presentations/code-presentation/`, etc.
