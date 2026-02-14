@@ -20,6 +20,7 @@ type Props = {
   pubDate?: Date;
   updatedDate?: Date | null;
   scrollSmooth?: boolean;
+  noindex?: boolean;
 };
 
 // Ensure trailing slash to match directory-style URLs
@@ -37,6 +38,7 @@ const {
   pubDate,
   updatedDate,
   scrollSmooth = false,
+  noindex = false,
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
@@ -160,8 +162,8 @@ const structuredData = {
         Production is indexed normally (default behavior). Canonical link tag above can
         optionally point to external content if needed.
         Related: src/pages/robots.txt.ts (staging: Disallow: /, production: Allow: /) */}
-    {isStaging && (
-      <meta name="robots" content="noindex,nofollow" />
+    {(isStaging || noindex) && (
+      <meta name="robots" content="noindex,follow" />
     )}
 
     <ClientRouter />
