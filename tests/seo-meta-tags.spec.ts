@@ -8,9 +8,14 @@ const isStaging =
 
 // Normalize base pathname to avoid double slashes (e.g., /site//tags/)
 const basePathname = (() => {
-	const pathname = new URL(BASE_URL).pathname;
-	if (pathname === '/' || pathname === '') return '';
-	return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+	const rawPathname = new URL(BASE_URL).pathname;
+	// When BASE_URL has no path (e.g. 'https://example.com'), URL.pathname is '/'
+	// but we want to treat this as "no base path" so that resolveUrl('/foo')
+	// becomes 'https://example.com/foo' and not 'https://example.com//foo'.
+	if (rawPathname === '/') return '';
+	// For non-root paths (e.g. 'https://example.com/site/'), strip a trailing slash
+	// so that we can safely concatenate with effectivePath without creating '//'.
+	return rawPathname.endsWith('/') ? rawPathname.slice(0, -1) : rawPathname;
 })();
 
 const resolveUrl = (path: string) => {
@@ -124,6 +129,9 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 	test.describe('Staging Environment', () => {
 		test('all pages have noindex,nofollow on staging', async ({ page }) => {
 			test.skip(!isStaging, 'This test only runs on staging');
+			// NOTE: Local development behaves like production (isStaging=false),
+			// so staging-specific tests are skipped in local dev. To test staging
+			// behavior locally, set PLAYWRIGHT_DEPLOY_ENV=staging explicitly.
 
 			// Test representative pages from each template type to ensure
 			// staging directives are enforced everywhere, including pages
@@ -134,7 +142,7 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 				'/tags/', // tags index (system page)
 				'/tags/ai/', // representative tag detail page
 				'/posts/2/', // representative pagination page
-				'/presentations/wohd/', // representative presentation detail page
+				'/presentations/wohd/', // presentation landing directory page (not the .html presentation file)
 			];
 
 			for (const pagePath of stagingPages) {
