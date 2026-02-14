@@ -71,10 +71,15 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		test('pagination pages have noindex,follow', async ({ page }) => {
 			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
 
-			await page.goto(resolveUrl('/posts/2/'), { waitUntil: 'networkidle' });
-			const robotsContent = await getRobotsMetaTag(page);
+			// First page of paginated posts listing
+			await page.goto(resolveUrl('/posts/'), { waitUntil: 'networkidle' });
+			let robotsContent = await getRobotsMetaTag(page);
+			expect(robotsContent, 'Expected /posts/ (first page) to have noindex,follow').toBe('noindex,follow');
 
-			expect(robotsContent).toBe('noindex,follow');
+			// Subsequent paginated page
+			await page.goto(resolveUrl('/posts/2/'), { waitUntil: 'networkidle' });
+			robotsContent = await getRobotsMetaTag(page);
+			expect(robotsContent, 'Expected /posts/2/ to have noindex,follow').toBe('noindex,follow');
 		});
 
 		test('presentations index has noindex,follow', async ({ page }) => {
