@@ -21,7 +21,7 @@ An SEO audit identified 56 pages with low word counts (10-194 words) that were i
 
 **SEO Impact**: Search engines penalize "thin content" pages - pages that provide little unique value to searchers. While these pages serve legitimate navigation purposes, they don't warrant individual search result entries.
 
-**Source**: `/Users/kyleskrinak/Documents/astro-blog/tmp/content_low_content_pages.csv`
+**Source**: `tmp/content_low_content_pages.csv`
 
 ---
 
@@ -100,7 +100,10 @@ npm run test:seo:production        # Against production
 
 ## Results
 
-### Pages De-indexed (56 total)
+### Pages Flagged in Audit (56 total)
+
+**Actual pages de-indexed: 49** (navigation/system pages)
+**Pages kept indexed: 7** (short blog posts - genuine content)
 
 **Tags** (~30 pages)
 - `/tags/` - tag listing page

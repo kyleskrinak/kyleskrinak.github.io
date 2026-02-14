@@ -6,6 +6,7 @@ import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, createPath } from '@/config/consts';
 import { slugifyStr } from '@/utils/slugify';
+import { PUBLIC_DEPLOY_ENV } from 'astro:env/client';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -33,13 +34,17 @@ const { tag } = Astro.props;
 const posts = (await getCollection('blog'))
 	.filter((post) => post.data.tags?.includes(tag))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const deployEnv = PUBLIC_DEPLOY_ENV ?? 'production';
+const isStaging = deployEnv === 'staging';
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={`${tag} - ${SITE_TITLE}`} description={`Posts tagged with: ${tag}`} />
-		<meta name="robots" content="noindex,follow" />
+		{isStaging && <meta name="robots" content="noindex,nofollow" />}
+		{!isStaging && <meta name="robots" content="noindex,follow" />}
 		<style>
 			main {
 				width: 960px;

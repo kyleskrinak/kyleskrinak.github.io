@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
-const isStaging = BASE_URL.includes('github.io');
+const isStaging =
+	process.env.PLAYWRIGHT_DEPLOY_ENV === 'staging' ||
+	process.env.PUBLIC_DEPLOY_ENV === 'staging' ||
+	BASE_URL.includes('github.io');
 
 const resolveUrl = (path: string) => {
 	const basePathname = new URL(BASE_URL).pathname;
