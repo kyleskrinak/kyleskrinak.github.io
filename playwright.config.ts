@@ -53,7 +53,7 @@ export default defineConfig({
     },
     {
       name: 'console',
-      testMatch: '**/console-errors.spec.ts',
+      testMatch: 'tests/console-errors.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
         screenshot: 'only-on-failure',
@@ -61,7 +61,7 @@ export default defineConfig({
     },
     {
       name: 'links',
-      testMatch: '**/link-validation.spec.ts',
+      testMatch: 'tests/link-validation.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
         screenshot: 'only-on-failure',

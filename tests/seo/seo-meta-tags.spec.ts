@@ -195,7 +195,25 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 
 				const href = await canonicalTag.getAttribute('href');
 				expect(href, `Expected canonical href on ${pagePath} to be non-null`).not.toBeNull();
-				expect(href, `Expected canonical href on ${pagePath} to be a valid URL`).toMatch(/^https?:\/\//);
+
+				// Verify canonical URL is a valid HTTPS URL (production)
+				expect(href, `Expected canonical href on ${pagePath} to use HTTPS`).toMatch(/^https:\/\//);
+
+				// Verify canonical URL path matches expected path
+				const expectedUrl = resolveUrl(pagePath);
+				const expectedUrlObj = new URL(expectedUrl);
+				const canonicalUrlObj = new URL(href!);
+
+				expect(
+					canonicalUrlObj.pathname,
+					`Expected canonical pathname to match ${expectedUrlObj.pathname} for ${pagePath}`
+				).toBe(expectedUrlObj.pathname);
+
+				// Verify canonical URL has a valid hostname (not localhost)
+				expect(
+					canonicalUrlObj.hostname,
+					`Expected canonical URL to have production hostname for ${pagePath}`
+				).not.toBe('localhost');
 
 				// Verify canonical uses correct origin and path (production domain)
 				// This catches issues like staging canonicalizing to itself instead of production
