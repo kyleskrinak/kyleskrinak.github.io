@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
+// Detect staging environment: primarily by BASE_URL pattern (github.io),
+// with optional environment variable override for local testing.
+// PUBLIC_DEPLOY_ENV controls app rendering; PLAYWRIGHT_DEPLOY_ENV controls test behavior.
 const isStaging =
+	BASE_URL.includes('github.io') ||
 	process.env.PLAYWRIGHT_DEPLOY_ENV === 'staging' ||
-	process.env.PUBLIC_DEPLOY_ENV === 'staging' ||
-	BASE_URL.includes('github.io');
+	process.env.PUBLIC_DEPLOY_ENV === 'staging';
 
 // Normalize base pathname to avoid double slashes (e.g., /site//tags/)
 const basePathname = (() => {
@@ -150,9 +153,10 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 	test.describe('Staging Environment', () => {
 		test('all pages have noindex,nofollow on staging', async ({ page }) => {
 			test.skip(!isStaging, 'This test only runs on staging');
-			// NOTE: To test staging behavior locally, set both environment variables:
-			//   PUBLIC_DEPLOY_ENV=staging (app renders staging meta tags)
-			//   PLAYWRIGHT_DEPLOY_ENV=staging (test suite runs staging-only tests)
+			// NOTE: Staging is auto-detected from BASE_URL (github.io). To test staging
+			// behavior locally, set environment variables:
+			//   PUBLIC_DEPLOY_ENV=staging (makes app render staging meta tags)
+			//   PLAYWRIGHT_DEPLOY_ENV=staging (makes test suite run staging-only tests)
 			// Example: PUBLIC_DEPLOY_ENV=staging PLAYWRIGHT_DEPLOY_ENV=staging npm run test:seo
 
 			// Test representative pages from each template type to ensure
@@ -205,23 +209,18 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 				// This catches issues like staging canonicalizing to itself instead of production
 				if (!isStaging) {
 					// On production/localhost: expect production canonicals
-					const canonicalUrl = new URL(href!);
 					// IMPORTANT: Domain is intentionally hardcoded (not derived from config)
 					// to ensure staging canonicals point to production. If we derived from
 					// config, staging might use staging URL and this test would incorrectly pass.
 					// If the production domain changes, update this constant.
 					const expectedOrigin = 'https://kyle.skrinak.com';
-					expect(
-						canonicalUrl.origin,
-						`Expected ${pagePath} canonical to use production origin ${expectedOrigin}, got ${canonicalUrl.origin}`
-					).toBe(expectedOrigin);
-
-					// Verify the canonical path matches the page path (normalized to trailing slash)
 					const expectedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
+					const expectedCanonicalUrl = `${expectedOrigin}${expectedPath}`;
+
 					expect(
-						canonicalUrl.pathname,
-						`Expected ${pagePath} canonical path to be ${expectedPath}, got ${canonicalUrl.pathname}`
-					).toBe(expectedPath);
+						href,
+						`Expected ${pagePath} canonical URL to be ${expectedCanonicalUrl}`
+					).toBe(expectedCanonicalUrl);
 				}
 				// TODO: Staging currently canonicalizes to github.io but should point to production
 				// to avoid staging being indexed. Fix in separate PR.
