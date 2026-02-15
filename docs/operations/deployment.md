@@ -177,7 +177,7 @@ Build and preview locally before deploying:
 ```bash
 npm run build
 npm run preview
-# Visit http://localhost:3000
+# Visit http://localhost:4321
 ```
 
 ## Rollback

@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
-
-const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000";
+import { BASE_URL } from "./test-utils";
 
 /**
  * Test console errors across key pages
