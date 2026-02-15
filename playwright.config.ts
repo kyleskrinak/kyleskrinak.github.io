@@ -1,52 +1,81 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
- * See https://playwright.dev/docs/test-configuration.
+ * Unified Playwright configuration for all test types
+ * Uses projects to organize tests by category (visual, SEO, analytics)
  */
 export default defineConfig({
-  testDir: './tests/visual',
-  /* Run tests in files in parallel */
+  // Global test timeout settings
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+
+  // Shared settings for all tests
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321',
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Take screenshots on every test for comparison */
-    screenshot: 'off',
   },
 
-  /* Configure projects for major browsers */
+  // Organize tests by type using projects
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'visual-desktop',
+      testDir: './tests/visual',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'off', // Visual tests handle screenshots themselves
+      },
     },
-
     {
-      name: 'mobile',
-      use: { ...devices['iPhone 12'] },
+      name: 'visual-mobile',
+      testDir: './tests/visual',
+      use: {
+        ...devices['iPhone 12'],
+        screenshot: 'off',
+      },
+    },
+    {
+      name: 'seo',
+      testDir: './tests/seo',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
+    },
+    {
+      name: 'analytics',
+      testDir: './tests/analytics',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
+    },
+    {
+      name: 'console',
+      testMatch: '**/console-errors.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
+    },
+    {
+      name: 'links',
+      testMatch: '**/link-validation.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // Only start dev server when no explicit PLAYWRIGHT_TEST_BASE_URL is set
-  // When PLAYWRIGHT_TEST_BASE_URL is provided (staging/production/local), skip webServer
+  // Reporter: HTML for visual tests (detailed), list for others
+  reporter: process.env.CI ? 'list' : [
+    ['list'],
+    ['html', { open: 'never' }],
+  ],
+
+  // Auto-start dev server when testing localhost
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
