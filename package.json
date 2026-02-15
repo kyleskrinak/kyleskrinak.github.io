@@ -20,8 +20,8 @@
     "test:analytics": "playwright test --project=analytics",
     "test:console": "playwright test --project=console",
     "test:links": "playwright test --project=links",
-    "test:staging": "PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test",
-    "test:production": "PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test",
+    "test:staging": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog playwright test",
+    "test:production": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test",
     "htmltest": "htmltest",
     "htmltest:verbose": "htmltest -l 3",
     "check:links": "node scripts/check-links.js"
@@ -50,6 +50,7 @@
     "@types/lodash.kebabcase": "^4.1.9",
     "@typescript-eslint/parser": "^8.51.0",
     "broken-link-checker": "^0.7.8",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-plugin-astro": "^1.5.0",
     "globals": "^16.5.0",
