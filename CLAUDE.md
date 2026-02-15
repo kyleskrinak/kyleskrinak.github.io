@@ -78,6 +78,42 @@ DO NOT read or reference files in:
 
 3. **Never commit without verification**
 
+## Pre-Commit Completeness Checklist
+
+**Before committing, verify ALL boxes:**
+
+**Pattern Completeness** (if implementing similar to existing code):
+- [ ] Read the COMPLETE existing implementation (code + tests + comments + docs)
+- [ ] Check for tests - add equivalent tests
+- [ ] Check for explanatory comments - add equivalent comments
+- [ ] Check for documentation - add equivalent docs
+- [ ] Compare side-by-side: match quality/completeness of existing code
+
+**Systemic Impact** (ask: "What OTHER systems interact with this?"):
+- [ ] Search codebase for related functionality
+- [ ] For SEO changes: check meta tags, sitemap, robots.txt, canonical tags
+- [ ] For any change: check tests, docs, configs, similar files
+
+**Test Coverage**:
+- [ ] Does similar functionality have tests? Add equivalent tests
+- [ ] Do tests cover edge cases? (null, undefined, privacy signals, etc.)
+- [ ] Do tests match implementation completeness?
+
+**Documentation Parity**:
+- [ ] Do similar implementations have explanatory comments? Add them
+- [ ] Do comments explain "why" not just "what"?
+- [ ] Is there docs/ content for this feature? Update it
+
+**Final Check - Can you answer YES to all:**
+1. ✅ Fixed the specific issue
+2. ✅ Found and fixed ALL instances of the pattern
+3. ✅ Added tests matching similar features
+4. ✅ Checked ALL interacting systems
+5. ✅ Matched completeness of similar implementations
+6. ✅ Added explanatory comments matching project style
+
+**If you can't check all boxes, you're not done.**
+
 ## Review Response Protocol
 
 **When addressing review comments:**
@@ -86,18 +122,30 @@ DO NOT read or reference files in:
    - Comment mentions line 25 → Find the pattern/issue CLASS
    - Example: "Line 25 uses /" → Issue is "hardcoded root paths break BASE_URL"
 
-2. **Search for ALL instances of that issue**
+2. **Identify the PATTERN type:**
+   - Missing tests? → Check ALL features for test coverage gaps
+   - Missing comment? → Check ALL similar code for comment patterns
+   - Systemic gap? → Map ALL affected systems (sitemap, robots.txt, etc.)
+   - Inconsistency? → Find what it should match and ensure parity
+
+3. **Search for ALL instances of that issue**
    ```bash
    grep -rn 'href="/"' src/ public/ scripts/
    ```
 
-3. **Fix ALL instances in ONE commit**
+4. **Fix comprehensively in ONE commit**
+   - Fix the specific issue mentioned
+   - Fix all instances of the pattern
+   - Add missing tests/comments/docs to match existing code
+   - Update all interacting systems
 
-4. **Verify zero results remain**
+5. **Verify completeness:**
+   - Zero results for pattern search
+   - Test coverage matches similar features
+   - Documentation matches similar features
+   - All affected systems updated
 
-5. **Update related artifacts** (docs, PR description, tests)
-
-**Never fix "just that line" - fix the entire issue class.**
+**Never fix "just that line" - fix the entire issue class with full completeness.**
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
