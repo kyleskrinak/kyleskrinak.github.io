@@ -195,7 +195,7 @@ Create `src/content/blog/YYYY-MM-DD-slug.md` with your frontmatter and content.
 npm run dev
 ```
 
-Visit `http://localhost:3000` and check your post appears:
+Visit `http://localhost:4321` and check your post appears:
 - In the blog listing
 - At the correct URL (`/posts/YYYY-MM-DD-slug/`)
 - With correct formatting

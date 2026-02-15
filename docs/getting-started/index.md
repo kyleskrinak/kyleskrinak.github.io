@@ -23,7 +23,7 @@ npm install
 npm run dev
 
 # 4. Open in browser
-# Visit http://localhost:3000
+# Visit http://localhost:4321
 ```
 
 ## What's Happening?
@@ -34,7 +34,7 @@ The dev server watches your files and automatically reloads the browser when you
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Start development server (http://localhost:3000) |
+| `npm run dev` | Start development server (http://localhost:4321) |
 | `npm run build` | Build for production (creates `dist/` folder) |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Check code for issues |
