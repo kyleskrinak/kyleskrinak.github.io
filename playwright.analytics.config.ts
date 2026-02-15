@@ -1,10 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright config for SEO-related tests (meta tags + sitemap)
+ * Playwright config for analytics privacy tests
  */
 export default defineConfig({
-  testDir: './tests/seo',
+  testDir: './tests/analytics',
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -25,8 +25,6 @@ export default defineConfig({
     },
   ],
 
-  // Only start dev server when no explicit PLAYWRIGHT_TEST_BASE_URL is set
-  // When PLAYWRIGHT_TEST_BASE_URL is provided (staging/production/local), skip webServer
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
