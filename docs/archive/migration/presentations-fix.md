@@ -130,7 +130,7 @@ To test in production build:
 ```bash
 npm run build
 npm run preview
-# Visit http://localhost:3000/presentations/bundle-test.html
+# Visit http://localhost:4321/presentations/bundle-test.html
 ```
 
 ## Files Modified/Created
