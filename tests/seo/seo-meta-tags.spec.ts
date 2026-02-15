@@ -1,13 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
-// Detect staging environment: primarily by BASE_URL pattern (github.io),
-// with optional environment variable override for local testing.
-// PUBLIC_DEPLOY_ENV controls app rendering; PLAYWRIGHT_DEPLOY_ENV controls test behavior.
-const isStaging =
-	BASE_URL.includes('github.io') ||
-	process.env.PLAYWRIGHT_DEPLOY_ENV === 'staging' ||
-	process.env.PUBLIC_DEPLOY_ENV === 'staging';
+import { BASE_URL, isStaging } from '../test-utils';
 
 // Normalize base pathname to avoid double slashes (e.g., /site//tags/)
 const basePathname = (() => {
