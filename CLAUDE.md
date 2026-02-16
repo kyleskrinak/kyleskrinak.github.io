@@ -78,6 +78,61 @@ DO NOT read or reference files in:
 
 3. **Never commit without verification**
 
+## Dependency/Tool Change Protocol
+
+**MANDATORY when removing, replacing, or consolidating tools/dependencies:**
+
+1. **Search documentation for references:**
+   ```bash
+   # Search for tool name in docs
+   grep -rn "tool-name" docs/ README.md
+
+   # Search for related concepts
+   grep -rn "workflow.*name\|feature.*description" docs/
+   ```
+
+2. **Update ALL found references:**
+   - [ ] README.md - Update command examples, tech stack
+   - [ ] docs/index.md - Update navigation and file lists
+   - [ ] Feature-specific docs (e.g., docs/link-checking.md)
+   - [ ] Workflow documentation - Explain new approach
+   - [ ] Architecture docs - Update system diagrams/descriptions
+
+3. **Search tests for references:**
+   ```bash
+   grep -rn "tool-name" tests/
+   ```
+
+4. **Verify completeness:**
+   - [ ] No orphaned references to old tool
+   - [ ] New tool/approach fully documented
+   - [ ] Automated workflows documented (if applicable)
+   - [ ] Migration path explained (if relevant)
+
+**Example scenario:**
+- Removed: broken-link-checker
+- Added: htmltest + Playwright two-tier system
+- Must update: docs/link-checking.md, docs/index.md, README.md
+- Must search for: "broken-link-checker", "linkwatch", "external link"
+
+**This is NOT optional. If you change tools, you MUST update docs.**
+
+5. **Test critical paths of new implementation:**
+   - [ ] For workflows: Verify conditional logic (if: failure(), continue-on-error, exit codes)
+   - [ ] For scripts: Test happy path and error conditions
+   - [ ] For automation: Verify it triggers correctly
+   - [ ] Common gotchas: continue-on-error + if: failure() won't work (capture exit code instead)
+
+6. **Verify accuracy of documentation you write:**
+   - [ ] Test commands you document (don't assume what they do)
+   - [ ] Verify script/command behavior matches documentation
+   - [ ] Check package.json scripts match what docs claim
+
+7. **Remove obsolete code:**
+   - [ ] Delete unused scripts/files from old approach
+   - [ ] Search for orphaned utilities: `ls scripts/*.js` and verify each is used
+   - [ ] Clean up old config files
+
 ## Pre-Commit Completeness Checklist
 
 **Before committing, verify ALL boxes:**
@@ -103,6 +158,9 @@ DO NOT read or reference files in:
 - [ ] Do similar implementations have explanatory comments? Add them
 - [ ] Do comments explain "why" not just "what"?
 - [ ] Is there docs/ content for this feature? Update it
+- [ ] Search docs/ and README.md for references to changed code
+- [ ] Update docs/index.md if adding/removing major features
+- [ ] If replacing a tool: Search and update ALL mentions of old tool
 
 **Final Check - Can you answer YES to all:**
 1. ✅ Fixed the specific issue
@@ -111,6 +169,11 @@ DO NOT read or reference files in:
 4. ✅ Checked ALL interacting systems
 5. ✅ Matched completeness of similar implementations
 6. ✅ Added explanatory comments matching project style
+7. ✅ Searched docs/ and README.md and updated relevant sections
+8. ✅ If removed/replaced tool: No orphaned references remain
+9. ✅ Tested critical paths (workflows trigger correctly, scripts work, commands run)
+10. ✅ Verified documentation accuracy (tested what you documented)
+11. ✅ Removed obsolete code/scripts from old approach
 
 **If you can't check all boxes, you're not done.**
 

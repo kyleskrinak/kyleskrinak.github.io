@@ -22,25 +22,25 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
 - [Architecture Overview](./features/architecture.md) - How it all fits together (when created)
 
-## 📚 Migration History
+## 📚 Migration History (Archived)
 
-**Context about the Jekyll → Astro migration:**
-- [Migration Status](./migration/status.md) - Detailed completion report
-- [URL Mapping](./migration/url-mapping.md) - Old Jekyll URLs → New Astro URLs
-- [Performance Analysis](./migration/jekyll-astro-comparison.md) - Lighthouse comparison
-- [Presentations Analysis](./migration/presentations-deployment.md) - How presentations were handled
-- [Presentations Fix Details](./migration/presentations-fix.md) - Implementation details
+**Context about the Jekyll → Astro migration (completed Jan 2026):**
+- [Archive Index](./archive/README.md) - Overview of archived documentation
+- [Migration Status](./archive/migration/status.md) - Detailed completion report
+- [URL Mapping](./archive/migration/url-mapping.md) - Old Jekyll URLs → New Astro URLs
+- [Performance Analysis](./archive/migration/jekyll-astro-comparison.md) - Lighthouse comparison
 
-## 🚢 Launch Information
+## 🚢 Launch Information (Archived)
 
-**Current project status and launch readiness:**
-- [Launch Readiness](./launch/launch-ready.md) - What's ready for production
-- [Pre-Launch Gaps](./launch/pre-launch-gaps.md) - Remaining work before launch
-- [Launch Checklist](./launch/launch-checklist.md) - Final steps (when created)
+**Project successfully launched to production (kyle.skrinak.com) in Jan 2026:**
+- [Archive Index](./archive/README.md) - Overview of archived documentation
+- [Launch Readiness](./archive/launch/launch-ready.md) - What was ready for production
+- [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) - Historical gap analysis
 
 ## 🧪 Testing
 
 **Quality assurance and validation:**
+- [Link Checking](./link-checking.md) - Two-tier link validation (htmltest + Playwright)
 - [Visual Regression Testing](./testing/visual-regression.md) - Screenshot-based testing approach
 - [Test Findings](./testing/findings.md) - Results from test runs
 - [Console Error Testing](./testing/) - Checking for browser console issues
@@ -112,12 +112,19 @@ docs/
 │   ├── pre-launch-gaps.md
 │   └── launch-checklist.md
 │
-└── testing/                           # QA and validation
-    ├── visual-regression.md
-    └── findings.md
+├── testing/                           # QA and validation
+│   ├── visual-regression.md
+│   └── findings.md
+│
+├── link-checking.md                   # Two-tier link validation
+│
+└── archive/                           # Historical documentation
+    ├── README.md
+    ├── migration/
+    └── launch/
 ```
 
 ---
 
-**Last Updated**: January 20, 2026
-**Status**: Documentation reorganized for clarity and discoverability
+**Last Updated**: February 16, 2026
+**Status**: Documentation updated - link checking consolidated to two-tier system
