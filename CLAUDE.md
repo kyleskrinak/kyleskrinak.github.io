@@ -117,6 +117,22 @@ DO NOT read or reference files in:
 
 **This is NOT optional. If you change tools, you MUST update docs.**
 
+5. **Test critical paths of new implementation:**
+   - [ ] For workflows: Verify conditional logic (if: failure(), continue-on-error, exit codes)
+   - [ ] For scripts: Test happy path and error conditions
+   - [ ] For automation: Verify it triggers correctly
+   - [ ] Common gotchas: continue-on-error + if: failure() won't work (capture exit code instead)
+
+6. **Verify accuracy of documentation you write:**
+   - [ ] Test commands you document (don't assume what they do)
+   - [ ] Verify script/command behavior matches documentation
+   - [ ] Check package.json scripts match what docs claim
+
+7. **Remove obsolete code:**
+   - [ ] Delete unused scripts/files from old approach
+   - [ ] Search for orphaned utilities: `ls scripts/*.js` and verify each is used
+   - [ ] Clean up old config files
+
 ## Pre-Commit Completeness Checklist
 
 **Before committing, verify ALL boxes:**
@@ -155,6 +171,9 @@ DO NOT read or reference files in:
 6. ✅ Added explanatory comments matching project style
 7. ✅ Searched docs/ and README.md and updated relevant sections
 8. ✅ If removed/replaced tool: No orphaned references remain
+9. ✅ Tested critical paths (workflows trigger correctly, scripts work, commands run)
+10. ✅ Verified documentation accuracy (tested what you documented)
+11. ✅ Removed obsolete code/scripts from old approach
 
 **If you can't check all boxes, you're not done.**
 
