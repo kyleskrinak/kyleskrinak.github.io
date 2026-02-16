@@ -78,6 +78,45 @@ DO NOT read or reference files in:
 
 3. **Never commit without verification**
 
+## Dependency/Tool Change Protocol
+
+**MANDATORY when removing, replacing, or consolidating tools/dependencies:**
+
+1. **Search documentation for references:**
+   ```bash
+   # Search for tool name in docs
+   grep -rn "tool-name" docs/ README.md
+
+   # Search for related concepts
+   grep -rn "workflow.*name\|feature.*description" docs/
+   ```
+
+2. **Update ALL found references:**
+   - [ ] README.md - Update command examples, tech stack
+   - [ ] docs/index.md - Update navigation and file lists
+   - [ ] Feature-specific docs (e.g., docs/link-checking.md)
+   - [ ] Workflow documentation - Explain new approach
+   - [ ] Architecture docs - Update system diagrams/descriptions
+
+3. **Search tests for references:**
+   ```bash
+   grep -rn "tool-name" tests/
+   ```
+
+4. **Verify completeness:**
+   - [ ] No orphaned references to old tool
+   - [ ] New tool/approach fully documented
+   - [ ] Automated workflows documented (if applicable)
+   - [ ] Migration path explained (if relevant)
+
+**Example scenario:**
+- Removed: broken-link-checker
+- Added: htmltest + Playwright two-tier system
+- Must update: docs/link-checking.md, docs/index.md, README.md
+- Must search for: "broken-link-checker", "linkwatch", "external link"
+
+**This is NOT optional. If you change tools, you MUST update docs.**
+
 ## Pre-Commit Completeness Checklist
 
 **Before committing, verify ALL boxes:**
@@ -103,6 +142,9 @@ DO NOT read or reference files in:
 - [ ] Do similar implementations have explanatory comments? Add them
 - [ ] Do comments explain "why" not just "what"?
 - [ ] Is there docs/ content for this feature? Update it
+- [ ] Search docs/ and README.md for references to changed code
+- [ ] Update docs/index.md if adding/removing major features
+- [ ] If replacing a tool: Search and update ALL mentions of old tool
 
 **Final Check - Can you answer YES to all:**
 1. ✅ Fixed the specific issue
@@ -111,6 +153,8 @@ DO NOT read or reference files in:
 4. ✅ Checked ALL interacting systems
 5. ✅ Matched completeness of similar implementations
 6. ✅ Added explanatory comments matching project style
+7. ✅ Searched docs/ and README.md and updated relevant sections
+8. ✅ If removed/replaced tool: No orphaned references remain
 
 **If you can't check all boxes, you're not done.**
 
