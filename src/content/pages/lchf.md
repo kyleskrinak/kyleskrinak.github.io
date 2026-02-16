@@ -48,7 +48,7 @@ I love this way of eating and despise all the misinformation that has messed up 
 
 I came for weight loss and found a healthier way of living.
 
-*Last updated: 26/02/18*
+*Last updated: 2026-02-16*
 
 ## Resources
 
@@ -81,4 +81,4 @@ I came for weight loss and found a healthier way of living.
 
 ## My Low-Carb Blog Posts
 
-You can find all my LCHF-related posts by searching for "LCHF" or "low carb" on the [blog](/posts) or using the [search feature](/search). Note, I don’t say “keto,” as “keto” has become too ambiguous to be helpful.
+You can find all my LCHF-related posts by searching for "LCHF" or "low carb" on the [blog](/posts/) or using the [search feature](/search/). Note, I don't say "keto," as "keto" has become too ambiguous to be helpful.

@@ -37,8 +37,11 @@ jobs:
         run: npm run build
 
       - name: Install htmltest
+        env:
+          HTMLTEST_VERSION: "0.17.0"
         run: |
-          curl -sL https://github.com/wjdp/htmltest/releases/latest/download/htmltest_Linux_x86_64.tar.gz | tar -xz
+          curl -sL -o htmltest.tar.gz "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_Linux_x86_64.tar.gz"
+          tar -xzf htmltest.tar.gz
           sudo mv htmltest /usr/local/bin/
           htmltest --version
 
