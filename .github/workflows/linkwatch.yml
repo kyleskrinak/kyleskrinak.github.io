@@ -51,12 +51,15 @@ jobs:
         env:
           PLAYWRIGHT_HEADED: false
         run: |
-          npm run check:links > link-report.txt 2>&1 || true
+          set +e
+          npm run check:links > link-report.txt 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
           cat link-report.txt
+          exit 0
 
       # If the link check step fails, create/update a single tracking issue.
       - name: Create or update link rot report issue
-        if: failure()
+        if: steps.check-links.outputs.exit_code != '0'
         uses: actions/github-script@v7
         with:
           script: |

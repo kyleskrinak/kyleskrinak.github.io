@@ -127,20 +127,40 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 PLAYWRIGHT_HEADED=false PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 ```
 
-### Manual Checks
+### Available Commands
 
-#### Standard Check (Tier 1 only)
+**Two-Tier Check (Recommended):**
+
+```bash
+npm run check:links  # Automated: htmltest + Playwright browser verification
+```
+
+**Individual Tools:**
+
+```bash
+npm run htmltest           # Tier 1 only: Fast HTTP checks
+npm run test:links         # Playwright page tests (internal link validation)
+npm run htmltest:verbose   # htmltest with detailed output
+```
+
+**Note:** `test:links` is Playwright-based page validation (different from htmltest).
+Use `check:links` for comprehensive external link verification.
+
+### Manual Tier 1 Check
 
 ```bash
 npm run build
-npm run test:links
+npm run htmltest
 ```
 
-This runs `htmltest` against the built site. It checks:
+This runs only Tier 1 (htmltest) against the built site. It checks:
+
 - Internal links
 - External links
 - Canonical URLs
 - Hash anchors
+
+**Important:** This may report false positives from bot detection. Use `check:links` instead for accurate results.
 
 ### Configuration
 
