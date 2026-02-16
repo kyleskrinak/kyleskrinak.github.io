@@ -127,20 +127,40 @@ PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 PLAYWRIGHT_HEADED=false PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true npm run check:links
 ```
 
-### Manual Checks
+### Available Commands
 
-#### Standard Check (Tier 1 only)
+**Two-Tier Check (Recommended):**
+
+```bash
+npm run check:links  # Automated: htmltest + Playwright browser verification
+```
+
+**Individual Tools:**
+
+```bash
+npm run htmltest           # Tier 1 only: Fast HTTP checks
+npm run test:links         # Playwright page tests (internal link validation)
+npm run htmltest:verbose   # htmltest with detailed output
+```
+
+**Note:** `test:links` is Playwright-based page validation (different from htmltest).
+Use `check:links` for comprehensive external link verification.
+
+### Manual Tier 1 Check
 
 ```bash
 npm run build
-npm run test:links
+npm run htmltest
 ```
 
-This runs `htmltest` against the built site. It checks:
+This runs only Tier 1 (htmltest) against the built site. It checks:
+
 - Internal links
 - External links
 - Canonical URLs
 - Hash anchors
+
+**Important:** This may report false positives from bot detection. Use `check:links` instead for accurate results.
 
 ### Configuration
 
@@ -320,12 +340,46 @@ Sites may report different errors to bots vs real browsers:
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |
 
+## Automated Checks (GitHub Actions)
+
+### Nightly Link Monitoring
+
+The repository runs automated link checks every night via GitHub Actions:
+
+**Workflow:** `.github/workflows/linkwatch.yml`
+**Schedule:** Daily at 6:23 AM UTC
+**Process:**
+1. Builds the site
+2. Installs htmltest and Playwright Chromium
+3. Runs `check:links` (two-tier verification)
+4. Creates/updates GitHub issue if broken links found
+
+**Issue Reporting:**
+- **Title:** "Link check failure report"
+- **Trigger:** Only genuinely broken links (failed both htmltest AND browser)
+- **Auto-filtered:** 403s that work in browser are NOT reported
+- **Action:** Review issue, fix broken links, update ignore list as suggested
+
+**View workflow runs:**
+```bash
+gh workflow view linkwatch.yml
+gh run list --workflow=linkwatch.yml --limit 5
+```
+
+**Manual trigger:**
+```bash
+gh workflow run linkwatch.yml
+```
+
+The automated workflow uses headless Chromium mode for CI compatibility while maintaining full bot-detection bypass capabilities.
+
 ## Maintenance
 
 - Review ignore list quarterly
 - Remove domains if sites change their bot policies
 - Update this documentation when process changes
 - Keep `.htmltest.yml` comments up to date with reasons
+- Monitor nightly workflow runs for patterns in failures
 
 ## Troubleshooting
 

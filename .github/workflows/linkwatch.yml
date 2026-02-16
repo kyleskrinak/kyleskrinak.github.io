@@ -1,4 +1,4 @@
-name: Linkwatch (external link rot)
+name: Linkwatch (two-tier link checking)
 
 on:
   schedule:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   linkwatch:
-    name: Build site + check external links
+    name: Build site + two-tier link check (htmltest + Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -36,36 +36,52 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Install link checker
-        run: npm install -g broken-link-checker
+      - name: Install htmltest
+        env:
+          HTMLTEST_VERSION: "0.17.0"
+        run: |
+          curl -sL -o htmltest.tar.gz "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_Linux_x86_64.tar.gz"
+          tar -xzf htmltest.tar.gz
+          sudo mv htmltest /usr/local/bin/
+          htmltest --version
 
-      - name: Check external links
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run two-tier link check (htmltest + Playwright)
         id: check-links
         continue-on-error: true
+        env:
+          PLAYWRIGHT_HEADED: false
         run: |
-          npx broken-link-checker --recursive dist/ --exclude-external > link-report.txt 2>&1 || true
+          set +e
+          npm run check:links > link-report.txt 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
           cat link-report.txt
+          exit 0
 
       # If the link check step fails, create/update a single tracking issue.
       - name: Create or update link rot report issue
-        if: failure()
+        if: steps.check-links.outputs.exit_code != '0'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('link-report.txt', 'utf8');
-            const title = "External link rot report";
+            const title = "Link check failure report";
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
             const body =
-              `Linkwatch detected external link failures.\n\n` +
+              `Two-tier link check detected broken links (verified with real browser).\n\n` +
               `- Workflow run: ${runUrl}\n` +
               `- Branch/ref: ${context.ref}\n` +
               `- Commit: ${context.sha}\n\n` +
               `Report:\n\`\`\`\n${report}\n\`\`\`\n\n` +
-              `Review the job logs for the failing URLs and update/ignore as appropriate.`;
+              `Links shown above failed both htmltest AND browser verification. ` +
+              `Review the job logs for details. Links that work in browser (403s, bot-detected) ` +
+              `are automatically filtered out and not reported here.`;
 
             // Find an existing open issue with the exact title.
             const issues = await github.rest.issues.listForRepo({

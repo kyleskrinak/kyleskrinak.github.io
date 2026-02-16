@@ -70,6 +70,7 @@ npm run build            # Build production site
 npm run preview          # Preview production build
 npm run lint             # Check code quality
 npm run format           # Auto-format code
+npm run check:links      # Two-tier link checking (htmltest + Playwright)
 npm run test:console     # Check for console errors
 npm run test:visual      # Visual regression testing
 ```
