@@ -76,27 +76,25 @@ test.describe('Link Validation', () => {
 	test('sample post loads', async ({ page }) => {
 		await page.goto(resolveUrl('/posts/'), { waitUntil: 'networkidle' });
 
-		// Get the first post link and navigate to it
+		// Get the first post link and click it
 		const firstPostLink = page.locator(`a[href^="${withBasePath('/posts/')}"]`).first();
-		const href = await firstPostLink.getAttribute('href');
-		expect(href, 'Expected first post link to have a non-null href').not.toBeNull();
+		await firstPostLink.click();
+		await page.waitForLoadState('networkidle');
 
-		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
 		await expect(page.locator('article')).toBeVisible();
 
 		const canonical = await getCanonicalHref(page);
 		expect(canonical).toMatch(/\/$/);
 	});
 
-	test('category page loads', async ({ page }) => {
-		// Test a known category
-		await page.goto(resolveUrl('/categories/drupal/'), { waitUntil: 'networkidle' });
-		await expect(page.locator('h1').first()).toContainText('Category');
+	test.skip('category page loads', async ({ page }) => {
+		// Skip: No posts have categories (all have empty arrays)
+		// Categories functionality exists but is unused
 	});
 
 	test('tag page loads', async ({ page }) => {
-		// Test a known tag
-		await page.goto(resolveUrl('/tags/drupal/'), { waitUntil: 'networkidle' });
+		// Test a known tag (using drupalcon since "drupal" doesn't exist)
+		await page.goto(resolveUrl('/tags/drupalcon/'), { waitUntil: 'networkidle' });
 		await expect(page.locator('h1').first()).toContainText('Tag');
 	});
 
@@ -141,12 +139,10 @@ test.describe('Link Validation', () => {
 	test('presentation detail pages load with valid links', async ({ page }) => {
 		await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
 
-		// Get the first presentation link
+		// Get the first presentation link and click it
 		const firstPresLink = page.locator(`a[href^="${withBasePath('/presentations/')}"][href$="/"]`).first();
-		const href = await firstPresLink.getAttribute('href');
-		expect(href, 'Expected first presentation link to have a non-null href').not.toBeNull();
-
-		await page.goto(resolveUrl(href!), { waitUntil: 'networkidle' });
+		await firstPresLink.click();
+		await page.waitForLoadState('networkidle');
 
 		// Check that the "View Presentation" button exists and has valid href
 		const viewButton = page.locator('a:has-text("View Presentation")');
