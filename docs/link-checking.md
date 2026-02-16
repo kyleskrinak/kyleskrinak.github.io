@@ -320,12 +320,46 @@ Sites may report different errors to bots vs real browsers:
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |
 
+## Automated Checks (GitHub Actions)
+
+### Nightly Link Monitoring
+
+The repository runs automated link checks every night via GitHub Actions:
+
+**Workflow:** `.github/workflows/linkwatch.yml`
+**Schedule:** Daily at 6:23 AM UTC
+**Process:**
+1. Builds the site
+2. Installs htmltest and Playwright Chromium
+3. Runs `check:links` (two-tier verification)
+4. Creates/updates GitHub issue if broken links found
+
+**Issue Reporting:**
+- **Title:** "Link check failure report"
+- **Trigger:** Only genuinely broken links (failed both htmltest AND browser)
+- **Auto-filtered:** 403s that work in browser are NOT reported
+- **Action:** Review issue, fix broken links, update ignore list as suggested
+
+**View workflow runs:**
+```bash
+gh workflow view linkwatch.yml
+gh run list --workflow=linkwatch.yml --limit 5
+```
+
+**Manual trigger:**
+```bash
+gh workflow run linkwatch.yml
+```
+
+The automated workflow uses headless Chromium mode for CI compatibility while maintaining full bot-detection bypass capabilities.
+
 ## Maintenance
 
 - Review ignore list quarterly
 - Remove domains if sites change their bot policies
 - Update this documentation when process changes
 - Keep `.htmltest.yml` comments up to date with reasons
+- Monitor nightly workflow runs for patterns in failures
 
 ## Troubleshooting
 
