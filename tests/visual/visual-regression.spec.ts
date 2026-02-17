@@ -24,7 +24,7 @@ test.describe('Visual Regression - Home Page', () => {
     await page.waitForLoadState('networkidle');
     // Wait for fonts and animations to settle
     await page.waitForTimeout(1000);
-    await expect(page).toHaveScreenshot('home-desktop.png', {
+    await expect(page).toHaveScreenshot('home-page-desktop.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
     });
@@ -34,7 +34,7 @@ test.describe('Visual Regression - Home Page', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveScreenshot('home-mobile.png', {
+    await expect(page).toHaveScreenshot('home-page-mobile.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
     });
@@ -131,7 +131,7 @@ test.describe('Visual Regression - Tags & Categories', () => {
 
 test.describe('Visual Regression - Standalone Pages', () => {
   test('about page should match baseline', async ({ page }) => {
-    await page.goto('/about.html');
+    await page.goto('/about/');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveScreenshot('about-desktop.png', {
       fullPage: true,
