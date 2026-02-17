@@ -67,6 +67,14 @@ export default defineConfig({
         screenshot: 'only-on-failure',
       },
     },
+    {
+      name: 'layout',
+      testMatch: 'tests/layout-consistency.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
+    },
   ],
 
   // Reporter: HTML for visual tests (detailed), list for others
