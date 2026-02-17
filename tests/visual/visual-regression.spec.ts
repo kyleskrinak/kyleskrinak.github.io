@@ -22,6 +22,8 @@ test.describe('Visual Regression - Home Page', () => {
   test('home page desktop should match baseline', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    // Wait for fonts and animations to settle
+    await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('home-desktop.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
