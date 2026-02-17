@@ -13,11 +13,6 @@
   ],
   "footer": [
     {
-      "label": "Email",
-      "url": "mailto:kyle.skrinak@gmail.com",
-      "icon": "envelope"
-    },
-    {
       "label": "GitHub",
       "url": "https://github.com/kyleskrinak",
       "icon": "github"
