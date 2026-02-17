@@ -43,8 +43,8 @@ test.describe('Link Validation', () => {
 		await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
 		await expect(page).toHaveTitle(/Kyle Skrinak/);
 
-		// Check that key elements exist (home page has no h1, check h2 instead)
-		await expect(page.locator('h2').first()).toBeVisible();
+		// Check that key elements exist (home page has no h1, verify specific heading text)
+		await expect(page.locator('h2').first()).toContainText(/Recent Posts/i);
 		await expect(page.locator(`a[href="${withBasePath('/posts/')}"]`).first()).toBeVisible();
 
 		const canonical = await getCanonicalHref(page);
