@@ -19,12 +19,16 @@ export async function verifyUrl(page, url) {
 
     const status = response ? response.status() : 'NO_RESPONSE';
 
+    // 403 means resource exists (access-controlled), not broken
+    // Accept 2xx (OK) and 403 (Forbidden) as success
+    const isSuccess = response && (response.ok() || status === 403);
+
     return {
       url,
       status,
       finalUrl: page.url(),
       redirected: page.url() !== url,
-      success: !!(response && response.ok())
+      success: !!isSuccess
     };
   } catch (error) {
     return {
