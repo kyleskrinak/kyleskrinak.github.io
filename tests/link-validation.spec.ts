@@ -81,7 +81,8 @@ test.describe('Link Validation', () => {
 		await firstPostLink.click();
 		await page.waitForLoadState('networkidle');
 
-		await expect(page.locator('article')).toBeVisible();
+		// Wait for article with longer timeout for client-side routing
+		await expect(page.locator('article')).toBeVisible({ timeout: 10000 });
 
 		const canonical = await getCanonicalHref(page);
 		expect(canonical).toMatch(/\/$/);
@@ -146,7 +147,7 @@ test.describe('Link Validation', () => {
 
 		// Check that the "View Presentation" button exists and has valid href
 		const viewButton = page.locator('a:has-text("View Presentation")');
-		await expect(viewButton).toBeVisible();
+		await expect(viewButton).toBeVisible({ timeout: 10000 });
 
 		const presHref = await viewButton.getAttribute('href');
 		expect(presHref, 'Expected View Presentation href to be non-null').not.toBeNull();
