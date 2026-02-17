@@ -21,6 +21,9 @@ export default defineConfig({
   base,
   site: SITE.website,
   trailingSlash: "always",
+  devToolbar: {
+    enabled: process.env.DISABLE_DEV_TOOLBAR !== "true",
+  },
   integrations: [
     // Sitemap is generated via custom endpoint (src/pages/sitemap.xml.ts)
   ],

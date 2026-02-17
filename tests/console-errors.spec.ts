@@ -136,7 +136,7 @@ test.describe("Console Errors Check", () => {
     const failedChecks: string[] = [];
 
     for (const check of faviconChecks) {
-      const url = `${BASE_URL}${check.path}`;
+      const url = `${BASE_URL}/${check.path}`;
       try {
         const response = await page.goto(url);
         if (response?.status() === 200) {

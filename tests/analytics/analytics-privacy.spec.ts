@@ -14,6 +14,9 @@ import { BASE_URL } from "../test-utils";
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {
+  // Skip if running against dev server (analytics only load in production builds)
+  test.skip(BASE_URL.includes(':4321'), 'Analytics tests require production build (npm run build && npm run preview)');
+
   test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
     // Mock navigator properties with no privacy signals
     await context.addInitScript(() => {
