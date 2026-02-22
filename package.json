@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist && cp -r dist/_pagefind public/",
     "build:ci": "astro build && pagefind --site dist",
+    "build:presentations": "node scripts/build-presentations.js",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
