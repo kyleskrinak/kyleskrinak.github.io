@@ -249,6 +249,8 @@ git checkout develop && git pull origin develop
 - State assumptions upfront
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
+- Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
+- Be direct and concise — just state what you're doing or what needs to be done
 
 ---
 

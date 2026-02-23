@@ -33,6 +33,7 @@ const PRESENTATIONS = [
   { input: 'slidev-presentations/slides/06-drupal-multisite-on-a-dime.md', output: 'drupal-multisite-on-a-dime.html', title: 'Drupal Multisite on a Dime' },
   { input: 'slidev-presentations/slides/07-code-presentation.md', output: 'code-presentation.html', title: 'DrupalCon 2022 Code+ Presentation' },
   { input: 'slidev-presentations/slides/08-wohd.md', output: 'wohd.html', title: 'What I did at DrupalCon 2022' },
+  { input: 'slidev-presentations/slides/2026-02-22-squarespace-to-astro.md', output: '2026-02-22-squarespace-to-astro.html', title: 'AI-Accelerated CMS Migration with Claude Code' },
 ];
 
 const PUBLIC_DIR = 'public/presentations';
@@ -59,6 +60,7 @@ function parseMarkdownPresentation(filePath) {
 
   // Parse slides (separated by --- in Slidev presentations)
   const slides = [];
+  const notes = [];
   let currentSlide = [];
 
   // Skip to first non-empty line after front matter
@@ -70,7 +72,9 @@ function parseMarkdownPresentation(filePath) {
     // Slidev uses --- as slide separator
     if (lines[i] === '---') {
       if (currentSlide.length > 0) {
-        slides.push(currentSlide.join('\n').trim());
+        const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
+        slides.push(parsed.content);
+        notes.push(parsed.notes);
         currentSlide = [];
       }
     } else if (lines[i] === '{:/}') {
@@ -82,10 +86,32 @@ function parseMarkdownPresentation(filePath) {
   }
 
   if (currentSlide.length > 0) {
-    slides.push(currentSlide.join('\n').trim());
+    const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
+    slides.push(parsed.content);
+    notes.push(parsed.notes);
   }
 
-  return { slides };
+  return { slides, notes };
+}
+
+function extractNotesFromSlide(slideContent) {
+  // Extract HTML comments as speaker notes
+  const commentRegex = /<!--([\s\S]*?)-->/g;
+  const notesArray = [];
+  let content = slideContent;
+
+  let match;
+  while ((match = commentRegex.exec(slideContent)) !== null) {
+    notesArray.push(match[1].trim());
+  }
+
+  // Remove comments from content
+  content = content.replace(commentRegex, '').trim();
+
+  return {
+    content,
+    notes: notesArray.join('\n\n')
+  };
 }
 
 function markdownToHtml(markdown) {
@@ -94,13 +120,14 @@ function markdownToHtml(markdown) {
   return md.render(markdown);
 }
 
-function generateHtml(title, slides) {
+function generateHtml(title, slides, notes) {
   const slideHtml = slides
     .map((slide, idx) => {
       const html = markdownToHtml(slide);
       const isTitle = idx === 0 ? 'slide-title' : '';
+      const slideNotes = notes[idx] || '';
       return `
-        <section class="slide ${isTitle}">
+        <section class="slide ${isTitle}" data-notes="${encodeURIComponent(slideNotes)}">
           <div class="slide-content">
             ${html}
           </div>
@@ -323,6 +350,42 @@ function generateHtml(title, slides) {
             transition: width 0.3s;
         }
 
+        .notes-panel {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            max-height: 40vh;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+            z-index: 999;
+        }
+
+        .notes-panel.active {
+            display: block;
+        }
+
+        .notes-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .notes-panel p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -359,18 +422,42 @@ function generateHtml(title, slides) {
         ${slideHtml}
     </div>
 
+    <div class="notes-panel" id="notesPanel">
+        <h3>Speaker Notes</h3>
+        <div id="notesContent"></div>
+    </div>
+
     <div class="controls">
         <button onclick="prevSlide()">← Previous</button>
         <button onclick="nextSlide()">Next →</button>
+        <button onclick="toggleNotes()">Notes (N)</button>
+        <button onclick="openPresenter()">Presenter (P)</button>
         <button onclick="toggleFullscreen()">Fullscreen</button>
     </div>
 
     <script>
         let currentSlide = 0;
+        let notesVisible = false;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
+        const notesPanel = document.getElementById('notesPanel');
+        const notesContent = document.getElementById('notesContent');
+        let presenterWin = null;
+        let syncChannel = null;
 
-        function showSlide(n) {
+        // Initialize BroadcastChannel for sync
+        try {
+            syncChannel = new BroadcastChannel('presentation-sync');
+            syncChannel.onmessage = (event) => {
+                if (event.data.type === 'slideChange') {
+                    showSlide(event.data.index, false);
+                }
+            };
+        } catch (e) {
+            console.warn('BroadcastChannel not supported');
+        }
+
+        function showSlide(n, broadcast = true) {
             slides[currentSlide].classList.remove('active');
             currentSlide = (n + totalSlides) % totalSlides;
             slides[currentSlide].classList.add('active');
@@ -378,6 +465,36 @@ function generateHtml(title, slides) {
             // Update progress bar
             const progress = ((currentSlide + 1) / totalSlides) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
+
+            // Update notes
+            updateNotes();
+
+            // Broadcast to other windows
+            if (broadcast && syncChannel) {
+                syncChannel.postMessage({ type: 'slideChange', index: currentSlide });
+            }
+        }
+
+        function updateNotes() {
+            const notes = slides[currentSlide].getAttribute('data-notes');
+            if (notes) {
+                const decodedNotes = decodeURIComponent(notes);
+                const paragraphs = decodedNotes.split('\\n\\n').map(p =>
+                    '<p>' + p.replace(/\\n/g, '<br>') + '</p>'
+                ).join('');
+                notesContent.innerHTML = paragraphs;
+            } else {
+                notesContent.innerHTML = '<p style="color: rgba(255,255,255,0.5); font-style: italic;">No notes for this slide</p>';
+            }
+        }
+
+        function toggleNotes() {
+            notesVisible = !notesVisible;
+            if (notesVisible) {
+                notesPanel.classList.add('active');
+            } else {
+                notesPanel.classList.remove('active');
+            }
         }
 
         function nextSlide() {
@@ -398,12 +515,127 @@ function generateHtml(title, slides) {
             }
         }
 
+        function openPresenter() {
+            if (presenterWin && !presenterWin.closed) {
+                presenterWin.focus();
+                return;
+            }
+
+            const slidesData = Array.from(slides).map((slide) => ({
+                content: slide.querySelector('.slide-content').innerHTML,
+                notes: slide.getAttribute('data-notes') || ''
+            }));
+
+            presenterWin = window.open('', 'Presenter', 'width=1200,height=800');
+            presenterWin.document.write(buildPresenterHTML(slidesData));
+            presenterWin.document.close();
+        }
+
+        function buildPresenterHTML(slidesData) {
+            const lines = [];
+            lines.push('<!DOCTYPE html><html><head><meta charset="UTF-8">');
+            lines.push('<title>Presenter - ${title}</title>');
+            lines.push('<style>');
+            lines.push('* { margin: 0; padding: 0; box-sizing: border-box; }');
+            lines.push('body { font-family: -apple-system, sans-serif; background: #1a1a1a; color: #fff; height: 100vh; overflow: hidden; }');
+            lines.push('.container { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 60px 1fr; gap: 15px; padding: 15px; height: 100vh; }');
+            lines.push('.header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 0 20px; border-radius: 8px; }');
+            lines.push('.timer { font-size: 2rem; font-family: monospace; }');
+            lines.push('.counter { font-size: 1.2rem; }');
+            lines.push('.controls button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-left: 8px; }');
+            lines.push('.controls button:hover { background: rgba(255,255,255,0.3); }');
+            lines.push('.current { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 20px; overflow: auto; }');
+            lines.push('.preview-col { display: flex; flex-direction: column; gap: 15px; }');
+            lines.push('.next, .notes { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; overflow: auto; flex: 1; }');
+            lines.push('.title { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; text-transform: uppercase; }');
+            lines.push('.content h1 { font-size: 1.8rem; margin: 10px 0; }');
+            lines.push('.content h2 { font-size: 1.4rem; margin: 8px 0; }');
+            lines.push('.content p { margin: 8px 0; line-height: 1.6; }');
+            lines.push('.content ul { margin-left: 20px; }');
+            lines.push('.next .content { opacity: 0.7; font-size: 0.85rem; }');
+            lines.push('</style></head><body>');
+            lines.push('<div class="container">');
+            lines.push('<div class="header">');
+            lines.push('<div class="counter">Slide <span id="curr">1</span> / <span id="tot">' + slidesData.length + '</span></div>');
+            lines.push('<div class="timer" id="timer">00:00</div>');
+            lines.push('<div class="controls">');
+            lines.push('<button onclick="resetTimer()">Reset</button>');
+            lines.push('<button onclick="prev()">Prev</button>');
+            lines.push('<button onclick="next()">Next</button>');
+            lines.push('</div></div>');
+            lines.push('<div class="current"><div class="title">Current Slide</div><div class="content" id="current"></div></div>');
+            lines.push('<div class="preview-col">');
+            lines.push('<div class="next"><div class="title">Next Slide</div><div class="content" id="next"></div></div>');
+            lines.push('<div class="notes"><div class="title">Notes</div><div id="notesTxt"></div></div>');
+            lines.push('</div></div>');
+            lines.push('<script>');
+            lines.push('var data = ' + JSON.stringify(slidesData) + ';');
+            lines.push('var idx = ' + currentSlide + ';');
+            lines.push('var start = Date.now();');
+            lines.push('var ch = new BroadcastChannel("presentation-sync");');
+            lines.push('ch.onmessage = function(e) { if (e.data.type === "slideChange") { idx = e.data.index; update(); } };');
+            lines.push('function update() {');
+            lines.push('  document.getElementById("curr").textContent = idx + 1;');
+            lines.push('  document.getElementById("current").innerHTML = data[idx].content;');
+            lines.push('  if (idx < data.length - 1) {');
+            lines.push('    document.getElementById("next").innerHTML = data[idx + 1].content;');
+            lines.push('  } else {');
+            lines.push('    document.getElementById("next").innerHTML = "<p style=\\'opacity:0.5\\'>End</p>";');
+            lines.push('  }');
+            lines.push('  var n = data[idx].notes;');
+            lines.push('  if (n) {');
+            lines.push('    var dec = decodeURIComponent(n);');
+            lines.push('    var parts = dec.split("\\\\n\\\\n");');
+            lines.push('    var html = "";');
+            lines.push('    for (var i = 0; i < parts.length; i++) {');
+            lines.push('      html += "<p>" + parts[i].replace(/\\\\n/g, "<br>") + "</p>";');
+            lines.push('    }');
+            lines.push('    document.getElementById("notesTxt").innerHTML = html;');
+            lines.push('  } else {');
+            lines.push('    document.getElementById("notesTxt").innerHTML = "<p style=\\'opacity:0.5\\'>No notes</p>";');
+            lines.push('  }');
+            lines.push('}');
+            lines.push('function next() {');
+            lines.push('  if (idx < data.length - 1) {');
+            lines.push('    idx++;');
+            lines.push('    update();');
+            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('  }');
+            lines.push('}');
+            lines.push('function prev() {');
+            lines.push('  if (idx > 0) {');
+            lines.push('    idx--;');
+            lines.push('    update();');
+            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('  }');
+            lines.push('}');
+            lines.push('function resetTimer() { start = Date.now(); }');
+            lines.push('function tick() {');
+            lines.push('  var e = Math.floor((Date.now() - start) / 1000);');
+            lines.push('  var m = String(Math.floor(e / 60)).padStart(2, "0");');
+            lines.push('  var s = String(e % 60).padStart(2, "0");');
+            lines.push('  document.getElementById("timer").textContent = m + ":" + s;');
+            lines.push('}');
+            lines.push('document.addEventListener("keydown", function(e) {');
+            lines.push('  if (e.key === "ArrowRight" || e.key === " ") next();');
+            lines.push('  else if (e.key === "ArrowLeft") prev();');
+            lines.push('});');
+            lines.push('setInterval(tick, 1000);');
+            lines.push('update();');
+            lines.push('<' + '/script></body></html>');
+            return lines.join('\\n');
+        }
+
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 nextSlide();
             } else if (e.key === 'ArrowLeft') {
                 prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                toggleNotes();
+            } else if (e.key === 'p' || e.key === 'P') {
+                openPresenter();
             }
         });
 
@@ -425,12 +657,12 @@ async function buildPresentation(inputPath, outputName, title) {
       throw new Error(`Input file not found: ${inputPath}`);
     }
 
-    const { slides } = parseMarkdownPresentation(inputPath);
+    const { slides, notes } = parseMarkdownPresentation(inputPath);
     if (slides.length === 0) {
       throw new Error('No slides found');
     }
 
-    const html = generateHtml(title, slides);
+    const html = generateHtml(title, slides, notes);
     fs.writeFileSync(outputPath, html);
 
     console.log(`   ✓ Generated ${slides.length} slides`);
