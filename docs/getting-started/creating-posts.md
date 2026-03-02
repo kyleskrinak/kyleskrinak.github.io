@@ -52,9 +52,12 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | Field | Example | Notes |
 |-------|---------|-------|
 | `updatedDate` | `2026-01-20` | Last modified date (shows in post metadata) |
-| `image` | `"../../assets/images/my-image.jpg"` | Featured image for post |
-| `alt` | `"A screenshot of code"` | Accessibility text for featured image |
+| `image` | `"../../assets/images/my-image.jpg"` | Featured image for post (also used as Open Graph image for social sharing) |
+| `alt` | `"A screenshot of code"` | Accessibility text for featured image (required if `image` is set) |
+| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image |
+| `ogImage` | `"../../assets/images/social.jpg"` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
+| `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
 
 ## Complete Frontmatter Example
 
@@ -104,25 +107,32 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 ## Adding Images
 
-### Store images locally
+### Quick Reference
 
-Put images in: **`src/assets/images/`**
+**Store images in:** `src/assets/images/`
 
-Filename format: `YYYY-MM-DD-descriptive-name.jpg`
+**Naming format:** `YYYY-MM-DD-descriptive-name.webp`
 
-Example: `2026-01-20-astro-logo.jpg`
-
-**Note**: For graphic source files (PSD, AI, Sketch, etc.), store them in `/design` instead. Only production-ready, optimized images belong in `src/assets/images/`.
-
-### Reference images in posts
-
-From a post in `src/content/blog/`:
-
-```markdown
-![Alt text](../../assets/images/2026-01-20-my-image.jpg)
+**Featured image in frontmatter:**
+```yaml
+image: ../../assets/images/2026-01-20-my-image.webp
+alt: "Descriptive alt text"
 ```
 
-The `../../` goes up two directories to reach `src/`, then into `assets/images/`.
+**Inline image in content:**
+```markdown
+![Alt text](../../assets/images/2026-01-20-my-image.webp)
+```
+
+### Complete Image Workflow
+
+For the full workflow (high-res source → optimized web image → deployment):
+
+**See [Image Workflow Guide](./images.md)** for:
+- Where to save source files
+- How to optimize for web
+- Recommended dimensions and formats
+- Troubleshooting image issues
 
 ## Markdown Features Supported
 
