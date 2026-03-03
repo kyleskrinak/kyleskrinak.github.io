@@ -59,11 +59,12 @@ for (const path in images) {
  * Get optimized image metadata by filename
  *
  * Looks up an image in the imageMap and returns its metadata for use with
- * Astro's <Image> component. This enables automatic optimization including:
+ * Astro's <Image> or <Picture> components. By returning ImageMetadata, it allows
+ * those components to apply their built-in optimizations, such as:
  * - Multiple responsive sizes based on component configuration
- * - Format conversion (WebP with fallbacks)
- * - Compression and optimization
- * - Lazy loading and async decoding
+ * - Optional format conversion (e.g., WebP) when configured on the component
+ * - Compression and other optimizations handled by astro:assets
+ * - Lazy loading and async decoding based on component props
  *
  * @param imagePath - Full path like "../../assets/images/flatpanbake.jpg" or just "flatpanbake.jpg"
  * @returns ImageMetadata for use with astro:assets Image component, or undefined if not found

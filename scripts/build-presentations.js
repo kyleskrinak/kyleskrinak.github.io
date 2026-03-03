@@ -121,6 +121,9 @@ function markdownToHtml(markdown) {
 }
 
 function generateHtml(title, slides, notes) {
+  // Compute channel name once for use in both main and presenter windows
+  const channelName = 'presentation-sync-' + title.replace(/\s+/g, '-').toLowerCase();
+
   const slideHtml = slides
     .map((slide, idx) => {
       const html = markdownToHtml(slide);
@@ -446,7 +449,7 @@ function generateHtml(title, slides, notes) {
         let syncChannel = null;
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
-        const channelName = 'presentation-sync-${title.replace(/\\s+/g, '-').toLowerCase()}';
+        const channelName = '${channelName}';
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -599,7 +602,7 @@ function generateHtml(title, slides, notes) {
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');
-            lines.push('var channelName = "presentation-sync-${title.replace(/\\s+/g, "-").toLowerCase()}";');
+            lines.push('var channelName = "${channelName}";');
             lines.push('if (typeof BroadcastChannel !== "undefined") {');
             lines.push('  try {');
             lines.push('    ch = new BroadcastChannel(channelName);');

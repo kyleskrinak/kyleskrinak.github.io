@@ -588,7 +588,7 @@
         let syncChannel = null;
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
-        const channelName = 'presentation-sync-ai-accelerated cms migration with claude code';
+        const channelName = 'presentation-sync-ai-accelerated-cms-migration-with-claude-code';
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -741,7 +741,7 @@
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');
-            lines.push('var channelName = "presentation-sync-ai-accelerated cms migration with claude code";');
+            lines.push('var channelName = "presentation-sync-ai-accelerated-cms-migration-with-claude-code";');
             lines.push('if (typeof BroadcastChannel !== "undefined") {');
             lines.push('  try {');
             lines.push('    ch = new BroadcastChannel(channelName);');

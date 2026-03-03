@@ -148,29 +148,29 @@ Icons are imported in components:
 import iconName from '../assets/icons/icon-name.svg';
 ```
 
-### 4. Astro's Automatic Processing
+### 4. Astro's Image Processing
 
-Once images are in `src/assets/images/`, Astro automatically processes them at build time:
+Once images are in `src/assets/images/`, you can use Astro's image processing features:
 
-#### What Astro Does Automatically
+#### What This Site Does
 
-**Image Optimization:**
-- Compresses images for optimal file size
-- Generates multiple responsive sizes based on component configuration
-- Converts to modern formats (WebP with fallbacks for browser compatibility)
+**Markdown Images (via rehype plugin):**
+- Adds `loading="lazy"` for lazy loading
+- Adds `decoding="async"` for non-blocking rendering
+
+**Component Images (via `astro:assets` `<Image>` component):**
+- Compresses and transforms images for optimal file size
+- Generates multiple responsive sizes when you configure `widths` prop
+- Can convert to modern formats (e.g., WebP) when you explicitly set a `format` prop
+- Can use `<Picture>` component for multiple format fallbacks (WebP + JPEG)
 - Adds content hashes to filenames for cache busting
-- Outputs to `dist/_astro/` directory
+- Outputs generated assets to `dist/_astro/` directory
 
-**Responsive Images:**
-- Creates srcset with multiple resolutions
-- Adds appropriate `sizes` attribute for browser selection
-- Generates 1x, 2x, 3x versions for different pixel densities
-- Automatically serves smallest appropriate size
-
-**Performance Optimizations:**
-- Lazy loading (`loading="lazy"`) via rehype plugin
-- Async decoding (`decoding="async"`) for non-blocking rendering
-- Optimized delivery formats based on browser support
+**Responsive & Performance Features:**
+- Generates `srcset` with multiple resolutions when `widths` are specified
+- Adds `sizes` attributes based on component configuration
+- Browser selects the smallest appropriate size for the viewport
+- Lazy loading and async decoding when configured on components
 
 #### Image Service Configuration
 
@@ -190,15 +190,16 @@ Images in `src/assets/images/` are automatically:
 
 **Input:** `src/assets/images/example.jpg` (800 KB)
 
-**Output:** Multiple optimized files in `dist/_astro/`:
+**Output:** Multiple optimized files in `dist/_astro/` (when using `<Image widths={[800, 1600, 2400]}>`):
 ```
-example-aBc123.webp          (1200px, 120 KB)
-example-dEf456.webp          (800px, 80 KB)
-example-gHi789.webp          (400px, 45 KB)
-example-jKl012.jpg           (fallback, 200 KB)
+example-aBc123.jpg           (2400px, 200 KB)
+example-dEf456.jpg           (1600px, 140 KB)
+example-gHi789.jpg           (800px, 80 KB)
 ```
 
-Browser automatically selects best size and format based on viewport and support.
+Browser automatically selects the best size based on viewport width.
+
+**For WebP with fallbacks:** Use `<Picture>` component with multiple formats configured.
 
 #### Processing Pipeline Summary
 
