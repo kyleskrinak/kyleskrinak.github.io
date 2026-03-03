@@ -120,9 +120,28 @@ function markdownToHtml(markdown) {
   return md.render(markdown);
 }
 
+function createChannelName(title) {
+  // Create a normalized, slug-style channel name suffix from the title
+  const slug = title
+    .toString()
+    .normalize('NFKD')
+    // Remove all characters except word chars, spaces, and dashes
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    // Replace whitespace runs with single dashes
+    .replace(/\s+/g, '-')
+    // Collapse multiple dashes
+    .replace(/-+/g, '-')
+    .toLowerCase();
+
+  // Fallback to a default suffix if the slug becomes empty
+  const safeSlug = slug || 'default';
+  return 'presentation-sync-' + safeSlug;
+}
+
 function generateHtml(title, slides, notes) {
   // Compute channel name once for use in both main and presenter windows
-  const channelName = 'presentation-sync-' + title.replace(/\s+/g, '-').toLowerCase();
+  const channelName = createChannelName(title);
 
   const slideHtml = slides
     .map((slide, idx) => {
@@ -488,7 +507,14 @@ function generateHtml(title, slides, notes) {
             }
 
             if (notes) {
-                const decodedNotes = decodeURIComponent(notes);
+                let decodedNotes;
+                try {
+                    decodedNotes = decodeURIComponent(notes);
+                } catch (e) {
+                    // Fallback to raw notes string if decoding fails (malformed percent-encoding)
+                    console.warn('Failed to decode notes:', e);
+                    decodedNotes = notes;
+                }
                 const paragraphs = decodedNotes.split('\\n\\n');
 
                 paragraphs.forEach((paragraphText) => {

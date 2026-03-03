@@ -25,6 +25,16 @@ const blog = defineCollection({
 		hideEditPost: z.boolean().optional(),
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
+	}).superRefine((data, ctx) => {
+		// Enforce: if any image field exists, alt text is required for accessibility
+		const hasImage = data.image || data.heroImage || data.ogImage;
+		if (hasImage && !data.alt) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Alt text is required when an image (image, heroImage, or ogImage) is provided',
+				path: ['alt'],
+			});
+		}
 	}),
 });
 
