@@ -7,9 +7,9 @@ This directory contains source files for presentations that are converted to sta
 ```
 slidev-presentations/
 ├── slides/           # Slidev markdown source files
-│   ├── 00-template.md
-│   ├── 01-bundle-test.md
-│   └── NN-your-presentation.md
+│   ├── 00-template.md                           # Template for new presentations
+│   ├── 2026-02-22-squarespace-to-astro.md       # Example: Squarespace to Astro migration
+│   └── YYYY-MM-DD-your-presentation.md          # Your presentation here
 └── README.md
 ```
 

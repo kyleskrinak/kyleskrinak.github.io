@@ -57,9 +57,9 @@ if (typeof initOgImage === "string") {
   ogImageUrl = (initOgImage as any).src; // Local asset
 }
 
-// Fall back to hero image if no explicit ogImage
-if (!ogImageUrl && optimizedImage) {
-  ogImageUrl = optimizedImage.src; // Use hero image as OG image
+// Fall back to hero image if no explicit ogImage (skip SVGs - social scrapers don't render them)
+if (!ogImageUrl && optimizedImage && !optimizedImage.src.toLowerCase().endsWith('.svg')) {
+  ogImageUrl = optimizedImage.src; // Use hero image as OG image (raster only)
 }
 
 // Use dynamic OG image if enabled and no remote|local ogImage or hero image

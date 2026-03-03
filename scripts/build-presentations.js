@@ -25,15 +25,9 @@ const md = new MarkdownIt({
 // Enable table parsing
 md.enable('table');
 
+// List of presentations to build
+// Note: 00-template.md is excluded (it's a template, not a presentation)
 const PRESENTATIONS = [
-  { input: 'slidev-presentations/slides/01-bundle-test.md', output: 'bundle-test.html', title: 'Bundle Test' },
-  { input: 'slidev-presentations/slides/02-2019-feb-13-slg-presentation.md', output: '2019-Feb-SLG.html', title: '2019-Feb-13 SLG Presentation' },
-  { input: 'slidev-presentations/slides/03-2019-drupalcon-drupal-8-multisite.md', output: '2019-drupalcon-drupal-8-multisite.html', title: '2019 DrupalCon Drupal 8 Multisite' },
-  { input: 'slidev-presentations/slides/04-tts-profile-mgmt.md', output: 'tts-profile-mgmt.html', title: 'How to Manage Departmental Faculty and Staff Data' },
-  { input: 'slidev-presentations/slides/05-drupal-intro.md', output: 'drupal-intro.html', title: 'Introduction to Drupal' },
-  { input: 'slidev-presentations/slides/06-drupal-multisite-on-a-dime.md', output: 'drupal-multisite-on-a-dime.html', title: 'Drupal Multisite on a Dime' },
-  { input: 'slidev-presentations/slides/07-code-presentation.md', output: 'code-presentation.html', title: 'DrupalCon 2022 Code+ Presentation' },
-  { input: 'slidev-presentations/slides/08-wohd.md', output: 'wohd.html', title: 'What I did at DrupalCon 2022' },
   { input: 'slidev-presentations/slides/2026-02-22-squarespace-to-astro.md', output: '2026-02-22-squarespace-to-astro.html', title: 'AI-Accelerated CMS Migration with Claude Code' },
 ];
 
