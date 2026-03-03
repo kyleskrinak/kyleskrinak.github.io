@@ -587,9 +587,10 @@
         let presenterWin = null;
         let syncChannel = null;
 
-        // Initialize BroadcastChannel for sync
+        // Initialize BroadcastChannel for sync (scoped to this presentation)
+        const channelName = 'presentation-sync-ai-accelerated cms migration with claude code';
         try {
-            syncChannel = new BroadcastChannel('presentation-sync');
+            syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
                 if (event.data.type === 'slideChange') {
                     showSlide(event.data.index, false);
@@ -619,14 +620,35 @@
 
         function updateNotes() {
             const notes = slides[currentSlide].getAttribute('data-notes');
+
+            // Clear existing notes content
+            while (notesContent.firstChild) {
+                notesContent.removeChild(notesContent.firstChild);
+            }
+
             if (notes) {
                 const decodedNotes = decodeURIComponent(notes);
-                const paragraphs = decodedNotes.split('\n\n').map(p =>
-                    '<p>' + p.replace(/\n/g, '<br>') + '</p>'
-                ).join('');
-                notesContent.innerHTML = paragraphs;
+                const paragraphs = decodedNotes.split('\n\n');
+
+                paragraphs.forEach((paragraphText) => {
+                    const p = document.createElement('p');
+                    const lines = paragraphText.split('\n');
+
+                    lines.forEach((line, index) => {
+                        if (index > 0) {
+                            p.appendChild(document.createElement('br'));
+                        }
+                        p.appendChild(document.createTextNode(line));
+                    });
+
+                    notesContent.appendChild(p);
+                });
             } else {
-                notesContent.innerHTML = '<p style="color: rgba(255,255,255,0.5); font-style: italic;">No notes for this slide</p>';
+                const p = document.createElement('p');
+                p.style.color = 'rgba(255,255,255,0.5)';
+                p.style.fontStyle = 'italic';
+                p.textContent = 'No notes for this slide';
+                notesContent.appendChild(p);
             }
         }
 
@@ -669,6 +691,10 @@
             }));
 
             presenterWin = window.open('', 'Presenter', 'width=1200,height=800');
+            if (!presenterWin) {
+                alert('The presenter window was blocked by your browser. Please allow pop-ups for this site and try again.');
+                return;
+            }
             presenterWin.document.write(buildPresenterHTML(slidesData));
             presenterWin.document.close();
         }
@@ -714,8 +740,18 @@
             lines.push('var data = ' + JSON.stringify(slidesData) + ';');
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
-            lines.push('var ch = new BroadcastChannel("presentation-sync");');
-            lines.push('ch.onmessage = function(e) { if (e.data.type === "slideChange") { idx = e.data.index; update(); } };');
+            lines.push('var ch = null;');
+            lines.push('var channelName = "presentation-sync-ai-accelerated cms migration with claude code";');
+            lines.push('if (typeof BroadcastChannel !== "undefined") {');
+            lines.push('  try {');
+            lines.push('    ch = new BroadcastChannel(channelName);');
+            lines.push('  } catch (e) {');
+            lines.push('    console.warn("BroadcastChannel not available in presenter window:", e);');
+            lines.push('  }');
+            lines.push('}');
+            lines.push('if (ch) {');
+            lines.push('  ch.onmessage = function(e) { if (e.data.type === "slideChange") { idx = e.data.index; update(); } };');
+            lines.push('}');
             lines.push('function update() {');
             lines.push('  document.getElementById("curr").textContent = idx + 1;');
             lines.push('  document.getElementById("current").innerHTML = data[idx].content;');
@@ -725,30 +761,43 @@
             lines.push('    document.getElementById("next").innerHTML = "<p style=\'opacity:0.5\'>End</p>";');
             lines.push('  }');
             lines.push('  var n = data[idx].notes;');
+            lines.push('  var notesEl = document.getElementById("notesTxt");');
+            lines.push('  while (notesEl.firstChild) {');
+            lines.push('    notesEl.removeChild(notesEl.firstChild);');
+            lines.push('  }');
             lines.push('  if (n) {');
             lines.push('    var dec = decodeURIComponent(n);');
             lines.push('    var parts = dec.split("\\n\\n");');
-            lines.push('    var html = "";');
             lines.push('    for (var i = 0; i < parts.length; i++) {');
-            lines.push('      html += "<p>" + parts[i].replace(/\\n/g, "<br>") + "</p>";');
+            lines.push('      var p = document.createElement("p");');
+            lines.push('      var linesArr = parts[i].split("\\n");');
+            lines.push('      for (var j = 0; j < linesArr.length; j++) {');
+            lines.push('        if (j > 0) {');
+            lines.push('          p.appendChild(document.createElement("br"));');
+            lines.push('        }');
+            lines.push('        p.appendChild(document.createTextNode(linesArr[j]));');
+            lines.push('      }');
+            lines.push('      notesEl.appendChild(p);');
             lines.push('    }');
-            lines.push('    document.getElementById("notesTxt").innerHTML = html;');
             lines.push('  } else {');
-            lines.push('    document.getElementById("notesTxt").innerHTML = "<p style=\'opacity:0.5\'>No notes</p>";');
+            lines.push('    var p = document.createElement("p");');
+            lines.push('    p.style.opacity = "0.5";');
+            lines.push('    p.textContent = "No notes";');
+            lines.push('    notesEl.appendChild(p);');
             lines.push('  }');
             lines.push('}');
             lines.push('function next() {');
             lines.push('  if (idx < data.length - 1) {');
             lines.push('    idx++;');
             lines.push('    update();');
-            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('    if (ch) ch.postMessage({type:"slideChange",index:idx});');
             lines.push('  }');
             lines.push('}');
             lines.push('function prev() {');
             lines.push('  if (idx > 0) {');
             lines.push('    idx--;');
             lines.push('    update();');
-            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('    if (ch) ch.postMessage({type:"slideChange",index:idx});');
             lines.push('  }');
             lines.push('}');
             lines.push('function resetTimer() { start = Date.now(); }');

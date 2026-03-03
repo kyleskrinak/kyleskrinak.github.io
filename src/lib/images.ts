@@ -1,17 +1,18 @@
 /**
  * Astro Image Import Map
  *
- * Automatically imports all images from src/assets/images/ for type-safe, optimized image handling.
- * Uses Vite's import.meta.glob() to dynamically import all image files at build time.
+ * Automatically imports images from src/assets/images/ (top-level only, no subdirectories)
+ * for type-safe, optimized image handling. Uses Vite's import.meta.glob() to eagerly
+ * import all matching image files at build time.
  *
  * How it works:
- * 1. Glob pattern matches all images in src/assets/images/
+ * 1. Glob pattern matches images in src/assets/images/ (one level deep)
  * 2. Vite eagerly imports them at build time (eager: true)
  * 3. Creates a map with filename as key → ImageMetadata as value
  * 4. Components use getOptimizedImage() to look up images by filename
  *
  * Adding new images:
- * - Just add files to src/assets/images/
+ * - Add files directly to src/assets/images/ (not subdirectories)
  * - No manual registration needed
  * - Supported formats: jpg, jpeg, png, webp, gif, svg
  *
