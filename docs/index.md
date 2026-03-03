@@ -6,6 +6,8 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 **For new developers or contributors:**
 - [Local Setup](./getting-started/) - Running the project locally
+- [Creating Posts](./getting-started/creating-posts.md) - Quick guide for writing blog posts
+- [Image Workflow](./getting-started/images.md) - Complete guide for adding images
 - [Tech Stack](./getting-started/tech-stack.md) - Technology overview (when created)
 - [File Structure](./getting-started/file-structure.md) - How the project is organized (when created)
 
@@ -88,6 +90,8 @@ docs/
 ├── getting-started/                   # For first-time users
 │   ├── index.md
 │   ├── local-setup.md
+│   ├── creating-posts.md
+│   ├── images.md
 │   ├── tech-stack.md
 │   └── file-structure.md
 │

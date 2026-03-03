@@ -131,7 +131,7 @@ Seven phases, all dramatically improved in quality and execution time compared t
 > I already take parallel test suite management for granted. That shift happened fast.
 
 <!--
-Elena has a designer's eye and catches visual issues I miss. The test suite gave us a shared, objective reference — when she flagged something, we could verify it, fix it, and confirm the fix. That workflow only exists because tests were required upfront, not added at the end.
+Elena has a designer's eye and exacting standards. The test suite gave us a shared, objective reference — when I flagged something or she reviewed the result, we could verify it, fix it, and confirm the fix. That workflow only exists because tests were required upfront, not added at the end.
 -->
 
 ---
@@ -140,8 +140,8 @@ Elena has a designer's eye and catches visual issues I miss. The test suite gave
 
 **Total time: 8 hours** — start to deployed.
 
-- ~4 hours lost to a Cloudflare routing error from Claude Code
-- A clean run: probably **4 hours**
+- ~1 hour lost to a Cloudflare DNS configuration miss
+- A clean run: probably **7 hours**
 
 | Metric | Squarespace | Astro | Δ |
 |---|---|---|---|
@@ -151,7 +151,7 @@ Elena has a designer's eye and catches visual issues I miss. The test suite gave
 | SEO | 93 | 92 | -1 |
 
 <!--
-The routing error is worth naming. Claude Code gave confident, incorrect instructions for Cloudflare traffic configuration. Four hours of troubleshooting followed. AI-generated instructions fail — sometimes expensively. That's not a reason to avoid AI; it's a reason to verify, especially on infrastructure configuration. Eight hours total is still not a number that was realistic before.
+The DNS miss is worth naming. I'd added skrinakcreative.com as the custom domain in Cloudflare Pages but not www.skrinakcreative.com. Claude Code didn't catch it and suggested every possible fix except the right one. I stepped away and figured it out in idle time. AI-generated instructions fail — sometimes expensively. That's not a reason to avoid AI; it's a reason to verify, especially on infrastructure configuration. Eight hours total is still not a number that was realistic before.
 -->
 
 ---
@@ -171,13 +171,13 @@ Stakeholder approval here means something specific: Elena has a professional des
 
 ---
 
-## The Honest Limits
+## Project Scope
 
 This was the simple case. Extrapolate carefully.
 
 - 7 pages, one theme, one clean integration swap
 - Complexity scales with forms, data models, authentication
-- AI instructions fail — the routing error cost 4 hours
+- AI instructions fail — verify infrastructure configuration yourself
 
 > Prior assumptions about effort may no longer hold. Test it yourself.
 

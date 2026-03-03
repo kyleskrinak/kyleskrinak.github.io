@@ -1,50 +1,84 @@
-// Astro Image Import Map
-// All blog post hero images imported here for type-safe, optimized image handling
-
-import momMe from '../assets/images/19-10-31-mom-me.jpg';
-import megaphone from '../assets/images/190831-megaphone.jpg';
-import fathersday from '../assets/images/20160619-fathersday.jpg';
-import jekyllGarden from '../assets/images/21-04-02-jekyll-garden.jpg';
-import aiModernization from '../assets/images/ai-modernization-workflow.jpg';
-import confusedMeme from '../assets/images/confusedmeme.jpg';
-import drupalLogo from '../assets/images/drupal_logo.png';
-import emptyDining from '../assets/images/empty_dining.jpg';
-import flatpanbake from '../assets/images/flatpanbake.jpg';
-import funAtScale from '../assets/images/fun-at-scale.svg';
-import hotTub from '../assets/images/hot_tub.jpg';
-import punchCard from '../assets/images/punch_card.jpg';
-import typewriterToLaptop from '../assets/images/typewriter-to-laptop.jpg';
+/**
+ * Astro Image Import Map
+ *
+ * Automatically imports all images from src/assets/images/ for type-safe, optimized image handling.
+ * Uses Vite's import.meta.glob() to dynamically import all image files at build time.
+ *
+ * How it works:
+ * 1. Glob pattern matches all images in src/assets/images/
+ * 2. Vite eagerly imports them at build time (eager: true)
+ * 3. Creates a map with filename as key → ImageMetadata as value
+ * 4. Components use getOptimizedImage() to look up images by filename
+ *
+ * Adding new images:
+ * - Just add files to src/assets/images/
+ * - No manual registration needed
+ * - Supported formats: jpg, jpeg, png, webp, gif, svg
+ *
+ * @example
+ * // Add image: src/assets/images/my-photo.jpg
+ * // Use in component: getOptimizedImage("my-photo.jpg")
+ * // Returns: ImageMetadata for Astro's <Image> component
+ */
 
 import type { ImageMetadata } from 'astro';
 
-// Map filenames to imported image modules for dynamic lookup
-export const imageMap: Record<string, ImageMetadata> = {
-	'19-10-31-mom-me.jpg': momMe,
-	'190831-megaphone.jpg': megaphone,
-	'20160619-fathersday.jpg': fathersday,
-	'21-04-02-jekyll-garden.jpg': jekyllGarden,
-	'ai-modernization-workflow.jpg': aiModernization,
-	'confusedmeme.jpg': confusedMeme,
-	'drupal_logo.png': drupalLogo,
-	'empty_dining.jpg': emptyDining,
-	'flatpanbake.jpg': flatpanbake,
-	'fun-at-scale.svg': funAtScale,
-	'hot_tub.jpg': hotTub,
-	'punch_card.jpg': punchCard,
-	'typewriter-to-laptop.jpg': typewriterToLaptop,
-};
+/**
+ * Automatically import all images using glob pattern
+ * - Matches all common image formats (case-insensitive)
+ * - eager: true = imports at build time (not lazy-loaded)
+ * - Returns: { path: { default: ImageMetadata } }
+ */
+const images = import.meta.glob<{ default: ImageMetadata }>(
+	'../assets/images/*.{jpg,jpeg,png,webp,gif,svg,JPG,JPEG,PNG,WEBP,GIF,SVG}',
+	{ eager: true }
+);
+
+/**
+ * Image map for fast filename → ImageMetadata lookup
+ * Key: just the filename (e.g., "flatpanbake.jpg")
+ * Value: ImageMetadata for Astro's Image component
+ */
+export const imageMap: Record<string, ImageMetadata> = {};
+for (const path in images) {
+	// Extract filename from full path: "../assets/images/photo.jpg" → "photo.jpg"
+	const filename = path.split('/').pop();
+	if (filename) {
+		imageMap[filename] = images[path].default;
+	}
+}
 
 /**
  * Get optimized image metadata by filename
+ *
+ * Looks up an image in the imageMap and returns its metadata for use with
+ * Astro's <Image> component. This enables automatic optimization including:
+ * - Multiple responsive sizes (400px, 800px, 1200px)
+ * - Format conversion (WebP with fallbacks)
+ * - Compression and optimization
+ * - Lazy loading and async decoding
+ *
  * @param imagePath - Full path like "../../assets/images/flatpanbake.jpg" or just "flatpanbake.jpg"
- * @returns ImageMetadata for use with astro:assets Image component
+ * @returns ImageMetadata for use with astro:assets Image component, or undefined if not found
+ *
+ * @example
+ * // In a component:
+ * const image = getOptimizedImage("flatpanbake.jpg");
+ * if (image) {
+ *   <Image src={image} alt="..." />
+ * }
+ *
+ * @example
+ * // With full path (extracts filename automatically):
+ * const image = getOptimizedImage("../../assets/images/photo.jpg"); // → looks up "photo.jpg"
  */
 export function getOptimizedImage(imagePath: string | undefined): ImageMetadata | undefined {
 	if (!imagePath) return undefined;
 
-	// Extract filename from path
+	// Extract filename from path: "../../assets/images/photo.jpg" → "photo.jpg"
 	const filename = imagePath.split('/').pop();
 	if (!filename) return undefined;
 
+	// Look up in imageMap - returns undefined if not found
 	return imageMap[filename];
 }
