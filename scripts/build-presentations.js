@@ -653,7 +653,12 @@ function generateHtml(title, slides, notes) {
             lines.push('    notesEl.removeChild(notesEl.firstChild);');
             lines.push('  }');
             lines.push('  if (n) {');
-            lines.push('    var dec = decodeURIComponent(n);');
+            lines.push('    var dec;');
+            lines.push('    try {');
+            lines.push('      dec = decodeURIComponent(n);');
+            lines.push('    } catch (e) {');
+            lines.push('      dec = n;');
+            lines.push('    }');
             lines.push('    var parts = dec.split("\\\\n\\\\n");');
             lines.push('    for (var i = 0; i < parts.length; i++) {');
             lines.push('      var p = document.createElement("p");');

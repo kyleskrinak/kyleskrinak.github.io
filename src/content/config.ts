@@ -11,10 +11,10 @@ const blog = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		author: z.string().optional(),
-		image: z.string().optional(),
-		heroImage: z.string().optional(),
-		ogImage: z.string().optional(),
-		alt: z.string().optional(),
+		image: z.string().trim().min(1).optional(),
+		heroImage: z.string().trim().min(1).optional(),
+		ogImage: z.string().trim().min(1).optional(),
+		alt: z.string().trim().min(1).optional(),
 		caption: z.string().optional(),
 		canonicalURL: z.string().optional(),
 		tags: z.array(z.string()).optional(),
@@ -26,7 +26,8 @@ const blog = defineCollection({
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
 	}).superRefine((data, ctx) => {
-		// Enforce: if any image field exists, alt text is required for accessibility
+		// Enforce: if any non-empty image field exists, alt text is required for accessibility
+		// trim().min(1) already ensures non-empty strings, but check existence here
 		const hasImage = data.image || data.heroImage || data.ogImage;
 		if (hasImage && !data.alt) {
 			ctx.addIssue({
