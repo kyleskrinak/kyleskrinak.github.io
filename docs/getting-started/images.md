@@ -156,7 +156,7 @@ Once images are in `src/assets/images/`, Astro automatically processes them at b
 
 **Image Optimization:**
 - Compresses images for optimal file size
-- Generates multiple sizes for responsive srcset (400px, 800px, 1200px)
+- Generates multiple responsive sizes based on component configuration
 - Converts to modern formats (WebP with fallbacks for browser compatibility)
 - Adds content hashes to filenames for cache busting
 - Outputs to `dist/_astro/` directory
@@ -220,7 +220,7 @@ Browser automatically selects best size and format based on viewport and support
 ┌─────────────────────────────────────────────────────────────┐
 │ Build-Time Processing (Astro + Sharp)                       │
 │ • Compress and optimize                                     │
-│ • Generate responsive sizes (400px, 800px, 1200px)          │
+│ • Generate multiple responsive sizes                        │
 │ • Convert to WebP + fallbacks                               │
 │ • Add content hashes                                        │
 └────────────────────┬────────────────────────────────────────┘

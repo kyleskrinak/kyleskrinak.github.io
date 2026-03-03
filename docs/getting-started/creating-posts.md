@@ -111,17 +111,19 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 **Store images in:** `src/assets/images/`
 
-**Naming format:** `YYYY-MM-DD-descriptive-name.webp`
+**Naming format:** `YYYY-MM-DD-descriptive-name.(jpg|png|webp)`
+
+**Note:** Source images can be JPG or PNG - Astro automatically generates WebP with fallbacks.
 
 **Featured image in frontmatter:**
 ```yaml
-image: ../../assets/images/2026-01-20-my-image.webp
+image: ../../assets/images/2026-01-20-my-image.jpg
 alt: "Descriptive alt text"
 ```
 
 **Inline image in content:**
 ```markdown
-![Alt text](../../assets/images/2026-01-20-my-image.webp)
+![Alt text](../../assets/images/2026-01-20-my-image.jpg)
 ```
 
 ### Complete Image Workflow

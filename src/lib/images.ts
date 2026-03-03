@@ -53,7 +53,7 @@ for (const path in images) {
  *
  * Looks up an image in the imageMap and returns its metadata for use with
  * Astro's <Image> component. This enables automatic optimization including:
- * - Multiple responsive sizes (400px, 800px, 1200px)
+ * - Multiple responsive sizes based on component configuration
  * - Format conversion (WebP with fallbacks)
  * - Compression and optimization
  * - Lazy loading and async decoding

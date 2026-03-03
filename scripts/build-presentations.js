@@ -445,9 +445,10 @@ function generateHtml(title, slides, notes) {
         let presenterWin = null;
         let syncChannel = null;
 
-        // Initialize BroadcastChannel for sync
+        // Initialize BroadcastChannel for sync (scoped to this presentation)
+        const channelName = 'presentation-sync-${title.replace(/\\s+/g, '-').toLowerCase()}';
         try {
-            syncChannel = new BroadcastChannel('presentation-sync');
+            syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
                 if (event.data.type === 'slideChange') {
                     showSlide(event.data.index, false);
@@ -477,14 +478,35 @@ function generateHtml(title, slides, notes) {
 
         function updateNotes() {
             const notes = slides[currentSlide].getAttribute('data-notes');
+
+            // Clear existing notes content
+            while (notesContent.firstChild) {
+                notesContent.removeChild(notesContent.firstChild);
+            }
+
             if (notes) {
                 const decodedNotes = decodeURIComponent(notes);
-                const paragraphs = decodedNotes.split('\\n\\n').map(p =>
-                    '<p>' + p.replace(/\\n/g, '<br>') + '</p>'
-                ).join('');
-                notesContent.innerHTML = paragraphs;
+                const paragraphs = decodedNotes.split('\\n\\n');
+
+                paragraphs.forEach((paragraphText) => {
+                    const p = document.createElement('p');
+                    const lines = paragraphText.split('\\n');
+
+                    lines.forEach((line, index) => {
+                        if (index > 0) {
+                            p.appendChild(document.createElement('br'));
+                        }
+                        p.appendChild(document.createTextNode(line));
+                    });
+
+                    notesContent.appendChild(p);
+                });
             } else {
-                notesContent.innerHTML = '<p style="color: rgba(255,255,255,0.5); font-style: italic;">No notes for this slide</p>';
+                const p = document.createElement('p');
+                p.style.color = 'rgba(255,255,255,0.5)';
+                p.style.fontStyle = 'italic';
+                p.textContent = 'No notes for this slide';
+                notesContent.appendChild(p);
             }
         }
 
@@ -527,6 +549,10 @@ function generateHtml(title, slides, notes) {
             }));
 
             presenterWin = window.open('', 'Presenter', 'width=1200,height=800');
+            if (!presenterWin) {
+                alert('The presenter window was blocked by your browser. Please allow pop-ups for this site and try again.');
+                return;
+            }
             presenterWin.document.write(buildPresenterHTML(slidesData));
             presenterWin.document.close();
         }
@@ -572,8 +598,18 @@ function generateHtml(title, slides, notes) {
             lines.push('var data = ' + JSON.stringify(slidesData) + ';');
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
-            lines.push('var ch = new BroadcastChannel("presentation-sync");');
-            lines.push('ch.onmessage = function(e) { if (e.data.type === "slideChange") { idx = e.data.index; update(); } };');
+            lines.push('var ch = null;');
+            lines.push('var channelName = "presentation-sync-${title.replace(/\\s+/g, "-").toLowerCase()}";');
+            lines.push('if (typeof BroadcastChannel !== "undefined") {');
+            lines.push('  try {');
+            lines.push('    ch = new BroadcastChannel(channelName);');
+            lines.push('  } catch (e) {');
+            lines.push('    console.warn("BroadcastChannel not available in presenter window:", e);');
+            lines.push('  }');
+            lines.push('}');
+            lines.push('if (ch) {');
+            lines.push('  ch.onmessage = function(e) { if (e.data.type === "slideChange") { idx = e.data.index; update(); } };');
+            lines.push('}');
             lines.push('function update() {');
             lines.push('  document.getElementById("curr").textContent = idx + 1;');
             lines.push('  document.getElementById("current").innerHTML = data[idx].content;');
@@ -599,14 +635,14 @@ function generateHtml(title, slides, notes) {
             lines.push('  if (idx < data.length - 1) {');
             lines.push('    idx++;');
             lines.push('    update();');
-            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('    if (ch) ch.postMessage({type:"slideChange",index:idx});');
             lines.push('  }');
             lines.push('}');
             lines.push('function prev() {');
             lines.push('  if (idx > 0) {');
             lines.push('    idx--;');
             lines.push('    update();');
-            lines.push('    ch.postMessage({type:"slideChange",index:idx});');
+            lines.push('    if (ch) ch.postMessage({type:"slideChange",index:idx});');
             lines.push('  }');
             lines.push('}');
             lines.push('function resetTimer() { start = Date.now(); }');
