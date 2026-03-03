@@ -14,8 +14,9 @@ import markdownItTableOfContents from 'markdown-it-table-of-contents';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Initialize markdown-it with table support enabled
+// Security: html disabled to prevent XSS via arbitrary HTML/script tags in slides
 const md = new MarkdownIt({
-  html: true,
+  html: false,  // Disable raw HTML to prevent XSS
   linkify: true,
   typographer: true,
   breaks: false
