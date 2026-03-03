@@ -29,6 +29,12 @@ import type { ImageMetadata } from 'astro';
  * - Matches all common image formats (case-insensitive)
  * - eager: true = imports at build time (not lazy-loaded)
  * - Returns: { path: { default: ImageMetadata } }
+ *
+ * INTENTIONAL DESIGN: eager: true is used deliberately to ensure all images
+ * are available in the imageMap at runtime. This simplifies component logic
+ * and prevents runtime errors from missing images. The performance trade-off
+ * is acceptable for this site's image count. If build time becomes an issue,
+ * consider switching to lazy imports or a dedicated hero-images directory.
  */
 const images = import.meta.glob<{ default: ImageMetadata }>(
 	'../assets/images/*.{jpg,jpeg,png,webp,gif,svg,JPG,JPEG,PNG,WEBP,GIF,SVG}',
