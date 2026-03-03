@@ -26,7 +26,7 @@ import type { ImageMetadata } from 'astro';
 
 /**
  * Automatically import all images using glob pattern
- * - Matches all common image formats (case-insensitive)
+ * - Matches all common image formats (both lowercase and uppercase extensions)
  * - eager: true = imports at build time (not lazy-loaded)
  * - Returns: { path: { default: ImageMetadata } }
  *

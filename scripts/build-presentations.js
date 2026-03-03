@@ -449,7 +449,7 @@ function generateHtml(title, slides, notes) {
         let syncChannel = null;
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
-        const channelName = '${channelName}';
+        const channelName = ${JSON.stringify(channelName)};
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -602,7 +602,7 @@ function generateHtml(title, slides, notes) {
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');
-            lines.push('var channelName = "${channelName}";');
+            lines.push('var channelName = ' + JSON.stringify(channelName) + ';');
             lines.push('if (typeof BroadcastChannel !== "undefined") {');
             lines.push('  try {');
             lines.push('    ch = new BroadcastChannel(channelName);');
