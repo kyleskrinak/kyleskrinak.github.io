@@ -427,7 +427,7 @@ convert input.jpg -quality 85 output.webp
 1. Image path in frontmatter is incorrect
 2. Image file doesn't exist
 3. Image file name has special characters (use `-` not spaces)
-4. Missing `alt` text in frontmatter
+4. Missing `alt` text in frontmatter (won't fail the build, but falls back to a generic alt and hurts accessibility)
 
 ## Examples from Existing Posts
 
@@ -445,7 +445,7 @@ grep "!\[" src/content/blog/*.md | head -5
 
 1. **Name files descriptively**: `2026-03-02-homepage-redesign.webp` not `IMG_1234.jpg`
 2. **Optimize before committing**: Export at target dimensions and quality before adding to `src/assets/images/`
-3. **Let Astro handle format conversion**: Export as JPEG or PNG, Astro will generate WebP + fallbacks automatically
+3. **Use Astro image options for format conversion**: Export as JPEG or PNG, then configure formats (for example, `format="webp"`) and any `<Picture>` fallbacks in the relevant components
 4. **Keep sources in `/design`**: Preserve originals for future edits
 5. **Always add alt text**: Required for accessibility
 6. **Test locally first**: Preview images before pushing

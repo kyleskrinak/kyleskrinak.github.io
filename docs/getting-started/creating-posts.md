@@ -113,7 +113,7 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 **Naming format:** `YYYY-MM-DD-descriptive-name.(jpg|png|webp)`
 
-**Note:** Source images can be JPG or PNG - Astro automatically generates WebP with fallbacks.
+**Note:** Source images can be JPG or PNG. Astro can generate optimized formats like WebP (with fallbacks) when configured via `format` or `<Picture>`.
 
 **Featured image in frontmatter:**
 ```yaml
