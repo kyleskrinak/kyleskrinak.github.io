@@ -8,10 +8,12 @@
 import fs from 'fs';
 import path from 'path';
 import MarkdownIt from 'markdown-it';
+import sanitizeHtml from 'sanitize-html';
 
 // Initialize markdown-it with table support enabled
-// Security: HTML enabled for trusted presentation content (authored files, no user input)
-// Presentations are version-controlled content, not user-generated, so HTML is safe
+// Security: HTML enabled for presentation layout, sanitized with allowlist (defense-in-depth)
+// Even though presentations are version-controlled author content, sanitization prevents
+// XSS if repo is compromised or malicious HTML is inadvertently introduced
 const md = new MarkdownIt({
   html: true,  // Enable raw HTML for styling and layout control in presentations
   linkify: true,
@@ -81,6 +83,60 @@ md.validateLink = function(url) {
 
 // Enable table parsing
 md.enable('table');
+
+// Security: Sanitize HTML output with allowlist
+// Even for trusted content, defense-in-depth prevents XSS if repo is compromised
+// Allows presentation layout tags/attributes while blocking dangerous constructs
+const sanitizeConfig = {
+  allowedTags: [
+    // Structure
+    'div', 'span', 'p', 'br', 'hr',
+    // Headings
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    // Lists
+    'ul', 'ol', 'li',
+    // Emphasis
+    'strong', 'em', 'b', 'i', 'u', 's',
+    // Code
+    'code', 'pre',
+    // Links and media
+    'a', 'img',
+    // Tables
+    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+    // Quotes
+    'blockquote', 'q', 'cite'
+  ],
+  allowedAttributes: {
+    '*': ['style', 'class', 'id'],
+    'a': ['href', 'title', 'target', 'rel'],
+    'img': ['src', 'alt', 'title', 'width', 'height', 'loading']
+  },
+  allowedStyles: {
+    '*': {
+      'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
+      'font-size': [/^\d+(?:px|em|rem|%)$/],
+      'font-style': [/^italic$/, /^normal$/],
+      'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
+      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      'margin': [/^\d+(?:px|em|rem|%)$/],
+      'margin-top': [/^\d+(?:px|em|rem|%)$/],
+      'margin-bottom': [/^\d+(?:px|em|rem|%)$/],
+      'margin-left': [/^\d+(?:px|em|rem|%)$/],
+      'margin-right': [/^\d+(?:px|em|rem|%)$/],
+      'padding': [/^\d+(?:px|em|rem|%)$/],
+      'max-width': [/^\d+(?:px|em|rem|%)$/],
+      'width': [/^\d+(?:px|em|rem|%)$/, /^auto$/],
+      'height': [/^\d+(?:px|em|rem|%)$/, /^auto$/],
+      'display': [/^block$/, /^inline$/, /^inline-block$/, /^flex$/, /^grid$/]
+    }
+  },
+  // Validate URLs in links/images against the same blocklist as validateLink
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowedSchemesAppliedToAttributes: ['href', 'src'],
+  allowProtocolRelative: true
+};
 
 const PUBLIC_DIR = 'public/presentations';
 const SLIDES_DIR = 'slidev-presentations/slides';
@@ -301,7 +357,11 @@ function extractNotesFromSlide(slideContent) {
 function markdownToHtml(markdown) {
   // Use markdown-it for comprehensive markdown support
   // This handles: headings, lists, code blocks, tables, links, images, bold, italic, etc.
-  return md.render(markdown);
+  const rendered = md.render(markdown);
+
+  // Sanitize HTML output to prevent XSS (blocks <script>, dangerous event handlers, etc.)
+  // Allows presentation layout elements while removing dangerous constructs
+  return sanitizeHtml(rendered, sanitizeConfig);
 }
 
 /**
