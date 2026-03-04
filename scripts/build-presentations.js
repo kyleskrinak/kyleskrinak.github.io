@@ -237,8 +237,9 @@ function extractNotesFromSlide(slideContent) {
   }
 
   // Function to check if a position is inside a code block
+  // Treat ranges as half-open [start, end): end is exclusive
   function isInCodeBlock(position) {
-    return codeBlockRanges.some(range => position >= range.start && position <= range.end);
+    return codeBlockRanges.some(range => position >= range.start && position < range.end);
   }
 
   // Extract comments that are NOT inside code blocks
