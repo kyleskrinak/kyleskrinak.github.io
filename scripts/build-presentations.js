@@ -197,18 +197,58 @@ function parseMarkdownPresentation(filePath) {
 }
 
 function extractNotesFromSlide(slideContent) {
-  // Extract HTML comments as speaker notes
+  // Extract HTML comments as speaker notes, but skip comments inside code blocks
+
+  // First, find all fenced code block ranges (between ``` markers)
+  const codeBlockRanges = [];
+  const lines = slideContent.split('\n');
+  let inCodeBlock = false;
+  let codeBlockStart = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('```')) {
+      if (!inCodeBlock) {
+        // Starting a code block
+        codeBlockStart = slideContent.split('\n').slice(0, i).join('\n').length;
+        inCodeBlock = true;
+      } else {
+        // Ending a code block
+        const codeBlockEnd = slideContent.split('\n').slice(0, i + 1).join('\n').length;
+        codeBlockRanges.push({ start: codeBlockStart, end: codeBlockEnd });
+        inCodeBlock = false;
+      }
+    }
+  }
+
+  // Function to check if a position is inside a code block
+  function isInCodeBlock(position) {
+    return codeBlockRanges.some(range => position >= range.start && position <= range.end);
+  }
+
+  // Extract comments that are NOT inside code blocks
   const commentRegex = /<!--([\s\S]*?)-->/g;
   const notesArray = [];
-  let content = slideContent;
+  const commentsToRemove = [];
 
   let match;
   while ((match = commentRegex.exec(slideContent)) !== null) {
-    notesArray.push(match[1].trim());
+    const commentPosition = match.index;
+
+    if (!isInCodeBlock(commentPosition)) {
+      // This comment is outside code blocks - treat as speaker note
+      notesArray.push(match[1].trim());
+      commentsToRemove.push(match[0]);
+    }
+    // Comments inside code blocks are left in the content
   }
 
-  // Remove comments from content
-  content = content.replace(commentRegex, '').trim();
+  // Remove only the comments that were extracted as notes
+  let content = slideContent;
+  for (const comment of commentsToRemove) {
+    content = content.replace(comment, '');
+  }
+  content = content.trim();
 
   return {
     content,
