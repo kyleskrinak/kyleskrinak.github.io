@@ -118,9 +118,10 @@ const sanitizeConfig = {
       'font-size': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
       'font-style': [/^italic$/, /^normal$/],
       'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
-      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
-      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
-      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      // Fully anchor rgb/rgba patterns to prevent bypass (e.g., "rgb() url(evil)")
+      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
+      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
+      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
       // Allow 1-4 values, decimals, unitless zero, and auto (e.g., "0 auto", "10px 20px")
       'margin': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)){0,3})$/],
       // Allow decimals, unitless zero, and auto for individual margins
