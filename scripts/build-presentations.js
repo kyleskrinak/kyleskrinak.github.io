@@ -126,7 +126,7 @@ const sanitizeConfig = {
       'margin-left': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
       'margin-right': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
       // Allow 1-4 values, decimals, and unitless zero for padding
-      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)){0,3}))$/],
+      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))){0,3})$/],
       // Allow decimals and unitless zero for max-width
       'max-width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
       // Allow decimals, unitless zero, and auto for width/height
@@ -139,7 +139,32 @@ const sanitizeConfig = {
   // Both use allowlist approach: allows ONLY http, https, mailto, tel (plus relative URLs)
   allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   allowedSchemesAppliedToAttributes: ['href', 'src'],
-  allowProtocolRelative: true
+  allowProtocolRelative: true,
+  // Security: Prevent reverse-tabnabbing by enforcing rel="noopener noreferrer" on target="_blank"
+  transformTags: {
+    'a': function(tagName, attribs) {
+      // If target="_blank" is present, ensure rel includes noopener noreferrer
+      if (attribs.target === '_blank') {
+        const existingRel = attribs.rel || '';
+        const relParts = existingRel.split(/\s+/).filter(Boolean);
+
+        // Add noopener and noreferrer if not already present
+        if (!relParts.includes('noopener')) {
+          relParts.push('noopener');
+        }
+        if (!relParts.includes('noreferrer')) {
+          relParts.push('noreferrer');
+        }
+
+        attribs.rel = relParts.join(' ');
+      }
+
+      return {
+        tagName: tagName,
+        attribs: attribs
+      };
+    }
+  }
 };
 
 const PUBLIC_DIR = 'public/presentations';
