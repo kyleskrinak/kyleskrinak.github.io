@@ -25,13 +25,64 @@ const md = new MarkdownIt({
 // Enable table parsing
 md.enable('table');
 
-// List of presentations to build
-// Note: 00-template.md is excluded (it's a template, not a presentation)
-const PRESENTATIONS = [
-  { input: 'slidev-presentations/slides/2026-02-22-squarespace-to-astro.md', output: '2026-02-22-squarespace-to-astro.html', title: 'AI-Accelerated CMS Migration with Claude Code' },
-];
-
 const PUBLIC_DIR = 'public/presentations';
+const SLIDES_DIR = 'slidev-presentations/slides';
+
+/**
+ * Extract title from frontmatter
+ * Looks for "title: ..." in YAML frontmatter
+ */
+function extractTitleFromFrontmatter(filePath) {
+  const content = fs.readFileSync(filePath, 'utf8');
+  const lines = content.split('\n');
+
+  // Look for title in frontmatter (between first and second ---)
+  let inFrontmatter = false;
+  for (const line of lines) {
+    if (line === '---') {
+      if (inFrontmatter) break; // End of frontmatter
+      inFrontmatter = true;
+      continue;
+    }
+    if (inFrontmatter && line.startsWith('title:')) {
+      // Extract title, removing quotes if present
+      return line.substring(6).trim().replace(/^["']|["']$/g, '');
+    }
+  }
+
+  // Fallback: use filename without extension
+  return path.basename(filePath, '.md');
+}
+
+/**
+ * Auto-discover presentations from slides directory
+ * Excludes template files (00-template.md)
+ */
+function discoverPresentations() {
+  if (!fs.existsSync(SLIDES_DIR)) {
+    console.error(`❌ Slides directory not found: ${SLIDES_DIR}`);
+    return [];
+  }
+
+  const files = fs.readdirSync(SLIDES_DIR)
+    .filter(file => file.endsWith('.md') && !file.startsWith('00-template'))
+    .sort();
+
+  return files.map(file => {
+    const inputPath = path.join(SLIDES_DIR, file);
+    const outputName = file.replace('.md', '.html');
+    const title = extractTitleFromFrontmatter(inputPath);
+
+    return {
+      input: inputPath,
+      output: outputName,
+      title: title
+    };
+  });
+}
+
+// Auto-discover presentations from slides directory
+const PRESENTATIONS = discoverPresentations();
 
 function parseMarkdownPresentation(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
@@ -619,7 +670,7 @@ function generateHtml(title, slides, notes) {
             lines.push('<div class="notes"><div class="title">Notes</div><div id="notesTxt"></div></div>');
             lines.push('</div></div>');
             lines.push('<script>');
-            lines.push('var data = ' + JSON.stringify(slidesData) + ';');
+            lines.push('var data = ' + JSON.stringify(slidesData).replace(/<\/script/gi, '<\\/script') + ';');
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');

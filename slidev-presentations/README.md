@@ -17,7 +17,7 @@ slidev-presentations/
 
 ### 1. Create the Slidev Markdown File
 
-Create a new file in `slides/` following the naming convention: `NN-slug.md`
+Create a new file in `slides/` following the naming convention: `YYYY-MM-DD-slug.md`
 
 Use the template at `slides/00-template.md` as a starting point:
 
