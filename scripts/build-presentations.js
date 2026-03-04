@@ -18,6 +18,17 @@ const md = new MarkdownIt({
   breaks: false
 });
 
+// Security: Override link validation to block dangerous protocols
+// Allow only safe schemes (http, https, mailto) and reject javascript:, data:, etc.
+md.validateLink = function(url) {
+  // Parse the URL protocol
+  const protocol = url.trim().toLowerCase().split(':')[0];
+
+  // Allow safe protocols and relative URLs (no protocol)
+  const safeProtocols = ['http', 'https', 'mailto', ''];
+  return safeProtocols.includes(protocol);
+};
+
 // Enable table parsing
 md.enable('table');
 

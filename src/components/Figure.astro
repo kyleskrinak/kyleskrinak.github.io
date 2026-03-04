@@ -46,10 +46,13 @@ const { image_path, alt, caption, lazy = true } = Astro.props;
 
 // Try to get optimized image from map, fallback to direct path
 const optimizedImage = getOptimizedImage(image_path);
+
+// Check if this is an SVG - SVGs don't need responsive image generation
+const isSvg = optimizedImage?.src?.toLowerCase().endsWith('.svg');
 ---
 
 <figure class="figure">
-  {optimizedImage ? (
+  {optimizedImage && !isSvg ? (
     <Image
       src={optimizedImage}
       alt={alt}
@@ -57,6 +60,15 @@ const optimizedImage = getOptimizedImage(image_path);
       quality={90}
       widths={[800, 1600, 2400]}
       sizes="(min-width: 1024px) 768px, 100vw"
+      loading={lazy ? 'lazy' : 'eager'}
+      decoding="async"
+    />
+  ) : optimizedImage && isSvg ? (
+    // SVG: use plain img tag without responsive transforms
+    <img
+      src={optimizedImage.src}
+      alt={alt}
+      class="figure__image figure__image--svg"
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
     />

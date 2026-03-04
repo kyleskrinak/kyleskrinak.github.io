@@ -96,7 +96,7 @@ This ensures search engines can discover your presentation.
 npm run dev
 ```
 
-Visit: `http://localhost:4321/presentations/YYYY-MM-DD-your-slug/` (matching the HTML filename)
+Visit: `http://localhost:4321/presentations/YYYY-MM-DD-your-slug.html` (matching the HTML filename)
 
 ### 6. Commit and Deploy
 
