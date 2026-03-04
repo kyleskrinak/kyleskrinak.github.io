@@ -235,6 +235,11 @@ function extractNotesFromSlide(slideContent) {
     }
   }
 
+  // If the slide ends while still in a code block, treat the remainder as code
+  if (inCodeBlock && codeBlockStart >= 0) {
+    codeBlockRanges.push({ start: codeBlockStart, end: slideContent.length });
+  }
+
   // Function to check if a position is inside a code block
   // Treat ranges as half-open [start, end): end is exclusive
   function isInCodeBlock(position) {
@@ -253,17 +258,38 @@ function extractNotesFromSlide(slideContent) {
     if (!isInCodeBlock(commentPosition)) {
       // This comment is outside code blocks - treat as speaker note
       notesArray.push(match[1].trim());
-      commentsToRemove.push(match[0]);
+      // Store the exact range of this comment so we can remove by position
+      commentsToRemove.push({
+        start: commentPosition,
+        end: commentPosition + match[0].length
+      });
     }
     // Comments inside code blocks are left in the content
   }
 
   // Remove only the comments that were extracted as notes
-  let content = slideContent;
-  for (const comment of commentsToRemove) {
-    content = content.replace(comment, '');
+  // Use the stored ranges to avoid accidentally removing matching text inside code blocks
+  let contentParts = [];
+  let lastIndex = 0;
+
+  // Ensure ranges are processed in order
+  commentsToRemove.sort((a, b) => a.start - b.start);
+
+  for (const range of commentsToRemove) {
+    // Append text before this comment
+    if (range.start > lastIndex) {
+      contentParts.push(slideContent.slice(lastIndex, range.start));
+    }
+    // Skip the comment itself by moving lastIndex past the end
+    lastIndex = range.end;
   }
-  content = content.trim();
+
+  // Append any remaining text after the last comment
+  if (lastIndex < slideContent.length) {
+    contentParts.push(slideContent.slice(lastIndex));
+  }
+
+  let content = contentParts.join('').trim();
 
   return {
     content,
