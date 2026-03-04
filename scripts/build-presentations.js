@@ -175,28 +175,17 @@ function escapeHtml(text) {
     .replace(/'/g, '&#39;');
 }
 
-function createChannelName(title) {
-  // Create a normalized, slug-style channel name suffix from the title
-  const slug = title
-    .toString()
-    .normalize('NFKD')
-    // Remove all characters except word chars, spaces, and dashes
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    // Replace whitespace runs with single dashes
-    .replace(/\s+/g, '-')
-    // Collapse multiple dashes
-    .replace(/-+/g, '-')
-    .toLowerCase();
-
-  // Fallback to a default suffix if the slug becomes empty
-  const safeSlug = slug || 'default';
-  return 'presentation-sync-' + safeSlug;
+function createChannelName(outputName) {
+  // Create channel name from output filename (without extension) for stable unique ID
+  // This prevents collisions when multiple presentations share the same title
+  const basename = outputName.replace(/\.html$/, '');
+  return 'presentation-sync-' + basename;
 }
 
-function generateHtml(title, slides, notes) {
+function generateHtml(title, slides, notes, outputName) {
   // Compute channel name once for use in both main and presenter windows
-  const channelName = createChannelName(title);
+  // Use outputName (stable identifier) instead of title to prevent collisions
+  const channelName = createChannelName(outputName);
 
   const slideHtml = slides
     .map((slide, idx) => {
@@ -801,7 +790,7 @@ async function buildPresentation(inputPath, outputName, title) {
       throw new Error('No slides found');
     }
 
-    const html = generateHtml(title, slides, notes);
+    const html = generateHtml(title, slides, notes, outputName);
     fs.writeFileSync(outputPath, html);
 
     console.log(`   ✓ Generated ${slides.length} slides`);
