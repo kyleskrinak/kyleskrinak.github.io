@@ -112,6 +112,36 @@ git checkout develop && git pull origin develop
 
 3. **Never commit without verification**
 
+## Text Processing & Parsing Rules
+
+**When implementing text parsing, string manipulation, or range-based operations:**
+
+### Critical Implementation Rules
+1. **Range boundaries**: Use exclusive end (`pos < range.end`). Closing delimiters already included.
+2. **Offset calculation**: Account for newlines. Use running offset, never `join('\n').length`.
+3. **String removal**: NEVER use `.replace(substring, '')` on potentially duplicate content. Store position ranges, slice, rebuild.
+4. **Cross-platform**: Always `.trim()` before exact string comparison (CRLF vs LF).
+5. **Malformed input**: Handle unclosed blocks/tags — if still in block after scan, extend range to `content.length`.
+6. **Error handling**: Throw errors for missing expected resources. Don't silently return empty arrays.
+
+### Edge Cases Checklist (Text Processing)
+Before committing parsing/text manipulation code, verify:
+- [ ] Handles malformed input (unclosed blocks, missing delimiters)
+- [ ] Works with CRLF line endings (uses `.trim()`)
+- [ ] Handles duplicate content in different contexts (code blocks vs actual content)
+- [ ] Uses position-based manipulation, not string matching
+- [ ] Range boundaries are exclusive end, offsets include newlines
+- [ ] Fails fast for missing resources (throws, doesn't hide problems)
+
+### Data Validation Rules
+- [ ] Apply `.trim().min(1).optional()` consistently to ALL text fields
+- [ ] Distinguish validation context (on-page vs metadata, interactive vs static)
+- [ ] Security: Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs)
+
+### Web Performance Rules
+- [ ] `sizes` attribute must match actual container width, not viewport width
+- [ ] Always include `width`/`height` on images (including SVGs) for CLS prevention
+
 ## Dependency/Tool Change Protocol
 
 **MANDATORY when removing, replacing, or consolidating tools/dependencies:**
@@ -182,6 +212,12 @@ git checkout develop && git pull origin develop
 - [ ] Search codebase for related functionality
 - [ ] For SEO changes: check meta tags, sitemap, robots.txt, canonical tags
 - [ ] For any change: check tests, docs, configs, similar files
+
+**Text Processing & Parsing** (if code manipulates strings, ranges, or parses text):
+- [ ] Followed all rules in "Text Processing & Parsing Rules" section
+- [ ] Verified all items in "Edge Cases Checklist (Text Processing)"
+- [ ] Used position-based manipulation, not string matching
+- [ ] Handles malformed input, CRLF, and duplicate content
 
 **Test Coverage**:
 - [ ] Does similar functionality have tests? Add equivalent tests
