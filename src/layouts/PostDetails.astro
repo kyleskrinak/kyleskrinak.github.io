@@ -37,6 +37,7 @@ const {
   hideEditPost,
   image,
   alt,
+  caption,
 } = post.data;
 
 // timezone is optional and may not exist on all posts
@@ -56,7 +57,12 @@ if (typeof initOgImage === "string") {
   ogImageUrl = (initOgImage as any).src; // Local asset
 }
 
-// Use dynamic OG image if enabled and no remote|local ogImage
+// Fall back to hero image if no explicit ogImage (skip SVGs - social scrapers don't render them)
+if (!ogImageUrl && optimizedImage && !optimizedImage.src.toLowerCase().endsWith('.svg')) {
+  ogImageUrl = optimizedImage.src; // Use hero image as OG image (raster only)
+}
+
+// Use dynamic OG image if enabled and no remote|local ogImage or hero image
 if (!ogImageUrl && SITE.dynamicOgImage) {
   ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
 }
@@ -118,7 +124,7 @@ const nextPost =
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
     {optimizedImage && (
-      <div class="hero-image mt-8 mb-8 w-full">
+      <figure class="hero-image mt-8 mb-8 w-full">
         <Image
           src={optimizedImage}
           alt={alt || "Post hero image"}
@@ -131,7 +137,12 @@ const nextPost =
           decoding="sync"
           class="rounded-lg shadow-md"
         />
-      </div>
+        {caption && (
+          <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
     )}
     <article
       id="article"

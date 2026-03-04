@@ -51,6 +51,40 @@ DO NOT read or reference files in:
 - Skip edge case handling unless critical
 - Ask: "Would copying be easier than generalizing?" If yes, copy.
 
+## Git Workflow
+
+### Branch Structure
+- **Three long-lived branches** (never delete): `develop` → `staging` → `main`
+- All changes flow: develop → staging → main via pull requests
+
+### Before Making Changes
+**ALWAYS sync local branches with origin first:**
+```bash
+# Sync the branch you're working on
+git checkout develop
+git pull origin develop
+```
+
+**To sync all branches:**
+```bash
+git checkout main && git pull origin main
+git checkout staging && git pull origin staging
+git checkout develop && git pull origin develop
+```
+
+### Making Changes
+1. Ensure you're on `develop` branch and synced
+2. Make your changes
+3. Commit with descriptive messages
+4. Push to origin: `git push origin develop`
+5. Create PR: `develop` → `staging`
+6. After staging approval, create PR: `staging` → `main`
+
+### PR Review Fixes
+- Commit fixes to the **PR's HEAD branch**, not develop
+- Example: Comments on PR (staging→main) → fix on `staging` branch
+- If fixes were made on wrong branch, cherry-pick to correct branch
+
 ## Code Changes
 - Batch related edits into single operations
 - Make minimal edits to accomplish goal
@@ -215,6 +249,8 @@ DO NOT read or reference files in:
 - State assumptions upfront
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
+- Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
+- Be direct and concise — just state what you're doing or what needs to be done
 
 ---
 

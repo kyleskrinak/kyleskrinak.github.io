@@ -7,6 +7,9 @@ import { getOptimizedImage } from '../lib/images';
  * Displays an optimized image with caption and optional alt text
  * Replaces Jekyll's {% include figure %} include
  *
+ * Automatically generates responsive images at 800px, 1600px, and 2400px widths
+ * using Astro's Image component (output format follows Astro's defaults, typically the source format)
+ *
  * Usage in MDX:
  * <Figure
  *   image_path="/assets/images/example.jpg"
@@ -23,10 +26,13 @@ import { getOptimizedImage } from '../lib/images';
  * />
  *
  * Props:
- * - image_path: Path to image file
- * - alt: Alt text for accessibility
- * - caption: Optional caption (supports HTML)
+ * - image_path: Filename or path to image file (filename used for optimization lookup; full value used as fallback)
+ * - alt: Alt text for accessibility (required)
+ * - caption: Optional caption (supports HTML; trusted author content only - no user input sanitization)
  * - lazy: Enable lazy loading (default: true)
+ *
+ * Security note: Caption HTML is rendered via set:html without sanitization.
+ * Only use with trusted content from blog authors. Never pass untrusted user input.
  */
 
 interface Props {
@@ -48,8 +54,9 @@ const optimizedImage = getOptimizedImage(image_path);
       src={optimizedImage}
       alt={alt}
       class="figure__image"
-      quality={85}
-      format="webp"
+      quality={90}
+      widths={[800, 1600, 2400]}
+      sizes="100vw"
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
     />

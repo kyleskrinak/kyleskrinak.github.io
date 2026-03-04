@@ -54,6 +54,12 @@ export default defineConfig({
     },
   },
   image: {
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+      config: {
+        limitInputPixels: 100000000, // 100MP max (~10000x10000px) - protects against memory exhaustion
+      },
+    },
     responsiveStyles: true,
     layout: "constrained",
   },
