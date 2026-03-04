@@ -1,355 +1,9 @@
-#!/usr/bin/env node
-
-/**
- * Build Slidev presentations as standalone HTML
- * Converts markdown presentations to HTML with Slidev styling
- */
-
-import fs from 'fs';
-import path from 'path';
-import MarkdownIt from 'markdown-it';
-
-// Initialize markdown-it with table support enabled
-// Security: html disabled to prevent XSS via arbitrary HTML/script tags in slides
-const md = new MarkdownIt({
-  html: false,  // Disable raw HTML to prevent XSS
-  linkify: true,
-  typographer: true,
-  breaks: false
-});
-
-// Security: Override link validation to block dangerous protocols
-// Allow relative, hash, and protocol-relative URLs; reject only known-dangerous schemes
-md.validateLink = function(url) {
-  if (!url) return false;
-
-  const normalized = url.trim().toLowerCase();
-  if (!normalized) return false;
-
-  // Always allow in-page anchors (e.g. "#section")
-  if (normalized.startsWith('#')) {
-    return true;
-  }
-
-  // Allow protocol-relative URLs (e.g. "//example.com")
-  if (normalized.startsWith('//')) {
-    return true;
-  }
-
-  // Allow root-relative and dot-relative URLs (e.g. "/path", "./file", "../file")
-  if (
-    normalized.startsWith('/') ||
-    normalized.startsWith('./') ||
-    normalized.startsWith('../')
-  ) {
-    return true;
-  }
-
-  // Determine if there is a real scheme before any path/query/fragment
-  const colonIndex = normalized.indexOf(':');
-  if (colonIndex === -1) {
-    // No colon => treat as relative path like "images/pic.png"
-    return true;
-  }
-
-  const slashIndex = normalized.indexOf('/');
-  const queryIndex = normalized.indexOf('?');
-  const hashIndex = normalized.indexOf('#');
-
-  // Find the earliest delimiter after a potential scheme
-  const firstDelimiter = [slashIndex, queryIndex, hashIndex]
-    .filter(i => i !== -1)
-    .sort((a, b) => a - b)[0];
-
-  // If the colon appears after a '/', '?', or '#', it's not a scheme (e.g. in a relative path)
-  if (firstDelimiter !== undefined && colonIndex > firstDelimiter) {
-    return true;
-  }
-
-  // Extract the scheme and block known-dangerous ones
-  const scheme = normalized.substring(0, colonIndex);
-  const blockedSchemes = ['javascript', 'data', 'vbscript', 'file'];
-
-  if (blockedSchemes.includes(scheme)) {
-    return false;
-  }
-
-  // Allow all other schemes (http, https, mailto, etc.)
-  return true;
-};
-
-// Enable table parsing
-md.enable('table');
-
-const PUBLIC_DIR = 'public/presentations';
-const SLIDES_DIR = 'slidev-presentations/slides';
-
-/**
- * Extract title from frontmatter
- * Looks for "title: ..." in YAML frontmatter
- */
-function extractTitleFromFrontmatter(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
-
-  // Look for title in frontmatter (between first and second ---)
-  let inFrontmatter = false;
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed === '---') {
-      if (inFrontmatter) break; // End of frontmatter
-      inFrontmatter = true;
-      continue;
-    }
-    if (inFrontmatter && trimmed.startsWith('title:')) {
-      // Extract title, removing quotes if present
-      return trimmed.substring(6).trim().replace(/^["']|["']$/g, '');
-    }
-  }
-
-  // Fallback: use filename without extension
-  return path.basename(filePath, '.md');
-}
-
-/**
- * Auto-discover presentations from slides directory
- * Excludes template files (00-template.md)
- */
-function discoverPresentations() {
-  if (!fs.existsSync(SLIDES_DIR)) {
-    throw new Error(`❌ Slides directory not found: ${SLIDES_DIR}`);
-  }
-
-  const files = fs.readdirSync(SLIDES_DIR)
-    .filter(file => file.endsWith('.md') && !file.startsWith('00-template'))
-    .sort();
-
-  return files.map(file => {
-    const inputPath = path.join(SLIDES_DIR, file);
-    const outputName = file.replace('.md', '.html');
-    const title = extractTitleFromFrontmatter(inputPath);
-
-    return {
-      input: inputPath,
-      output: outputName,
-      title: title
-    };
-  });
-}
-
-// Auto-discover presentations from slides directory
-const PRESENTATIONS = discoverPresentations();
-
-function parseMarkdownPresentation(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
-
-  // Extract Slidev front matter: skip past all --- delimiters at the top
-  // Slidev format: --- (start) ... --- (end) ... --- (first slide boundary)
-  let contentStart = 0;
-  let dashCount = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim() === '---') {
-      dashCount++;
-      // After second ---, we're past front matter
-      if (dashCount >= 2) {
-        contentStart = i + 1;
-        break;
-      }
-    }
-  }
-
-  // Parse slides (separated by --- in Slidev presentations)
-  const slides = [];
-  const notes = [];
-  let currentSlide = [];
-
-  // Skip to first non-empty line after front matter
-  while (contentStart < lines.length && lines[contentStart].trim() === '') {
-    contentStart++;
-  }
-
-  for (let i = contentStart; i < lines.length; i++) {
-    // Slidev uses --- as slide separator
-    if (lines[i].trim() === '---') {
-      if (currentSlide.length > 0) {
-        const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
-        slides.push(parsed.content);
-        notes.push(parsed.notes);
-        currentSlide = [];
-      }
-    } else if (lines[i] === '{:/}') {
-      // Skip closing Jekyll tag if present
-      continue;
-    } else {
-      currentSlide.push(lines[i]);
-    }
-  }
-
-  if (currentSlide.length > 0) {
-    const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
-    slides.push(parsed.content);
-    notes.push(parsed.notes);
-  }
-
-  return { slides, notes };
-}
-
-function extractNotesFromSlide(slideContent) {
-  // Extract HTML comments as speaker notes, but skip comments inside code blocks
-
-  // First, find all fenced code block ranges (between ``` markers)
-  const codeBlockRanges = [];
-  const lines = slideContent.split('\n');
-  let inCodeBlock = false;
-  let codeBlockStart = -1;
-  let currentOffset = 0; // Tracks the starting index of the current line in slideContent
-
-  for (let i = 0; i < lines.length; i++) {
-    const originalLine = lines[i];
-    const trimmedLine = originalLine.trim();
-    const lineStart = currentOffset;
-
-    if (trimmedLine.startsWith('```')) {
-      if (!inCodeBlock) {
-        // Starting a code block
-        codeBlockStart = lineStart;
-        inCodeBlock = true;
-      } else {
-        // Ending a code block
-        let codeBlockEnd = lineStart + originalLine.length;
-        // Include trailing newline in the code block range if present
-        if (slideContent[codeBlockEnd] === '\n') {
-          codeBlockEnd += 1;
-        }
-        codeBlockRanges.push({ start: codeBlockStart, end: codeBlockEnd });
-        inCodeBlock = false;
-      }
-    }
-
-    // Advance currentOffset to the start of the next line
-    currentOffset = lineStart + originalLine.length;
-    if (slideContent[currentOffset] === '\n') {
-      currentOffset += 1;
-    }
-  }
-
-  // If the slide ends while still in a code block, treat the remainder as code
-  if (inCodeBlock && codeBlockStart >= 0) {
-    codeBlockRanges.push({ start: codeBlockStart, end: slideContent.length });
-  }
-
-  // Function to check if a position is inside a code block
-  // Treat ranges as half-open [start, end): end is exclusive
-  function isInCodeBlock(position) {
-    return codeBlockRanges.some(range => position >= range.start && position < range.end);
-  }
-
-  // Extract comments that are NOT inside code blocks
-  const commentRegex = /<!--([\s\S]*?)-->/g;
-  const notesArray = [];
-  const commentsToRemove = [];
-
-  let match;
-  while ((match = commentRegex.exec(slideContent)) !== null) {
-    const commentPosition = match.index;
-
-    if (!isInCodeBlock(commentPosition)) {
-      // This comment is outside code blocks - treat as speaker note
-      notesArray.push(match[1].trim());
-      // Store the exact range of this comment so we can remove by position
-      commentsToRemove.push({
-        start: commentPosition,
-        end: commentPosition + match[0].length
-      });
-    }
-    // Comments inside code blocks are left in the content
-  }
-
-  // Remove only the comments that were extracted as notes
-  // Use the stored ranges to avoid accidentally removing matching text inside code blocks
-  let contentParts = [];
-  let lastIndex = 0;
-
-  // Ensure ranges are processed in order
-  commentsToRemove.sort((a, b) => a.start - b.start);
-
-  for (const range of commentsToRemove) {
-    // Append text before this comment
-    if (range.start > lastIndex) {
-      contentParts.push(slideContent.slice(lastIndex, range.start));
-    }
-    // Skip the comment itself by moving lastIndex past the end
-    lastIndex = range.end;
-  }
-
-  // Append any remaining text after the last comment
-  if (lastIndex < slideContent.length) {
-    contentParts.push(slideContent.slice(lastIndex));
-  }
-
-  let content = contentParts.join('').trim();
-
-  return {
-    content,
-    notes: notesArray.join('\n\n')
-  };
-}
-
-function markdownToHtml(markdown) {
-  // Use markdown-it for comprehensive markdown support
-  // This handles: headings, lists, code blocks, tables, links, images, bold, italic, etc.
-  return md.render(markdown);
-}
-
-/**
- * HTML-escape text for safe insertion into HTML attributes and elements
- * Prevents markup injection when title contains special characters
- */
-function escapeHtml(text) {
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function createChannelName(outputName) {
-  // Create channel name from output filename (without extension) for stable unique ID
-  // This prevents collisions when multiple presentations share the same title
-  const basename = outputName.replace(/\.html$/, '');
-  return 'presentation-sync-' + basename;
-}
-
-function generateHtml(title, slides, notes, outputName) {
-  // Compute channel name once for use in both main and presenter windows
-  // Use outputName (stable identifier) instead of title to prevent collisions
-  const channelName = createChannelName(outputName);
-
-  const slideHtml = slides
-    .map((slide, idx) => {
-      const html = markdownToHtml(slide);
-      const isTitle = idx === 0 ? 'slide-title' : '';
-      const slideNotes = notes[idx] || '';
-      return `
-        <section class="slide ${isTitle}" data-notes="${encodeURIComponent(slideNotes)}">
-          <div class="slide-content">
-            ${html}
-          </div>
-          <div class="slide-number">${idx + 1} / ${slides.length}</div>
-        </section>
-      `;
-    })
-    .join('\n');
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(title)}</title>
+    <title>AI-Accelerated CMS Migration with Claude Code</title>
     <style>
         * {
             margin: 0;
@@ -626,7 +280,288 @@ function generateHtml(title, slides, notes, outputName) {
     <div class="progress-bar" id="progressBar"></div>
 
     <div class="presentation-container" id="container" data-pagefind-body>
-        ${slideHtml}
+        
+        <section class="slide slide-title" data-notes="This%20is%20a%20case%20study%20in%20applying%20disciplined%20project%20management%20to%20an%20AI-accelerated%20workflow.%20The%20goal%20isn't%20to%20sell%20Claude%20Code%20%E2%80%94%20it's%20to%20show%20what%20becomes%20possible%20when%20you%20manage%20AI%20the%20way%20you'd%20manage%20any%20capable%20but%20literal%20contractor.">
+          <div class="slide-content">
+            <h1>AI-Accelerated CMS Migration with Claude Code</h1>
+<p>From Squarespace to Astro in eight hours</p>
+
+          </div>
+          <div class="slide-number">1 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="We%20migrated%20to%20Squarespace%20from%20Drupal%20in%202017%20%E2%80%94%20it%20was%20the%20right%20call%20then.%20This%20migration%20isn't%20a%20verdict%20on%20Squarespace.%20The%20business%20circumstances%20changed%2C%20making%20it%20practical%20for%20me%20to%20manage%20the%20site%20directly.%20Free%20hosting%20made%20the%20decision%20easy.">
+          <div class="slide-content">
+            <h2>The Situation</h2>
+<p>My wife Elena runs a graphic design business — <strong><a href="https://skrinakcreative.com">skrinakcreative.com</a></strong></p>
+<ul>
+<li>On Squarespace since 2017</li>
+<li>Squarespace worked well</li>
+<li>Her business downsized</li>
+<li>Seven pages, portfolio galleries, minimal interactivity</li>
+<li><strong>$16–23/month → $0</strong></li>
+</ul>
+
+          </div>
+          <div class="slide-number">2 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="HTTrack%20is%20a%20solid%2C%20well-respected%20tool%20for%20static%20sites.%20Its%20fundamental%20limitation%20is%20that%20it%20doesn't%20execute%20JavaScript%20%E2%80%94%20meaning%20any%20JavaScript-rendered%20content%20may%20not%20scrape%20cleanly.%20That%20could%20have%20been%20a%20problem%20here.%20Beyond%20the%20technical%20friction%2C%20I%20wasn't%20confident%20about%20the%20IP%20status%20of%20theme%20assets%2C%20fonts%2C%20and%20third-party%20integrations%20bundled%20by%20Squarespace.%20Rather%20than%20untangle%20that%2C%20it%20was%20cleaner%20to%20leave%20it%20behind%20entirely.%0A%0AWorth%20noting%20for%20the%20technically%20curious%3A%20this%20JavaScript%20limitation%20applies%20to%20React%20and%20Vue-based%20sites%20as%20well.%20HTTrack%20predates%20the%20JavaScript-rendered%20web%20and%20has%20no%20headless%20browser%20capability.">
+          <div class="slide-content">
+            <h2>What I Considered First — HTTrack</h2>
+<p>Web scraping is the obvious starting point. I know HTTrack well.</p>
+<ul>
+<li>Used HTTrack + AI as a first attempt</li>
+<li>Results were unusable</li>
+<li>Platform-coupled assets would require significant decoupling effort</li>
+<li>Unclear IP standing on scraped theme assets</li>
+<li>Enough friction to make me curious about a cleaner approach</li>
+</ul>
+
+          </div>
+          <div class="slide-number">3 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="Even%20one%20contact%20form%20meaningfully%20raises%20complexity%20%E2%80%94%20it%20requires%20a%20backend%20decision%2C%20a%20service%20integration%2C%20and%20validation%20logic.%20Scope%20definition%20isn't%20just%20good%20practice%20here%3B%20it's%20the%20prerequisite%20for%20everything%20that%20follows.%20This%20was%20always%20a%20conversion%2C%20not%20a%20lift%20and%20shift.%20The%20more%20clearly%20you%20define%20what's%20in%20and%20out%2C%20the%20more%20reliably%20AI%20executes.">
+          <div class="slide-content">
+            <h2>The Constraint — Know Your Scope</h2>
+<p>This was a <strong>simple</strong> migration. Knowing that upfront matters.</p>
+<ul>
+<li>7 pages, single grid-based theme</li>
+<li>One integration swap: Google Maps → OpenStreetMap</li>
+<li>No forms, no authentication, no e-commerce</li>
+<li>No CMS data model to untangle</li>
+</ul>
+
+          </div>
+          <div class="slide-number">4 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="This%20is%20the%20part%20that%20made%20AI%20reliable%20rather%20than%20chaotic.%20The%20project%20paradigm%20didn't%20slow%20things%20down%20%E2%80%94%20it%20removed%20the%20conditions%20under%20which%20AI%20fails.%20When%20I've%20been%20lazy%20in%20AI%20interactions%2C%20I've%20actually%20just%20been%20providing%20insufficient%20context.%20Same%20thing.">
+          <div class="slide-content">
+            <h2>The Approach — Discipline Before Code</h2>
+<p>Classic project management applied to an AI-accelerated workflow.</p>
+<p>Before any code was written:</p>
+<ol>
+<li><strong>Plan</strong> — goals ranked by priority, options evaluated</li>
+<li><strong>Scope</strong> — seven pages, exact asset inventory, known integrations</li>
+<li><strong>Specification</strong> — design tokens, typography, color palette, spacing</li>
+<li><strong>Testing requirements</strong> — visual regression baselines, pass criteria defined</li>
+</ol>
+
+          </div>
+          <div class="slide-number">5 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="I%20wanted%20to%20evaluate%20Cloudflare%20Pages%20%E2%80%94%20I%20hadn't%20used%20it%20before.%20Unlimited%20bandwidth%2C%20automatic%20HTTPS%2C%20and%20git-based%20deploys%20on%20the%20free%20tier.%20Satisfied%20with%20that%20choice.%0A%0AAstro's%20image%20component%20handles%20WebP%20conversion%20and%20lazy%20loading%20natively%20%E2%80%94%20important%20for%20an%20image-heavy%20design%20portfolio.%20The%20blank%20Astro%20starter%20was%20the%20right%20call%3B%20existing%20themes%20all%20required%20more%20adaptation%20than%20building%20clean%20from%20scratch.%20That%20decision%20echoes%20the%20blank%20theme%20approach%20from%20Drupal%20days.%0A%0AThe%20font%20substitution%20was%20unavoidable.%20Adobe%20Fonts%20licenses%20are%20bundled%20with%20the%20Squarespace%20subscription%20and%20don't%20transfer%20on%20cancellation.%20Jost%20is%20a%20close%20geometric%20match%20for%20Futura%20PT.%20Elena%20noticed%20the%20difference%3B%20we%20discussed%20it%3B%20she%20accepted%20the%20tradeoff.">
+          <div class="slide-content">
+            <h2>The Stack Decision</h2>
+<p><strong>Astro + Cloudflare Pages</strong></p>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosting</td>
+<td>Cloudflare Pages</td>
+<td>Free tier, global CDN, auto-deploy from git</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td>Astro</td>
+<td>Native image optimization, clean component model</td>
+</tr>
+<tr>
+<td>Theme</td>
+<td>None — built from scratch</td>
+<td>Existing themes didn’t match Elena’s design</td>
+</tr>
+<tr>
+<td>Font</td>
+<td>Jost (Google Fonts)</td>
+<td>Adobe Fonts license lost on Squarespace cancellation</td>
+</tr>
+<tr>
+<td>Lightbox</td>
+<td>GLightbox</td>
+<td>Matched portfolio gallery behavior exactly</td>
+</tr>
+</tbody>
+</table>
+
+          </div>
+          <div class="slide-number">6 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="Seven%20phases%2C%20all%20dramatically%20improved%20in%20quality%20and%20execution%20time%20compared%20to%20working%20alone.%20The%20most%20tangible%20demonstration%20was%20the%20visual%20alignment%20work%20%E2%80%94%20describing%20corrections%20conversationally%20and%20watching%20the%20test%20suite%20confirm%20each%20change.%20That%20combination%20of%20natural%20language%20interaction%20and%20automated%20verification%20changed%20the%20character%20of%20this%20kind%20of%20work.">
+          <div class="slide-content">
+            <h2>What Claude Code Actually Did</h2>
+<p>Claude Code wrote <strong>all of it</strong>. My role was project management.</p>
+<ul>
+<li>Discovery &amp; audit, technology evaluation, design spec extraction</li>
+<li>Astro scaffold, component build, gallery implementation</li>
+<li>Visual alignment, test suite, deployment configuration</li>
+</ul>
+<p><strong>The standout:</strong> Layout identification and visual alignment</p>
+<blockquote>
+<p>Describing design corrections in plain English, with a visual comparison test suite confirming each change against the live Squarespace baseline.</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">7 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="Elena%20has%20a%20designer's%20eye%20and%20exacting%20standards.%20The%20test%20suite%20gave%20us%20a%20shared%2C%20objective%20reference%20%E2%80%94%20when%20I%20flagged%20something%20or%20she%20reviewed%20the%20result%2C%20we%20could%20verify%20it%2C%20fix%20it%2C%20and%20confirm%20the%20fix.%20That%20workflow%20only%20exists%20because%20tests%20were%20required%20upfront%2C%20not%20added%20at%20the%20end.">
+          <div class="slide-content">
+            <h2>The Test Suite</h2>
+<p>78 tests. Claude Code wrote them.</p>
+<ul>
+<li><strong>60 visual regression tests</strong> — 7 pages × 3 breakpoints × 2 test types</li>
+<li><strong>18 navigation tests</strong> — desktop and mobile, dropdown and drawer behavior</li>
+<li>Playwright baselines pulled from the live Squarespace site</li>
+</ul>
+<blockquote>
+<p>I already take parallel test suite management for granted. That shift happened fast.</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">8 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="The%20DNS%20miss%20is%20worth%20naming.%20I'd%20added%20skrinakcreative.com%20as%20the%20custom%20domain%20in%20Cloudflare%20Pages%20but%20not%20www.skrinakcreative.com.%20Claude%20Code%20didn't%20catch%20it%20and%20suggested%20every%20possible%20fix%20except%20the%20right%20one.%20I%20stepped%20away%20and%20figured%20it%20out%20in%20idle%20time.%20AI-generated%20instructions%20fail%20%E2%80%94%20sometimes%20expensively.%20That's%20not%20a%20reason%20to%20avoid%20AI%3B%20it's%20a%20reason%20to%20verify%2C%20especially%20on%20infrastructure%20configuration.%20Eight%20hours%20total%20is%20still%20not%20a%20number%20that%20was%20realistic%20before.">
+          <div class="slide-content">
+            <h2>The Numbers</h2>
+<p><strong>Total time: 8 hours</strong> — start to deployed.</p>
+<ul>
+<li>~1 hour lost to a Cloudflare DNS configuration miss</li>
+<li>A clean run: probably <strong>7 hours</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Squarespace</th>
+<th>Astro</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Performance</td>
+<td>57</td>
+<td>86</td>
+<td><strong>+29</strong></td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>96</td>
+<td>99</td>
+<td>+3</td>
+</tr>
+<tr>
+<td>Best Practices</td>
+<td>100</td>
+<td>100</td>
+<td>—</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>93</td>
+<td>92</td>
+<td>-1</td>
+</tr>
+</tbody>
+</table>
+
+          </div>
+          <div class="slide-number">9 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="Stakeholder%20approval%20here%20means%20something%20specific%3A%20Elena%20has%20a%20professional%20designer's%20eye%2C%20cares%20deeply%20about%20how%20the%20site%20looks%2C%20and%20had%20no%20patience%20for%20%22good%20enough%20for%20a%20migration.%22%20The%20result%20cleared%20that%20bar.%20That's%20the%20meaningful%20test.">
+          <div class="slide-content">
+            <h2>The Results</h2>
+<p>Deployed. Stakeholder approved.</p>
+<ul>
+<li>Elena signed off — she cares about the design, not the tech</li>
+<li>Not pixel-perfect: font substitution accounts for most of the gap</li>
+<li>Better on every meaningful performance dimension</li>
+<li>Full control, no vendor lock-in</li>
+</ul>
+
+          </div>
+          <div class="slide-number">10 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="Five%20or%20more%20years%20in%20web%20tech%20means%20you've%20watched%20%22this%20will%20be%20complicated%22%20become%20%22oh%2C%20that's%20it%3F%22%20repeatedly%20as%20tooling%20matures.%20The%20honest%20position%20isn't%20a%20warning%20%E2%80%94%20it's%20an%20open%20question.%20The%20floor%20of%20what%20AI%20handles%20trivially%20keeps%20rising.">
+          <div class="slide-content">
+            <h2>Project Scope</h2>
+<p>This was the simple case. Extrapolate carefully.</p>
+<ul>
+<li>7 pages, one theme, one clean integration swap</li>
+<li>Complexity scales with forms, data models, authentication</li>
+<li>AI instructions fail — verify infrastructure configuration yourself</li>
+</ul>
+<blockquote>
+<p>Prior assumptions about effort may no longer hold. Test it yourself.</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">11 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="When%20AI%20underperforms%2C%20the%20failure%20is%20usually%20traceable%20to%20insufficient%20context.%20Discipline%20isn't%20a%20constraint%20on%20AI-accelerated%20work%20%E2%80%94%20it's%20what%20makes%20the%20acceleration%20reliable.">
+          <div class="slide-content">
+            <h1>The Takeaway</h1>
+<p><strong>Context is the input. Quality is the output.</strong></p>
+<ul>
+<li>Define scope before you start</li>
+<li>Write specs before you build</li>
+<li>Require tests before you ship</li>
+<li>Manage AI like a very fast, very literal contractor</li>
+</ul>
+<blockquote>
+<p>The question isn’t whether AI can do this. It’s whether <em>you</em> can manage it well enough to let it.</p>
+</blockquote>
+
+          </div>
+          <div class="slide-number">12 / 13</div>
+        </section>
+      
+
+        <section class="slide " data-notes="">
+          <div class="slide-content">
+            <h1>Questions?</h1>
+<p><strong>See it live</strong></p>
+<ul>
+<li><a href="https://skrinakcreative.com">skrinakcreative.com</a> — production site, now running on Astro</li>
+<li><a href="https://elena-skrinak-md37.squarespace.com">elena-skrinak-md37.squarespace.com</a> — original Squarespace site, available until September 12, 2026</li>
+</ul>
+<p><strong>The stack</strong></p>
+<ul>
+<li><a href="https://astro.build">Astro</a> · <a href="https://pages.cloudflare.com">Cloudflare Pages</a> · <a href="https://biati-digital.github.io/glightbox/">GLightbox</a></li>
+<li><a href="https://claude.ai/code">Claude Code</a></li>
+</ul>
+
+          </div>
+          <div class="slide-number">13 / 13</div>
+        </section>
+      
     </div>
 
     <div class="notes-panel" id="notesPanel">
@@ -653,8 +588,8 @@ function generateHtml(title, slides, notes, outputName) {
         let syncChannel = null;
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
-        const channelName = ${JSON.stringify(channelName)};
-        const escapedTitle = ${JSON.stringify(escapeHtml(title))};
+        const channelName = "presentation-sync-2026-02-22-squarespace-to-astro";
+        const escapedTitle = "AI-Accelerated CMS Migration with Claude Code";
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -701,11 +636,11 @@ function generateHtml(title, slides, notes, outputName) {
                     console.warn('Failed to decode notes:', e);
                     decodedNotes = notes;
                 }
-                const paragraphs = decodedNotes.split('\\n\\n');
+                const paragraphs = decodedNotes.split('\n\n');
 
                 paragraphs.forEach((paragraphText) => {
                     const p = document.createElement('p');
-                    const lines = paragraphText.split('\\n');
+                    const lines = paragraphText.split('\n');
 
                     lines.forEach((line, index) => {
                         if (index > 0) {
@@ -810,7 +745,7 @@ function generateHtml(title, slides, notes, outputName) {
             lines.push('<div class="notes"><div class="title">Notes</div><div id="notesTxt"></div></div>');
             lines.push('</div></div>');
             lines.push('<script>');
-            lines.push('var data = ' + JSON.stringify(slidesData).replace(new RegExp('</script', 'gi'), '<\\/script') + ';');
+            lines.push('var data = ' + JSON.stringify(slidesData).replace(new RegExp('</script', 'gi'), '<\/script') + ';');
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');
@@ -831,7 +766,7 @@ function generateHtml(title, slides, notes, outputName) {
             lines.push('  if (idx < data.length - 1) {');
             lines.push('    document.getElementById("next").innerHTML = data[idx + 1].content;');
             lines.push('  } else {');
-            lines.push('    document.getElementById("next").innerHTML = "<p style=\\'opacity:0.5\\'>End</p>";');
+            lines.push('    document.getElementById("next").innerHTML = "<p style=\'opacity:0.5\'>End</p>";');
             lines.push('  }');
             lines.push('  var n = data[idx].notes;');
             lines.push('  var notesEl = document.getElementById("notesTxt");');
@@ -845,10 +780,10 @@ function generateHtml(title, slides, notes, outputName) {
             lines.push('    } catch (e) {');
             lines.push('      dec = n;');
             lines.push('    }');
-            lines.push('    var parts = dec.split("\\\\n\\\\n");');
+            lines.push('    var parts = dec.split("\\n\\n");');
             lines.push('    for (var i = 0; i < parts.length; i++) {');
             lines.push('      var p = document.createElement("p");');
-            lines.push('      var linesArr = parts[i].split("\\\\n");');
+            lines.push('      var linesArr = parts[i].split("\\n");');
             lines.push('      for (var j = 0; j < linesArr.length; j++) {');
             lines.push('        if (j > 0) {');
             lines.push('          p.appendChild(document.createElement("br"));');
@@ -892,7 +827,7 @@ function generateHtml(title, slides, notes, outputName) {
             lines.push('setInterval(tick, 1000);');
             lines.push('update();');
             lines.push('<' + '/script></body></html>');
-            return lines.join('\\n');
+            return lines.join('\n');
         }
 
         // Keyboard navigation
@@ -912,64 +847,4 @@ function generateHtml(title, slides, notes, outputName) {
         showSlide(0);
     </script>
 </body>
-</html>`;
-}
-
-async function buildPresentation(inputPath, outputName, title) {
-  const outputPath = path.join(PUBLIC_DIR, outputName);
-
-  console.log(`\n📊 Building: ${path.basename(inputPath)}`);
-  console.log(`   → ${outputName}`);
-
-  try {
-    if (!fs.existsSync(inputPath)) {
-      throw new Error(`Input file not found: ${inputPath}`);
-    }
-
-    const { slides, notes } = parseMarkdownPresentation(inputPath);
-    if (slides.length === 0) {
-      throw new Error('No slides found');
-    }
-
-    const html = generateHtml(title, slides, notes, outputName);
-    fs.writeFileSync(outputPath, html);
-
-    console.log(`   ✓ Generated ${slides.length} slides`);
-  } catch (error) {
-    console.error(`   ✗ Error: ${error.message}`);
-    throw error;
-  }
-}
-
-async function main() {
-  console.log('\n🎬 Building Slidev Presentations as Static HTML');
-  console.log('='.repeat(60));
-
-  if (!fs.existsSync(PUBLIC_DIR)) {
-    fs.mkdirSync(PUBLIC_DIR, { recursive: true });
-    console.log(`✓ Created output directory: ${PUBLIC_DIR}`);
-  }
-
-  let successCount = 0;
-  for (const { input, output, title } of PRESENTATIONS) {
-    try {
-      await buildPresentation(input, output, title);
-      successCount++;
-    } catch (error) {
-      console.error(`Failed to build ${output}`);
-    }
-  }
-
-  console.log('\n' + '='.repeat(60));
-  console.log(`✓ Build complete: ${successCount}/${PRESENTATIONS.length} presentations created`);
-  console.log(`📁 Output: ${PUBLIC_DIR}`);
-  console.log('\n📍 Presentation URLs:');
-  PRESENTATIONS.forEach(({ output }) => {
-    console.log(`   /presentations/${output}`);
-  });
-}
-
-main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+</html>

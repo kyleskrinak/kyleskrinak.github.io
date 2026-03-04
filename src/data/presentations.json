@@ -1,5 +1,13 @@
 [
   {
+    "id": "2026-02-22-squarespace-to-astro",
+    "title": "AI-Accelerated CMS Migration with Claude Code",
+    "date": "2026-02-22",
+    "description": "From Squarespace to Astro in eight hours: a case study in AI-assisted web development with disciplined project management",
+    "type": "technical",
+    "tags": ["ai", "claude-code", "astro", "migration", "squarespace"]
+  },
+  {
     "id": "wohd",
     "title": "What I did at DrupalCon 2022",
     "date": "2022-05-04",

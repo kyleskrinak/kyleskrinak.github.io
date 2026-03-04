@@ -59,6 +59,12 @@ Ready to add new blog posts?
   - Markdown examples
   - Publishing workflow
 
+- **[Image Workflow Guide](./images.md)** - Complete guide for adding images
+  - Source file management
+  - Web optimization
+  - Deployment locations
+  - Accessibility requirements
+
 ## Next Steps
 
 - **Want to understand the project better?** Read [File Structure](./file-structure.md)

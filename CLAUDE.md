@@ -51,6 +51,40 @@ DO NOT read or reference files in:
 - Skip edge case handling unless critical
 - Ask: "Would copying be easier than generalizing?" If yes, copy.
 
+## Git Workflow
+
+### Branch Structure
+- **Three long-lived branches** (never delete): `develop` → `staging` → `main`
+- All changes flow: develop → staging → main via pull requests
+
+### Before Making Changes
+**ALWAYS sync local branches with origin first:**
+```bash
+# Sync the branch you're working on
+git checkout develop
+git pull origin develop
+```
+
+**To sync all branches:**
+```bash
+git checkout main && git pull origin main
+git checkout staging && git pull origin staging
+git checkout develop && git pull origin develop
+```
+
+### Making Changes
+1. Ensure you're on `develop` branch and synced
+2. Make your changes
+3. Commit with descriptive messages
+4. Push to origin: `git push origin develop`
+5. Create PR: `develop` → `staging`
+6. After staging approval, create PR: `staging` → `main`
+
+### PR Review Fixes
+- Commit fixes to the **PR's HEAD branch**, not develop
+- Example: Comments on PR (staging→main) → fix on `staging` branch
+- If fixes were made on wrong branch, cherry-pick to correct branch
+
 ## Code Changes
 - Batch related edits into single operations
 - Make minimal edits to accomplish goal
@@ -77,6 +111,36 @@ DO NOT read or reference files in:
    - Other files in same directory?
 
 3. **Never commit without verification**
+
+## Text Processing & Parsing Rules
+
+**When implementing text parsing, string manipulation, or range-based operations:**
+
+### Critical Implementation Rules
+1. **Range boundaries**: Use exclusive end (`pos < range.end`). Closing delimiters already included.
+2. **Offset calculation**: Account for newlines. Use running offset, never `join('\n').length`.
+3. **String removal**: NEVER use `.replace(substring, '')` on potentially duplicate content. Store position ranges, slice, rebuild.
+4. **Cross-platform**: Always `.trim()` before exact string comparison (CRLF vs LF).
+5. **Malformed input**: Handle unclosed blocks/tags — if still in block after scan, extend range to `content.length`.
+6. **Error handling**: Throw errors for missing expected resources. Don't silently return empty arrays.
+
+### Edge Cases Checklist (Text Processing)
+Before committing parsing/text manipulation code, verify:
+- [ ] Handles malformed input (unclosed blocks, missing delimiters)
+- [ ] Works with CRLF line endings (uses `.trim()`)
+- [ ] Handles duplicate content in different contexts (code blocks vs actual content)
+- [ ] Uses position-based manipulation, not string matching
+- [ ] Range boundaries are exclusive end, offsets include newlines
+- [ ] Fails fast for missing resources (throws, doesn't hide problems)
+
+### Data Validation Rules
+- [ ] Apply `.trim().min(1).optional()` consistently to ALL text fields
+- [ ] Distinguish validation context (on-page vs metadata, interactive vs static)
+- [ ] Security: Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs)
+
+### Web Performance Rules
+- [ ] `sizes` attribute must match actual container width, not viewport width
+- [ ] Always include `width`/`height` on images (including SVGs) for CLS prevention
 
 ## Dependency/Tool Change Protocol
 
@@ -149,6 +213,12 @@ DO NOT read or reference files in:
 - [ ] For SEO changes: check meta tags, sitemap, robots.txt, canonical tags
 - [ ] For any change: check tests, docs, configs, similar files
 
+**Text Processing & Parsing** (if code manipulates strings, ranges, or parses text):
+- [ ] Followed all rules in "Text Processing & Parsing Rules" section
+- [ ] Verified all items in "Edge Cases Checklist (Text Processing)"
+- [ ] Used position-based manipulation, not string matching
+- [ ] Handles malformed input, CRLF, and duplicate content
+
 **Test Coverage**:
 - [ ] Does similar functionality have tests? Add equivalent tests
 - [ ] Do tests cover edge cases? (null, undefined, privacy signals, etc.)
@@ -215,6 +285,8 @@ DO NOT read or reference files in:
 - State assumptions upfront
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
+- Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
+- Be direct and concise — just state what you're doing or what needs to be done
 
 ---
 

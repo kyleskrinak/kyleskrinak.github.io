@@ -49,6 +49,7 @@ export const GET: APIRoute = async ({ site }) => {
     "presentations/tts-profile-mgmt.html",
     "presentations/wohd.html",
     "presentations/code-presentation.html",
+    "presentations/2026-02-22-squarespace-to-astro.html",
   ];
 
   const urls = [...staticPages, ...postPages, ...presentationFiles];
