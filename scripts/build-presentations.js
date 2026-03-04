@@ -10,6 +10,10 @@ import path from 'path';
 import MarkdownIt from 'markdown-it';
 import sanitizeHtml from 'sanitize-html';
 
+// Security: Shared allowlist of safe URL schemes for both markdown-it and sanitize-html
+// Prevents policy drift by defining once and reusing in both validateLink and sanitizeConfig
+const ALLOWED_URL_SCHEMES = ['http', 'https', 'mailto', 'tel'];
+
 // Initialize markdown-it with table support enabled
 // Security: HTML enabled for presentation layout, sanitized with allowlist (defense-in-depth)
 // Even though presentations are version-controlled author content, sanitization prevents
@@ -72,10 +76,9 @@ md.validateLink = function(url) {
 
   // Extract the scheme and check against allowlist
   const scheme = normalized.substring(0, colonIndex);
-  const allowedSchemes = ['http', 'https', 'mailto', 'tel'];
 
   // Allow only schemes in the allowlist
-  return allowedSchemes.includes(scheme);
+  return ALLOWED_URL_SCHEMES.includes(scheme);
 };
 
 // Enable table parsing
@@ -136,8 +139,8 @@ const sanitizeConfig = {
     }
   },
   // Validate URLs in links/images with same allowlist as md.validateLink
-  // Both use allowlist approach: allows ONLY http, https, mailto, tel (plus relative URLs)
-  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  // Both use allowlist approach defined by ALLOWED_URL_SCHEMES constant (plus relative URLs)
+  allowedSchemes: ALLOWED_URL_SCHEMES,
   allowedSchemesAppliedToAttributes: ['href', 'src'],
   allowProtocolRelative: true,
   // Security: Prevent reverse-tabnabbing by enforcing rel="noopener noreferrer" on target="_blank"
