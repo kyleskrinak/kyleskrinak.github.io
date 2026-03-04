@@ -95,6 +95,8 @@ I still haven't worked out the right balance between planning and surprise. Push
 
 As far as what I will post next, I don't know. Here's a tease: I used a similar process in writing this very post. I've asked Claude to juggle the details while I rope it into a hopefully interesting narrative. Relatedly, an interesting [video by Stephen Welch](https://www.youtube.com/watch?v=iv-5mZ_9CPY) on how diffusion models generate imagery, from coarse structure to fine detail as we whittle away the "detail noise," reinforces my discovery through practice.
 
+For a more technical walkthrough of this migration, see [my presentation on AI-Accelerated CMS Migration](https://kyle.skrinak.com/presentations/2026-02-22-squarespace-to-astro.html).
+
 ---
 
 *This post was developed collaboratively with Claude Sonnet 4.6 (claude.ai) in a single session, using the same iterative, AI-assisted approach described above.*

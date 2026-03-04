@@ -178,7 +178,7 @@ test.describe('Visual Regression - Image Rendering', () => {
     expect(imageSrc).not.toContain('undefined');
 
     // Take screenshot of hero section
-    const heroSection = page.locator('div.hero-image');
+    const heroSection = page.locator('figure.hero-image');
     await expect(heroSection).toHaveScreenshot('hero-image-render.png', {
       maxDiffPixelRatio: 0.05,
     });
