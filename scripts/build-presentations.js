@@ -18,6 +18,66 @@ const md = new MarkdownIt({
   breaks: false
 });
 
+// Security: Override link validation to block dangerous protocols
+// Allow relative, hash, and protocol-relative URLs; reject only known-dangerous schemes
+md.validateLink = function(url) {
+  if (!url) return false;
+
+  const normalized = url.trim().toLowerCase();
+  if (!normalized) return false;
+
+  // Always allow in-page anchors (e.g. "#section")
+  if (normalized.startsWith('#')) {
+    return true;
+  }
+
+  // Allow protocol-relative URLs (e.g. "//example.com")
+  if (normalized.startsWith('//')) {
+    return true;
+  }
+
+  // Allow root-relative and dot-relative URLs (e.g. "/path", "./file", "../file")
+  if (
+    normalized.startsWith('/') ||
+    normalized.startsWith('./') ||
+    normalized.startsWith('../')
+  ) {
+    return true;
+  }
+
+  // Determine if there is a real scheme before any path/query/fragment
+  const colonIndex = normalized.indexOf(':');
+  if (colonIndex === -1) {
+    // No colon => treat as relative path like "images/pic.png"
+    return true;
+  }
+
+  const slashIndex = normalized.indexOf('/');
+  const queryIndex = normalized.indexOf('?');
+  const hashIndex = normalized.indexOf('#');
+
+  // Find the earliest delimiter after a potential scheme
+  const firstDelimiter = [slashIndex, queryIndex, hashIndex]
+    .filter(i => i !== -1)
+    .sort((a, b) => a - b)[0];
+
+  // If the colon appears after a '/', '?', or '#', it's not a scheme (e.g. in a relative path)
+  if (firstDelimiter !== undefined && colonIndex > firstDelimiter) {
+    return true;
+  }
+
+  // Extract the scheme and block known-dangerous ones
+  const scheme = normalized.substring(0, colonIndex);
+  const blockedSchemes = ['javascript', 'data', 'vbscript', 'file'];
+
+  if (blockedSchemes.includes(scheme)) {
+    return false;
+  }
+
+  // Allow all other schemes (http, https, mailto, etc.)
+  return true;
+};
+
 // Enable table parsing
 md.enable('table');
 
@@ -35,14 +95,15 @@ function extractTitleFromFrontmatter(filePath) {
   // Look for title in frontmatter (between first and second ---)
   let inFrontmatter = false;
   for (const line of lines) {
-    if (line === '---') {
+    const trimmed = line.trim();
+    if (trimmed === '---') {
       if (inFrontmatter) break; // End of frontmatter
       inFrontmatter = true;
       continue;
     }
-    if (inFrontmatter && line.startsWith('title:')) {
+    if (inFrontmatter && trimmed.startsWith('title:')) {
       // Extract title, removing quotes if present
-      return line.substring(6).trim().replace(/^["']|["']$/g, '');
+      return trimmed.substring(6).trim().replace(/^["']|["']$/g, '');
     }
   }
 
@@ -56,8 +117,7 @@ function extractTitleFromFrontmatter(filePath) {
  */
 function discoverPresentations() {
   if (!fs.existsSync(SLIDES_DIR)) {
-    console.error(`❌ Slides directory not found: ${SLIDES_DIR}`);
-    return [];
+    throw new Error(`❌ Slides directory not found: ${SLIDES_DIR}`);
   }
 
   const files = fs.readdirSync(SLIDES_DIR)
@@ -90,7 +150,7 @@ function parseMarkdownPresentation(filePath) {
   let dashCount = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i] === '---') {
+    if (lines[i].trim() === '---') {
       dashCount++;
       // After second ---, we're past front matter
       if (dashCount >= 2) {
@@ -112,7 +172,7 @@ function parseMarkdownPresentation(filePath) {
 
   for (let i = contentStart; i < lines.length; i++) {
     // Slidev uses --- as slide separator
-    if (lines[i] === '---') {
+    if (lines[i].trim() === '---') {
       if (currentSlide.length > 0) {
         const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
         slides.push(parsed.content);
@@ -137,18 +197,99 @@ function parseMarkdownPresentation(filePath) {
 }
 
 function extractNotesFromSlide(slideContent) {
-  // Extract HTML comments as speaker notes
+  // Extract HTML comments as speaker notes, but skip comments inside code blocks
+
+  // First, find all fenced code block ranges (between ``` markers)
+  const codeBlockRanges = [];
+  const lines = slideContent.split('\n');
+  let inCodeBlock = false;
+  let codeBlockStart = -1;
+  let currentOffset = 0; // Tracks the starting index of the current line in slideContent
+
+  for (let i = 0; i < lines.length; i++) {
+    const originalLine = lines[i];
+    const trimmedLine = originalLine.trim();
+    const lineStart = currentOffset;
+
+    if (trimmedLine.startsWith('```')) {
+      if (!inCodeBlock) {
+        // Starting a code block
+        codeBlockStart = lineStart;
+        inCodeBlock = true;
+      } else {
+        // Ending a code block
+        let codeBlockEnd = lineStart + originalLine.length;
+        // Include trailing newline in the code block range if present
+        if (slideContent[codeBlockEnd] === '\n') {
+          codeBlockEnd += 1;
+        }
+        codeBlockRanges.push({ start: codeBlockStart, end: codeBlockEnd });
+        inCodeBlock = false;
+      }
+    }
+
+    // Advance currentOffset to the start of the next line
+    currentOffset = lineStart + originalLine.length;
+    if (slideContent[currentOffset] === '\n') {
+      currentOffset += 1;
+    }
+  }
+
+  // If the slide ends while still in a code block, treat the remainder as code
+  if (inCodeBlock && codeBlockStart >= 0) {
+    codeBlockRanges.push({ start: codeBlockStart, end: slideContent.length });
+  }
+
+  // Function to check if a position is inside a code block
+  // Treat ranges as half-open [start, end): end is exclusive
+  function isInCodeBlock(position) {
+    return codeBlockRanges.some(range => position >= range.start && position < range.end);
+  }
+
+  // Extract comments that are NOT inside code blocks
   const commentRegex = /<!--([\s\S]*?)-->/g;
   const notesArray = [];
-  let content = slideContent;
+  const commentsToRemove = [];
 
   let match;
   while ((match = commentRegex.exec(slideContent)) !== null) {
-    notesArray.push(match[1].trim());
+    const commentPosition = match.index;
+
+    if (!isInCodeBlock(commentPosition)) {
+      // This comment is outside code blocks - treat as speaker note
+      notesArray.push(match[1].trim());
+      // Store the exact range of this comment so we can remove by position
+      commentsToRemove.push({
+        start: commentPosition,
+        end: commentPosition + match[0].length
+      });
+    }
+    // Comments inside code blocks are left in the content
   }
 
-  // Remove comments from content
-  content = content.replace(commentRegex, '').trim();
+  // Remove only the comments that were extracted as notes
+  // Use the stored ranges to avoid accidentally removing matching text inside code blocks
+  let contentParts = [];
+  let lastIndex = 0;
+
+  // Ensure ranges are processed in order
+  commentsToRemove.sort((a, b) => a.start - b.start);
+
+  for (const range of commentsToRemove) {
+    // Append text before this comment
+    if (range.start > lastIndex) {
+      contentParts.push(slideContent.slice(lastIndex, range.start));
+    }
+    // Skip the comment itself by moving lastIndex past the end
+    lastIndex = range.end;
+  }
+
+  // Append any remaining text after the last comment
+  if (lastIndex < slideContent.length) {
+    contentParts.push(slideContent.slice(lastIndex));
+  }
+
+  let content = contentParts.join('').trim();
 
   return {
     content,
@@ -622,7 +763,7 @@ function generateHtml(title, slides, notes, outputName) {
                 notes: slide.getAttribute('data-notes') || ''
             }));
 
-            presenterWin = window.open('', 'Presenter', 'width=1200,height=800');
+            presenterWin = window.open('', 'Presenter-' + channelName, 'width=1200,height=800');
             if (!presenterWin) {
                 alert('The presenter window was blocked by your browser. Please allow pop-ups for this site and try again.');
                 return;

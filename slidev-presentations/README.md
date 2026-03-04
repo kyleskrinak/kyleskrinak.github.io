@@ -96,7 +96,7 @@ This ensures search engines can discover your presentation.
 npm run dev
 ```
 
-Visit: `http://localhost:4321/presentations/YYYY-MM-DD-your-slug/` (matching the HTML filename)
+Visit: `http://localhost:4321/presentations/YYYY-MM-DD-your-slug.html` (matching the HTML filename)
 
 ### 6. Commit and Deploy
 
@@ -128,7 +128,7 @@ Supported markdown features:
 - Images ![alt](url)
 - Code blocks with syntax highlighting
 - Tables
-- Horizontal rules (---)
+- Horizontal rules (use `***` or `___`, not `---` which is reserved for slide separators)
 
 ## Presentation Types
 
