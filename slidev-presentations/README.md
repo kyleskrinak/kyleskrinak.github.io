@@ -128,7 +128,7 @@ Supported markdown features:
 - Images ![alt](url)
 - Code blocks with syntax highlighting
 - Tables
-- Horizontal rules (---)
+- Horizontal rules (use `***` or `___`, not `---` which is reserved for slide separators)
 
 ## Presentation Types
 

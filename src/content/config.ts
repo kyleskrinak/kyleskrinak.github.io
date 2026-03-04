@@ -26,13 +26,13 @@ const blog = defineCollection({
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
 	}).superRefine((data, ctx) => {
-		// Enforce: if any non-empty image field exists, alt text is required for accessibility
+		// Enforce: if any non-empty on-page image field exists, alt text is required for accessibility
 		// trim().min(1) already ensures non-empty strings, but check existence here
-		const hasImage = data.image || data.heroImage || data.ogImage;
-		if (hasImage && !data.alt) {
+		const hasOnPageImage = data.image || data.heroImage;
+		if (hasOnPageImage && !data.alt) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
-				message: 'Alt text is required when an image (image, heroImage, or ogImage) is provided',
+				message: 'Alt text is required when an on-page image (image or heroImage) is provided',
 				path: ['alt'],
 			});
 		}
