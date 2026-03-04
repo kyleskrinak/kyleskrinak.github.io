@@ -21,8 +21,9 @@ const md = new MarkdownIt({
   breaks: false
 });
 
-// Security: Override link validation to block dangerous protocols
-// Allow relative, hash, and protocol-relative URLs; reject only known-dangerous schemes
+// Security: Override link validation to allow only safe URL schemes
+// Uses allowlist approach (matches sanitize-html config for consistency)
+// Allows: relative URLs, hash anchors, protocol-relative URLs, and safe schemes
 md.validateLink = function(url) {
   if (!url) return false;
 
@@ -69,16 +70,12 @@ md.validateLink = function(url) {
     return true;
   }
 
-  // Extract the scheme and block known-dangerous ones
+  // Extract the scheme and check against allowlist
   const scheme = normalized.substring(0, colonIndex);
-  const blockedSchemes = ['javascript', 'data', 'vbscript', 'file'];
+  const allowedSchemes = ['http', 'https', 'mailto', 'tel'];
 
-  if (blockedSchemes.includes(scheme)) {
-    return false;
-  }
-
-  // Allow all other schemes (http, https, mailto, etc.)
-  return true;
+  // Allow only schemes in the allowlist
+  return allowedSchemes.includes(scheme);
 };
 
 // Enable table parsing
@@ -132,7 +129,8 @@ const sanitizeConfig = {
       'display': [/^block$/, /^inline$/, /^inline-block$/, /^flex$/, /^grid$/]
     }
   },
-  // Validate URLs in links/images against the same blocklist as validateLink
+  // Validate URLs in links/images with same allowlist as md.validateLink
+  // Both use allowlist approach: allows ONLY http, https, mailto, tel (plus relative URLs)
   allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   allowedSchemesAppliedToAttributes: ['href', 'src'],
   allowProtocolRelative: true
