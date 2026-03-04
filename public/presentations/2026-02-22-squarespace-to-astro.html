@@ -589,6 +589,7 @@
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
         const channelName = "presentation-sync-ai-accelerated-cms-migration-with-claude-code";
+        const escapedTitle = "AI-Accelerated CMS Migration with Claude Code";
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -709,7 +710,7 @@
         function buildPresenterHTML(slidesData) {
             const lines = [];
             lines.push('<!DOCTYPE html><html><head><meta charset="UTF-8">');
-            lines.push('<title>Presenter - AI-Accelerated CMS Migration with Claude Code</title>');
+            lines.push('<title>Presenter - ' + escapedTitle + '</title>');
             lines.push('<style>');
             lines.push('* { margin: 0; padding: 0; box-sizing: border-box; }');
             lines.push('body { font-family: -apple-system, sans-serif; background: #1a1a1a; color: #fff; height: 100vh; overflow: hidden; }');

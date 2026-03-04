@@ -162,6 +162,19 @@ function markdownToHtml(markdown) {
   return md.render(markdown);
 }
 
+/**
+ * HTML-escape text for safe insertion into HTML attributes and elements
+ * Prevents markup injection when title contains special characters
+ */
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function createChannelName(title) {
   // Create a normalized, slug-style channel name suffix from the title
   const slug = title
@@ -206,7 +219,7 @@ function generateHtml(title, slides, notes) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
+    <title>${escapeHtml(title)}</title>
     <style>
         * {
             margin: 0;
@@ -511,6 +524,7 @@ function generateHtml(title, slides, notes) {
 
         // Initialize BroadcastChannel for sync (scoped to this presentation)
         const channelName = ${JSON.stringify(channelName)};
+        const escapedTitle = ${JSON.stringify(escapeHtml(title))};
         try {
             syncChannel = new BroadcastChannel(channelName);
             syncChannel.onmessage = (event) => {
@@ -631,7 +645,7 @@ function generateHtml(title, slides, notes) {
         function buildPresenterHTML(slidesData) {
             const lines = [];
             lines.push('<!DOCTYPE html><html><head><meta charset="UTF-8">');
-            lines.push('<title>Presenter - ${title}</title>');
+            lines.push('<title>Presenter - ' + escapedTitle + '</title>');
             lines.push('<style>');
             lines.push('* { margin: 0; padding: 0; box-sizing: border-box; }');
             lines.push('body { font-family: -apple-system, sans-serif; background: #1a1a1a; color: #fff; height: 100vh; overflow: hidden; }');

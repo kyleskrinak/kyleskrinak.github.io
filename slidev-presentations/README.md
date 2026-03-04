@@ -69,7 +69,8 @@ Edit `src/data/presentations.json` and add:
 Make sure:
 - Your slide deck file is in `slidev-presentations/slides/`
 - Filename follows `YYYY-MM-DD-your-slug.md`
-- The `id` in `src/data/presentations.json` matches your slug (without date prefix and extension)
+- The `id` in `src/data/presentations.json` matches the generated HTML filename (without extension)
+  - Example: for `2026-02-22-squarespace-to-astro.md`, use `id: "2026-02-22-squarespace-to-astro"`
 
 Run the build:
 
@@ -79,13 +80,23 @@ npm run build:presentations
 
 This generates `public/presentations/YYYY-MM-DD-your-slug.html` (matching the source filename)
 
+### 4. Update sitemap.xml
+
+New presentations are NOT automatically discovered by the sitemap generator. After building:
+
+- Open `src/pages/sitemap.xml.ts`
+- Find the hard-coded list of `/presentations/*.html` entries
+- Add: `"presentations/YYYY-MM-DD-your-slug.html"`
+
+This ensures search engines can discover your presentation.
+
 ### 5. Test Locally
 
 ```bash
 npm run dev
 ```
 
-Visit: `http://localhost:4321/presentations/your-slug/`
+Visit: `http://localhost:4321/presentations/YYYY-MM-DD-your-slug/` (matching the HTML filename)
 
 ### 6. Commit and Deploy
 
