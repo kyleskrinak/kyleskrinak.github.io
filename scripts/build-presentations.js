@@ -19,14 +19,63 @@ const md = new MarkdownIt({
 });
 
 // Security: Override link validation to block dangerous protocols
-// Allow only safe schemes (http, https, mailto) and reject javascript:, data:, etc.
+// Allow relative, hash, and protocol-relative URLs; reject only known-dangerous schemes
 md.validateLink = function(url) {
-  // Parse the URL protocol
-  const protocol = url.trim().toLowerCase().split(':')[0];
+  if (!url) return false;
 
-  // Allow safe protocols and relative URLs (no protocol)
-  const safeProtocols = ['http', 'https', 'mailto', ''];
-  return safeProtocols.includes(protocol);
+  const normalized = url.trim().toLowerCase();
+  if (!normalized) return false;
+
+  // Always allow in-page anchors (e.g. "#section")
+  if (normalized.startsWith('#')) {
+    return true;
+  }
+
+  // Allow protocol-relative URLs (e.g. "//example.com")
+  if (normalized.startsWith('//')) {
+    return true;
+  }
+
+  // Allow root-relative and dot-relative URLs (e.g. "/path", "./file", "../file")
+  if (
+    normalized.startsWith('/') ||
+    normalized.startsWith('./') ||
+    normalized.startsWith('../')
+  ) {
+    return true;
+  }
+
+  // Determine if there is a real scheme before any path/query/fragment
+  const colonIndex = normalized.indexOf(':');
+  if (colonIndex === -1) {
+    // No colon => treat as relative path like "images/pic.png"
+    return true;
+  }
+
+  const slashIndex = normalized.indexOf('/');
+  const queryIndex = normalized.indexOf('?');
+  const hashIndex = normalized.indexOf('#');
+
+  // Find the earliest delimiter after a potential scheme
+  const firstDelimiter = [slashIndex, queryIndex, hashIndex]
+    .filter(i => i !== -1)
+    .sort((a, b) => a - b)[0];
+
+  // If the colon appears after a '/', '?', or '#', it's not a scheme (e.g. in a relative path)
+  if (firstDelimiter !== undefined && colonIndex > firstDelimiter) {
+    return true;
+  }
+
+  // Extract the scheme and block known-dangerous ones
+  const scheme = normalized.substring(0, colonIndex);
+  const blockedSchemes = ['javascript', 'data', 'vbscript'];
+
+  if (blockedSchemes.includes(scheme)) {
+    return false;
+  }
+
+  // Allow all other schemes (http, https, mailto, etc.)
+  return true;
 };
 
 // Enable table parsing
