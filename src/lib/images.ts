@@ -6,7 +6,7 @@
  * import all matching image files at build time.
  *
  * How it works:
- * 1. Glob pattern matches images in src/assets/images/ (one level deep)
+ * 1. Glob pattern matches images in src/assets/images/ (top-level only, non-recursive)
  * 2. Vite eagerly imports them at build time (eager: true)
  * 3. Creates a map with filename as key → ImageMetadata as value
  * 4. Components use getOptimizedImage() to look up images by filename

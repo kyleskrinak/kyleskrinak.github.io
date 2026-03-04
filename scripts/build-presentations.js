@@ -622,7 +622,7 @@ function generateHtml(title, slides, notes, outputName) {
                 notes: slide.getAttribute('data-notes') || ''
             }));
 
-            presenterWin = window.open('', 'Presenter', 'width=1200,height=800');
+            presenterWin = window.open('', 'Presenter-' + channelName, 'width=1200,height=800');
             if (!presenterWin) {
                 alert('The presenter window was blocked by your browser. Please allow pop-ups for this site and try again.');
                 return;
