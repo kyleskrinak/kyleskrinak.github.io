@@ -10,9 +10,10 @@ import path from 'path';
 import MarkdownIt from 'markdown-it';
 
 // Initialize markdown-it with table support enabled
-// Security: html disabled to prevent XSS via arbitrary HTML/script tags in slides
+// Security: HTML enabled for trusted presentation content (authored files, no user input)
+// Presentations are version-controlled content, not user-generated, so HTML is safe
 const md = new MarkdownIt({
-  html: false,  // Disable raw HTML to prevent XSS
+  html: true,  // Enable raw HTML for styling and layout control in presentations
   linkify: true,
   typographer: true,
   breaks: false
