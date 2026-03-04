@@ -670,7 +670,7 @@ function generateHtml(title, slides, notes) {
             lines.push('<div class="notes"><div class="title">Notes</div><div id="notesTxt"></div></div>');
             lines.push('</div></div>');
             lines.push('<script>');
-            lines.push('var data = ' + JSON.stringify(slidesData).replace(/<\/script/gi, '<\\/script') + ';');
+            lines.push('var data = ' + JSON.stringify(slidesData).replace(new RegExp('</script', 'gi'), '<\\/script') + ';');
             lines.push('var idx = ' + currentSlide + ';');
             lines.push('var start = Date.now();');
             lines.push('var ch = null;');

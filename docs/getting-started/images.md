@@ -181,10 +181,11 @@ Uses **Sharp** (configured in `astro.config.ts`):
 
 #### Automatic Image Map
 
-Images in `src/assets/images/` are automatically:
+Top-level images (files directly in `src/assets/images/`, not subdirectories) are automatically:
 - Imported via glob pattern in `src/lib/images.ts`
 - Added to the `imageMap` for component lookup
-- **No manual registration needed** - just add files to the directory
+- **No manual registration needed** - just add files to the top level of this directory
+- **Note:** Images in subdirectories are not included (non-recursive glob)
 
 #### Build Output Example
 

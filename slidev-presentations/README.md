@@ -62,19 +62,16 @@ Edit `src/data/presentations.json` and add:
 }
 ```
 
-### 3. Update the Build Script
+### 3. Build the Presentation
 
-Edit `scripts/build-presentations.js` and add to the `PRESENTATIONS` array (around line 27):
+**No manual script changes needed!** The build script automatically discovers all `.md` files in `slidev-presentations/slides/` and generates HTML files for them.
 
-```javascript
-{
-  input: 'slidev-presentations/slides/NN-your-slug.md',
-  output: 'your-slug.html',
-  title: 'Your Presentation Title'
-},
-```
+Make sure:
+- Your slide deck file is in `slidev-presentations/slides/`
+- Filename follows `YYYY-MM-DD-your-slug.md`
+- The `id` in `src/data/presentations.json` matches your filename (without date prefix and extension)
 
-### 4. Build the Presentation
+Run the build:
 
 ```bash
 npm run build:presentations
