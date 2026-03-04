@@ -68,7 +68,7 @@ md.validateLink = function(url) {
 
   // Extract the scheme and block known-dangerous ones
   const scheme = normalized.substring(0, colonIndex);
-  const blockedSchemes = ['javascript', 'data', 'vbscript'];
+  const blockedSchemes = ['javascript', 'data', 'vbscript', 'file'];
 
   if (blockedSchemes.includes(scheme)) {
     return false;
