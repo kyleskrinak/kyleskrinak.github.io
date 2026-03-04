@@ -28,8 +28,11 @@ import { getOptimizedImage } from '../lib/images';
  * Props:
  * - image_path: Filename or path to image file (filename used for optimization lookup; full value used as fallback)
  * - alt: Alt text for accessibility (required)
- * - caption: Optional caption (supports HTML)
+ * - caption: Optional caption (supports HTML; trusted author content only - no user input sanitization)
  * - lazy: Enable lazy loading (default: true)
+ *
+ * Security note: Caption HTML is rendered via set:html without sanitization.
+ * Only use with trusted content from blog authors. Never pass untrusted user input.
  */
 
 interface Props {

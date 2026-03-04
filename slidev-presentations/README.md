@@ -69,7 +69,7 @@ Edit `src/data/presentations.json` and add:
 Make sure:
 - Your slide deck file is in `slidev-presentations/slides/`
 - Filename follows `YYYY-MM-DD-your-slug.md`
-- The `id` in `src/data/presentations.json` matches your filename (without date prefix and extension)
+- The `id` in `src/data/presentations.json` matches your slug (without date prefix and extension)
 
 Run the build:
 
@@ -77,7 +77,7 @@ Run the build:
 npm run build:presentations
 ```
 
-This generates `public/presentations/your-slug.html`
+This generates `public/presentations/YYYY-MM-DD-your-slug.html` (matching the source filename)
 
 ### 5. Test Locally
 

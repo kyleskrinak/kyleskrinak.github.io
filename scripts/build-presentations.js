@@ -7,11 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import MarkdownIt from 'markdown-it';
-import markdownItTableOfContents from 'markdown-it-table-of-contents';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Initialize markdown-it with table support enabled
 // Security: html disabled to prevent XSS via arbitrary HTML/script tags in slides

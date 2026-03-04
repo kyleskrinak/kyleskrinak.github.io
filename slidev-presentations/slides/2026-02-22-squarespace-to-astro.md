@@ -16,7 +16,7 @@ This is a case study in applying disciplined project management to an AI-acceler
 
 ## The Situation
 
-My wife Elena runs a graphic design business — **skrinakcreative.com**
+My wife Elena runs a graphic design business — **[skrinakcreative.com](https://skrinakcreative.com)**
 
 - On Squarespace since 2017
 - Squarespace worked well
