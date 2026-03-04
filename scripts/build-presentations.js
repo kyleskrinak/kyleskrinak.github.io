@@ -111,21 +111,27 @@ const sanitizeConfig = {
   allowedStyles: {
     '*': {
       'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
-      'font-size': [/^\d+(?:px|em|rem|%)$/],
+      // Allow decimals and unitless zero (e.g., "1.1em", "0")
+      'font-size': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
       'font-style': [/^italic$/, /^normal$/],
       'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
       'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
       'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
       'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
-      'margin': [/^\d+(?:px|em|rem|%)$/],
-      'margin-top': [/^\d+(?:px|em|rem|%)$/],
-      'margin-bottom': [/^\d+(?:px|em|rem|%)$/],
-      'margin-left': [/^\d+(?:px|em|rem|%)$/],
-      'margin-right': [/^\d+(?:px|em|rem|%)$/],
-      'padding': [/^\d+(?:px|em|rem|%)$/],
-      'max-width': [/^\d+(?:px|em|rem|%)$/],
-      'width': [/^\d+(?:px|em|rem|%)$/, /^auto$/],
-      'height': [/^\d+(?:px|em|rem|%)$/, /^auto$/],
+      // Allow 1-4 values, decimals, unitless zero, and auto (e.g., "0 auto", "10px 20px")
+      'margin': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)){0,3})$/],
+      // Allow decimals, unitless zero, and auto for individual margins
+      'margin-top': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-bottom': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-left': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-right': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      // Allow 1-4 values, decimals, and unitless zero for padding
+      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)){0,3}))$/],
+      // Allow decimals and unitless zero for max-width
+      'max-width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
+      // Allow decimals, unitless zero, and auto for width/height
+      'width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'height': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
       'display': [/^block$/, /^inline$/, /^inline-block$/, /^flex$/, /^grid$/]
     }
   },
