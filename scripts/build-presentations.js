@@ -117,8 +117,7 @@ function extractTitleFromFrontmatter(filePath) {
  */
 function discoverPresentations() {
   if (!fs.existsSync(SLIDES_DIR)) {
-    console.error(`❌ Slides directory not found: ${SLIDES_DIR}`);
-    return [];
+    throw new Error(`❌ Slides directory not found: ${SLIDES_DIR}`);
   }
 
   const files = fs.readdirSync(SLIDES_DIR)
