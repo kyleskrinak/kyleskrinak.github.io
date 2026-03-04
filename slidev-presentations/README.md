@@ -64,7 +64,7 @@ Edit `src/data/presentations.json` and add:
 
 ### 3. Build the Presentation
 
-**No manual script changes needed!** The build script automatically discovers all `.md` files in `slidev-presentations/slides/` and generates HTML files for them.
+**No manual script changes needed!** The `scripts/build-presentations.js` script uses its `discoverPresentations()` helper to automatically find all `.md` files in `slidev-presentations/slides/` and generate HTML files for them.
 
 Make sure:
 - Your slide deck file is in `slidev-presentations/slides/`
@@ -90,9 +90,9 @@ Visit: `http://localhost:4321/presentations/your-slug/`
 ### 6. Commit and Deploy
 
 ```bash
-git add slidev-presentations/slides/NN-your-slug.md
+git add slidev-presentations/slides/YYYY-MM-DD-your-slug.md
+git add public/presentations/YYYY-MM-DD-your-slug.html
 git add src/data/presentations.json
-git add scripts/build-presentations.js
 git commit -m "feat: add [presentation name]"
 ```
 
