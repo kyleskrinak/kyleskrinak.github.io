@@ -95,14 +95,15 @@ function extractTitleFromFrontmatter(filePath) {
   // Look for title in frontmatter (between first and second ---)
   let inFrontmatter = false;
   for (const line of lines) {
-    if (line === '---') {
+    const trimmed = line.trim();
+    if (trimmed === '---') {
       if (inFrontmatter) break; // End of frontmatter
       inFrontmatter = true;
       continue;
     }
-    if (inFrontmatter && line.startsWith('title:')) {
+    if (inFrontmatter && trimmed.startsWith('title:')) {
       // Extract title, removing quotes if present
-      return line.substring(6).trim().replace(/^["']|["']$/g, '');
+      return trimmed.substring(6).trim().replace(/^["']|["']$/g, '');
     }
   }
 
@@ -150,7 +151,7 @@ function parseMarkdownPresentation(filePath) {
   let dashCount = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i] === '---') {
+    if (lines[i].trim() === '---') {
       dashCount++;
       // After second ---, we're past front matter
       if (dashCount >= 2) {
@@ -172,7 +173,7 @@ function parseMarkdownPresentation(filePath) {
 
   for (let i = contentStart; i < lines.length; i++) {
     // Slidev uses --- as slide separator
-    if (lines[i] === '---') {
+    if (lines[i].trim() === '---') {
       if (currentSlide.length > 0) {
         const parsed = extractNotesFromSlide(currentSlide.join('\n').trim());
         slides.push(parsed.content);
@@ -204,20 +205,34 @@ function extractNotesFromSlide(slideContent) {
   const lines = slideContent.split('\n');
   let inCodeBlock = false;
   let codeBlockStart = -1;
+  let currentOffset = 0; // Tracks the starting index of the current line in slideContent
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.startsWith('```')) {
+    const originalLine = lines[i];
+    const trimmedLine = originalLine.trim();
+    const lineStart = currentOffset;
+
+    if (trimmedLine.startsWith('```')) {
       if (!inCodeBlock) {
         // Starting a code block
-        codeBlockStart = slideContent.split('\n').slice(0, i).join('\n').length;
+        codeBlockStart = lineStart;
         inCodeBlock = true;
       } else {
         // Ending a code block
-        const codeBlockEnd = slideContent.split('\n').slice(0, i + 1).join('\n').length;
+        let codeBlockEnd = lineStart + originalLine.length;
+        // Include trailing newline in the code block range if present
+        if (slideContent[codeBlockEnd] === '\n') {
+          codeBlockEnd += 1;
+        }
         codeBlockRanges.push({ start: codeBlockStart, end: codeBlockEnd });
         inCodeBlock = false;
       }
+    }
+
+    // Advance currentOffset to the start of the next line
+    currentOffset = lineStart + originalLine.length;
+    if (slideContent[currentOffset] === '\n') {
+      currentOffset += 1;
     }
   }
 

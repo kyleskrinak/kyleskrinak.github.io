@@ -69,6 +69,8 @@ const isSvg = optimizedImage?.src?.toLowerCase().endsWith('.svg');
       src={optimizedImage.src}
       alt={alt}
       class="figure__image figure__image--svg"
+      width={optimizedImage.width}
+      height={optimizedImage.height}
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
     />
