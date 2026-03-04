@@ -8,18 +8,22 @@
 import fs from 'fs';
 import path from 'path';
 import MarkdownIt from 'markdown-it';
+import sanitizeHtml from 'sanitize-html';
 
 // Initialize markdown-it with table support enabled
-// Security: html disabled to prevent XSS via arbitrary HTML/script tags in slides
+// Security: HTML enabled for presentation layout, sanitized with allowlist (defense-in-depth)
+// Even though presentations are version-controlled author content, sanitization prevents
+// XSS if repo is compromised or malicious HTML is inadvertently introduced
 const md = new MarkdownIt({
-  html: false,  // Disable raw HTML to prevent XSS
+  html: true,  // Enable raw HTML for styling and layout control in presentations
   linkify: true,
   typographer: true,
   breaks: false
 });
 
-// Security: Override link validation to block dangerous protocols
-// Allow relative, hash, and protocol-relative URLs; reject only known-dangerous schemes
+// Security: Override link validation to allow only safe URL schemes
+// Uses allowlist approach (matches sanitize-html config for consistency)
+// Allows: relative URLs, hash anchors, protocol-relative URLs, and safe schemes
 md.validateLink = function(url) {
   if (!url) return false;
 
@@ -66,20 +70,77 @@ md.validateLink = function(url) {
     return true;
   }
 
-  // Extract the scheme and block known-dangerous ones
+  // Extract the scheme and check against allowlist
   const scheme = normalized.substring(0, colonIndex);
-  const blockedSchemes = ['javascript', 'data', 'vbscript', 'file'];
+  const allowedSchemes = ['http', 'https', 'mailto', 'tel'];
 
-  if (blockedSchemes.includes(scheme)) {
-    return false;
-  }
-
-  // Allow all other schemes (http, https, mailto, etc.)
-  return true;
+  // Allow only schemes in the allowlist
+  return allowedSchemes.includes(scheme);
 };
 
 // Enable table parsing
 md.enable('table');
+
+// Security: Sanitize HTML output with allowlist
+// Even for trusted content, defense-in-depth prevents XSS if repo is compromised
+// Allows presentation layout tags/attributes while blocking dangerous constructs
+const sanitizeConfig = {
+  allowedTags: [
+    // Structure
+    'div', 'span', 'p', 'br', 'hr',
+    // Headings
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    // Lists
+    'ul', 'ol', 'li',
+    // Emphasis
+    'strong', 'em', 'b', 'i', 'u', 's',
+    // Code
+    'code', 'pre',
+    // Links and media
+    'a', 'img',
+    // Tables
+    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+    // Quotes
+    'blockquote', 'q', 'cite'
+  ],
+  allowedAttributes: {
+    '*': ['style', 'class', 'id'],
+    'a': ['href', 'title', 'target', 'rel'],
+    'img': ['src', 'alt', 'title', 'width', 'height', 'loading']
+  },
+  allowedStyles: {
+    '*': {
+      'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
+      // Allow decimals and unitless zero (e.g., "1.1em", "0")
+      'font-size': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
+      'font-style': [/^italic$/, /^normal$/],
+      'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
+      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      // Allow 1-4 values, decimals, unitless zero, and auto (e.g., "0 auto", "10px 20px")
+      'margin': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)){0,3})$/],
+      // Allow decimals, unitless zero, and auto for individual margins
+      'margin-top': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-bottom': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-left': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'margin-right': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      // Allow 1-4 values, decimals, and unitless zero for padding
+      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)){0,3}))$/],
+      // Allow decimals and unitless zero for max-width
+      'max-width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
+      // Allow decimals, unitless zero, and auto for width/height
+      'width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'height': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
+      'display': [/^block$/, /^inline$/, /^inline-block$/, /^flex$/, /^grid$/]
+    }
+  },
+  // Validate URLs in links/images with same allowlist as md.validateLink
+  // Both use allowlist approach: allows ONLY http, https, mailto, tel (plus relative URLs)
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowedSchemesAppliedToAttributes: ['href', 'src'],
+  allowProtocolRelative: true
+};
 
 const PUBLIC_DIR = 'public/presentations';
 const SLIDES_DIR = 'slidev-presentations/slides';
@@ -300,7 +361,11 @@ function extractNotesFromSlide(slideContent) {
 function markdownToHtml(markdown) {
   // Use markdown-it for comprehensive markdown support
   // This handles: headings, lists, code blocks, tables, links, images, bold, italic, etc.
-  return md.render(markdown);
+  const rendered = md.render(markdown);
+
+  // Sanitize HTML output to prevent XSS (blocks <script>, dangerous event handlers, etc.)
+  // Allows presentation layout elements while removing dangerous constructs
+  return sanitizeHtml(rendered, sanitizeConfig);
 }
 
 /**

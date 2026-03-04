@@ -14,6 +14,13 @@ This is a case study in applying disciplined project management to an AI-acceler
 
 ---
 
+<div style="text-align: center;">
+  <img src="/assets/images/2026-03-02-squarespace-to-cf-pages.webp" alt="Squarespace to Cloudflare Pages migration workflow" style="max-width: 90%; height: auto; margin: 0 auto; display: block;">
+  <p style="margin-top: 1rem; font-style: italic; color: #222; font-size: 1.1em;">original site — migrated site</p>
+</div>
+
+---
+
 ## The Situation
 
 My wife Elena runs a graphic design business — **[skrinakcreative.com](https://skrinakcreative.com)**
@@ -209,6 +216,9 @@ When AI underperforms, the failure is usually traceable to insufficient context.
 **See it live**
 - [skrinakcreative.com](https://skrinakcreative.com) — production site, now running on Astro
 - [elena-skrinak-md37.squarespace.com](https://elena-skrinak-md37.squarespace.com) — original Squarespace site, available until September 12, 2026
+
+**Read the full story**
+- [From Squarespace to Astro: A Migration Story](https://kyle.skrinak.com/posts/2026-03-02-from-squarespace-to-astro/) — full narrative with project context, decision-making process, and lessons learned
 
 **The stack**
 - [Astro](https://astro.build) · [Cloudflare Pages](https://pages.cloudflare.com) · [GLightbox](https://biati-digital.github.io/glightbox/)
