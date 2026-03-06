@@ -10,6 +10,10 @@ import path from 'path';
 import MarkdownIt from 'markdown-it';
 import sanitizeHtml from 'sanitize-html';
 
+// Security: Shared allowlist of safe URL schemes for both markdown-it and sanitize-html
+// Prevents policy drift by defining once and reusing in both validateLink and sanitizeConfig
+const ALLOWED_URL_SCHEMES = ['http', 'https', 'mailto', 'tel'];
+
 // Initialize markdown-it with table support enabled
 // Security: HTML enabled for presentation layout, sanitized with allowlist (defense-in-depth)
 // Even though presentations are version-controlled author content, sanitization prevents
@@ -72,10 +76,9 @@ md.validateLink = function(url) {
 
   // Extract the scheme and check against allowlist
   const scheme = normalized.substring(0, colonIndex);
-  const allowedSchemes = ['http', 'https', 'mailto', 'tel'];
 
   // Allow only schemes in the allowlist
-  return allowedSchemes.includes(scheme);
+  return ALLOWED_URL_SCHEMES.includes(scheme);
 };
 
 // Enable table parsing
@@ -115,9 +118,10 @@ const sanitizeConfig = {
       'font-size': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
       'font-style': [/^italic$/, /^normal$/],
       'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
-      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
-      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
-      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\(/i, /^rgba\(/i],
+      // Fully anchor rgb/rgba patterns to prevent bypass (e.g., "rgb() url(evil)")
+      'color': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
+      'background': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
+      'background-color': [/^#[0-9a-f]{3,6}$/i, /^rgb\([^)]*\)$/i, /^rgba\([^)]*\)$/i],
       // Allow 1-4 values, decimals, unitless zero, and auto (e.g., "0 auto", "10px 20px")
       'margin': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)){0,3})$/],
       // Allow decimals, unitless zero, and auto for individual margins
@@ -126,7 +130,7 @@ const sanitizeConfig = {
       'margin-left': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
       'margin-right': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)|auto)$/],
       // Allow 1-4 values, decimals, and unitless zero for padding
-      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%)){0,3}))$/],
+      'padding': [/^(?:(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))(?:\s+(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))){0,3})$/],
       // Allow decimals and unitless zero for max-width
       'max-width': [/^(?:0|(?:\d*\.?\d+)(?:px|em|rem|%))$/],
       // Allow decimals, unitless zero, and auto for width/height
@@ -136,10 +140,35 @@ const sanitizeConfig = {
     }
   },
   // Validate URLs in links/images with same allowlist as md.validateLink
-  // Both use allowlist approach: allows ONLY http, https, mailto, tel (plus relative URLs)
-  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  // Both use allowlist approach defined by ALLOWED_URL_SCHEMES constant (plus relative URLs)
+  allowedSchemes: ALLOWED_URL_SCHEMES,
   allowedSchemesAppliedToAttributes: ['href', 'src'],
-  allowProtocolRelative: true
+  allowProtocolRelative: true,
+  // Security: Prevent reverse-tabnabbing by enforcing rel="noopener noreferrer" on target="_blank"
+  transformTags: {
+    'a': function(tagName, attribs) {
+      // If target="_blank" is present, ensure rel includes noopener noreferrer
+      if (attribs.target === '_blank') {
+        const existingRel = attribs.rel || '';
+        const relParts = existingRel.split(/\s+/).filter(Boolean);
+
+        // Add noopener and noreferrer if not already present
+        if (!relParts.includes('noopener')) {
+          relParts.push('noopener');
+        }
+        if (!relParts.includes('noreferrer')) {
+          relParts.push('noreferrer');
+        }
+
+        attribs.rel = relParts.join(' ');
+      }
+
+      return {
+        tagName: tagName,
+        attribs: attribs
+      };
+    }
+  }
 };
 
 const PUBLIC_DIR = 'public/presentations';
