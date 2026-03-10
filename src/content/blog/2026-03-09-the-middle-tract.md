@@ -121,7 +121,7 @@ Daedalus knew. You knew. You went anyway. You came back.
 Fly the middle tract.
 
 ![Jacob Peter Gowy's painting The Fall of Icarus showing Icarus falling from the sky with his wings breaking apart](../../assets/images/2026-03-09-fall-of-icarus.webp)
-*Jacob Peter Gowy, The Fall of Icarus (1635–1637). Be like Daedalus—not this guy.*
+*Jacob Peter Gowy, The Fall of Icarus (1635–1637). Be like Daedalus, left, and not Icarus.*
 
 ---
 
