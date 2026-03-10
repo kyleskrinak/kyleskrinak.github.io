@@ -90,7 +90,9 @@ Friends — online and in person — urged me to run a marathon. By now, I'd com
 
 ## The Wax Starts Melting
 
-Six months before the marathon, I injured my foot while training. My coach worried it might sideline me. It didn't, but it never fully healed. Two years later, it still hasn't.
+Six months before the marathon, I made a choice that destabilized everything that had taken seven years to build. I didn't know it then. I know it now.
+
+My foot injury during training was the first sign. My coach worried it might sideline me. It didn't, but it never fully healed. Two years later, it still hasn't.
 
 Training for a marathon differs from training for a half-marathon. Greater effort means greater fuel needs. I raised my carb intake — not much by normal standards, but significant for me. Twenty grams a day had been my ceiling for 7 years; that limit softened. With extra activity, nothing alarming showed. So I continued.
 
@@ -112,9 +114,14 @@ This achievement culture — online and in person, though I spend less time in t
 
 A steady, boring Tuesday is the win. Keeping my carb intake to below 20 grams, an ordinary walk, feeling good, and then going to bed. Nobody posts that. There are no likes for this steady state in achievement culture. But steady state is the point. It always was.
 
+I wanted the marathon. I just didn't give serious thought to what it would do to my equilibrium. Seven years of work, and I'd taken it for granted.
+
 Daedalus knew. You knew. You went anyway. You came back.
 
 Fly the middle tract.
+
+![Jacob Peter Gowy's painting The Fall of Icarus showing Icarus falling from the sky with his wings breaking apart](../../assets/images/2026-03-09-fall-of-icarus.webp)
+*Jacob Peter Gowy, The Fall of Icarus (1635–1637). Be like Daedalus—not this guy.*
 
 ---
 
