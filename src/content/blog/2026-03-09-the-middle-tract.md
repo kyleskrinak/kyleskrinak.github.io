@@ -37,6 +37,11 @@ The morning of the run, I filled my CamelBak with Ninja-blended berries, my carb
 
 Shortly after the turnaround on US 64 heading north, my daughter FaceTimed me, radically changing my failing disposition. She stayed with me through that stretch, past Wimberly Road, hearing everything — including my encounter at an aid station where a volunteer happened to have pickle juice on hand. I knew pickle juice worked on cramps and figured someone at a marathon would have already thought of that; it was great to see they were right. The volunteer also handed me a banana. Cramping and ready to try anything, I accepted — at this point, all bets were off. If a banana was on the table, so was the banana. It did nothing for the cramps. My first banana in five years, consumed on camera, pickle juice in the other hand. My daughter laughed; I'm fairly certain she has screenshots.
 
+<figure class="w-full md:float-left md:w-1/4 md:max-w-xs md:mr-6 md:mb-4 mb-6">
+  <img src="/assets/images/2026-03-09-marathon-banana.webp" alt="Kyle eating a banana mid-race while on FaceTime with his daughter, pickle juice in the other hand" class="w-full h-auto" />
+  <figcaption class="text-sm italic mt-2">My first banana in five years. Mile 18. She has screenshots.</figcaption>
+</figure>
+
 > At mile 18, my daughter reminded me that I'd once said I didn't need to run a marathon. Only looking back did I realize how right she was — I had meant it, then and now.
 
 The gel packs worked better. I figured this out around mile 20.
@@ -73,11 +78,6 @@ It's an ancient Greek myth about the dangers of ignoring good advice. It's also 
 
 ## How do you like these wings, Icarus?
 
-<figure class="w-full md:float-left md:w-1/4 md:max-w-xs md:mr-6 md:mb-4 mb-6">
-  <img src="/assets/images/2026-03-09-marathon-banana.webp" alt="Kyle eating a banana mid-race while on FaceTime with his daughter, pickle juice in the other hand" class="w-full h-auto" />
-  <figcaption class="text-sm italic mt-2">My first banana in five years. Mile 18. She has screenshots.</figcaption>
-</figure>
-
 Only later would I see what June 8, 2017, set in motion. By 2016, knee pain made me think of my mother's experience. She needed knee replacements. I was heavy and in pain, and my doctor's advice — move more, eat less — had failed before. I was 295 pounds and had been obese my entire adult life.
 
 Then, somewhat serendipitously, I found a presentation by Dr. Eric Westman of Duke University on low-carbohydrate eating. I had done Atkins years before, backsliding after not following maintenance. Dr. Westman's simple and ungimmicky approach centers on a single handout — what to eat, what to limit, what to avoid. I began his care on June 8, 2017. Within 6 to 9 months, knee pain was practically gone, and over the course of a year, I'd lost 65 pounds, a weight I've maintained since.
@@ -90,9 +90,7 @@ Friends — online and in person — urged me to run a marathon. By now, I'd com
 
 ## The Wax Starts Melting
 
-Six months before the marathon, I made a choice that destabilized everything that had taken seven years to build. I didn't know it then. I know it now.
-
-My foot injury during training was the first sign. My coach worried it might sideline me. It didn't, but it never fully healed. Two years later, it still hasn't.
+Six months before the marathon, I injured my foot while training. My coach worried it might sideline me. It didn't, but it never fully healed. Two years later, it still hasn't.
 
 Training for a marathon differs from training for a half-marathon. Greater effort means greater fuel needs. I raised my carb intake — not much by normal standards, but significant for me. Twenty grams a day had been my ceiling for 7 years; that limit softened. With extra activity, nothing alarming showed. So I continued.
 
@@ -106,7 +104,7 @@ I've run less since. My routine changed. I can no longer reliably run a half-mar
 
 ## The Middle Tract
 
-The Tobacco Road Half Marathon is next Sunday (March 16, 2026). I won't be there this year, but it's very much on my mind. I ran the half last year and had great fun. I may run it again next year, or I may not. It's not a hard decision either way.
+The Tobacco Road Half Marathon is next Sunday. I won't be there this year, but it's very much on my mind. I ran the half last year and had great fun. I may run it again next year, or I may not. It's not a hard decision either way.
 
 The half is genuinely fun. That's the whole reason I plan on it again. My first half was about whether I could. I run them not to prove anything, not to chase a qualifier, not because restored health demands an achievement destination. It's just because I enjoy it. Fancy that. Exercise is fun and does not need to be a meat grinder.
 
@@ -114,14 +112,9 @@ This achievement culture — online and in person, though I spend less time in t
 
 A steady, boring Tuesday is the win. Keeping my carb intake to below 20 grams, an ordinary walk, feeling good, and then going to bed. Nobody posts that. There are no likes for this steady state in achievement culture. But steady state is the point. It always was.
 
-I wanted the marathon. I just didn't give serious thought to what it would do to my equilibrium. Seven years of work, and I'd taken it for granted.
-
 Daedalus knew. You knew. You went anyway. You came back.
 
 Fly the middle tract.
-
-![Jacob Peter Gowy's painting The Fall of Icarus showing Icarus falling from the sky with his wings breaking apart](../../assets/images/2026-03-09-fall-of-icarus.webp)
-*Jacob Peter Gowy, The Fall of Icarus (1635–1637). Be like Daedalus, left, and not Icarus.*
 
 ---
 
