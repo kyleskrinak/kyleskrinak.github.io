@@ -127,13 +127,31 @@ failedLines.forEach(line => {
 });
 
 // Deduplicate URLs intelligently using canonical form
+// Select representative URL with best known status for accurate reporting
+const canonicalToRepUrl = new Map();
 const failedUrls = [];
+
 for (const url of allUrls) {
   const canonical = getCanonicalUrl(url);
-  if (!canonicalUrlsSeen.has(canonical)) {
+  const currentStatus = statusByUrl.get(url);
+
+  if (!canonicalToRepUrl.has(canonical)) {
+    // First time we see this canonical URL: tentatively use this URL
+    canonicalToRepUrl.set(canonical, url);
     canonicalUrlsSeen.add(canonical);
-    failedUrls.push(url);
+  } else {
+    const existingUrl = canonicalToRepUrl.get(canonical);
+    const existingStatus = statusByUrl.get(existingUrl);
+
+    // Prefer a URL that has a concrete status over one with null/undefined
+    if ((existingStatus == null) && (currentStatus != null)) {
+      canonicalToRepUrl.set(canonical, url);
+    }
   }
+}
+
+for (const repUrl of canonicalToRepUrl.values()) {
+  failedUrls.push(repUrl);
 }
 
 const skippedCount = allUrls.length - failedUrls.length;

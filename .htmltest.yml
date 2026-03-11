@@ -4,7 +4,6 @@ CheckInternal: true
 IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
-HTTPStatusIgnore: [403]  # 403 = resource exists but access-controlled, not broken
 IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers
   - "nytimes.com"  # Aggressive rate limiting, works in real browsers

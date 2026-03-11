@@ -12,7 +12,7 @@ const URL = Astro.url;
       <div class="text-center" id="share-links">
         {SHARE_LINKS.map(social => (
           <LinkButton
-            href={social.isNativeShare ? "#share" : `${social.href + URL}`}
+            href={social.isNativeShare ? `${URL}` : `${social.href + URL}`}
             class="scale-90 p-2 hover:rotate-6 sm:p-1"
             title={social.linkTitle}
             data-native-share={social.isNativeShare ? "true" : undefined}
@@ -28,10 +28,20 @@ const URL = Astro.url;
 
 <script>
   // Handle native Web Share API
-  document.addEventListener('DOMContentLoaded', () => {
+  function initNativeShare() {
     const shareContainer = document.getElementById('share-links');
     if (!shareContainer) return;
 
+    // Hide native share button if Web Share API is not supported
+    if (!navigator.share) {
+      const nativeShareButton = shareContainer.querySelector('a[data-native-share="true"]');
+      if (nativeShareButton) {
+        (nativeShareButton as HTMLElement).style.display = 'none';
+      }
+      return;
+    }
+
+    // Use event delegation - click handler survives navigation
     shareContainer.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a[data-native-share="true"]');
@@ -50,19 +60,10 @@ const URL = Astro.url;
             console.error('Share failed:', err);
           }
         }
-      } else if (link && !navigator.share) {
-        // Fallback: hide native share button if not supported
-        e.preventDefault();
-        console.log('Web Share API not supported in this browser');
       }
-    });
+    }, { once: false });
+  }
 
-    // Hide native share button if Web Share API is not supported
-    if (!navigator.share) {
-      const nativeShareButton = shareContainer.querySelector('a[data-native-share="true"]');
-      if (nativeShareButton) {
-        (nativeShareButton as HTMLElement).style.display = 'none';
-      }
-    }
-  });
+  // Initialize on first load and after client-side navigation
+  document.addEventListener('astro:page-load', initNativeShare);
 </script>
