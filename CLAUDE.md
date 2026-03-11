@@ -280,13 +280,32 @@ Before committing parsing/text manipulation code, verify:
 
 **Never fix "just that line" - fix the entire issue class with full completeness.**
 
+## Following Instructions
+
+**CRITICAL: Read instructions exactly. Do what they say. Nothing more, nothing less.**
+
+When I say:
+- **"Review X"** → Read, analyze, report findings. DO NOT fix anything.
+- **"Review and discuss"** → Read, analyze, report findings, WAIT for my response. DO NOT take action.
+- **"Fix X"** → Make the changes.
+- **"Review X then fix Y"** → Review first, report findings, THEN fix Y. Two separate steps.
+
+**Before taking ANY action (editing files, committing, pushing):**
+- Check: Did I explicitly ask you to do this action?
+- If I asked to "review" or "discuss" → STOP. Report findings. Wait.
+- If I asked to "fix" or "implement" → Proceed with action.
+
+**Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
+
+If my instruction is unclear, ask what I want. Don't assume.
+
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
 - State assumptions upfront
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
-- Be direct and concise — just state what you're doing or what needs to be done
+- Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
 
 ---
 
