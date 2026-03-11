@@ -4,7 +4,10 @@ CheckInternal: true
 IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 IgnoreDirectoryMissingTrailingSlash: true
+HTTPStatusIgnore: [403]  # 403 = resource exists but access-controlled, not broken
 IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers
   - "nytimes.com"  # Aggressive rate limiting, works in real browsers
   - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
+  - "web.archive.org"  # Archive.org can be slow, exceeds ExternalTimeout
+  - "alessio.franceschelli.me"  # Slow response times, exceeds ExternalTimeout
