@@ -6,13 +6,24 @@ import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconShare from "@/assets/icons/IconShare.svg";
 import { SITE } from "@/config/index";
 
-interface Social {
+// Discriminated union to prevent invalid share configurations
+type NativeShare = {
   name: string;
-  href?: string;
   linkTitle: string;
   icon: (_props: Props) => Element;
-  isNativeShare?: boolean;
-}
+  isNativeShare: true;
+  href?: never;
+};
+
+type ExternalShare = {
+  name: string;
+  linkTitle: string;
+  icon: (_props: Props) => Element;
+  href: string;
+  isNativeShare?: false;
+};
+
+type Social = NativeShare | ExternalShare;
 
 export const SOCIALS: Social[] = [
   {

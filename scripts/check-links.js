@@ -152,19 +152,22 @@ for (const repUrl of canonicalToRepUrl.values()) {
   failedUrls.push(repUrl);
 }
 
-const skippedCount = allUrls.length - failedUrls.length;
+const totalFailures = allUrls.length;
+const uniqueUrls = failedUrls.length;
+const skippedCount = totalFailures - uniqueUrls;
+
 if (skippedCount > 0) {
   console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) (share buttons with different query params)\n`);
 }
 
-if (failedUrls.length === 0) {
+if (uniqueUrls === 0) {
   console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
   console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
   process.exit(1);
 }
 
 console.log('\n━'.repeat(60));
-console.log(`TIER 2: Browser verification (${failedUrls.length} URLs)`);
+console.log(`TIER 2: Browser verification (${uniqueUrls} unique URL${uniqueUrls === 1 ? '' : 's'})`);
 console.log('━'.repeat(60));
 // Browser mode:
 // - Defaults to headed (better bot detection bypass)
@@ -228,7 +231,7 @@ const working = results.filter(r => r.success);
 const broken = results.filter(r => !r.success);
 
 console.log(`\n📊 Summary:`);
-console.log(`   Total failures from htmltest: ${failedUrls.length}`);
+console.log(`   Total failures from htmltest: ${totalFailures} (${uniqueUrls} unique URL${uniqueUrls === 1 ? '' : 's'})`);
 console.log(`   ✅ Working in real browser: ${working.length}`);
 console.log(`   ❌ Actually broken: ${broken.length}`);
 
