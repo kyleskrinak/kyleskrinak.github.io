@@ -157,7 +157,7 @@ const uniqueUrls = failedUrls.length;
 const skippedCount = totalFailures - uniqueUrls;
 
 if (skippedCount > 0) {
-  console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) (share buttons with different query params)\n`);
+  console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) after canonicalization/deduplication\n`);
 }
 
 if (uniqueUrls === 0) {
