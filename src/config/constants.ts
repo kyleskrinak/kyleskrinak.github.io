@@ -20,7 +20,7 @@ type ExternalShare = {
   linkTitle: string;
   icon: (_props: Props) => Element;
   href: string;
-  isNativeShare?: false;
+  isNativeShare: false;
 };
 
 type Social = NativeShare | ExternalShare;
@@ -58,11 +58,13 @@ export const SHARE_LINKS: readonly Social[] = [
     href: "https://www.facebook.com/sharer.php?u=",
     linkTitle: `Share this post on Facebook`,
     icon: IconFacebook,
+    isNativeShare: false,
   },
   {
     name: "X",
     href: "https://x.com/intent/post?url=",
     linkTitle: `Share this post on X`,
     icon: IconBrandX,
+    isNativeShare: false,
   },
 ] as const;
