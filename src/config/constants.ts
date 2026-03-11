@@ -4,7 +4,6 @@ import IconBrandX from "@/assets/icons/IconBrandX.svg";
 import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
 import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
-import IconTelegram from "@/assets/icons/IconTelegram.svg";
 import IconPinterest from "@/assets/icons/IconPinterest.svg";
 import { SITE } from "@/config/index";
 
@@ -54,12 +53,6 @@ export const SHARE_LINKS: Social[] = [
     href: "https://x.com/intent/post?url=",
     linkTitle: `Share this post on X`,
     icon: IconBrandX,
-  },
-  {
-    name: "Telegram",
-    href: "https://t.me/share/url?url=",
-    linkTitle: `Share this post via Telegram`,
-    icon: IconTelegram,
   },
   {
     name: "Pinterest",

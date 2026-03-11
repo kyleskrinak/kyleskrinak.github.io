@@ -11,8 +11,6 @@ IgnoreURLs:
   - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
   - "web.archive.org"  # Archive.org can be slow, exceeds ExternalTimeout
   - "alessio.franceschelli.me"  # Slow response times, exceeds ExternalTimeout
-  - "t.me"  # Telegram share buttons, timeout issues
-  - "duke.qualtrics.com"  # Works in browser, 503 in htmltest
   - "about.gitlab.com"  # Connection reset in htmltest, works in browser
   - "claude.ai"  # Connection reset in htmltest, works in browser
   - "github.io"  # Intermittent connection resets, works in real browsers
