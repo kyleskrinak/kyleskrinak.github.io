@@ -47,7 +47,8 @@ const URL = Astro.url;
 
     // Use event delegation - click handler survives navigation
     shareContainer.addEventListener('click', async (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target;
+      if (!(target instanceof Element)) return;
       const link = target.closest('a[data-native-share="true"]');
 
       if (link && navigator.share) {
@@ -70,4 +71,5 @@ const URL = Astro.url;
 
   // Initialize on first load and after client-side navigation
   document.addEventListener('astro:page-load', initNativeShare);
+  initNativeShare();
 </script>
