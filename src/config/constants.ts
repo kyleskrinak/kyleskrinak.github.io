@@ -8,7 +8,7 @@ import { SITE } from "@/config/index";
 
 interface Social {
   name: string;
-  href: string;
+  href?: string;
   linkTitle: string;
   icon: (_props: Props) => Element;
   isNativeShare?: boolean;
@@ -38,7 +38,6 @@ export const SOCIALS: Social[] = [
 export const SHARE_LINKS: Social[] = [
   {
     name: "Share",
-    href: "",
     linkTitle: `Share this post`,
     icon: IconShare,
     isNativeShare: true,
