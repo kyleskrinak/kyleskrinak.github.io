@@ -12,3 +12,4 @@ IgnoreURLs:
   - "alessio.franceschelli.me"  # Slow response times, exceeds ExternalTimeout
   - "about.gitlab.com"  # Connection reset in htmltest, works in browser
   - "claude.ai"  # Connection reset in htmltest, works in browser
+  - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers
