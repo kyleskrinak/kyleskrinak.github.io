@@ -103,7 +103,6 @@ function getCanonicalUrl(url) {
 }
 
 const statusByUrl = new Map();
-const canonicalUrlsSeen = new Set();
 const allUrls = [];
 
 failedLines.forEach(line => {
@@ -138,7 +137,6 @@ for (const url of allUrls) {
   if (!canonicalToRepUrl.has(canonical)) {
     // First time we see this canonical URL: tentatively use this URL
     canonicalToRepUrl.set(canonical, url);
-    canonicalUrlsSeen.add(canonical);
   } else {
     const existingUrl = canonicalToRepUrl.get(canonical);
     const existingStatus = statusByUrl.get(existingUrl);

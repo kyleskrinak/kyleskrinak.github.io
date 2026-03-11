@@ -12,5 +12,3 @@ IgnoreURLs:
   - "alessio.franceschelli.me"  # Slow response times, exceeds ExternalTimeout
   - "about.gitlab.com"  # Connection reset in htmltest, works in browser
   - "claude.ai"  # Connection reset in htmltest, works in browser
-  - "github.io"  # Intermittent connection resets, works in real browsers
-  - "stackoverflow.com"  # Connection reset issues in automated checks
