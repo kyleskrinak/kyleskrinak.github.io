@@ -25,7 +25,7 @@ type ExternalShare = {
 
 type Social = NativeShare | ExternalShare;
 
-export const SOCIALS: ExternalShare[] = [
+export const SOCIALS: readonly ExternalShare[] = [
   {
     name: "GitHub",
     href: "https://github.com/kyleskrinak",
@@ -46,7 +46,7 @@ export const SOCIALS: ExternalShare[] = [
   },
 ] as const;
 
-export const SHARE_LINKS: Social[] = [
+export const SHARE_LINKS: readonly Social[] = [
   {
     name: "Share",
     linkTitle: `Share this post`,
