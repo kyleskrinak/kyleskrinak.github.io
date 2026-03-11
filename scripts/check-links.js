@@ -73,28 +73,73 @@ const failedLines = htmltestOutput.split('\n').filter(line =>
   line.includes('tls:')
 );
 
+/**
+ * Get canonical URL for deduplication purposes
+ * Share buttons with different query params are treated as the same URL
+ */
+function getCanonicalUrl(url) {
+  try {
+    const urlObj = new URL(url);
+    // Share services - only check base URL once regardless of shared content
+    const shareServices = [
+      'wa.me',
+      'facebook.com/sharer',
+      'x.com/intent',
+      'twitter.com/intent',
+      'pinterest.com/pin',
+      't.me/share'
+    ];
+
+    if (shareServices.some(service => urlObj.hostname.includes(service.split('/')[0]) && url.includes(service))) {
+      // Return base URL without query params for share services
+      return urlObj.origin + urlObj.pathname;
+    }
+
+    // For other URLs, return as-is
+    return url;
+  } catch {
+    return url;
+  }
+}
+
 const statusByUrl = new Map();
-const failedUrls = [...new Set(
-  failedLines
-    .map(line => {
-      const matches = line.match(urlPattern);
-      if (!matches) return null;
-      // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
-      let url = matches[matches.length - 1];
-      url = url.replace(/["':)\]]+$/, '');
+const canonicalUrlsSeen = new Set();
+const allUrls = [];
 
-      const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
-      const newStatus = statusMatch ? Number(statusMatch[1]) : null;
-      const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
-      // Set status if first encounter, or overwrite null with actual status code
-      if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
-        statusByUrl.set(url, newStatus);
-      }
+failedLines.forEach(line => {
+  const matches = line.match(urlPattern);
+  if (!matches) return;
 
-      return url;
-    })
-    .filter(url => url !== null)
-)];
+  // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
+  let url = matches[matches.length - 1];
+  url = url.replace(/["':)\]]+$/, '');
+
+  const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
+  const newStatus = statusMatch ? Number(statusMatch[1]) : null;
+  const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
+
+  // Set status if first encounter, or overwrite null with actual status code
+  if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
+    statusByUrl.set(url, newStatus);
+  }
+
+  allUrls.push(url);
+});
+
+// Deduplicate URLs intelligently using canonical form
+const failedUrls = [];
+for (const url of allUrls) {
+  const canonical = getCanonicalUrl(url);
+  if (!canonicalUrlsSeen.has(canonical)) {
+    canonicalUrlsSeen.add(canonical);
+    failedUrls.push(url);
+  }
+}
+
+const skippedCount = allUrls.length - failedUrls.length;
+if (skippedCount > 0) {
+  console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) (share buttons with different query params)\n`);
+}
 
 if (failedUrls.length === 0) {
   console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
