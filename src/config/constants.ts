@@ -3,6 +3,7 @@ import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
 import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
+import IconShare from "@/assets/icons/IconShare.svg";
 import { SITE } from "@/config/index";
 
 interface Social {
@@ -10,6 +11,7 @@ interface Social {
   href: string;
   linkTitle: string;
   icon: (_props: Props) => Element;
+  isNativeShare?: boolean;
 }
 
 export const SOCIALS: Social[] = [
@@ -34,6 +36,13 @@ export const SOCIALS: Social[] = [
 ] as const;
 
 export const SHARE_LINKS: Social[] = [
+  {
+    name: "Share",
+    href: "",
+    linkTitle: `Share this post`,
+    icon: IconShare,
+    isNativeShare: true,
+  },
   {
     name: "Facebook",
     href: "https://www.facebook.com/sharer.php?u=",

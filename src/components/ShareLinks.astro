@@ -9,12 +9,13 @@ const URL = Astro.url;
   SHARE_LINKS.length > 0 && (
     <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start">
       <span class="italic">Share this post on:</span>
-      <div class="text-center">
+      <div class="text-center" id="share-links">
         {SHARE_LINKS.map(social => (
           <LinkButton
-            href={`${social.href + URL}`}
+            href={social.isNativeShare ? "#share" : `${social.href + URL}`}
             class="scale-90 p-2 hover:rotate-6 sm:p-1"
             title={social.linkTitle}
+            data-native-share={social.isNativeShare ? "true" : undefined}
           >
             <social.icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
             <span class="sr-only">{social.linkTitle}</span>
@@ -24,3 +25,44 @@ const URL = Astro.url;
     </div>
   )
 }
+
+<script>
+  // Handle native Web Share API
+  document.addEventListener('DOMContentLoaded', () => {
+    const shareContainer = document.getElementById('share-links');
+    if (!shareContainer) return;
+
+    shareContainer.addEventListener('click', async (e) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[data-native-share="true"]');
+
+      if (link && navigator.share) {
+        e.preventDefault();
+
+        try {
+          await navigator.share({
+            title: document.title,
+            url: window.location.href
+          });
+        } catch (err) {
+          // User cancelled or share failed - silently ignore
+          if ((err as Error).name !== 'AbortError') {
+            console.error('Share failed:', err);
+          }
+        }
+      } else if (link && !navigator.share) {
+        // Fallback: hide native share button if not supported
+        e.preventDefault();
+        console.log('Web Share API not supported in this browser');
+      }
+    });
+
+    // Hide native share button if Web Share API is not supported
+    if (!navigator.share) {
+      const nativeShareButton = shareContainer.querySelector('a[data-native-share="true"]');
+      if (nativeShareButton) {
+        (nativeShareButton as HTMLElement).style.display = 'none';
+      }
+    }
+  });
+</script>
