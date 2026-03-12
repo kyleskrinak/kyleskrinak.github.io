@@ -83,7 +83,7 @@ function getCanonicalUrl(url) {
     // Share services - only check base URL once regardless of shared content
     const shareServices = [
       'wa.me',
-      'facebook.com/sharer',
+      'facebook.com/sharer.php',
       'x.com/intent',
       'twitter.com/intent',
       'pinterest.com/pin',
