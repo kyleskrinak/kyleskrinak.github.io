@@ -45,7 +45,8 @@ const URL = Astro.url;
       return;
     }
 
-    // Use event delegation - click handler survives navigation
+    // Use event delegation so clicks on descendant share links are handled;
+    // initNativeShare is re-run on `astro:page-load` after navigation.
     shareContainer.addEventListener('click', async (e) => {
       const target = e.target;
       if (!(target instanceof Element)) return;
