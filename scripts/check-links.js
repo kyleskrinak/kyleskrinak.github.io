@@ -90,7 +90,23 @@ function getCanonicalUrl(url) {
       't.me/share'
     ];
 
-    if (shareServices.some(service => urlObj.hostname.includes(service.split('/')[0]) && url.includes(service))) {
+    const isShareService = shareServices.some(service => {
+      const [serviceHost, ...servicePathParts] = service.split('/');
+      const servicePath = servicePathParts.length ? '/' + servicePathParts.join('/') : '';
+      const hostname = urlObj.hostname;
+      const pathname = urlObj.pathname;
+
+      const hostnameMatches =
+        hostname === serviceHost ||
+        hostname.endsWith('.' + serviceHost);
+
+      const pathMatches =
+        servicePath === '' ? true : pathname.startsWith(servicePath);
+
+      return hostnameMatches && pathMatches;
+    });
+
+    if (isShareService) {
       // Return base URL without query params for share services
       return urlObj.origin + urlObj.pathname;
     }
