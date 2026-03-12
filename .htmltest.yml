@@ -8,3 +8,8 @@ IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers
   - "nytimes.com"  # Aggressive rate limiting, works in real browsers
   - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
+  - "web.archive.org"  # Archive.org can be slow, exceeds ExternalTimeout
+  - "alessio.franceschelli.me"  # Slow response times, exceeds ExternalTimeout
+  - "about.gitlab.com"  # Connection reset in htmltest, works in browser
+  - "claude.ai"  # Connection reset in htmltest, works in browser
+  - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers

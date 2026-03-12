@@ -2,20 +2,30 @@ import type { Props } from "astro";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
 import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
-import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
-import IconTelegram from "@/assets/icons/IconTelegram.svg";
-import IconPinterest from "@/assets/icons/IconPinterest.svg";
+import IconShare from "@/assets/icons/IconShare.svg";
 import { SITE } from "@/config/index";
 
-interface Social {
+// Discriminated union to prevent invalid share configurations
+type NativeShare = {
   name: string;
-  href: string;
   linkTitle: string;
   icon: (_props: Props) => Element;
-}
+  isNativeShare: true;
+  href?: never;
+};
 
-export const SOCIALS: Social[] = [
+type ExternalShare = {
+  name: string;
+  linkTitle: string;
+  icon: (_props: Props) => Element;
+  href: string;
+  isNativeShare: false;
+};
+
+type Social = NativeShare | ExternalShare;
+
+export const SOCIALS: readonly ExternalShare[] = [
   {
     name: "GitHub",
     href: "https://github.com/kyleskrinak",
@@ -36,35 +46,25 @@ export const SOCIALS: Social[] = [
   },
 ] as const;
 
-export const SHARE_LINKS: Social[] = [
+export const SHARE_LINKS: readonly Social[] = [
   {
-    name: "WhatsApp",
-    href: "https://wa.me/?text=",
-    linkTitle: `Share this post via WhatsApp`,
-    icon: IconWhatsapp,
+    name: "Share",
+    linkTitle: `Share this post`,
+    icon: IconShare,
+    isNativeShare: true,
   },
   {
     name: "Facebook",
     href: "https://www.facebook.com/sharer.php?u=",
     linkTitle: `Share this post on Facebook`,
     icon: IconFacebook,
+    isNativeShare: false,
   },
   {
     name: "X",
     href: "https://x.com/intent/post?url=",
     linkTitle: `Share this post on X`,
     icon: IconBrandX,
-  },
-  {
-    name: "Telegram",
-    href: "https://t.me/share/url?url=",
-    linkTitle: `Share this post via Telegram`,
-    icon: IconTelegram,
-  },
-  {
-    name: "Pinterest",
-    href: "https://pinterest.com/pin/create/button/?url=",
-    linkTitle: `Share this post on Pinterest`,
-    icon: IconPinterest,
+    isNativeShare: false,
   },
 ] as const;

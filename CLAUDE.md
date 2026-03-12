@@ -22,6 +22,27 @@ DO NOT read or reference files in:
 
 ---
 
+# ⚠️ CRITICAL: Following Instructions
+
+**READ THIS FIRST. Read instructions exactly. Do what they say. Nothing more, nothing less.**
+
+When I say:
+- **"Review X"** → Read, analyze, report findings. DO NOT fix anything.
+- **"Review and discuss"** → Read, analyze, report findings, WAIT for my response. DO NOT take action.
+- **"Fix X"** → Make the changes.
+- **"Review X then fix Y"** → Review first, report findings, THEN fix Y. Two separate steps.
+
+**Before taking ANY action (editing files, committing, pushing):**
+- Check: Did I explicitly ask you to do this action?
+- If I asked to "review" or "discuss" → STOP. Report findings. Wait.
+- If I asked to "fix" or "implement" → Proceed with action.
+
+**Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
+
+If my instruction is unclear, ask what I want. Don't assume.
+
+---
+
 # Token Optimization Rules
 
 ## Context Management
@@ -110,7 +131,18 @@ git checkout develop && git pull origin develop
    - Related files with similar patterns?
    - Other files in same directory?
 
-3. **Never commit without verification**
+3. **Quality Gates - MANDATORY before pushing:**
+   ```bash
+   npm run build
+   npm run check:links
+   npm run test:visual
+   ```
+   - All three MUST pass before git push
+   - If any fail, fix and re-run all three
+   - Never push without running these tests
+   - "I'll let CI catch it" is NOT acceptable
+
+4. **Never commit without verification**
 
 ## Text Processing & Parsing Rules
 
@@ -286,7 +318,7 @@ Before committing parsing/text manipulation code, verify:
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
-- Be direct and concise — just state what you're doing or what needs to be done
+- Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
 
 ---
 
