@@ -6,7 +6,15 @@ import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconShare from "@/assets/icons/IconShare.svg";
 import { SITE } from "@/config/index";
 
-// Discriminated union to prevent invalid share configurations
+// Social media links (header/footer)
+type SocialLink = {
+  name: string;
+  linkTitle: string;
+  icon: (_props: Props) => Element;
+  href: string;
+};
+
+// Share button types - discriminated union to prevent invalid configurations
 type NativeShare = {
   name: string;
   linkTitle: string;
@@ -23,9 +31,9 @@ type ExternalShare = {
   isNativeShare: false;
 };
 
-type Social = NativeShare | ExternalShare;
+type ShareLink = NativeShare | ExternalShare;
 
-export const SOCIALS: readonly ExternalShare[] = [
+export const SOCIALS: readonly SocialLink[] = [
   {
     name: "GitHub",
     href: "https://github.com/kyleskrinak",
@@ -46,7 +54,7 @@ export const SOCIALS: readonly ExternalShare[] = [
   },
 ] as const;
 
-export const SHARE_LINKS: readonly Social[] = [
+export const SHARE_LINKS: readonly ShareLink[] = [
   {
     name: "Share",
     linkTitle: `Share this post`,
