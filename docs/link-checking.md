@@ -199,7 +199,7 @@ Common error types:
 For URLs that fail htmltest, verify them with a real browser:
 
 ```bash
-node scripts/verify-links-with-browser.js \
+node scripts/check-links.js \
   "https://example.com/url1" \
   "https://example.com/url2"
 ```
@@ -207,11 +207,11 @@ node scripts/verify-links-with-browser.js \
 **Optional Environment Variables:**
 ```bash
 # Use headless mode
-PLAYWRIGHT_HEADED=false node scripts/verify-links-with-browser.js \
+PLAYWRIGHT_HEADED=false node scripts/check-links.js \
   "https://example.com/url"
 
 # Bypass HTTPS validation
-PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/verify-links-with-browser.js \
+PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true node scripts/check-links.js \
   "https://example.com/url"
 ```
 
@@ -286,7 +286,7 @@ npm run test:links
 # Output shows 5 errors
 
 # 2. Extract failed URLs from output and verify with browser
-node scripts/verify-links-with-browser.js \
+node scripts/check-links.js \
   "https://www.example.com/article" \
   "https://other.example.com/page"
 

@@ -2,13 +2,19 @@
 /**
  * Automated two-tier link checking process
  *
- * Usage: npm run check:links
+ * Usage:
+ *   npm run check:links                    # Full site check (htmltest + browser)
+ *   node scripts/check-links.js <url> ...  # Manual URL verification
  *
- * Process:
+ * Process (full site check):
  * 1. Run htmltest (fast automated checks)
  * 2. Extract failed URLs
  * 3. Verify failures with real browser (Playwright)
  * 4. Report results and suggest ignore list updates
+ *
+ * Process (manual URLs):
+ * 1. Verify provided URLs with real browser (Playwright)
+ * 2. Report results
  */
 
 import { execSync } from 'child_process';
@@ -19,59 +25,72 @@ import { resolveBrowserMode } from './lib/browser-mode.js';
 
 const DIST_DIR = 'dist';
 
-// Check if dist exists
-if (!existsSync(DIST_DIR)) {
-  console.error('❌ Error: dist/ directory not found.');
-  console.error('   Run "npm run build" first.\n');
-  process.exit(1);
+// Check if URLs provided as command-line arguments
+const manualUrls = process.argv.slice(2);
+const isManualMode = manualUrls.length > 0;
+
+// Manual mode: skip htmltest, verify provided URLs directly
+if (isManualMode) {
+  console.log(`🔍 Manual URL verification mode (${manualUrls.length} URL${manualUrls.length === 1 ? '' : 's'})\n`);
+} else {
+  // Full site check mode: run htmltest first
+  // Check if dist exists
+  if (!existsSync(DIST_DIR)) {
+    console.error('❌ Error: dist/ directory not found.');
+    console.error('   Run "npm run build" first.\n');
+    process.exit(1);
+  }
+
+  // Check if htmltest is installed
+  try {
+    execSync('htmltest --version', { stdio: 'ignore' });
+  } catch (error) {
+    console.error('❌ Error: htmltest binary not found.');
+    console.error('   Install htmltest first. See docs/link-checking.md for instructions.');
+    console.error('   macOS: brew install htmltest');
+    console.error('   Linux: https://github.com/wjdp/htmltest/releases\n');
+    process.exit(1);
+  }
+
+  console.log('🔍 Starting automated two-tier link checking...\n');
+  console.log('━'.repeat(60));
+  console.log('TIER 1: htmltest (fast HTTP checks)');
+  console.log('━'.repeat(60));
 }
 
-// Check if htmltest is installed
-try {
-  execSync('htmltest --version', { stdio: 'ignore' });
-} catch (error) {
-  console.error('❌ Error: htmltest binary not found.');
-  console.error('   Install htmltest first. See docs/link-checking.md for instructions.');
-  console.error('   macOS: brew install htmltest');
-  console.error('   Linux: https://github.com/wjdp/htmltest/releases\n');
-  process.exit(1);
-}
+// Run htmltest and capture output (skip in manual mode)
+let htmltestOutput = '';
+let statusByUrl = new Map();
+let failedUrls = [];
 
-console.log('🔍 Starting automated two-tier link checking...\n');
-console.log('━'.repeat(60));
-console.log('TIER 1: htmltest (fast HTTP checks)');
-console.log('━'.repeat(60));
+if (!isManualMode) {
+  try {
+    htmltestOutput = execSync('htmltest', {
+      encoding: 'utf-8',
+      stdio: 'pipe'
+    });
+    console.log('✅ All links passed htmltest!\n');
+    process.exit(0);
+  } catch (error) {
+    // Safely convert stdout/stderr to strings (defensive against buffers/undefined)
+    const stdout = error && error.stdout != null
+      ? (Buffer.isBuffer(error.stdout) ? error.stdout.toString('utf-8') : String(error.stdout))
+      : '';
+    const stderr = error && error.stderr != null
+      ? (Buffer.isBuffer(error.stderr) ? error.stderr.toString('utf-8') : String(error.stderr))
+      : '';
+    htmltestOutput = stdout + stderr;
+  }
 
-// Run htmltest and capture output
-let htmltestOutput;
+  console.log(htmltestOutput);
 
-try {
-  htmltestOutput = execSync('htmltest', {
-    encoding: 'utf-8',
-    stdio: 'pipe'
-  });
-  console.log('✅ All links passed htmltest!\n');
-  process.exit(0);
-} catch (error) {
-  // Safely convert stdout/stderr to strings (defensive against buffers/undefined)
-  const stdout = error && error.stdout != null
-    ? (Buffer.isBuffer(error.stdout) ? error.stdout.toString('utf-8') : String(error.stdout))
-    : '';
-  const stderr = error && error.stderr != null
-    ? (Buffer.isBuffer(error.stderr) ? error.stderr.toString('utf-8') : String(error.stderr))
-    : '';
-  htmltestOutput = stdout + stderr;
-}
-
-console.log(htmltestOutput);
-
-// Extract failed URLs from htmltest output
-const urlPattern = /https?:\/\/[^\s]+/g;
-const failedLines = htmltestOutput.split('\n').filter(line =>
-  line.includes('Non-OK status') ||
-  line.includes('Get "http') ||
-  line.includes('tls:')
-);
+  // Extract failed URLs from htmltest output
+  const urlPattern = /https?:\/\/[^\s]+/g;
+  const failedLines = htmltestOutput.split('\n').filter(line =>
+    line.includes('Non-OK status') ||
+    line.includes('Get "http') ||
+    line.includes('tls:')
+  );
 
 /**
  * Get canonical URL for deduplication purposes
@@ -118,10 +137,9 @@ function getCanonicalUrl(url) {
   }
 }
 
-const statusByUrl = new Map();
-const allUrls = [];
+  const allUrls = [];
 
-failedLines.forEach(line => {
+  failedLines.forEach(line => {
   const matches = line.match(urlPattern);
   if (!matches) return;
 
@@ -144,7 +162,6 @@ failedLines.forEach(line => {
 // Deduplicate URLs intelligently using canonical form
 // Select representative URL with best known status for accurate reporting
 const canonicalToRepUrl = new Map();
-const failedUrls = [];
 
 for (const url of allUrls) {
   const canonical = getCanonicalUrl(url);
@@ -164,27 +181,34 @@ for (const url of allUrls) {
   }
 }
 
-for (const repUrl of canonicalToRepUrl.values()) {
-  failedUrls.push(repUrl);
+  for (const repUrl of canonicalToRepUrl.values()) {
+    failedUrls.push(repUrl);
+  }
+
+  const totalFailures = allUrls.length;
+  const uniqueUrls = failedUrls.length;
+  const skippedCount = totalFailures - uniqueUrls;
+
+  if (skippedCount > 0) {
+    console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) after canonicalization/deduplication\n`);
+  }
+
+  if (uniqueUrls === 0) {
+    console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
+    console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
+    process.exit(1);
+  }
+
+  console.log('\n━'.repeat(60));
+  console.log(`TIER 2: Browser verification (${uniqueUrls} unique URL${uniqueUrls === 1 ? '' : 's'})`);
+  console.log('━'.repeat(60));
+} else {
+  // Manual mode: use provided URLs directly
+  failedUrls = manualUrls;
+  console.log('━'.repeat(60));
+  console.log(`Verifying ${failedUrls.length} URL${failedUrls.length === 1 ? '' : 's'}`);
+  console.log('━'.repeat(60));
 }
-
-const totalFailures = allUrls.length;
-const uniqueUrls = failedUrls.length;
-const skippedCount = totalFailures - uniqueUrls;
-
-if (skippedCount > 0) {
-  console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) after canonicalization/deduplication\n`);
-}
-
-if (uniqueUrls === 0) {
-  console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
-  console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
-  process.exit(1);
-}
-
-console.log('\n━'.repeat(60));
-console.log(`TIER 2: Browser verification (${uniqueUrls} unique URL${uniqueUrls === 1 ? '' : 's'})`);
-console.log('━'.repeat(60));
 // Browser mode:
 // - Defaults to headed (better bot detection bypass)
 // - PLAYWRIGHT_HEADED=true  -> force headed
@@ -247,21 +271,36 @@ const working = results.filter(r => r.success);
 const broken = results.filter(r => !r.success);
 
 console.log(`\n📊 Summary:`);
-console.log(`   Total failures from htmltest: ${totalFailures} (${uniqueUrls} unique URL${uniqueUrls === 1 ? '' : 's'})`);
-console.log(`   ✅ Working in real browser: ${working.length}`);
-console.log(`   ❌ Actually broken: ${broken.length}`);
+if (isManualMode) {
+  console.log(`   URLs checked: ${failedUrls.length}`);
+  console.log(`   ✅ Working: ${working.length}`);
+  console.log(`   ❌ Broken: ${broken.length}`);
+} else {
+  const totalFailures = failedUrls.length; // This is from the htmltest parsing
+  console.log(`   Total failures from htmltest: ${totalFailures}`);
+  console.log(`   ✅ Working in real browser: ${working.length}`);
+  console.log(`   ❌ Actually broken: ${broken.length}`);
+}
 
-// Compute candidates in outer scope for use throughout reporting and exit logic
-// Include: URLs with explicit HTTP status (404, 429, 503, etc.) suggesting bot-blocking
-// Exclude: 403s (withheld by policy), null/undefined (TLS/connection errors)
-const ignoreCandidates = working.filter(r => {
-  const status = statusByUrl.get(r.url);
-  return status !== 403 && status !== null && status !== undefined;
-});
-const withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
-const connectionErrors = working.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
+// In automated mode, categorize working URLs by their htmltest status for detailed reporting
+// Manual mode doesn't have htmltest status, so skip this categorization
+let ignoreCandidates = [];
+let withheld403s = [];
+let connectionErrors = [];
 
-if (working.length > 0) {
+if (!isManualMode) {
+  // Compute candidates in outer scope for use throughout reporting and exit logic
+  // Include: URLs with explicit HTTP status (404, 429, 503, etc.) suggesting bot-blocking
+  // Exclude: 403s (withheld by policy), null/undefined (TLS/connection errors)
+  ignoreCandidates = working.filter(r => {
+    const status = statusByUrl.get(r.url);
+    return status !== 403 && status !== null && status !== undefined;
+  });
+  withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
+  connectionErrors = working.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
+}
+
+if (working.length > 0 && !isManualMode) {
 
   if (ignoreCandidates.length > 0) {
     console.log('\n✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):');
