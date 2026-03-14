@@ -90,8 +90,8 @@ jobs:
                     `If these changes are intentional, the baseline will be updated when this PR is merged to main.\n\n` +
                     `*Last updated: ${new Date().toISOString()}*`;
 
-            // Find existing comment
-            const { data: comments } = await github.rest.issues.listComments({
+            // Find existing comment (paginate to handle PRs with >30 comments)
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
@@ -132,8 +132,8 @@ jobs:
 
             const marker = '<!-- visual-regression-comment -->';
 
-            // Find and delete existing visual regression comment
-            const { data: comments } = await github.rest.issues.listComments({
+            // Find and delete existing visual regression comment (paginate to handle >30 comments)
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
