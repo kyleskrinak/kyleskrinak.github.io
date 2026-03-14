@@ -393,9 +393,15 @@ if (broken.length > 0) {
 }
 
 if (ignoreCandidates.length > 0) {
-  console.log(`\n✅ All failed links work in browser - update ignore list\n`);
+  const msg = isManualMode
+    ? 'All provided URLs work in browser - update ignore list'
+    : 'All failed links work in browser - update ignore list';
+  console.log(`\n✅ ${msg}\n`);
 } else if (working.length > 0) {
-  console.log(`\n✅ All failed links work in browser - no ignore list updates suggested\n`);
+  const msg = isManualMode
+    ? 'All provided URLs work in browser - no ignore list updates suggested'
+    : 'All failed links work in browser - no ignore list updates suggested';
+  console.log(`\n✅ ${msg}\n`);
 }
 
 process.exit(0);
