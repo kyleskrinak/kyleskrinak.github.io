@@ -8,7 +8,6 @@ on:
 
 permissions:
   issues: write # For commenting on PRs (issues and PRs share same permission)
-  actions: read
 
 jobs:
   comment:
