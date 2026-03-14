@@ -120,18 +120,6 @@ jobs:
             playwright-report/
           retention-days: 30
 
-      - name: Save PR number for commenting workflow
-        if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
-        run: echo "${{ github.event.pull_request.number }}" > pr-number.txt
-
-      - name: Upload PR metadata
-        if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-metadata-${{ github.event.pull_request.number }}
-          path: pr-number.txt
-          retention-days: 1
-
       - name: Fail workflow if visual diffs detected
         if: steps.baseline-check.outputs.baseline_exists == 'true' && steps.visual-test.outcome == 'failure'
         run: exit 1
