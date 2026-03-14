@@ -393,16 +393,12 @@ if (broken.length > 0) {
   process.exit(1);
 }
 
-if (ignoreCandidates.length > 0) {
-  const msg = isManualMode
-    ? 'All provided URLs work in browser - update ignore list'
-    : 'All failed links work in browser - update ignore list';
-  console.log(`\n✅ ${msg}\n`);
+if (isManualMode && working.length > 0) {
+  console.log(`\n✅ All provided URLs are accessible\n`);
+} else if (ignoreCandidates.length > 0) {
+  console.log(`\n✅ All failed links work in browser - update ignore list\n`);
 } else if (working.length > 0) {
-  const msg = isManualMode
-    ? 'All provided URLs work in browser - no ignore list updates suggested'
-    : 'All failed links work in browser - no ignore list updates suggested';
-  console.log(`\n✅ ${msg}\n`);
+  console.log(`\n✅ All failed links work in browser - no ignore list updates suggested\n`);
 }
 
 process.exit(0);

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { getPath } from '@/utils/getPath';
+import { linkWithBase } from '@/utils/linkWithBase';
 import { SITE } from '@/config';
 
 /**
@@ -12,7 +13,8 @@ import { SITE } from '@/config';
  * To new Astro URLs:
  *   /posts/2025-09-19-modernizing-an-old-jekyll-blog/
  *
- * Returns 301 permanent redirects for SEO (meta refresh in static builds)
+ * Uses HTML meta refresh (0-second delay) for client-side redirect.
+ * Static builds cannot return HTTP 301 status codes.
  */
 
 export async function getStaticPaths() {
@@ -45,10 +47,11 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { year, month, day, slug } = Astro.params;
 
-// Build new and old URLs
-const newUrl = getPath(post.id, post.filePath);
-const oldUrl = `/${year}/${month}/${day}/${slug}/`;
-const canonicalUrl = new URL(newUrl, SITE.website).href;
+// Build new and old URLs (with base path for staging support)
+const postPath = getPath(post.id, post.filePath);
+const newUrl = linkWithBase(postPath);
+const oldUrl = linkWithBase(`/${year}/${month}/${day}/${slug}/`);
+const canonicalUrl = new URL(postPath, SITE.website).href;
 ---
 
 <!doctype html>

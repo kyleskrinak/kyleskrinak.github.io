@@ -92,7 +92,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload visual diff images
-        if: steps.baseline-check.outputs.baseline_exists == 'true' && failure() && steps.visual-test.outcome == 'failure'
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: visual-diffs-pr-${{ github.event.pull_request.number }}
@@ -102,7 +102,7 @@ jobs:
           retention-days: 30
 
       - name: Comment on PR with results
-        if: steps.baseline-check.outputs.baseline_exists == 'true' && failure() && steps.visual-test.outcome == 'failure'
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
