@@ -90,11 +90,8 @@ jobs:
       - name: Start preview server
         continue-on-error: true
         run: |
-          npm run preview > preview-server.log 2>&1 &
+          npx astro preview --host localhost --port 4321 > preview-server.log 2>&1 &
           echo $! > preview-server.pid
-        env:
-          HOST: localhost
-          PORT: 4321
 
       - name: Wait for preview server
         continue-on-error: true
@@ -113,6 +110,7 @@ jobs:
           }
 
       - name: Generate visual baseline snapshots
+        id: baseline
         continue-on-error: true
         run: npm run test:visual:baseline
         env:
@@ -127,9 +125,11 @@ jobs:
           fi
 
       - name: Upload visual baseline as artifact
-        if: always() && hashFiles('tests/visual/visual-regression.spec.ts-snapshots/**/*.png') != ''
+        if: steps.baseline.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: visual-baseline-main
           path: tests/visual/visual-regression.spec.ts-snapshots/
           retention-days: 90
+          # Note: Only upload if baseline generation fully succeeded
+          # Partial/failed snapshots would break future PR comparisons

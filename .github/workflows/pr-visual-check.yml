@@ -72,11 +72,8 @@ jobs:
       - name: Start preview server
         if: steps.baseline-check.outputs.baseline_exists == 'true'
         run: |
-          npm run preview > preview-server.log 2>&1 &
+          npx astro preview --host localhost --port 4321 > preview-server.log 2>&1 &
           echo $! > preview-server.pid
-        env:
-          HOST: localhost
-          PORT: 4321
 
       - name: Wait for preview server
         if: steps.baseline-check.outputs.baseline_exists == 'true'
