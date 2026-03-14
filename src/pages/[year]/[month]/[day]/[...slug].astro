@@ -51,7 +51,8 @@ const { year, month, day, slug } = Astro.params;
 const postPath = getPath(post.id, post.filePath);
 const newUrl = linkWithBase(postPath);
 const oldUrl = linkWithBase(`/${year}/${month}/${day}/${slug}/`);
-const canonicalUrl = new URL(postPath, SITE.website).href;
+// Remove leading slash for canonical URL to preserve base path in SITE.website
+const canonicalUrl = new URL(postPath.slice(1), SITE.website).href;
 ---
 
 <!doctype html>
