@@ -80,3 +80,27 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
             --paths "/"
+
+      # Generate visual regression baseline after successful deploy
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start preview server
+        run: npm run preview &
+        env:
+          HOST: localhost
+          PORT: 4321
+
+      - name: Wait for preview server
+        run: |
+          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do sleep 1; done' || exit 1
+
+      - name: Generate visual baseline snapshots
+        run: npm run test:visual:baseline
+
+      - name: Upload visual baseline as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baseline-main
+          path: tests/visual/visual-regression.spec.ts-snapshots/
+          retention-days: 90
