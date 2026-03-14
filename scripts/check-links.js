@@ -235,7 +235,8 @@ const { headless } = resolveBrowserMode();
 // Set PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true to bypass (useful for bot-detection testing)
 const ignoreHTTPSErrors = process.env.PLAYWRIGHT_IGNORE_HTTPS_ERRORS === 'true';
 
-console.log(`Launching Chromium in ${headless ? 'headless' : 'headed'} mode to verify failed URLs...\n`);
+const urlDescription = isManualMode ? 'URLs' : 'failed URLs';
+console.log(`Launching Chromium in ${headless ? 'headless' : 'headed'} mode to verify ${urlDescription}...\n`);
 if (!headless) {
   console.log('⚠️  Browser windows will open during verification.\n');
 }
