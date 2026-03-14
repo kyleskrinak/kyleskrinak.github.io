@@ -82,10 +82,13 @@ jobs:
             --paths "/"
 
       # Generate visual regression baseline after successful deploy
+      # Note: Baseline generation is non-blocking - failures won't fail the deploy
       - name: Install Playwright browsers
+        continue-on-error: true
         run: npx playwright install --with-deps chromium
 
       - name: Start preview server
+        continue-on-error: true
         run: |
           npm run preview > preview-server.log 2>&1 &
           echo $! > preview-server.pid
@@ -94,6 +97,7 @@ jobs:
           PORT: 4321
 
       - name: Wait for preview server
+        continue-on-error: true
         run: |
           timeout 30 sh -c 'until curl --silent --fail --show-error http://localhost:4321 > /dev/null; do
             if [ -f preview-server.pid ] && ! kill -0 $(cat preview-server.pid) 2>/dev/null; then
@@ -109,6 +113,7 @@ jobs:
           }
 
       - name: Generate visual baseline snapshots
+        continue-on-error: true
         run: npm run test:visual:baseline
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:4321
@@ -122,6 +127,7 @@ jobs:
           fi
 
       - name: Upload visual baseline as artifact
+        if: always() && hashFiles('tests/visual/visual-regression.spec.ts-snapshots/**/*.png') != ''
         uses: actions/upload-artifact@v4
         with:
           name: visual-baseline-main

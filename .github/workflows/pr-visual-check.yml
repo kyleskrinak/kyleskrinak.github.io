@@ -8,8 +8,9 @@ on:
 
 permissions:
   contents: read
-  actions: read        # for downloading baseline artifact
-  pull-requests: write # for commenting on PR with results
+  actions: read # for downloading baseline artifact
+  # Note: No write permissions - PR code execution is untrusted
+  # Commenting is handled by pr-visual-comment.yml (workflow_run, secure context)
 
 concurrency:
   group: visual-check-${{ github.ref }}
@@ -43,13 +44,14 @@ jobs:
       - name: Download baseline from main
         id: download-baseline
         uses: dawidd6/action-download-artifact@v6
-        continue-on-error: true
         with:
           workflow: production-deploy.yml
           branch: main
           name: visual-baseline-main
           path: tests/visual/visual-regression.spec.ts-snapshots/
           if_no_artifact_found: warn
+          # Note: if_no_artifact_found: warn handles first-run case gracefully
+          # Other failures (permissions, API outages) should fail the workflow
 
       - name: Check baseline availability
         id: baseline-check
@@ -118,24 +120,17 @@ jobs:
             playwright-report/
           retention-days: 30
 
-      - name: Comment on PR with results
+      - name: Save PR number for commenting workflow
         if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const artifactUrl = `${runUrl}#artifacts`;
+        run: echo "${{ github.event.pull_request.number }}" > pr-number.txt
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `## ⚠️ Visual Regression Detected\n\n` +
-                    `Visual differences detected compared to main baseline.\n\n` +
-                    `- [View diff images](${artifactUrl})\n` +
-                    `- [Full test report](${runUrl})\n\n` +
-                    `If these changes are intentional, the baseline will be updated when this PR is merged to main.`
-            });
+      - name: Upload PR metadata
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && always() && steps.visual-test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-metadata-${{ github.event.pull_request.number }}
+          path: pr-number.txt
+          retention-days: 1
 
       - name: Fail workflow if visual diffs detected
         if: steps.baseline-check.outputs.baseline_exists == 'true' && steps.visual-test.outcome == 'failure'
