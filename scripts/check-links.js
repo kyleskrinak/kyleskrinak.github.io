@@ -25,23 +25,24 @@ import { resolveBrowserMode } from './lib/browser-mode.js';
 
 const DIST_DIR = 'dist';
 
-// Check if URLs provided as command-line arguments
-const manualUrls = process.argv.slice(2).filter(arg => {
-  // Filter out flags and invalid arguments
+// Validate and collect URLs from command-line arguments
+const manualUrls = [];
+for (const arg of process.argv.slice(2)) {
+  // Reject flags
   if (arg.startsWith('--') || arg.startsWith('-')) {
     console.error(`❌ Error: Invalid argument "${arg}"`);
     console.error('   Usage: node scripts/check-links.js <url> [<url> ...]');
     console.error('   Example: node scripts/check-links.js https://example.com\n');
     process.exit(1);
   }
-  // Basic URL validation
+  // Validate URL format
   if (!arg.match(/^https?:\/\//)) {
     console.error(`❌ Error: Invalid URL "${arg}"`);
     console.error('   URLs must start with http:// or https://\n');
     process.exit(1);
   }
-  return true;
-});
+  manualUrls.push(arg);
+}
 const isManualMode = manualUrls.length > 0;
 
 // Manual mode: skip htmltest, verify provided URLs directly

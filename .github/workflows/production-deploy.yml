@@ -95,7 +95,7 @@ jobs:
 
       - name: Wait for preview server
         run: |
-          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do
+          timeout 30 sh -c 'until curl --silent --fail --show-error http://localhost:4321 > /dev/null; do
             if [ -f preview-server.pid ] && ! kill -0 $(cat preview-server.pid) 2>/dev/null; then
               echo "❌ Preview server died during startup"
               cat preview-server.log
@@ -110,6 +110,14 @@ jobs:
 
       - name: Generate visual baseline snapshots
         run: npm run test:visual:baseline
+
+      - name: Stop preview server
+        if: always()
+        run: |
+          if [ -f preview-server.pid ]; then
+            kill $(cat preview-server.pid) 2>/dev/null || true
+            rm preview-server.pid
+          fi
 
       - name: Upload visual baseline as artifact
         uses: actions/upload-artifact@v4
