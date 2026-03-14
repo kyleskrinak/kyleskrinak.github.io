@@ -1,7 +1,7 @@
 /**
  * Shared URL verification logic using Playwright
  *
- * Used by both check-links.js (automated) and verify-links-with-browser.js (manual)
+ * Used by check-links.js for both automated (htmltest + browser) and manual (browser-only) modes
  */
 
 /**
