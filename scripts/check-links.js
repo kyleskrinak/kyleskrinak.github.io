@@ -26,7 +26,22 @@ import { resolveBrowserMode } from './lib/browser-mode.js';
 const DIST_DIR = 'dist';
 
 // Check if URLs provided as command-line arguments
-const manualUrls = process.argv.slice(2);
+const manualUrls = process.argv.slice(2).filter(arg => {
+  // Filter out flags and invalid arguments
+  if (arg.startsWith('--') || arg.startsWith('-')) {
+    console.error(`❌ Error: Invalid argument "${arg}"`);
+    console.error('   Usage: node scripts/check-links.js <url> [<url> ...]');
+    console.error('   Example: node scripts/check-links.js https://example.com\n');
+    process.exit(1);
+  }
+  // Basic URL validation
+  if (!arg.match(/^https?:\/\//)) {
+    console.error(`❌ Error: Invalid URL "${arg}"`);
+    console.error('   URLs must start with http:// or https://\n');
+    process.exit(1);
+  }
+  return true;
+});
 const isManualMode = manualUrls.length > 0;
 
 // Manual mode: skip htmltest, verify provided URLs directly
@@ -140,46 +155,46 @@ function getCanonicalUrl(url) {
   const allUrls = [];
 
   failedLines.forEach(line => {
-  const matches = line.match(urlPattern);
-  if (!matches) return;
+    const matches = line.match(urlPattern);
+    if (!matches) return;
 
-  // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
-  let url = matches[matches.length - 1];
-  url = url.replace(/["':)\]]+$/, '');
+    // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
+    let url = matches[matches.length - 1];
+    url = url.replace(/["':)\]]+$/, '');
 
-  const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
-  const newStatus = statusMatch ? Number(statusMatch[1]) : null;
-  const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
+    const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
+    const newStatus = statusMatch ? Number(statusMatch[1]) : null;
+    const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
 
-  // Set status if first encounter, or overwrite null with actual status code
-  if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
-    statusByUrl.set(url, newStatus);
-  }
+    // Set status if first encounter, or overwrite null with actual status code
+    if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
+      statusByUrl.set(url, newStatus);
+    }
 
-  allUrls.push(url);
-});
+    allUrls.push(url);
+  });
 
-// Deduplicate URLs intelligently using canonical form
-// Select representative URL with best known status for accurate reporting
-const canonicalToRepUrl = new Map();
+  // Deduplicate URLs intelligently using canonical form
+  // Select representative URL with best known status for accurate reporting
+  const canonicalToRepUrl = new Map();
 
-for (const url of allUrls) {
-  const canonical = getCanonicalUrl(url);
-  const currentStatus = statusByUrl.get(url);
+  for (const url of allUrls) {
+    const canonical = getCanonicalUrl(url);
+    const currentStatus = statusByUrl.get(url);
 
-  if (!canonicalToRepUrl.has(canonical)) {
-    // First time we see this canonical URL: tentatively use this URL
-    canonicalToRepUrl.set(canonical, url);
-  } else {
-    const existingUrl = canonicalToRepUrl.get(canonical);
-    const existingStatus = statusByUrl.get(existingUrl);
-
-    // Prefer a URL that has a concrete status over one with null/undefined
-    if ((existingStatus == null) && (currentStatus != null)) {
+    if (!canonicalToRepUrl.has(canonical)) {
+      // First time we see this canonical URL: tentatively use this URL
       canonicalToRepUrl.set(canonical, url);
+    } else {
+      const existingUrl = canonicalToRepUrl.get(canonical);
+      const existingStatus = statusByUrl.get(existingUrl);
+
+      // Prefer a URL that has a concrete status over one with null/undefined
+      if ((existingStatus == null) && (currentStatus != null)) {
+        canonicalToRepUrl.set(canonical, url);
+      }
     }
   }
-}
 
   for (const repUrl of canonicalToRepUrl.values()) {
     failedUrls.push(repUrl);
@@ -276,8 +291,7 @@ if (isManualMode) {
   console.log(`   ✅ Working: ${working.length}`);
   console.log(`   ❌ Broken: ${broken.length}`);
 } else {
-  const totalFailures = failedUrls.length; // This is from the htmltest parsing
-  console.log(`   Total failures from htmltest: ${totalFailures}`);
+  console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Working in real browser: ${working.length}`);
   console.log(`   ❌ Actually broken: ${broken.length}`);
 }
