@@ -1,0 +1,10 @@
+name: Setup Node.js for builds
+description: Sets up Node.js with npm caching for build workflows
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
