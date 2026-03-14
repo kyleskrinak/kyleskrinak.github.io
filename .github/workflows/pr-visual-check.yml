@@ -6,6 +6,11 @@ on:
       - staging
       - main
 
+permissions:
+  contents: read
+  actions: read        # for downloading baseline artifact
+  pull-requests: write # for commenting on PR with results
+
 concurrency:
   group: visual-check-${{ github.ref }}
   cancel-in-progress: true
@@ -91,6 +96,8 @@ jobs:
         if: steps.baseline-check.outputs.baseline_exists == 'true'
         id: visual-test
         run: npm run test:visual
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:4321
         continue-on-error: true
 
       - name: Stop preview server

@@ -110,6 +110,8 @@ jobs:
 
       - name: Generate visual baseline snapshots
         run: npm run test:visual:baseline
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:4321
 
       - name: Stop preview server
         if: always()
