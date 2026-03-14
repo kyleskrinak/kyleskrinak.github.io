@@ -86,14 +86,27 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Start preview server
-        run: npm run preview &
+        run: |
+          npm run preview > preview-server.log 2>&1 &
+          echo $! > preview-server.pid
         env:
           HOST: localhost
           PORT: 4321
 
       - name: Wait for preview server
         run: |
-          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do sleep 1; done' || exit 1
+          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do
+            if [ -f preview-server.pid ] && ! kill -0 $(cat preview-server.pid) 2>/dev/null; then
+              echo "❌ Preview server died during startup"
+              cat preview-server.log
+              exit 1
+            fi
+            sleep 1
+          done' || {
+            echo "❌ Preview server failed to start within 30 seconds"
+            [ -f preview-server.log ] && cat preview-server.log
+            exit 1
+          }
 
       - name: Generate visual baseline snapshots
         run: npm run test:visual:baseline

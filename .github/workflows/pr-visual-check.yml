@@ -34,34 +34,65 @@ jobs:
           SITE_URL: https://kyleskrinak.github.io/
 
       - name: Download baseline from main
+        id: download-baseline
         uses: dawidd6/action-download-artifact@v6
+        continue-on-error: true
         with:
           workflow: production-deploy.yml
           branch: main
           name: visual-baseline-main
           path: tests/visual/visual-regression.spec.ts-snapshots/
-          # If no baseline exists yet, workflow will fail - this is expected for first run
+          if_no_artifact_found: warn
+
+      - name: Check baseline availability
+        id: baseline-check
+        run: |
+          if [ -d "tests/visual/visual-regression.spec.ts-snapshots" ] && [ "$(ls -A tests/visual/visual-regression.spec.ts-snapshots)" ]; then
+            echo "baseline_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Baseline downloaded successfully"
+          else
+            echo "baseline_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️  No baseline found - this is expected for first run after enabling visual regression"
+            echo "   Skipping visual regression tests. Baseline will be created when PR merges to main."
+          fi
 
       - name: Install Playwright browsers
+        if: steps.baseline-check.outputs.baseline_exists == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Start preview server
-        run: npm run preview &
+        if: steps.baseline-check.outputs.baseline_exists == 'true'
+        run: |
+          npm run preview > preview-server.log 2>&1 &
+          echo $! > preview-server.pid
         env:
           HOST: localhost
           PORT: 4321
 
       - name: Wait for preview server
+        if: steps.baseline-check.outputs.baseline_exists == 'true'
         run: |
-          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do sleep 1; done' || exit 1
+          timeout 30 sh -c 'until curl -s http://localhost:4321 > /dev/null; do
+            if [ -f preview-server.pid ] && ! kill -0 $(cat preview-server.pid) 2>/dev/null; then
+              echo "❌ Preview server died during startup"
+              cat preview-server.log
+              exit 1
+            fi
+            sleep 1
+          done' || {
+            echo "❌ Preview server failed to start within 30 seconds"
+            [ -f preview-server.log ] && cat preview-server.log
+            exit 1
+          }
 
       - name: Run visual regression tests
+        if: steps.baseline-check.outputs.baseline_exists == 'true'
         id: visual-test
         run: npm run test:visual
         continue-on-error: true
 
       - name: Upload visual diff images
-        if: failure() && steps.visual-test.outcome == 'failure'
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && failure() && steps.visual-test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: visual-diffs-pr-${{ github.event.pull_request.number }}
@@ -71,7 +102,7 @@ jobs:
           retention-days: 30
 
       - name: Comment on PR with results
-        if: failure() && steps.visual-test.outcome == 'failure'
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && failure() && steps.visual-test.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
@@ -90,5 +121,5 @@ jobs:
             });
 
       - name: Fail workflow if visual diffs detected
-        if: steps.visual-test.outcome == 'failure'
+        if: steps.baseline-check.outputs.baseline_exists == 'true' && steps.visual-test.outcome == 'failure'
         run: exit 1
