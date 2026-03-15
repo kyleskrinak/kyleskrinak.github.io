@@ -34,7 +34,9 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 │   ├── seo/              # SEO validation tests
 │   └── analytics/        # Analytics privacy tests
 ├── scripts/              # Build and utility scripts
-└── reports/              # Generated test reports
+├── playwright-report/    # Playwright HTML reports (gitignored)
+├── test-results/         # Playwright test artifacts (gitignored)
+└── lighthouse-reports/   # Lighthouse audit reports (gitignored)
 ```
 
 ## Key Configuration Files

@@ -47,7 +47,7 @@ This section covers testing strategies, test runs, and quality validation for th
 - See [Link Checking Guide](../link-checking.md) for details
 
 ### Performance Testing
-- **[Lighthouse Reports](../../reports/lighthouse/)** - Performance auditing
+- **[Lighthouse Reports](../../lighthouse-reports/)** - Performance auditing
 - See actual test results and historical trends
 
 ## Test Results
