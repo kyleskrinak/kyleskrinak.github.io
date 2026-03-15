@@ -57,7 +57,6 @@ gh run download $RUN_ID --name visual-baseline-main --dir tests/visual/visual-re
 - 8+ key pages tested
 - Multiple viewport sizes (mobile: 320px-414px, tablet: 768px, desktop: 1920px)
 - Responsive design validation
-- Dark mode testing
 
 ## Workflows
 

@@ -114,7 +114,7 @@ Run tests:
 npm run test:seo
 
 # Test against staging (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:seo
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:seo
 
 # Test against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
@@ -123,8 +123,7 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 npm run test:staging      # All test suites against staging (note: package.json has /astro-blog URL; may need update)
 npm run test:production   # All test suites against production
 
-# Note: test:staging in package.json uses /astro-blog path but staging deploys to /.
-# For reliable staging tests, use explicit PLAYWRIGHT_TEST_BASE_URL commands above.
+# Note: For most reliable staging tests, use explicit PLAYWRIGHT_TEST_BASE_URL commands above.
 ```
 
 ---

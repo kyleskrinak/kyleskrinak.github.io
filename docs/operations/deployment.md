@@ -23,7 +23,7 @@ No additional setup required. GitHub Pages is automatically configured when you 
 
 ### Access
 
-- URL: `https://kyleskrinak.github.io/` (or your configured Pages URL)
+- URL: `https://kyleskrinak.github.io/astro-blog/` (or your configured Pages URL)
 
 ## AWS Production Deployment
 

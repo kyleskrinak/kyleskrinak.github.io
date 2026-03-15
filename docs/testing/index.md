@@ -18,6 +18,7 @@ This section covers testing strategies, test runs, and quality validation for th
 
 ### Layout Consistency Testing
 - **Test suite**: `tests/layout-consistency.spec.ts`
+- Run with: `npx playwright test --project=layout`
 - Validates consistent layout elements across pages
 - Checks navigation, footer, and common components
 - Ensures no broken layout on key pages
@@ -72,7 +73,7 @@ npm run test:production
 # For most reliable staging tests, run individual suites against the staging URL.
 
 # Run specific suite against staging/production (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:console
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:console
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 ```
 
