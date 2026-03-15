@@ -14,6 +14,7 @@ This section covers deploying, maintaining, and troubleshooting the Astro blog i
 ## Deployment
 
 - **[Deployment Guide](./deployment.md)** - Complete instructions for staging and production deployments
+- **[Staging URL Reference](./staging-url-reference.md)** - Authoritative staging URL documentation (GitHub Pages user site constraints)
 
 ### Quick Deploy
 ```bash
@@ -32,9 +33,10 @@ git push origin main
 ## Key Information
 
 **Staging Environment**:
-- URL: https://kyleskrinak.github.io/astro-blog/
+- URL: https://kyleskrinak.github.io/ (root - user site constraint)
 - Deployed on: GitHub Pages
 - Triggers on: Push to `staging` branch
+- **See**: [Staging URL Reference](./staging-url-reference.md) for details
 
 **Production Environment**:
 - URL: https://kyle.skrinak.com/

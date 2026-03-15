@@ -74,7 +74,7 @@ npm run test:production
 # For most reliable staging tests, run individual suites against the staging URL.
 
 # Run specific suite against staging/production (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:console
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:console
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 ```
 
