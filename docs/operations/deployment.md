@@ -199,6 +199,44 @@ Build size and performance metrics:
 - All pages: ~40 HTML files
 
 Monitor in GitHub Actions logs.
+
+## Automated Quality Gates
+
+All PRs to staging and main branches run automated quality checks:
+
+### Visual Regression Testing
+
+**What happens:**
+1. PR opened → `pr-visual-check.yml` triggered
+2. Downloads baseline from latest main deployment
+3. Builds PR code with production settings
+4. Compares screenshots to baseline
+5. Posts results to PR (`pr-visual-comment.yml`)
+
+**PR Comment Indicators:**
+- ⚠️ **Visual Regression Detected** - Review diff artifacts in workflow run
+- ✅ **Tests passed** - No comment posted
+- ⚠️ **No baseline found** - First run after enabling, safe to merge
+
+**Viewing Diffs:**
+Click artifact link in PR comment to download:
+- Diff images (expected vs actual)
+- Playwright HTML report
+
+**Updating Baselines:**
+Baselines auto-update when PR merges to main and production deploys successfully.
+
+### Link Validation
+
+Nightly `linkwatch.yml` workflow checks for broken links:
+- Runs htmltest + browser verification
+- Creates GitHub issue if genuinely broken links found
+- Filters out bot-detected false positives (403s that work in browser)
+
+See also:
+- `/docs/testing/visual-regression.md` - Visual regression details
+- `/docs/link-checking.md` - Link validation workflow
+
 ## Troubleshooting
 
 ### Build Fails with "cannot stat 'dist/pagefind'"

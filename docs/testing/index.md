@@ -5,9 +5,10 @@ This section covers testing strategies, test runs, and quality validation for th
 ## Testing Types
 
 ### Visual Regression Testing
-- **[Visual Regression Guide](./visual-regression.md)** - Screenshot-based testing to catch UI changes
-- Run with: `npm run test:visual`
-- Tests across 36 pages to catch unexpected visual regressions
+- **[Visual Regression Guide](./visual-regression.md)** - Automated PR testing with Playwright
+- Run with: `npm run test:visual` (local) or automatic on PRs
+- Status: ✅ **Production** (March 2026) - automated CI/CD baseline comparison
+- Tests 8+ key pages across 5 viewports to catch unexpected visual changes
 
 ### Console Error Testing
 - **[Console Error Tests](../getting-started/test-console.md)** - Browser console validation

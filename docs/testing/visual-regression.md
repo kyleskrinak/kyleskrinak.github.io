@@ -1,231 +1,95 @@
-# Visual Regression Testing Strategy
+# Visual Regression Testing
 
-## Current State
-**Status:** ⚠️ Not yet implemented
+## Status
+✅ **PRODUCTION** (Implemented March 2026)
 
-No automated visual regression tests have been established. Before Astro goes live, we need baselines to verify no visual regressions between environments.
+## Overview
+Automated visual regression testing using Playwright + GitHub Actions artifacts.
+Runs on all PRs to staging and main branches.
 
-## Recommended Approach: Playwright + Percy
+## Architecture
 
-### Option 1: Percy.io (Cloud-based, Recommended for Launch)
-**Best for:** Quick setup, minimal maintenance, excellent for launch validation
+### Baseline Generation (Production Deploy)
+- Workflow: `.github/workflows/production-deploy.yml`
+- After successful AWS deploy, generates visual baseline
+- Uploads as artifact: `visual-baseline-main`
+- Retention: 90 days
+- Non-blocking: Deploy succeeds even if baseline generation fails
 
-**Setup:**
+### PR Testing Workflow
+1. **Trigger**: PR opened to staging or main
+2. **Workflow**: `.github/workflows/pr-visual-check.yml`
+   - Downloads latest baseline from main
+   - Builds PR code with production settings
+   - Runs Playwright visual tests
+   - Uploads diff images if failures detected
+3. **Commenting**: `.github/workflows/pr-visual-comment.yml`
+   - Secure workflow_run context
+   - Posts/updates PR comment with results
+   - Removes comment when tests pass
+
+### Key Features
+- Idempotent PR comments (updates existing, not duplicate spam)
+- Pagination support (handles PRs with >30 comments)
+- Proper PR matching by head SHA
+- Only comments on actual visual regressions
+- Security: PR code runs read-only, commenting in secure context
+
+## Local Development
+
+### Commands
 ```bash
-npm install --save-dev @percy/cli @percy/playwright
+npm run test:visual           # Run tests against local baseline
+npm run test:visual:baseline  # Generate new baseline snapshots
+npm run test:visual:report    # View HTML report
 ```
 
-**Creates snapshots for comparison:**
-- Local baseline → Staging → Production
-- Cross-browser comparison (Chrome, Firefox, Safari)
-- Mobile vs desktop views
-- Light mode vs dark mode
-
-**Key pages to capture:**
-- Home page
-- Blog archive
-- Individual blog post
-- Tag/category pages
-- Search page
-- About page
-
-**Cost:** Free tier supports up to 5,000 snapshots/month
-
----
-
-### Option 2: Playwright with Local Screenshots (DIY)
-**Best for:** Full control, no cloud dependency
-
-**Setup:**
+### Download Official Baseline
 ```bash
-npm install --save-dev @playwright/test
+gh run download --name visual-baseline-main --dir tests/visual/
 ```
 
-**Create test file: `tests/visual-regression.spec.ts`**
+## Test Coverage
+- 8+ key pages tested
+- 5 viewport configurations (desktop, mobile, tablet)
+- Responsive design validation
+- Dark mode testing
 
-```typescript
-import { test, expect } from '@playwright/test';
+## Workflows
 
-test.describe('Visual Regression Tests', () => {
+### For Developers
+1. Make UI changes
+2. Run `npm run test:visual` locally
+3. If diffs expected, document in PR
+4. PR workflow runs automatically
+5. Review diff artifacts if failures reported
 
-  // Home page
-  test('home page should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/');
-    await expect(page).toHaveScreenshot('home-page.png', {
-      fullPage: true,
-      maxDiffPixelRatio: 0.1
-    });
-  });
+### For Reviewers
+1. Check PR comment for visual regression alerts
+2. Download diff artifacts from workflow run
+3. Review Playwright HTML report
+4. Approve if changes intentional
 
-  // Blog post
-  test('blog post should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/posts/2025-09-19-modernizing-an-old-jekyll-blog-with-github-actions-and-ai/');
-    await expect(page).toHaveScreenshot('blog-post.png', {
-      fullPage: true
-    });
-  });
+## Troubleshooting
 
-  // Blog archive
-  test('blog archive should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/posts/');
-    await expect(page).toHaveScreenshot('blog-archive.png', {
-      fullPage: true
-    });
-  });
+### "Visual Regression Detected" Comment
+- **Cause**: Legitimate UI change or unexpected regression
+- **Action**: Download diff artifacts, review images
+- **Resolution**: Document intentional changes or fix regression
 
-  // Tag page
-  test('tag page should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/tags/jekyll/');
-    await expect(page).toHaveScreenshot('tag-page.png', {
-      fullPage: true
-    });
-  });
+### "No baseline found" Warning
+- **Cause**: First PR after enabling feature
+- **Action**: Safe to merge, baseline created when PR reaches main
+- **Resolution**: No action needed
 
-  // Search page
-  test('search page should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/search/');
-    await expect(page).toHaveScreenshot('search-page.png', {
-      fullPage: true
-    });
-  });
+### Tests Pass Locally but Fail in CI
+- **Cause**: Different rendering between local and CI environments
+- **Action**: Download baseline: `gh run download --name visual-baseline-main`
+- **Resolution**: Test against official baseline locally
 
-  // Dark mode (if applicable)
-  test('home page dark mode should match baseline', async ({ page }) => {
-    await page.goto('http://localhost:4321/');
-    // Simulate dark mode
-    await page.evaluate(() => {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    });
-    await expect(page).toHaveScreenshot('home-page-dark.png', {
-      fullPage: true
-    });
-  });
+## Technical Details
 
-  // Mobile viewport
-  test('home page mobile should match baseline', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('http://localhost:4321/');
-    await expect(page).toHaveScreenshot('home-page-mobile.png', {
-      fullPage: true
-    });
-  });
-});
-```
-
-**Run tests:**
-```bash
-# Generate baselines (first run)
-npx playwright test --update-snapshots
-
-# Compare against baselines
-npx playwright test
-
-# Run on specific environment
-PLAYWRIGHT_TEST_BASE_URL=https://staging-url npx playwright test
-```
-
----
-
-## Pre-Launch Visual Regression Testing Checklist
-
-### Phase 1: Establish Baselines (Local)
-- [ ] Create baseline screenshots on localhost:4321 (dev mode)
-- [ ] Capture 10+ key pages (home, posts, tags, search, etc.)
-- [ ] Test light mode + dark mode
-- [ ] Test desktop + mobile viewports
-- [ ] Save baselines to `tests/baseline-screenshots/`
-
-### Phase 2: Staging Validation
-- [ ] Run tests against staging URL
-- [ ] Compare staging screenshots to baselines
-- [ ] Document any expected differences
-- [ ] Fix visual regressions if found
-
-### Phase 3: Production Validation (After Launch)
-- [ ] Run full test suite against production
-- [ ] Compare production to staging
-- [ ] Verify no unexpected visual changes
-- [ ] Update baselines if needed
-
-### Phase 4: Ongoing Monitoring
-- [ ] Run visual tests on every staging build
-- [ ] Include in CI/CD pipeline (GitHub Actions)
-- [ ] Set alerts for visual regression failures
-
----
-
-## Critical Pages to Test (Minimum)
-
-| Page | Desktop | Mobile | Light | Dark | Notes |
-|------|---------|--------|-------|------|-------|
-| Home | ✓ | ✓ | ✓ | ✓ | Primary entry point |
-| Blog Post | ✓ | ✓ | ✓ | ✓ | Hero image rendering |
-| Blog Archive | ✓ | ✓ | ✓ | - | Pagination, post cards |
-| Tag Page | ✓ | ✓ | - | - | Dynamic content |
-| Search | ✓ | ✓ | ✓ | - | Interactive element |
-| About | ✓ | ✓ | ✓ | - | Static page |
-
----
-
-## Recommended Launch Procedure
-
-### 48 Hours Before Launch
-1. Generate baseline screenshots from local dev
-2. Run full visual regression suite locally
-3. Fix any visual issues found
-
-### 24 Hours Before Launch
-1. Deploy staging build
-2. Run visual tests against staging URL
-3. Compare staging vs local baselines
-4. Document any environment-specific differences
-
-### Day of Launch
-1. Final visual regression check
-2. Deploy to production
-3. Run visual tests against production
-4. Compare production vs staging
-5. If issues found, revert or hotfix
-
-### Post-Launch
-1. Run visual tests weekly
-2. Monitor for unexpected changes
-3. Update baselines after intentional design changes
-
----
-
-## Tools Comparison
-
-| Tool | Setup | Cost | Cloud | CI/CD | Best For |
-|------|-------|------|-------|-------|----------|
-| **Percy.io** | Easy | Free tier | ✓ | ✓ | Launch readiness |
-| **Playwright** | Medium | Free | - | ✓ | Self-hosted, control |
-| **Cypress** | Medium | Free | ✓ | ✓ | E2E + visual |
-| **BackstopJS** | Complex | Free | - | ✓ | Advanced diffing |
-
-**Recommendation for your launch:** Start with **Percy.io** for quick validation, then migrate to **Playwright** if you want long-term self-hosted solution.
-
----
-
-## Implementation Timeline
-
-| When | What | Effort |
-|------|------|--------|
-| **Now** | Set up Playwright locally | 1-2 hours |
-| **This week** | Generate baselines | 30 minutes |
-| **Before launch** | Run against staging | 15 minutes |
-| **Launch day** | Final validation | 15 minutes |
-| **Ongoing** | Weekly regression checks | 10 minutes |
-
----
-
-## Next Steps
-
-Choose one approach and I'll help you implement it:
-
-1. **Percy.io** - Cloud-based, easy setup, great for validation
-2. **Playwright** - Local, self-hosted, full control
-3. **Both** - Percy for launch, Playwright for ongoing
-
-Which would you prefer?
+See also:
+- `/tests/visual/README.md` - Developer guide
+- `/tests/visual/visual-regression.spec.ts` - Test implementation
+- `/.github/workflows/pr-visual-check.yml` - CI workflow

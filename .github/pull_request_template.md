@@ -20,6 +20,9 @@ Brief summary of the changes in this PR.
 
 ### Testing & Validation
 - [ ] Local build succeeds: `npm run build`.
+- [ ] Visual regression tests pass: `npm run test:visual` (automatically run on PR).
+- [ ] Link validation passes (automatically run nightly).
+- [ ] Console errors checked (no JavaScript errors).
 - [ ] Local preview works: `npx astro preview` (if UI changes).
 - [ ] CI passes on this branch (GitHub Actions).
 - [ ] Environment variables are correctly documented in `.env.example` (if new vars added).

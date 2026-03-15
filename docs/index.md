@@ -130,5 +130,5 @@ docs/
 
 ---
 
-**Last Updated**: February 16, 2026
-**Status**: Documentation updated - link checking consolidated to two-tier system
+**Last Updated**: March 15, 2026
+**Status**: Documentation updated - visual regression testing in production, link checking two-tier system
