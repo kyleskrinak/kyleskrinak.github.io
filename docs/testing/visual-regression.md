@@ -17,7 +17,7 @@ Runs on all PRs to staging and main branches.
 - Non-blocking: Deploy succeeds even if baseline generation fails
 
 ### PR Testing Workflow
-1. **Trigger**: PR opened to staging or main
+1. **Trigger**: PR opened/updated (pull_request events) to staging or main
 2. **Workflow**: `.github/workflows/pr-visual-check.yml`
    - Downloads latest baseline from main
    - Builds PR code with production settings

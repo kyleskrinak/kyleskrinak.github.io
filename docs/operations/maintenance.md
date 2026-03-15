@@ -27,7 +27,7 @@ npm run check:links    # Validate all links
 ```
 
 **Deployment Verification**:
-- Staging: https://kyleskrinak.github.io/astro-blog/
+- Staging: https://kyleskrinak.github.io/
 - Production: https://kyle.skrinak.com/
 
 **Analytics Dashboard**:

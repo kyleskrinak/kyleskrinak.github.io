@@ -62,17 +62,17 @@ npm run test:seo             # SEO meta tags & sitemap
 npm run test:links           # Link validation
 npm run test:analytics       # Analytics privacy
 
-# Run base-path aware tests against staging (SEO, analytics, links)
+# Run all Playwright test suites against staging
 npm run test:staging
 
-# Run base-path aware tests against production
+# Run all Playwright test suites against production
 npm run test:production
 
-# Note: Not all test suites are base-path aware for staging.
-# Visual regression and layout tests should run against production or local.
+# Note: test:staging may have issues with base-path assumptions in some tests.
+# For most reliable staging tests, run individual suites against the staging URL.
 
 # Run specific suite against staging/production (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:console
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:console
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 ```
 

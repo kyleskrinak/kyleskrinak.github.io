@@ -33,7 +33,7 @@ For detailed architecture information, see:
 ┌─────────────────────────────────────────────────────────────┐
 │                      Deployment                              │
 ├─────────────────────────────────────────────────────────────┤
-│  Staging (GitHub Pages): kyleskrinak.github.io/astro-blog   │
+│  Staging (GitHub Pages): kyleskrinak.github.io              │
 │  Production (AWS S3 + CloudFront): kyle.skrinak.com         │
 └─────────────────────────────────────────────────────────────┘
 ```

@@ -54,7 +54,7 @@ npm run test:console  # Terminal 2
 
 **Solutions**:
 1. Check workflow logs in Actions tab
-2. Verify secrets are configured (use `secrets-check.yml` workflow)
+2. Verify Cloudflare analytics tokens (use `secrets-check.yml` workflow for token presence check)
 3. Check AWS credentials and permissions
 4. See [Deployment Guide](./deployment.md#troubleshooting)
 

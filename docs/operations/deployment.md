@@ -253,7 +253,7 @@ PRs to staging and main branches run automated visual regression testing. Additi
 ### Visual Regression Testing
 
 **What happens:**
-1. PR opened → `pr-visual-check.yml` triggered
+1. PR opened/updated → `pr-visual-check.yml` triggered
 2. Downloads baseline from latest main deployment
 3. Builds PR code with production settings
 4. Compares screenshots to baseline
