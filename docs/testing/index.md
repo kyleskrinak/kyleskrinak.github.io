@@ -19,9 +19,10 @@ This section covers testing strategies, test runs, and quality validation for th
 ### Layout Consistency Testing
 - **Test suite**: `tests/layout-consistency.spec.ts`
 - Run with: `npx playwright test --project=layout`
-- Validates consistent layout elements across pages
-- Checks navigation, footer, and common components
-- Ensures no broken layout on key pages
+- Validates Main.astro layout structure (#main-content.app-layout)
+- Checks breadcrumb navigation and h1 presence
+- Ensures post card list items render correctly
+- Verifies structural parity across content-listing pages (posts, tags)
 
 ### Analytics Privacy Testing
 - **Test suites**:

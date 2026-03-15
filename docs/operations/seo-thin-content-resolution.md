@@ -120,7 +120,7 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm 
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
 # Or use shortcuts (runs all Playwright test suites against environment)
-npm run test:staging      # All test suites against staging (note: package.json has /astro-blog URL; may need update)
+npm run test:staging      # All test suites against staging
 npm run test:production   # All test suites against production
 
 # Note: For most reliable staging tests, use explicit PLAYWRIGHT_TEST_BASE_URL commands above.
