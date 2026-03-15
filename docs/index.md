@@ -65,18 +65,17 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 ### 🚀 DevOps/Deployment
 1. [Deployment Guide](./operations/deployment.md)
-2. [Pre-Launch Gaps](./launch/pre-launch-gaps.md)
-3. [Launch Checklist](./launch/launch-checklist.md)
+2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
 
 ### 📖 Understanding the Project
-1. [Migration Status](./migration/status.md)
-2. [Performance Analysis](./migration/jekyll-astro-comparison.md)
+1. [Migration Status](./archive/migration/status.md) *(archived)*
+2. [Performance Analysis](./archive/migration/jekyll-astro-comparison.md) *(archived)*
 3. [Special Features](./features/special-implementations.md)
-4. [Presentations](./migration/presentations-deployment.md)
+4. [Presentations](./archive/migration/presentations-deployment.md) *(archived)*
 
 ### 🔍 Troubleshooting
 1. [Troubleshooting Guide](./operations/troubleshooting.md)
-2. [Pre-Launch Gaps](./launch/pre-launch-gaps.md)
+2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
 3. [Test Findings](./testing/findings.md)
 
 ---
@@ -104,18 +103,6 @@ docs/
 │   ├── special-implementations.md
 │   └── architecture.md
 │
-├── migration/                         # Historical context
-│   ├── status.md
-│   ├── url-mapping.md
-│   ├── jekyll-astro-comparison.md
-│   ├── presentations-deployment.md
-│   └── presentations-fix.md
-│
-├── launch/                            # Current launch status
-│   ├── launch-ready.md
-│   ├── pre-launch-gaps.md
-│   └── launch-checklist.md
-│
 ├── testing/                           # QA and validation
 │   ├── visual-regression.md
 │   └── findings.md
@@ -124,8 +111,17 @@ docs/
 │
 └── archive/                           # Historical documentation
     ├── README.md
-    ├── migration/
-    └── launch/
+    ├── migration/                     # Jekyll → Astro migration (Jan 2026)
+    │   ├── index.md
+    │   ├── status.md
+    │   ├── url-mapping.md
+    │   ├── jekyll-astro-comparison.md
+    │   ├── presentations-deployment.md
+    │   └── presentations-fix.md
+    └── launch/                        # Pre-launch & launch (Jan 2026)
+        ├── index.md
+        ├── launch-ready.md
+        └── pre-launch-gaps.md
 ```
 
 ---
