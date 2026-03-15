@@ -248,7 +248,7 @@ Monitor in GitHub Actions logs.
 
 ## Automated Quality Gates
 
-All PRs to staging and main branches run automated quality checks:
+PRs to staging and main branches run automated visual regression testing. Additional quality checks run on scheduled intervals:
 
 ### Visual Regression Testing
 

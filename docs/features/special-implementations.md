@@ -121,14 +121,15 @@ The workflow pattern is reusable for other projects needing PR visual regression
 
 #### 4. **Migration Scripts** (One-Time Use)
 
-Located in root directory:
+**Note**: These scripts were used during the Jekyll→Astro migration and have been removed from the repository after completion. Listed here for historical reference:
+
 - `migrate-posts.js` - Converted 36 Jekyll posts → Astro
 - `migrate-pages.js` - Converted 9 Jekyll pages → Astro
 - `migrate-presentations.js` - Converted 8 Reveal.js presentations → Slidev
 - `fix-yaml.js` - Fixed YAML indentation issues
 - `add-descriptions.js` - Added missing post descriptions
 
-**Status**: ✅ Complete, archived for reference
+**Status**: ✅ Complete, scripts removed after successful migration
 
 **Reusability**:
 - Not reusable as-is (Jekyll-specific)

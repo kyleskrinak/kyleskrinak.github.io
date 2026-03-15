@@ -119,9 +119,12 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm 
 # Test against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
-# Or use shortcuts (runs ALL test suites against environment)
-npm run test:staging      # All tests against staging
-npm run test:production   # All tests against production
+# Or use shortcuts (runs base-path aware test suites against environment)
+npm run test:staging      # SEO, analytics, and link tests against staging
+npm run test:production   # All base-path aware tests against production
+
+# Note: Only base-path aware suites (SEO, analytics, links) work with staging.
+# Visual regression tests against local or production only.
 ```
 
 ---
