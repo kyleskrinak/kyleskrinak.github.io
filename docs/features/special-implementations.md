@@ -47,12 +47,7 @@ This document catalogs special use cases, custom implementations, and unique con
 - Most use external services (Google Slides, etc.) instead
 - Slidev is designed for single projects, not batch deployment
 
-**Future Use**:
-```bash
-# Deploy Slidev independently:
-npm run presentations:dev    # Dev server
-npm run presentations:build  # Build for deployment
-```
+**Note**: Slidev presentations are in a separate project (`slidev-presentations/`) with its own package.json and scripts. Not part of main blog build pipeline.
 
 ---
 
@@ -91,7 +86,40 @@ npm run build:presentations
 
 ---
 
-#### 3. **Migration Scripts** (One-Time Use)
+#### 3. **CI/CD Visual Regression Testing**
+
+**The Implementation**:
+- Automated Playwright visual regression on all PRs
+- Artifact-based baseline system (no cloud service dependency)
+- Secure two-workflow pattern (pr-visual-check + pr-visual-comment)
+
+**Why This is Custom**:
+Most projects use Percy.io, Chromatic, or other cloud services. This project uses:
+- GitHub Actions artifacts for baseline storage (90-day retention)
+- Custom secure workflow pattern to prevent PR comment injection attacks
+- Two-workflow separation: untrusted PR execution + secure commenting
+
+**Production Since**: March 2026
+
+**Files**:
+- `.github/workflows/pr-visual-check.yml` - Test execution (read-only PR context)
+- `.github/workflows/pr-visual-comment.yml` - PR commenting (secure workflow_run)
+- `.github/workflows/production-deploy.yml` - Baseline generation
+- `tests/visual/visual-regression.spec.ts` - Test suite
+
+**Trade-offs**:
+- ✅ No cloud service cost
+- ✅ Full control over baseline storage
+- ✅ Secure workflow pattern (prevents injection attacks)
+- ⚠️ 90-day artifact retention (baselines expire, regenerate from main deploy)
+- ⚠️ No visual diff UI in PR (must download artifacts to view)
+
+**Reusability**:
+The workflow pattern is reusable for other projects needing PR visual regression without cloud dependencies.
+
+---
+
+#### 4. **Migration Scripts** (One-Time Use)
 
 Located in root directory:
 - `migrate-posts.js` - Converted 36 Jekyll posts → Astro
@@ -173,13 +201,7 @@ npm run build
 
 ### Presentations Build (Standalone)
 
-```bash
-npm run presentations:dev
-npm run presentations:build
-npm run presentations:export
-```
-
-**Deployed separately** to Netlify/Vercel or AWS
+**Note**: Presentations are in a separate `slidev-presentations/` directory with independent package.json. Use presentation project's own scripts, not main blog scripts.
 
 ---
 
@@ -286,14 +308,13 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 ### Updating Presentations
 
 1. Edit `slidev-presentations/slides/NN-*.md`
-2. `npm run presentations:dev` to preview
-3. `npm run presentations:build` to compile
-4. Deploy independently (not part of blog build)
+2. Use presentation project's own scripts (in `slidev-presentations/package.json`)
+3. Deploy independently (not part of blog build)
 
 ### Updating Deployment
 
-1. Modify `.github/workflows/production.yml` for AWS changes
-2. Modify `.github/workflows/staging.yml` for GitHub Pages changes
+1. Modify `.github/workflows/production-deploy.yml` for AWS changes
+2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages changes
 3. Test on staging branch first
 
 ---

@@ -122,6 +122,7 @@ Before submitting for review:
 - [ ] No redundancy (e.g., explicit defaults that achieve nothing)
 - [ ] Comments explain intent and reference related files if applicable
 - [ ] Commit message accurately describes all changes
+- [ ] Visual regression tests pass (`npm run test:visual`)
 - [ ] Tests updated or added for the new behavior (especially when links/routes change)
 
 ### Documentation Sync
@@ -135,6 +136,7 @@ Before submitting for review:
 
 ```bash
 npm run build
+npm run test:visual  # Verify no visual regressions
 # Verify no build errors
 # Check generated artifacts make sense
 ```

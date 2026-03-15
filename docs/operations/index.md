@@ -26,8 +26,8 @@ git push origin main
 
 ## Maintenance & Monitoring
 
-- **[Maintenance Checklist](./maintenance.md)** - Regular health checks and monitoring (when created)
-- **[Troubleshooting Guide](./troubleshooting.md)** - Solving common issues (when created)
+- **[Maintenance Checklist](./maintenance.md)** - Regular health checks and monitoring
+- **[Troubleshooting Guide](./troubleshooting.md)** - Solving common issues
 
 ## Key Information
 

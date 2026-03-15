@@ -75,6 +75,31 @@ npm run test:console     # Check for console errors
 npm run test:visual      # Visual regression testing
 ```
 
+## 🧪 Testing & Quality Assurance
+
+Automated quality checks run on all PRs:
+
+**Visual Regression Testing**
+- Playwright-based screenshot comparison
+- Automated baseline management
+- Runs on PRs to staging/main
+
+**Link Validation**
+- Two-tier verification (htmltest + browser)
+- Nightly automated checks
+- Filters false positives (bot detection)
+
+**Console Error Detection**
+- Scans for JavaScript errors
+- Validates across all pages
+
+**SEO Validation**
+- Meta tags verification
+- Sitemap accuracy
+- Canonical URL checks
+
+See `/docs/testing/` for detailed guides.
+
 ## 📊 Project Structure
 
 ```
