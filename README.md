@@ -77,7 +77,7 @@ npm run test:visual      # Visual regression testing
 
 ## 🧪 Testing & Quality Assurance
 
-**PR Checks** (run on all PRs):
+**PR Checks** (run on PRs to staging/main):
 - **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
 
 **Scheduled Checks** (nightly):

@@ -89,7 +89,7 @@ npm run build:presentations
 #### 3. **CI/CD Visual Regression Testing**
 
 **The Implementation**:
-- Automated Playwright visual regression on all PRs
+- Automated Playwright visual regression on PRs to staging/main
 - Artifact-based baseline system (no cloud service dependency)
 - Secure two-workflow pattern (pr-visual-check + pr-visual-comment)
 
