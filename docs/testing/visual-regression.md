@@ -46,13 +46,16 @@ npm run test:visual:report    # View HTML report
 
 ### Download Official Baseline
 ```bash
-# Download baseline artifacts
-gh run download --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
+# Get latest successful production deploy run
+RUN_ID=$(gh run list --workflow=production-deploy.yml --branch=main --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
+
+# Download baseline artifacts from that run
+gh run download $RUN_ID --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
 ```
 
 ## Test Coverage
 - 8+ key pages tested
-- 5 viewport configurations (desktop, mobile, tablet)
+- Multiple viewport sizes (mobile: 320px-414px, tablet: 768px, desktop: 1920px)
 - Responsive design validation
 - Dark mode testing
 
@@ -88,7 +91,9 @@ gh run download --name visual-baseline-main --dir tests/visual/visual-regression
 - **Cause**: Different rendering between local and CI environments
 - **Action**: Download baseline to snapshots directory:
   ```bash
-  gh run download --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
+  # Get latest successful production deploy run
+  RUN_ID=$(gh run list --workflow=production-deploy.yml --branch=main --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
+  gh run download $RUN_ID --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
   ```
 - **Resolution**: Test against official baseline locally
 

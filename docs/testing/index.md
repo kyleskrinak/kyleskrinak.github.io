@@ -8,7 +8,7 @@ This section covers testing strategies, test runs, and quality validation for th
 - **[Visual Regression Guide](./visual-regression.md)** - Automated PR testing with Playwright
 - Run with: `npm run test:visual` (local) or automatic on PRs
 - Status: ✅ **Production** (March 2026) - automated CI/CD baseline comparison
-- Tests 8+ key pages across 5 viewports to catch unexpected visual changes
+- Tests 8+ key pages across multiple viewports (mobile, tablet, desktop) to catch unexpected visual changes
 
 ### Console Error Testing
 - **Test suite**: `tests/console-errors.spec.ts`

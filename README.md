@@ -85,13 +85,8 @@ npm run test:visual      # Visual regression testing
 
 **Test Suites** (run manually or in CI):
 - **Console Error Detection** - Scans for JavaScript errors on key pages
-- **SEO Validation** - Meta tags, sitemap, canonical URLs
+- **SEO Validation** - Meta tags verification, sitemap accuracy, canonical URL checks
 - **Analytics Privacy** - DNT/GPC compliance
-
-**SEO Validation**
-- Meta tags verification
-- Sitemap accuracy
-- Canonical URL checks
 
 See `/docs/testing/` for detailed guides.
 
