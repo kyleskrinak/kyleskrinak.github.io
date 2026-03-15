@@ -62,7 +62,7 @@ If my instruction is unclear, ask what I want. Don't assume.
 **Infrastructure** (scripts, build, CI/CD, tooling):
 - Production-grade from start
 - Configurable (not hardcoded)
-- Proper error handling required
+- Proper error handling required (code-level errors; operational failures: see Blocker Resolution Protocol)
 - Must work in CI/CD environments
 - Resource cleanup (try/finally for processes/connections)
 
@@ -85,6 +85,7 @@ If my instruction is unclear, ask what I want. Don't assume.
 git checkout develop
 git pull origin develop
 ```
+(On conflicts or failure, see Blocker Resolution Protocol)
 
 **To sync all branches:**
 ```bash
@@ -92,19 +93,79 @@ git checkout main && git pull origin main
 git checkout staging && git pull origin staging
 git checkout develop && git pull origin develop
 ```
+(On conflicts or failure, see Blocker Resolution Protocol)
 
 ### Making Changes
 1. Ensure you're on `develop` branch and synced
 2. Make your changes
 3. Commit with descriptive messages
-4. Push to origin: `git push origin develop`
+4. Push to origin: `git push origin develop` (on failure, see Blocker Resolution Protocol)
 5. Create PR: `develop` → `staging`
 6. After staging approval, create PR: `staging` → `main`
 
 ### PR Review Fixes
 - Commit fixes to the **PR's HEAD branch**, not develop
 - Example: Comments on PR (staging→main) → fix on `staging` branch
-- If fixes were made on wrong branch, cherry-pick to correct branch
+- If fixes were made on wrong branch, cherry-pick to correct branch (on failure, see Blocker Resolution Protocol)
+
+## Blocker Resolution Protocol
+
+**DEFAULT: When operations fail (exit code != 0 or explicit error):**
+
+1. **STOP immediately** - Do not proceed with other work
+2. **Report the failure:**
+   - What failed (command, operation, step)
+   - Current state (unpushed commits, conflicts, partial completion)
+   - Error message/output
+3. **Present options** - Give user clear choices for resolution
+4. **Wait for explicit direction** - Do not assume, retry, or work around
+
+### What Counts as a Blocker
+
+**STOP on these:**
+- Git operations fail (push, pull, fetch, merge returns conflicts)
+- Commands return exit code != 0
+- Build/test failures
+- File operations fail (permission denied, file not found when expected)
+
+**Do NOT stop on these:**
+- Warnings (operation succeeds with warnings)
+- Deprecation notices
+- Successful operations with advisory output
+
+### Retry Logic
+
+**Never auto-retry.** Even for transient failures (network timeout), stop and ask.
+
+Example:
+```
+Push failed: network timeout
+Commit ad88b33 exists locally but not on origin.
+
+Options:
+1. Retry push now
+2. You'll push manually later
+3. Amend or discard commit
+
+What do you want to do?
+```
+
+### Background Task Failures
+
+When notified of background task failure:
+1. Report immediately in next response
+2. Do not start NEW work until resolved
+3. Ongoing work can complete
+
+### User Override
+
+User can override by explicitly saying "continue anyway" or "ignore the error."
+
+Before proceeding, confirm understanding:
+```
+Confirmed: proceeding with [task] despite [blocker].
+[Specific consequence of proceeding].
+```
 
 ## Code Changes
 - Batch related edits into single operations
@@ -138,7 +199,7 @@ git checkout develop && git pull origin develop
    npm run test:visual
    ```
    - All three MUST pass before git push
-   - If any fail, fix and re-run all three
+   - If any fail, see Blocker Resolution Protocol
    - Never push without running these tests
    - "I'll let CI catch it" is NOT acceptable
 
@@ -319,6 +380,7 @@ Before committing parsing/text manipulation code, verify:
 - Summarize findings in <100 words when possible
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
 - Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
+- **Exception:** Blocker reporting requires verbose detail (state, options, consequences) per Blocker Resolution Protocol
 
 ---
 

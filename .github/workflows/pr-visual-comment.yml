@@ -1,0 +1,153 @@
+name: PR Visual Regression Comment
+
+on:
+  workflow_run:
+    workflows: ["PR Visual Regression Check"]
+    types:
+      - completed
+
+permissions:
+  issues: write # For commenting/deleting PR comments
+  actions: read # For checking if visual diff artifacts exist
+
+jobs:
+  comment:
+    name: Update PR with visual regression results
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      - name: Get PR number from workflow run
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get PR number from workflow_run event (GitHub-controlled, secure)
+            const pullRequests = context.payload.workflow_run.pull_requests;
+            if (!pullRequests || pullRequests.length === 0) {
+              console.log('No PR associated with this workflow run');
+              return;
+            }
+
+            // Match PR by head SHA to handle multiple PRs correctly
+            const headSha = context.payload.workflow_run.head_sha;
+            const matchingPR = pullRequests.find(pr => pr.head.sha === headSha);
+
+            if (!matchingPR) {
+              console.log(`No PR found matching head SHA ${headSha}`);
+              return;
+            }
+
+            const prNumber = matchingPR.number;
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              console.log(`Invalid PR number: ${prNumber}`);
+              return;
+            }
+
+            console.log(`Found PR #${prNumber}`);
+            core.setOutput('number', prNumber);
+            core.setOutput('found', 'true');
+
+      - name: Check if visual diffs exist
+        id: check-diffs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check if visual diff artifacts were uploaded
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }},
+            });
+
+            const hasDiffs = artifacts.data.artifacts.some(
+              a => a.name.startsWith('visual-diffs-pr-')
+            );
+
+            core.setOutput('has_diffs', hasDiffs);
+            console.log(`Visual diff artifacts found: ${hasDiffs}`);
+
+      - name: Comment on PR (idempotent)
+        if: steps.pr.outputs.found == 'true' && steps.check-diffs.outputs.has_diffs == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = parseInt('${{ steps.pr.outputs.number }}', 10);
+            if (isNaN(prNumber) || prNumber <= 0) {
+              console.log('Invalid PR number, skipping comment');
+              return;
+            }
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${{ github.event.workflow_run.id }}`;
+            const artifactUrl = `${runUrl}#artifacts`;
+            const marker = '<!-- visual-regression-comment -->';
+
+            const commentBody = `${marker}\n## ⚠️ Visual Regression Detected\n\n` +
+                    `Visual differences detected compared to main baseline.\n\n` +
+                    `- [View diff images](${artifactUrl})\n` +
+                    `- [Full test report](${runUrl})\n\n` +
+                    `If these changes are intentional, the baseline will be updated when this PR is merged to main.\n\n` +
+                    `*Last updated: ${new Date().toISOString()}*`;
+
+            // Find existing comment (paginate to handle PRs with >30 comments)
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existingComment = comments.find(c => c.body?.includes(marker));
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody,
+              });
+              console.log(`Updated existing comment #${existingComment.id}`);
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody,
+              });
+              console.log('Created new comment');
+            }
+
+      - name: Remove stale comment on success
+        if: steps.pr.outputs.found == 'true' && github.event.workflow_run.conclusion == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = parseInt('${{ steps.pr.outputs.number }}', 10);
+            if (isNaN(prNumber) || prNumber <= 0) {
+              console.log('Invalid PR number, skipping');
+              return;
+            }
+
+            const marker = '<!-- visual-regression-comment -->';
+
+            // Find and delete existing visual regression comment (paginate to handle >30 comments)
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existingComment = comments.find(c => c.body?.includes(marker));
+
+            if (existingComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+              });
+              console.log(`Deleted stale visual regression comment #${existingComment.id}`);
+            } else {
+              console.log('No stale comment to remove');
+            }

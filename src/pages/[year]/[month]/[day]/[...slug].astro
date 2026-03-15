@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import { getPath } from '@/utils/getPath';
+import { linkWithBase } from '@/utils/linkWithBase';
+import { SITE } from '@/config';
 
 /**
  * Dynamic redirect route for Jekyll URL format
@@ -11,7 +13,8 @@ import { getPath } from '@/utils/getPath';
  * To new Astro URLs:
  *   /posts/2025-09-19-modernizing-an-old-jekyll-blog/
  *
- * Returns 301 permanent redirects for SEO
+ * Uses HTML meta refresh (0-second delay) for client-side redirect.
+ * Static builds cannot return HTTP 301 status codes.
  */
 
 export async function getStaticPaths() {
@@ -42,7 +45,28 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const { year, month, day, slug } = Astro.params;
 
-// Redirect to new URL with 301 permanent redirect
-return Astro.redirect(getPath(post.id, post.filePath), 301);
+// Build new and old URLs (with base path for staging support)
+const postPath = getPath(post.id, post.filePath);
+const newUrl = linkWithBase(postPath);
+const oldUrl = linkWithBase(`/${year}/${month}/${day}/${slug}/`);
+// Remove leading slash for canonical URL to preserve base path in SITE.website
+const canonicalUrl = new URL(postPath.slice(1), SITE.website).href;
 ---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting to: {newUrl}</title>
+  <meta http-equiv="refresh" content={`0;url=${newUrl}`}>
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href={canonicalUrl}>
+</head>
+<body>
+  <a href={newUrl}>
+    Redirecting from <code>{oldUrl}</code> to <code>{newUrl}</code>
+  </a>
+</body>
+</html>
