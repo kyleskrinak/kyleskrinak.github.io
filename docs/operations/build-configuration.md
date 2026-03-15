@@ -195,7 +195,7 @@ Centralizes Node.js setup across all workflows to ensure consistency.
 **Configuration**:
 - Node.js version: 24
 - npm caching: enabled
-- Setup mode: standard (installs npm dependencies)
+- Dependency installation: handled by separate `npm ci` steps in each workflow
 
 **Used by**:
 - `production-deploy.yml`

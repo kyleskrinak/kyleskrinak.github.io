@@ -308,7 +308,7 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 ### Updating Presentations
 
 1. Edit `slidev-presentations/slides/NN-*.md`
-2. Use presentation project's own scripts (in `slidev-presentations/package.json`)
+2. Build using root-level script: `npm run build:presentations` (see `scripts/build-presentations.js`)
 3. Deploy independently (not part of blog build)
 
 ### Updating Deployment

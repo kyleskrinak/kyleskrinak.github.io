@@ -240,7 +240,7 @@ When adding new page types, ask:
 - Implementation PR: [Branch: content/low-content-pages]
 - Test suite: `tests/seo/seo-meta-tags.spec.ts`
 - Layout component: `src/layouts/Layout.astro`
-- Pre-launch gaps doc: `docs/launch/pre-launch-gaps.md`
+- Pre-launch gaps doc: `docs/archive/launch/pre-launch-gaps.md`
 
 ---
 

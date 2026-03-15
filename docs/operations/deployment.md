@@ -283,7 +283,7 @@ See also:
 - `/docs/testing/visual-regression.md` - Visual regression details
 - `/docs/link-checking.md` - Link validation workflow
 
-## Troubleshooting
+## Common Build & Configuration Issues
 
 ### Build Fails with "cannot stat 'dist/pagefind'"
 

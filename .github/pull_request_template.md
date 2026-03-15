@@ -21,7 +21,7 @@ Brief summary of the changes in this PR.
 ### Testing & Validation
 - [ ] Local build succeeds: `npm run build`.
 - [ ] Visual regression tests pass: `npm run test:visual` (automatically run on PR).
-- [ ] Link validation passes (automatically run nightly).
+- [ ] No new broken links expected (run `npm run check:links` locally; nightly linkwatch will verify after merge).
 - [ ] Console errors checked (no JavaScript errors).
 - [ ] Local preview works: `npx astro preview` (if UI changes).
 - [ ] CI passes on this branch (GitHub Actions).
