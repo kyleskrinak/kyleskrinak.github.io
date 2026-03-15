@@ -14,7 +14,7 @@ This section covers testing strategies, test runs, and quality validation for th
 - **Test suite**: `tests/console-errors.spec.ts`
 - Run with: `npm run test:console`
 - Catches missing resources, syntax errors, 404s
-- Validates all pages load without JavaScript errors
+- Validates key pages load without JavaScript errors
 
 ### Layout Consistency Testing
 - **Test suite**: `tests/layout-consistency.spec.ts`
@@ -28,7 +28,7 @@ This section covers testing strategies, test runs, and quality validation for th
   - `tests/analytics/analytics-privacy-ga.spec.ts` - Google Analytics privacy (if enabled)
 - Validates respect for Do Not Track (DNT) signals
 - Ensures Global Privacy Control (GPC) compliance
-- Confirms analytics only load in production with valid tokens
+- Confirms analytics load only in production builds when a token is configured (staging token optional)
 
 ### SEO & Sitemap Testing
 - **Test suites**:
@@ -40,8 +40,8 @@ This section covers testing strategies, test runs, and quality validation for th
 
 ### Link Validation Testing
 - **Test suite**: `tests/link-validation.spec.ts`
-- Run with: `npm run test:links`
-- Two-tier verification (htmltest + Playwright browser checks)
+- Run with: `npm run test:links` (Playwright browser verification only)
+- For two-tier validation (htmltest + Playwright), use: `npm run check:links`
 - See [Link Checking Guide](../link-checking.md) for details
 
 ### Performance Testing
@@ -68,9 +68,9 @@ npm run test:staging
 # Run ALL tests against production
 npm run test:production
 
-# Run specific suite against staging/production
-PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:console
-PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
+# Run specific suite against staging/production (cross-platform)
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:console
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 ```
 
 See [Testing Guide](../../tests/README.md) for detailed instructions.

@@ -36,8 +36,8 @@ For specific troubleshooting scenarios, see:
 
 **Solutions**:
 ```bash
-# Visual regression - download official baseline
-gh run download --name visual-baseline-main --dir tests/visual/
+# Visual regression - download official baseline to snapshots directory
+gh run download --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
 
 # Link validation - check htmltest is installed
 htmltest --version

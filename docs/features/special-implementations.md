@@ -47,7 +47,7 @@ This document catalogs special use cases, custom implementations, and unique con
 - Most use external services (Google Slides, etc.) instead
 - Slidev is designed for single projects, not batch deployment
 
-**Note**: Slidev presentations are in a separate project (`slidev-presentations/`) with its own package.json and scripts. Not part of main blog build pipeline.
+**Note**: Slidev presentations are in a separate `slidev-presentations/` directory containing slide source files. Build tooling is managed at the repo root (see `scripts/build-presentations.js` and root `package.json`). Not part of main blog build pipeline.
 
 ---
 
@@ -201,7 +201,7 @@ npm run build
 
 ### Presentations Build (Standalone)
 
-**Note**: Presentations are in a separate `slidev-presentations/` directory with independent package.json. Use presentation project's own scripts, not main blog scripts.
+**Note**: Presentations are in a separate `slidev-presentations/` directory containing slide sources. Build scripts are managed at the repo root via `npm run build:presentations` (see `scripts/build-presentations.js`).
 
 ---
 

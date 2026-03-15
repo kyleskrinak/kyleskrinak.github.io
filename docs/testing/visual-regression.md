@@ -46,7 +46,8 @@ npm run test:visual:report    # View HTML report
 
 ### Download Official Baseline
 ```bash
-gh run download --name visual-baseline-main --dir tests/visual/
+# Download baseline artifacts
+gh run download --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
 ```
 
 ## Test Coverage
@@ -78,18 +79,22 @@ gh run download --name visual-baseline-main --dir tests/visual/
 - **Resolution**: Document intentional changes or fix regression
 
 ### "No baseline found" Warning
-- **Cause**: First PR after enabling feature
-- **Action**: Safe to merge, baseline created when PR reaches main
-- **Resolution**: No action needed
+- **Cause**: First PR after enabling feature (check workflow logs)
+- **Behavior**: Warning appears in logs, visual tests are skipped (PR check still passes)
+- **Action**: Safe to merge, baseline will be created when PR reaches main
+- **Resolution**: No action needed (no PR comment posted for this condition)
 
 ### Tests Pass Locally but Fail in CI
 - **Cause**: Different rendering between local and CI environments
-- **Action**: Download baseline: `gh run download --name visual-baseline-main`
+- **Action**: Download baseline to snapshots directory:
+  ```bash
+  gh run download --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
+  ```
 - **Resolution**: Test against official baseline locally
 
 ## Technical Details
 
 See also:
-- `/tests/visual/README.md` - Developer guide
+- `/tests/visual/README.md` - Developer guide (Note: describes old __screenshots__/ approach; current implementation uses artifact-based visual-regression.spec.ts-snapshots/)
 - `/tests/visual/visual-regression.spec.ts` - Test implementation
 - `/.github/workflows/pr-visual-check.yml` - CI workflow

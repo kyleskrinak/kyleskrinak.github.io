@@ -77,21 +77,16 @@ npm run test:visual      # Visual regression testing
 
 ## 🧪 Testing & Quality Assurance
 
-Automated quality checks run on all PRs:
+**PR Checks** (run on all PRs):
+- **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
 
-**Visual Regression Testing**
-- Playwright-based screenshot comparison
-- Automated baseline management
-- Runs on PRs to staging/main
+**Scheduled Checks** (nightly):
+- **Link Validation** - Two-tier verification (htmltest + browser) that filters false positives
 
-**Link Validation**
-- Two-tier verification (htmltest + browser)
-- Nightly automated checks
-- Filters false positives (bot detection)
-
-**Console Error Detection**
-- Scans for JavaScript errors
-- Validates across all pages
+**Test Suites** (run manually or in CI):
+- **Console Error Detection** - Scans for JavaScript errors on key pages
+- **SEO Validation** - Meta tags, sitemap, canonical URLs
+- **Analytics Privacy** - DNT/GPC compliance
 
 **SEO Validation**
 - Meta tags verification

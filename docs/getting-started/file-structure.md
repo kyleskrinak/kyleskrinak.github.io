@@ -62,7 +62,7 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 
 **Testing**:
 - `tests/**/*.spec.ts` - Playwright test suites
-- `tests/visual/snapshots/` - Visual regression baselines (gitignored)
+- `tests/visual/visual-regression.spec.ts-snapshots/` - Visual regression baselines (gitignored)
 
 ## Future Content
 

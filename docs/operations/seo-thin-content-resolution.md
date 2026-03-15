@@ -113,11 +113,11 @@ Run tests:
 # SEO meta tags (local development)
 npm run test:seo
 
-# Test against staging
-PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:seo
+# Test against staging (cross-platform)
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:seo
 
-# Test against production
-PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
+# Test against production (cross-platform)
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
 # Or use shortcuts (runs ALL test suites against environment)
 npm run test:staging      # All tests against staging
