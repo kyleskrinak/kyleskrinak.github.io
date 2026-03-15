@@ -104,6 +104,7 @@ docs/
 │   └── architecture.md
 │
 ├── testing/                           # QA and validation
+│   ├── index.md
 │   ├── visual-regression.md
 │   └── findings.md
 │

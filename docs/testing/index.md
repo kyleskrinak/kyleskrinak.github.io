@@ -60,7 +60,7 @@ npm run test:visual          # Visual regression
 npm run test:console         # Console errors
 npm run test:seo             # SEO meta tags & sitemap
 npm run test:links           # Link validation
-npm run test:analytics       # Analytics privacy
+npm run test:analytics       # Analytics privacy (requires non-local PLAYWRIGHT_TEST_BASE_URL)
 
 # Run all Playwright test suites against staging
 npm run test:staging
