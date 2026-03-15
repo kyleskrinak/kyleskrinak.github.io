@@ -96,13 +96,13 @@ Rather than adding content to navigation pages or removing them entirely, we imp
 
 Created comprehensive test suites:
 
-**SEO Meta Tags** (`tests/seo-meta-tags.spec.ts`):
+**SEO Meta Tags** (`tests/seo/seo-meta-tags.spec.ts`):
 - ✅ Verifies system pages have `noindex,follow`
 - ✅ Verifies content pages have no robots tag
 - ✅ Verifies staging has `noindex,nofollow` on all pages
 - ✅ Validates canonical URLs across all page types
 
-**Sitemap Validation** (`tests/sitemap.spec.ts`):
+**Sitemap Validation** (`tests/seo/sitemap.spec.ts`):
 - ✅ Verifies indexable pages are included
 - ✅ Verifies noindex pages are excluded
 - ✅ Validates sitemap XML format
@@ -110,15 +110,18 @@ Created comprehensive test suites:
 
 Run tests:
 ```bash
-# SEO meta tags
-npm run test:seo                    # Local development
-npm run test:seo:staging           # Against staging
-npm run test:seo:production        # Against production
+# SEO meta tags (local development)
+npm run test:seo
 
-# Sitemap validation
-npm run test:sitemap               # Local development
-npm run test:sitemap:staging       # Against staging
-npm run test:sitemap:production    # Against production
+# Test against staging
+PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npm run test:seo
+
+# Test against production
+PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
+
+# Or use shortcuts (runs ALL test suites against environment)
+npm run test:staging      # All tests against staging
+npm run test:production   # All tests against production
 ```
 
 ---
@@ -235,7 +238,7 @@ When adding new page types, ask:
 
 - SEO audit CSV: `tmp/content_low_content_pages.csv`
 - Implementation PR: [Branch: content/low-content-pages]
-- Test suite: `tests/seo-meta-tags.spec.ts`
+- Test suite: `tests/seo/seo-meta-tags.spec.ts`
 - Layout component: `src/layouts/Layout.astro`
 - Pre-launch gaps doc: `docs/launch/pre-launch-gaps.md`
 

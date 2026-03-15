@@ -8,21 +8,21 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 - [Local Setup](./getting-started/) - Running the project locally
 - [Creating Posts](./getting-started/creating-posts.md) - Quick guide for writing blog posts
 - [Image Workflow](./getting-started/images.md) - Complete guide for adding images
-- [Tech Stack](./getting-started/tech-stack.md) - Technology overview (when created)
-- [File Structure](./getting-started/file-structure.md) - How the project is organized (when created)
+- [Tech Stack](./getting-started/tech-stack.md) - Technology overview
+- [File Structure](./getting-started/file-structure.md) - How the project is organized
 
 ## 🔧 Operations
 
 **For deployments and maintenance:**
 - [Deployment Guide](./operations/deployment.md) - How to deploy to staging and production
-- [Maintenance](./operations/maintenance.md) - Health checks and monitoring (when created)
-- [Troubleshooting](./operations/troubleshooting.md) - Common issues and fixes (when created)
+- [Maintenance](./operations/maintenance.md) - Health checks and monitoring
+- [Troubleshooting](./operations/troubleshooting.md) - Common issues and fixes
 
 ## ✨ Features
 
 **Understanding project capabilities:**
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
-- [Architecture Overview](./features/architecture.md) - How it all fits together (when created)
+- [Architecture Overview](./features/architecture.md) - How it all fits together
 
 ## 📚 Migration History (Archived)
 

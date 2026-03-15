@@ -101,6 +101,20 @@ Add the following secrets to the repository:
 | `AWS_ROLE_NAME` | Name of the IAM role created above (e.g., `astro-deploy-role`) |
 | `AWS_S3_BUCKET` | S3 bucket name (e.g., `kyle.skrinak.com`) |
 | `AWS_CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID |
+| `CLOUDFLARE_TOKEN_PROD` | Cloudflare Web Analytics token (production) |
+| `CLOUDFLARE_TOKEN_STAGING` | Cloudflare Web Analytics token (staging, optional) |
+
+### Verifying Secrets Configuration
+
+Use the manual **secrets-check.yml** workflow to verify tokens are configured:
+
+```bash
+# Via GitHub UI: Actions → Secrets Check → Run workflow
+# Or via gh CLI:
+gh workflow run secrets-check.yml
+```
+
+This workflow checks both staging and production Cloudflare Analytics tokens without exposing their values.
 
 ### Process
 
@@ -120,6 +134,8 @@ The production workflow sets up intelligent caching:
 
 ## Environment Variables
 
+### Local Development
+
 Create a `.env.local` file (not committed to git) with:
 
 ```env
@@ -128,7 +144,30 @@ PUBLIC_GA_ID=G-XXXXX
 
 # Disqus comments (configured in DisqusComments component)
 PUBLIC_DISQUS_SHORTNAME=kds38-duke-blog
+
+# Cloudflare Web Analytics (production)
+PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_cloudflare_token
 ```
+
+### CI/CD Environment Variables
+
+Configure in GitHub repository secrets (Settings → Secrets and variables → Actions):
+
+**Analytics**:
+- `CLOUDFLARE_TOKEN_PROD` - Production Cloudflare Web Analytics token (required for production analytics)
+- `CLOUDFLARE_TOKEN_STAGING` - Staging token (optional, leave blank to disable staging analytics)
+
+**AWS Deployment** (see AWS IAM Setup section above):
+- `AWS_ACCOUNT_ID`
+- `AWS_ROLE_NAME`
+- `AWS_S3_BUCKET`
+- `AWS_CLOUDFRONT_DISTRIBUTION_ID`
+
+**How Analytics Work**:
+- Cloudflare beacon loads only in production (`import.meta.env.PROD === true`) when token is present
+- Respects Do Not Track (DNT) and Global Privacy Control (GPC) signals
+- No cookies, minimal data collection
+- See `docs/operations/build-configuration.md` for detailed analytics configuration
 
 ## Monitoring Deployments
 

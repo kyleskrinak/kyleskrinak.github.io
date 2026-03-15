@@ -47,12 +47,7 @@ This document catalogs special use cases, custom implementations, and unique con
 - Most use external services (Google Slides, etc.) instead
 - Slidev is designed for single projects, not batch deployment
 
-**Future Use**:
-```bash
-# Deploy Slidev independently:
-npm run presentations:dev    # Dev server
-npm run presentations:build  # Build for deployment
-```
+**Note**: Slidev presentations are in a separate project (`slidev-presentations/`) with its own package.json and scripts. Not part of main blog build pipeline.
 
 ---
 
@@ -206,13 +201,7 @@ npm run build
 
 ### Presentations Build (Standalone)
 
-```bash
-npm run presentations:dev
-npm run presentations:build
-npm run presentations:export
-```
-
-**Deployed separately** to Netlify/Vercel or AWS
+**Note**: Presentations are in a separate `slidev-presentations/` directory with independent package.json. Use presentation project's own scripts, not main blog scripts.
 
 ---
 
@@ -319,14 +308,13 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 ### Updating Presentations
 
 1. Edit `slidev-presentations/slides/NN-*.md`
-2. `npm run presentations:dev` to preview
-3. `npm run presentations:build` to compile
-4. Deploy independently (not part of blog build)
+2. Use presentation project's own scripts (in `slidev-presentations/package.json`)
+3. Deploy independently (not part of blog build)
 
 ### Updating Deployment
 
-1. Modify `.github/workflows/production.yml` for AWS changes
-2. Modify `.github/workflows/staging.yml` for GitHub Pages changes
+1. Modify `.github/workflows/production-deploy.yml` for AWS changes
+2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages changes
 3. Test on staging branch first
 
 ---
