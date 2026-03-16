@@ -68,16 +68,13 @@ npm run test:production -- --project=console
 ### Running Locally
 
 ```bash
-# Terminal 1: Build and preview (analytics only loads in production builds)
-# IMPORTANT: Set PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN for the beacon loader to be included.
-# A dummy non-empty value is sufficient for validating gating logic:
-PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
+# Analytics tests require a remote URL (tests skip on localhost)
+# Use staging or production:
+PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
 
-# Terminal 2: Run the test
-npx playwright test tests/analytics/analytics-privacy.spec.ts
-
-# Alternative: Use the convenience scripts for staging/production:
-npm run test:staging -- --project=analytics  # or test:production -- --project=analytics
+# Or use the convenience scripts:
+npm run test:staging -- --project=analytics
+npm run test:production -- --project=analytics
 ```
 
 ### What It Tests
