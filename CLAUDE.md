@@ -290,57 +290,86 @@ Before committing parsing/text manipulation code, verify:
    - [ ] Search for orphaned utilities: `ls scripts/*.js` and verify each is used
    - [ ] Clean up old config files
 
-## Pre-Commit Completeness Checklist
+## Pre-Commit Verification Protocol
 
-**Before committing, verify ALL boxes:**
+**MANDATORY: Execute and output ALL steps before ANY commit.**
 
-**Pattern Completeness** (if implementing similar to existing code):
-- [ ] Read the COMPLETE existing implementation (code + tests + comments + docs)
-- [ ] Check for tests - add equivalent tests
-- [ ] Check for explanatory comments - add equivalent comments
-- [ ] Check for documentation - add equivalent docs
-- [ ] Compare side-by-side: match quality/completeness of existing code
+### Step 1: Search for ALL instances (SHOW OUTPUT)
 
-**Systemic Impact** (ask: "What OTHER systems interact with this?"):
-- [ ] Search codebase for related functionality
-- [ ] For SEO changes: check meta tags, sitemap, robots.txt, canonical tags
-- [ ] For any change: check tests, docs, configs, similar files
+```bash
+# Search for pattern in code
+grep -rn "pattern-being-fixed" src/ scripts/ tests/ public/
 
-**Text Processing & Parsing** (if code manipulates strings, ranges, or parses text):
-- [ ] Followed all rules in "Text Processing & Parsing Rules" section
-- [ ] Verified all items in "Edge Cases Checklist (Text Processing)"
-- [ ] Used position-based manipulation, not string matching
-- [ ] Handles malformed input, CRLF, and duplicate content
+# MUST show: "0 results" or "found N, fixing all N"
+```
 
-**Test Coverage**:
-- [ ] Does similar functionality have tests? Add equivalent tests
-- [ ] Do tests cover edge cases? (null, undefined, privacy signals, etc.)
-- [ ] Do tests match implementation completeness?
+**OUTPUT REQUIRED**: Show grep results. If N>0, fix all before proceeding.
 
-**Documentation Parity**:
-- [ ] Do similar implementations have explanatory comments? Add them
-- [ ] Do comments explain "why" not just "what"?
-- [ ] Is there docs/ content for this feature? Update it
-- [ ] Search docs/ and README.md for references to changed code
-- [ ] Update docs/index.md if adding/removing major features
-- [ ] If replacing a tool: Search and update ALL mentions of old tool
+### Step 2: Check documentation references (SHOW OUTPUT)
 
-**Final Check - Can you answer YES to all:**
-1. ✅ Fixed the specific issue
-2. ✅ Found and fixed ALL instances of the pattern
-3. ✅ Added tests matching similar features
-4. ✅ Checked ALL interacting systems
-5. ✅ Matched completeness of similar implementations
-6. ✅ Added explanatory comments matching project style
-7. ✅ Searched docs/ and README.md and updated relevant sections
-8. ✅ If removed/replaced tool: No orphaned references remain
-9. ✅ Tested critical paths (workflows trigger correctly, scripts work, commands run)
-10. ✅ Verified documentation accuracy (tested what you documented)
-11. ✅ Removed obsolete code/scripts from old approach
+```bash
+# Search docs for references to changed files/concepts
+grep -rn "filename\|changed-concept\|old-behavior" docs/ README.md
 
-**If you can't check all boxes, you're not done.**
+# MUST show: all found references and confirmation of updates
+```
+
+**OUTPUT REQUIRED**: For EVERY file/concept you change:
+- Search docs/ and README.md for references
+- Show search results
+- Update found references OR explain why no update needed
+
+### Step 3: Verify systemic impact (SHOW OUTPUT)
+
+**For changed files, search for references:**
+```bash
+# Example: Changed astro.config.ts
+grep -rn "astro.config\|buildEnv\|base.*path" docs/
+
+# Example: Changed test commands
+grep -rn "npm run test\|playwright test" docs/ README.md
+```
+
+**OUTPUT REQUIRED**: Show what you searched for and what you found.
+
+### Step 4: Check related systems
+
+**Ask: "What OTHER systems interact with this change?"**
+- Changed code → check docs, tests, configs
+- Changed config → check code, docs, scripts that reference it
+- Removed tool → search ALL references across entire repo
+- Changed URL → check ALL files (grep -rn "old-url")
+
+**OUTPUT REQUIRED**: State what systems you checked and results.
+
+### Step 5: Verification summary (REQUIRED FORMAT)
+
+Before committing, output:
+```
+Pre-commit verification:
+✅ Pattern search: 0 results (all instances fixed)
+✅ Documentation search: found 3 refs in docs/, updated all 3
+✅ Systemic impact: checked tests/, configs/, no updates needed
+✅ Related systems: [list what you checked]
+```
+
+**NO COMMIT without showing this verification summary.**
+
+### ENFORCEMENT
+
+This is NOT optional. This is NOT a suggestion. Before ANY commit:
+
+1. Execute the search commands above
+2. Show the output in your response
+3. Fix everything found
+4. Show verification summary
+5. THEN commit
+
+**Failure mode**: Committing without showing verification output violates this protocol.
 
 ## Review Response Protocol
+
+**CRITICAL: Review comments MUST trigger Pre-Commit Verification Protocol.**
 
 **When addressing review comments:**
 
@@ -354,24 +383,29 @@ Before committing parsing/text manipulation code, verify:
    - Systemic gap? → Map ALL affected systems (sitemap, robots.txt, etc.)
    - Inconsistency? → Find what it should match and ensure parity
 
-3. **Search for ALL instances of that issue**
+3. **BEFORE fixing, execute verification searches:**
    ```bash
-   grep -rn 'href="/"' src/ public/ scripts/
+   # Find ALL instances of the issue
+   grep -rn "pattern" relevant-paths/
+
+   # Find ALL documentation that might reference this
+   grep -rn "concept\|filename" docs/ README.md
    ```
+   **SHOW OUTPUT** before proceeding with fixes.
 
-4. **Fix comprehensively in ONE commit**
+4. **Fix comprehensively**
    - Fix the specific issue mentioned
-   - Fix all instances of the pattern
+   - Fix ALL instances of the pattern found
    - Add missing tests/comments/docs to match existing code
-   - Update all interacting systems
+   - Update ALL interacting systems
 
-5. **Verify completeness:**
-   - Zero results for pattern search
-   - Test coverage matches similar features
-   - Documentation matches similar features
-   - All affected systems updated
+5. **MANDATORY: Execute Pre-Commit Verification Protocol**
+   - Run all verification searches
+   - Show output for each search
+   - Provide verification summary
+   - THEN commit
 
-**Never fix "just that line" - fix the entire issue class with full completeness.**
+**Never fix "just that line" - fix the entire issue class. Never commit without verification output.**
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks

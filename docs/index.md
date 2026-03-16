@@ -24,20 +24,16 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
 - [Architecture Overview](./features/architecture.md) - How it all fits together
 
-## 📚 Migration History (Archived)
+## 📚 Migration History
 
-**Context about the Jekyll → Astro migration (completed Jan 2026):**
-- [Archive Index](./archive/README.md) - Overview of archived documentation
-- [Migration Status](./archive/migration/status.md) - Detailed completion report
-- [URL Mapping](./archive/migration/url-mapping.md) - Old Jekyll URLs → New Astro URLs
-- [Performance Analysis](./archive/migration/jekyll-astro-comparison.md) - Lighthouse comparison
+**Jekyll → Astro migration (completed Jan 2026):**
+- See [CHANGELOG.md](../CHANGELOG.md) "Jekyll → Astro Migration" section for:
+  - Performance improvements (Lighthouse scores, build time)
+  - Technical decisions (presentations architecture, URL structure)
+  - Breaking changes (none - full backward compatibility)
+  - Migration process overview
 
-## 🚢 Launch Information (Archived)
-
-**Project successfully launched to production (kyle.skrinak.com) in Jan 2026:**
-- [Archive Index](./archive/README.md) - Overview of archived documentation
-- [Launch Readiness](./archive/launch/launch-ready.md) - What was ready for production
-- [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) - Historical gap analysis
+> **Note:** Detailed migration planning docs were intentionally archived post-launch to reduce maintenance overhead. The CHANGELOG preserves key historical facts.
 
 ## 🧪 Testing
 
@@ -51,7 +47,6 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 - **[README.md](../README.md)** - Main project README at root
 - **[CHANGELOG.md](../CHANGELOG.md)** - Version history and changes
-- **[reports/](../reports/)** - Generated test and performance reports
 
 ---
 
@@ -65,18 +60,14 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 ### 🚀 DevOps/Deployment
 1. [Deployment Guide](./operations/deployment.md)
-2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
 
 ### 📖 Understanding the Project
-1. [Migration Status](./archive/migration/status.md) *(archived)*
-2. [Performance Analysis](./archive/migration/jekyll-astro-comparison.md) *(archived)*
-3. [Special Features](./features/special-implementations.md)
-4. [Presentations](./archive/migration/presentations-deployment.md) *(archived)*
+1. [Migration History](../CHANGELOG.md) - See "Jekyll → Astro Migration" section
+2. [Special Features](./features/special-implementations.md)
 
 ### 🔍 Troubleshooting
 1. [Troubleshooting Guide](./operations/troubleshooting.md)
-2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
-3. [Test Findings](./testing/findings.md)
+2. [Test Findings](./testing/findings.md)
 
 ---
 
@@ -88,41 +79,33 @@ docs/
 │
 ├── getting-started/                   # For first-time users
 │   ├── index.md
-│   ├── local-setup.md
 │   ├── creating-posts.md
 │   ├── images.md
 │   ├── tech-stack.md
 │   └── file-structure.md
 │
 ├── operations/                        # For deployment and maintenance
+│   ├── index.md
+│   ├── build-configuration.md
+│   ├── code-change-process.md
 │   ├── deployment.md
+│   ├── gitflow.md
 │   ├── maintenance.md
+│   ├── seo-thin-content-resolution.md
+│   ├── staging-url-reference.md
 │   └── troubleshooting.md
 │
 ├── features/                          # Understanding capabilities
-│   ├── special-implementations.md
-│   └── architecture.md
+│   ├── index.md
+│   ├── architecture.md
+│   └── special-implementations.md
 │
 ├── testing/                           # QA and validation
 │   ├── index.md
 │   ├── visual-regression.md
 │   └── findings.md
 │
-├── link-checking.md                   # Two-tier link validation
-│
-└── archive/                           # Historical documentation
-    ├── README.md
-    ├── migration/                     # Jekyll → Astro migration (Jan 2026)
-    │   ├── index.md
-    │   ├── status.md
-    │   ├── url-mapping.md
-    │   ├── jekyll-astro-comparison.md
-    │   ├── presentations-deployment.md
-    │   └── presentations-fix.md
-    └── launch/                        # Pre-launch & launch (Jan 2026)
-        ├── index.md
-        ├── launch-ready.md
-        └── pre-launch-gaps.md
+└── link-checking.md                   # Two-tier link validation
 ```
 
 ---
