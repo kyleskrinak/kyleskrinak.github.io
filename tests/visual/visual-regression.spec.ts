@@ -6,16 +6,16 @@ import { test, expect } from '@playwright/test';
  * Run against different environments:
  *
  * Local (default):
- *   npx playwright test
+ *   npm run test:visual
  *
  * Staging:
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:visual
  *
  * Production:
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npx playwright test
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:visual
  *
  * Update baselines:
- *   npx playwright test --update-snapshots
+ *   npm run test:visual -- --update-snapshots
  */
 
 test.describe('Visual Regression - Home Page', () => {
