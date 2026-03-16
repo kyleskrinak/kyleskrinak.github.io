@@ -1,6 +1,6 @@
 # GitFlow Workflow
 
-This document defines the branching strategy and PR workflow for the astro-blog project.
+This document defines the branching strategy and PR workflow for the kyleskrinak.github.io project.
 
 ## Branch Structure
 
@@ -378,13 +378,11 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for clear histo
 
 **Scope**: Optional; use feature or component name (e.g., `analytics`, `build`, `search`).
 
-Commits are automatically parsed for `CHANGELOG.md` using [commitizen](https://github.com/commitizen/cz-cli).
-
 ## Changelog Management
 
 ### `CHANGELOG.md`
 
-Maintained manually in this project.
+Maintained manually in this project. Commit messages follow conventional format for clarity, but CHANGELOG entries are written by hand.
 
 **Format**: Keep one entry per release, dated, with sections for Features, Fixes, Docs, etc.
 

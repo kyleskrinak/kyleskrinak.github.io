@@ -48,10 +48,11 @@ Migrated personal blog from Jekyll to Astro static site generator while preservi
 ### Technical Decisions
 
 **URL Structure**:
-- Preserved Jekyll URL format: `/YYYY/MM/DD/post-slug/`
+- Primary post URLs: `/posts/YYYY-MM-DD-post-slug/` (canonical)
+- Legacy Jekyll URLs: `/YYYY/MM/DD/post-slug/` (redirect to primary)
 - Configured `trailingSlash: 'always'` for consistency
-- All redirects handled to prevent broken links
-- Example: `/2021/01/16/jekyll-hugo-and-me/` works identically pre/post migration
+- All old URLs preserved via redirect routes for SEO continuity
+- Example: `/2021/01/16/jekyll-hugo-and-me/` redirects to `/posts/2021-01-16-jekyll-hugo-and-me/`
 
 **Presentations Architecture**:
 - Migrated 8 Reveal.js presentations to Slidev
@@ -84,7 +85,7 @@ The migration involved:
 5. URL structure preservation (critical for SEO)
 6. Comprehensive testing (visual regression, link checking, console errors)
 
-For detailed technical documentation, search git history for commits around 2026-01-20 or grep for "migration" in commit messages.
+**Note on Migration Documentation**: Detailed migration planning docs (URL mappings, architectural explorations, weekly status updates) were intentionally archived after migration completion to reduce maintenance overhead. This changelog preserves the key historical facts and technical decisions. Deeper implementation details are available in git history (commits around 2026-01-20) if needed.
 
 ## v5.5.1 (2026-01-08)
 

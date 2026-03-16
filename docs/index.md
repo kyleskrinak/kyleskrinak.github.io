@@ -33,6 +33,8 @@ Welcome! This directory contains all documentation for the Astro blog project. U
   - Breaking changes (none - full backward compatibility)
   - Migration process overview
 
+> **Note:** Detailed migration planning docs were intentionally archived post-launch to reduce maintenance overhead. The CHANGELOG preserves key historical facts.
+
 ## 🧪 Testing
 
 **Quality assurance and validation:**

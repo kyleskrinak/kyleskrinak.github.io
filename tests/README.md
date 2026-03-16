@@ -50,13 +50,13 @@ npm run test:production -- --project=console
 
 📄 Testing: Search (/search/)
    ❌ Found 1 console error(s):
-      - [404] Failed to load: https://kyleskrinak.github.io/astro-blog/site.webmanifest
+      - [404] Failed to load: https://kyleskrinak.github.io/site.webmanifest
 
 📊 CONSOLE ERROR SUMMARY
 ❌ 1 page(s) have console errors:
 
   📄 Search:
-     • [404] Failed to load: https://kyleskrinak.github.io/astro-blog/site.webmanifest
+     • [404] Failed to load: https://kyleskrinak.github.io/site.webmanifest
 ```
 
 ## Analytics Privacy Signal Testing
@@ -74,7 +74,7 @@ npm run test:production -- --project=console
 PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
 
 # Terminal 2: Run the test
-npx playwright test tests/analytics-privacy.spec.ts
+npx playwright test tests/analytics/analytics-privacy.spec.ts
 
 # Alternative: Use the convenience scripts for staging/production:
 npm run test:staging -- --project=analytics  # or test:production -- --project=analytics

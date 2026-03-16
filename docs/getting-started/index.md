@@ -13,8 +13,8 @@ Welcome to the Astro blog project! This section has everything you need to get t
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/kyleskrinak/astro-blog.git
-cd astro-blog
+git clone https://github.com/kyleskrinak/kyleskrinak.github.io.git
+cd kyleskrinak.github.io
 
 # 2. Install dependencies
 npm install

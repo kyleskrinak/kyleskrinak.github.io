@@ -43,7 +43,6 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 | File | Purpose |
 |------|---------|
 | `astro.config.ts` | Astro framework configuration |
-| `tailwind.config.mjs` | TailwindCSS configuration |
 | `playwright.config.ts` | Playwright test configuration |
 | `pagefind.json` | Search index configuration |
 | `.htmltest.yml` | Link validation configuration |

@@ -33,7 +33,7 @@ All project documentation is organized in the `/docs` directory. Start here:
 |------|-----------|
 | 👨‍💻 **Developer** | [Getting Started](./docs/getting-started/) |
 | 🚀 **DevOps** | [Operations & Deployment](./docs/operations/) |
-| 📖 **Understanding Project** | [Migration History](./CHANGELOG.md) - See "Jekyll → Astro Migration" |
+| 📖 **Understanding Project** | [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch) |
 | 🧪 **QA/Testing** | [Testing Guide](./docs/testing/) |
 
 ### Quick Links:
@@ -41,7 +41,7 @@ All project documentation is organized in the `/docs` directory. Start here:
 - [Local Setup](./docs/getting-started/) - Run locally in 5 minutes
 - [Deployment Guide](./docs/operations/deployment.md) - How to deploy
 - [Special Features](./docs/features/special-implementations.md) - Custom implementations
-- [Migration History](./CHANGELOG.md) - Jekyll → Astro migration details
+- [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch)
 
 ## 🚀 Quick Start
 
@@ -96,7 +96,7 @@ See `/docs/testing/` for detailed guides.
 ├── docs/                    # 📚 All documentation (see docs/index.md)
 ├── src/
 │   ├── content/
-│   │   ├── blog/           # 36 blog posts (markdown)
+│   │   ├── blog/           # 39 blog posts (markdown/MDX)
 │   │   └── pages/          # Static pages
 │   ├── components/         # Reusable components
 │   ├── layouts/            # Page layouts

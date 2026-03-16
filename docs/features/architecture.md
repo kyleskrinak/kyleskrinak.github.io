@@ -76,7 +76,7 @@ For detailed architecture information, see:
 
 **Layouts**:
 - `src/layouts/Layout.astro` - Base layout (head, analytics, body)
-- `src/layouts/BlogPost.astro` - Blog post layout
+- `src/layouts/PostDetails.astro` - Blog post layout
 
 **Pages** (Astro file-based routing):
 - Static: `src/pages/index.astro`, `about.astro`, etc.

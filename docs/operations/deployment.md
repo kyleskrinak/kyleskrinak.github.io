@@ -57,7 +57,7 @@ Create an IAM role with the following trust policy:
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
         },
         "StringLike": {
-          "token.actions.githubusercontent.com:sub": "repo:kyleskrinak/astro-blog:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub": "repo:kyleskrinak/kyleskrinak.github.io:ref:refs/heads/main"
         }
       }
     }
@@ -185,8 +185,8 @@ Configure in GitHub repository settings (Settings → Secrets and variables → 
 ### GitHub Actions
 
 View deployment status in the repository Actions tab:
-- Staging: https://github.com/kyleskrinak/astro-blog/actions?query=branch%3Astaging
-- Production: https://github.com/kyleskrinak/astro-blog/actions?query=branch%3Amain
+- Staging: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Astaging
+- Production: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Amain
 
 ### CloudFront
 
@@ -195,7 +195,7 @@ Monitor cache performance and create-invalidation metrics in AWS CloudFront cons
 ### Link Validation
 
 Daily link validation runs and creates GitHub issues for broken links. View in:
-- Issues: https://github.com/kyleskrinak/astro-blog/issues
+- Issues: https://github.com/kyleskrinak/kyleskrinak.github.io/issues
 
 ## Troubleshooting
 
