@@ -47,8 +47,9 @@ This section covers testing strategies, test runs, and quality validation for th
 - See [Link Checking Guide](../link-checking.md) for details
 
 ### Performance Testing
-- **[Lighthouse Reports](../../lighthouse-reports/)** - Performance auditing
-- See actual test results and historical trends
+- **Lighthouse Reports** - Performance auditing (reports saved to `lighthouse-reports/` directory, gitignored)
+- Generate reports: Run Lighthouse against deployed site (staging or production)
+- View historical trends in local `lighthouse-reports/` directory after running audits
 
 ## Test Results
 
