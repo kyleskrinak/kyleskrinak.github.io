@@ -1,9 +1,10 @@
-// Determine environment: production (main branch) or staging (staging branch)
-const buildEnv = process.env.BUILD_ENV || "production";
-const siteUrl = process.env.SITE_URL; // Allow explicit override for deployment environments
-const isProduction = buildEnv === "production";
-// NOTE: Staging uses root path (kyleskrinak.github.io is a GitHub Pages user site, must deploy to root)
+// Determine website URL based on SITE_URL env var or build environment
+// NOTE: Both staging and production builds use BUILD_ENV=production
+// Staging is distinguished by SITE_URL (workflow sets it) or by fallback to github.io
 // See: docs/operations/staging-url-reference.md for details
+const buildEnv = process.env.BUILD_ENV || "production";
+const siteUrl = process.env.SITE_URL; // Explicit override from workflow (staging: github.io/, production: kyle.skrinak.com/)
+const isProduction = buildEnv === "production";
 const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io");
 
 console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);

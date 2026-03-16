@@ -32,22 +32,24 @@ SITE_URL: https://kyleskrinak.github.io/
 
 **astro.config.ts**:
 ```typescript
-const buildEnv = process.env.BUILD_ENV || "production";
-const base = buildEnv === "staging" ? "/astro-blog/" : "/";
+// Repository "kyleskrinak.github.io" is a GitHub Pages USER SITE and MUST deploy to root (/).
+// GitHub Pages does not allow user sites to deploy to subpaths.
+const base = "/";
 ```
 
-**Current behavior**: Since the workflow sets `BUILD_ENV: production`, the `base` is always `"/"` for staging builds.
-
-The staging condition (`buildEnv === "staging"`) is **dead code** - it never executes because BUILD_ENV is set to "production" in staging-deploy.yml.
+**Current behavior**: Both staging and production use `base: "/"` (root path). This is required because the repository name matches the GitHub Pages user site pattern.
 
 ## Correct URLs in Documentation
 
-When documenting or testing staging, always use:
+When documenting or testing staging, use:
 
-✅ **CORRECT**:
-- `https://kyleskrinak.github.io/`
+✅ **CORRECT** (for display/links):
+- `https://kyleskrinak.github.io/` (with or without trailing slash)
 - `https://kyleskrinak.github.io/posts/`
 - `https://kyleskrinak.github.io/about/`
+
+✅ **CORRECT** (for base URL in commands - no trailing slash):
+- `https://kyleskrinak.github.io` (prevents double slashes in URL concatenation)
 
 ❌ **INCORRECT** (does not exist):
 - ~~`https://kyleskrinak.github.io/astro-blog/`~~

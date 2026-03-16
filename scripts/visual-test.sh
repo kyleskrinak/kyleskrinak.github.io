@@ -15,7 +15,7 @@ ENVIRONMENT=${1:-local}
 case $ENVIRONMENT in
   local)
     echo "🧪 Running visual tests against LOCAL (http://localhost:4321)"
-    npx playwright test --config=playwright.config.ts
+    npm run test:visual
     ;;
 
   staging)
@@ -30,8 +30,8 @@ case $ENVIRONMENT in
 
   baseline)
     echo "📸 Creating/updating baselines from LOCAL dev"
-    npx playwright test --config=playwright.config.ts --update-snapshots
-    echo "✓ Baselines updated in tests/visual/__screenshots__/"
+    npm run test:visual -- --update-snapshots
+    echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/"
     ;;
 
   compare)
