@@ -39,7 +39,7 @@ This document catalogs special use cases, custom implementations, and unique con
 
 **Files**:
 - `slidev-presentations/` - Independent Slidev project
-- `PRESENTATIONS_DEPLOYMENT.md` - Detailed architecture docs
+- `docs/archive/migration/presentations-deployment.md` - Detailed architecture docs
 - `build-presentations.js` - Legacy script (archived, not in main build)
 
 **Why This is Custom**:
@@ -373,11 +373,11 @@ These can be added without changing core architecture:
 
 | File | Purpose |
 |------|---------|
-| `MIGRATION_STATUS.md` | Current state of migration, all 5 phases |
-| `PRESENTATIONS_DEPLOYMENT.md` | How presentations are deployed (Option 2) |
-| `DEPLOYMENT.md` | AWS setup, GitHub secrets, troubleshooting |
-| `PRESENTATIONS_FIX.md` | Details on presentation HTML generation |
-| `SPECIAL_FEATURES.md` | This file - unique features & decisions |
+| `docs/archive/migration/status.md` | Current state of migration, all 5 phases |
+| `docs/archive/migration/presentations-deployment.md` | How presentations are deployed (Option 2) |
+| `docs/operations/deployment.md` | AWS setup, GitHub secrets, troubleshooting |
+| `docs/archive/migration/presentations-fix.md` | Details on presentation HTML generation |
+| `docs/features/special-implementations.md` | This file - unique features & decisions |
 
 ---
 

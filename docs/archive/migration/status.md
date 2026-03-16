@@ -265,8 +265,8 @@ Pagefind Results:
 - `add-descriptions.js` - Generate missing descriptions
 
 ### Documentation
-- `DEPLOYMENT.md` - Complete deployment guide
-- `MIGRATION_STATUS.md` - This file
+- `docs/operations/deployment.md` - Complete deployment guide
+- `docs/archive/migration/status.md` - This file
 
 ---
 

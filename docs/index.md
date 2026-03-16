@@ -51,7 +51,6 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 - **[README.md](../README.md)** - Main project README at root
 - **[CHANGELOG.md](../CHANGELOG.md)** - Version history and changes
-- **[reports/](../reports/)** - Generated test and performance reports
 
 ---
 
@@ -88,20 +87,26 @@ docs/
 │
 ├── getting-started/                   # For first-time users
 │   ├── index.md
-│   ├── local-setup.md
 │   ├── creating-posts.md
 │   ├── images.md
 │   ├── tech-stack.md
 │   └── file-structure.md
 │
 ├── operations/                        # For deployment and maintenance
+│   ├── index.md
+│   ├── build-configuration.md
+│   ├── code-change-process.md
 │   ├── deployment.md
+│   ├── gitflow.md
 │   ├── maintenance.md
+│   ├── seo-thin-content-resolution.md
+│   ├── staging-url-reference.md
 │   └── troubleshooting.md
 │
 ├── features/                          # Understanding capabilities
-│   ├── special-implementations.md
-│   └── architecture.md
+│   ├── index.md
+│   ├── architecture.md
+│   └── special-implementations.md
 │
 ├── testing/                           # QA and validation
 │   ├── index.md
