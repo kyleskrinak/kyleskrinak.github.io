@@ -10,7 +10,7 @@ import { BASE_URL } from "./test-utils";
  *   npx playwright test tests/console-errors.spec.ts   # In terminal 2
  *
  * Or with a specific environment:
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ \
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io \
  *   npx playwright test tests/console-errors.spec.ts
  */
 

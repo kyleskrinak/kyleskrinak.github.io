@@ -20,7 +20,7 @@ case $ENVIRONMENT in
 
   staging)
     echo "🧪 Running visual tests against STAGING (GitHub Pages)"
-    PLAYWRIGHT_TEST_BASE_URL="https://kyleskrinak.github.io/" npx playwright test --config=playwright.config.ts
+    PLAYWRIGHT_TEST_BASE_URL="https://kyleskrinak.github.io" npx playwright test --config=playwright.config.ts
     ;;
 
   production)

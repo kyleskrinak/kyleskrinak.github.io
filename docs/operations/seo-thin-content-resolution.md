@@ -114,7 +114,7 @@ Run tests:
 npm run test:seo
 
 # Test against staging (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:seo
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
 
 # Test against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo

@@ -55,10 +55,10 @@ When documenting or testing staging, always use:
 
 ## Test Commands
 
-**Correct staging test commands**:
+**Correct staging test commands** (no trailing slash to avoid double slashes in URL concatenation):
 ```bash
 # Individual suite against staging
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ npm run test:seo
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
 
 # All suites against staging (package.json script)
 npm run test:staging
@@ -67,7 +67,7 @@ npm run test:staging
 **package.json should define**:
 ```json
 {
-  "test:staging": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/ playwright test"
+  "test:staging": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io playwright test"
 }
 ```
 

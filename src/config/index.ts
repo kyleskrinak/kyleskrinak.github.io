@@ -4,7 +4,7 @@ const siteUrl = process.env.SITE_URL; // Allow explicit override for deployment 
 const isProduction = buildEnv === "production";
 // NOTE: Staging uses root path (kyleskrinak.github.io is a GitHub Pages user site, must deploy to root)
 // See: docs/operations/staging-url-reference.md for details
-const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io/");
+const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io");
 
 console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);
 
