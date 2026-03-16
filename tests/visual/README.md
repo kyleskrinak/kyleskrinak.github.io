@@ -18,13 +18,13 @@ Compares current rendering against baselines. Local dev server starts automatica
 
 ### 3. Test Staging Before Launch
 ```bash
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 ```
 Tests against GitHub Pages staging URL. This validates that staging renders identically to local.
 
 ### 4. Verify Production After Launch
 ```bash
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 ```
 Tests against production URL. Should match staging and baselines.
 
@@ -38,10 +38,10 @@ npm run test:visual
 npm run test:visual:baseline
 
 # Test against staging (GitHub Pages)
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 
 # Test against production (kyle.skrinak.com)
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # View HTML report of last test run
 npm run test:visual:report
@@ -97,7 +97,7 @@ npm run test:visual:report
 ```bash
 # 1. Deploy staging build (with BUILD_ENV=staging in GitHub Actions)
 # 2. Test staging renders correctly
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 
 # 3. Review report - staging may differ from local due to base path
 # Expected: Layout variations due to /astro-blog/ base path, but no broken images/content
@@ -114,7 +114,7 @@ npm run test:visual:report
 # 1. Deploy to production
 # 2. Production should use base path "/"
 # 3. Run visual tests against production
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # 4. Production should match local baselines (same base path "/")
 npm run test:visual:report
@@ -128,7 +128,7 @@ npm run test:visual:report
 ### Post-Launch
 ```bash
 # Run weekly to catch regressions
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # Compare to baseline report
 npm run test:visual:report
@@ -204,10 +204,10 @@ tests/visual/__screenshots__/                  # Local dev baselines
 npm run test:visual:baseline
 
 # Staging (base = "/astro-blog/" + GitHub Pages subdirectory)
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 
 # Production (base = "/" at kyle.skrinak.com)
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 ```
 
 **Expected behavior:**

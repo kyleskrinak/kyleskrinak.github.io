@@ -384,7 +384,7 @@ Commits are automatically parsed for `CHANGELOG.md` using [commitizen](https://g
 
 ### `CHANGELOG.md`
 
-Maintained manually or via `npm run release` (if using standard-version).
+Maintained manually in this project.
 
 **Format**: Keep one entry per release, dated, with sections for Features, Fixes, Docs, etc.
 

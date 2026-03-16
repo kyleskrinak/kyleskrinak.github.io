@@ -33,17 +33,15 @@ All project documentation is organized in the `/docs` directory. Start here:
 |------|-----------|
 | 👨‍💻 **Developer** | [Getting Started](./docs/getting-started/) |
 | 🚀 **DevOps** | [Operations & Deployment](./docs/operations/) |
-| 📖 **Understanding Project** | [Migration History](./docs/archive/migration/) |
+| 📖 **Understanding Project** | [Migration History](./CHANGELOG.md) - See "Jekyll → Astro Migration" |
 | 🧪 **QA/Testing** | [Testing Guide](./docs/testing/) |
-| 🎯 **Ready to Launch?** | [Launch Status](./docs/archive/launch/) |
 
 ### Quick Links:
 
 - [Local Setup](./docs/getting-started/) - Run locally in 5 minutes
 - [Deployment Guide](./docs/operations/deployment.md) - How to deploy
 - [Special Features](./docs/features/special-implementations.md) - Custom implementations
-- [Performance Analysis](./docs/archive/migration/jekyll-astro-comparison.md) - Jekyll vs Astro comparison
-- [Pre-Launch Checklist](./docs/archive/launch/pre-launch-gaps.md) - Launch readiness
+- [Migration History](./CHANGELOG.md) - Jekyll → Astro migration details
 
 ## 🚀 Quick Start
 
@@ -133,7 +131,7 @@ See `/docs/testing/` for detailed guides.
 - Best Practices: 100
 - SEO: 100
 
-See [Performance Analysis](./docs/archive/migration/jekyll-astro-comparison.md) for detailed comparison.
+See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for performance metrics and technical details.
 
 ## 🚢 Deployment
 
@@ -155,10 +153,10 @@ npm run test:console     # Terminal 2
 npm run test:visual
 
 # Against staging environment
-npm run test:staging --project=console
+npm run test:staging -- --project=console
 
 # Against production environment
-npm run test:production --project=console
+npm run test:production -- --project=console
 ```
 
 See [Testing Guide](./docs/testing/) for more.
@@ -177,8 +175,7 @@ Licensed under the MIT License. See [LICENSE](./LICENSE) file for details.
 
 1. **Getting started?** → [Getting Started Guide](./docs/getting-started/)
 2. **Something not working?** → [Troubleshooting](./docs/operations/troubleshooting.md)
-3. **Want to understand why something works this way?** → [Migration History](./docs/archive/migration/)
-4. **Ready to launch?** → [Launch Checklist](./docs/archive/launch/pre-launch-gaps.md)
+3. **Want to understand why something works this way?** → [Migration History](./CHANGELOG.md)
 
 **All documentation is in `/docs`** - start with [docs/index.md](./docs/index.md).
 

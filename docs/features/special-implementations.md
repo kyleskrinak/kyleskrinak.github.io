@@ -39,8 +39,10 @@ This document catalogs special use cases, custom implementations, and unique con
 
 **Files**:
 - `slidev-presentations/` - Independent Slidev project
-- `docs/archive/migration/presentations-deployment.md` - Detailed architecture docs
 - `build-presentations.js` - Legacy script (archived, not in main build)
+
+**Documentation**:
+- See CHANGELOG.md "Jekyll → Astro Migration" section for architectural decisions
 
 **Why This is Custom**:
 - Most blogs don't have embedded presentations
@@ -373,10 +375,8 @@ These can be added without changing core architecture:
 
 | File | Purpose |
 |------|---------|
-| `docs/archive/migration/status.md` | Current state of migration, all 5 phases |
-| `docs/archive/migration/presentations-deployment.md` | How presentations are deployed (Option 2) |
+| `CHANGELOG.md` | Migration history and technical decisions (see "Jekyll → Astro Migration" section) |
 | `docs/operations/deployment.md` | AWS setup, GitHub secrets, troubleshooting |
-| `docs/archive/migration/presentations-fix.md` | Details on presentation HTML generation |
 | `docs/features/special-implementations.md` | This file - unique features & decisions |
 
 ---

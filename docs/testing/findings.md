@@ -96,7 +96,7 @@ npm run test:visual
 
 ### Staging Testing (Pre-Launch Validation)
 ```bash
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 ```
 - Tests GitHub Pages deployment
 - Expected: Layout variations due to `/astro-blog/` base path
@@ -104,7 +104,7 @@ npm run test:visual:staging
 
 ### Production Testing (Post-Launch)
 ```bash
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 ```
 - Tests production domain at `kyle.skrinak.com`
 - Should match local baselines (same `/` base path)

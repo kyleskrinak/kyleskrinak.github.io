@@ -18,8 +18,7 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 │   ├── getting-started/  # Setup and onboarding
 │   ├── operations/       # Deployment and maintenance
 │   ├── features/         # Feature documentation
-│   ├── testing/          # Testing guides
-│   └── archive/          # Historical docs (migration, launch)
+│   └── testing/          # Testing guides
 ├── src/
 │   ├── content/
 │   │   ├── blog/         # Blog posts (markdown)

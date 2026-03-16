@@ -21,7 +21,7 @@ npm run test:console
 ### Running Against Staging
 
 ```bash
-npm run test:staging --project=console
+npm run test:staging -- --project=console
 ```
 
 This will test the live staging site on GitHub Pages and report any console errors.
@@ -29,7 +29,7 @@ This will test the live staging site on GitHub Pages and report any console erro
 ### Running Against Production
 
 ```bash
-npm run test:production --project=console
+npm run test:production -- --project=console
 ```
 
 ### What It Tests
@@ -77,7 +77,7 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
 npx playwright test tests/analytics-privacy.spec.ts
 
 # Alternative: Use the convenience scripts for staging/production:
-npm run test:staging --project=analytics  # or test:production --project=analytics
+npm run test:staging -- --project=analytics  # or test:production -- --project=analytics
 ```
 
 ### What It Tests
@@ -118,7 +118,7 @@ npm run test:visual:baseline
 ### Running Against Staging
 
 ```bash
-npm run test:staging --project=visual-*
+npm run test:staging -- --project=visual-*
 ```
 
 ## Troubleshooting
