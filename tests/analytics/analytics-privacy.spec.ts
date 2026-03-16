@@ -6,11 +6,11 @@ import { BASE_URL } from "../test-utils";
  * Verifies that the beacon respects DNT and GPC signals
  *
  * Usage:
- *   # Ensure PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN is set for the preview build.
- *   # A dummy non-empty value is sufficient if you only need to validate the gating logic, e.g.:
- *   #   PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
- *   npm run build && npm run preview  # In terminal 1
- *   npx playwright test tests/analytics/analytics-privacy.spec.ts   # In terminal 2
+ *   # Test against staging/production (analytics only load on remote, non-localhost URLs)
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
+ *
+ *   # Note: Tests are skipped on localhost (including npm run preview) because
+ *   # the analytics beacon only loads when BASE_URL is a remote domain
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {

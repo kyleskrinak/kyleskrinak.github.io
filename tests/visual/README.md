@@ -191,9 +191,10 @@ All environments use the same baseline set (managed via CI artifacts):
 
 ```
 tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitignored)
-  ├── home-desktop-visual-desktop-darwin.png
-  ├── home-mobile-large-visual-mobile-darwin.png
-  └── ... (36 baseline images)
+  ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
+  ├── blog-archive-desktop-visual-desktop-{os}.png
+  ├── home-desktop-visual-desktop-{os}.png
+  └── ... (72 baseline images: 36 tests × 2 projects)
 ```
 
 **Baseline Workflow:**
@@ -290,11 +291,10 @@ tests/
 │   ├── README.md (this file)
 │   ├── visual-regression.spec.ts (test definitions)
 │   └── visual-regression.spec.ts-snapshots/ (generated baselines)
-│       ├── home-desktop-visual-desktop-darwin.png
-│       ├── home-mobile-large-visual-mobile-darwin.png
-│       ├── blog-archive-desktop-visual-desktop-darwin.png
-│       ├── blog-post-2025-09-19-desktop-visual-desktop-darwin.png
-│       └── ... (35+ screenshots)
+│       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
+│       ├── blog-archive-desktop-visual-desktop-{os}.png
+│       ├── home-desktop-visual-desktop-{os}.png
+│       └── ... (72 snapshots: 36 tests × 2 projects, OS varies by environment)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```

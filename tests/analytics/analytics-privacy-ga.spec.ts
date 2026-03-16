@@ -6,9 +6,11 @@ import { BASE_URL } from "../test-utils";
  * Verifies that GA4 respects DNT and GPC signals
  *
  * Usage:
- *   # Build for production (GA only loads in production builds):
- *   npm run build && npm run preview  # In terminal 1
- *   npx playwright test tests/analytics/analytics-privacy-ga.spec.ts   # In terminal 2
+ *   # Test against staging/production (analytics only load on remote, non-localhost URLs)
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy-ga.spec.ts
+ *
+ *   # Note: Tests are skipped on localhost (including npm run preview) because
+ *   # GA/analytics only load when BASE_URL is a remote domain
  */
 
 test.describe("Google Analytics Privacy Signals", () => {
