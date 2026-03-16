@@ -194,7 +194,7 @@ tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitigno
   ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
   ├── blog-archive-desktop-visual-desktop-{os}.png
   ├── home-desktop-visual-desktop-{os}.png
-  └── ... (72 baseline images: 36 tests × 2 projects)
+  └── ... (36 baseline images: 18 screenshots × 2 projects)
 ```
 
 **Baseline Workflow:**
@@ -294,14 +294,14 @@ tests/
 │       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
 │       ├── blog-archive-desktop-visual-desktop-{os}.png
 │       ├── home-desktop-visual-desktop-{os}.png
-│       └── ... (72 snapshots: 36 tests × 2 projects, OS varies by environment)
+│       └── ... (36 snapshots: 18 screenshots × 2 projects, OS varies by environment)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```
 
 ## Tips for Success
 
-1. **Commit baselines** to version control so team sees expected changes
+1. **Baselines managed via CI** - Production deploys upload baselines as artifacts; PRs download and compare
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
 4. **Test all environments** before launch (local → staging → production)
