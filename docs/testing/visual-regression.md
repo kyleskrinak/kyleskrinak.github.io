@@ -99,6 +99,7 @@ gh run download $RUN_ID --name visual-baseline-main --dir tests/visual/visual-re
 ## Technical Details
 
 See also:
-- `/tests/visual/README.md` - Developer guide (Note: describes old __screenshots__/ approach; current implementation uses artifact-based visual-regression.spec.ts-snapshots/)
 - `/tests/visual/visual-regression.spec.ts` - Test implementation
-- `/.github/workflows/pr-visual-check.yml` - CI workflow
+- `/.github/workflows/pr-visual-check.yml` - PR visual check workflow
+- `/.github/workflows/pr-visual-comment.yml` - PR comment workflow
+- `/.github/workflows/production-deploy.yml` - Baseline creation workflow
