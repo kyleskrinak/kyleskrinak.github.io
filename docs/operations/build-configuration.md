@@ -184,6 +184,32 @@ The site integrates Cloudflare Web Analytics for privacy-friendly, lightweight t
 
 ---
 
+## Composite Actions
+
+### setup-node-build
+
+Centralizes Node.js setup across all workflows to ensure consistency.
+
+**Location**: `.github/actions/setup-node-build/action.yml`
+
+**Configuration**:
+- Node.js version: 24
+- npm caching: enabled
+- Dependency installation: handled by separate `npm ci` steps in each workflow
+
+**Used by**:
+- `production-deploy.yml`
+- `staging-deploy.yml`
+- `pr-visual-check.yml`
+- `linkwatch.yml`
+
+**Benefits**:
+- DRY principle: single source of truth for Node setup
+- Consistent environment across all workflows
+- Easier to update Node version (change once, applies everywhere)
+
+---
+
 ## References
 
 - [Pagefind Documentation](https://pagefind.app/)

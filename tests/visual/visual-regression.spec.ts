@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  *   npx playwright test
  *
  * Staging:
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io/astro-blog npx playwright test
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test
  *
  * Production:
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npx playwright test

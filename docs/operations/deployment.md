@@ -23,7 +23,11 @@ No additional setup required. GitHub Pages is automatically configured when you 
 
 ### Access
 
-- URL: `https://kyleskrinak.github.io/` (or your configured Pages URL)
+- URL: `https://kyleskrinak.github.io/`
+
+**⚠️ IMPORTANT**: Staging deploys to the root path (not `/astro-blog/`) because `kyleskrinak.github.io` is a GitHub Pages **user site**. User sites must deploy to root - this is a GitHub Pages platform constraint.
+
+See [Staging URL Reference](./staging-url-reference.md) for authoritative documentation.
 
 ## AWS Production Deployment
 
@@ -91,16 +95,36 @@ Attach a policy with these permissions:
 }
 ```
 
-### GitHub Secrets Setup
+### GitHub Repository Configuration
 
-Add the following secrets to the repository:
+Configure in GitHub repository settings (Settings → Secrets and variables → Actions):
 
-| Secret Name | Value |
-|-------------|-------|
+**Repository Variables** (used for AWS deployment):
+| Variable Name | Value |
+|---------------|-------|
 | `AWS_ACCOUNT_ID` | Your AWS account ID |
-| `AWS_ROLE_NAME` | Name of the IAM role created above (e.g., `astro-deploy-role`) |
+| `AWS_DEPLOY_ROLE` | Name of the IAM role created above (e.g., `astro-deploy-role`) |
+| `AWS_REGION` | AWS region (e.g., `us-east-1`) |
 | `AWS_S3_BUCKET` | S3 bucket name (e.g., `kyle.skrinak.com`) |
 | `AWS_CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID |
+
+**Repository Secrets** (used for analytics tokens):
+| Secret Name | Value |
+|-------------|-------|
+| `CLOUDFLARE_TOKEN_PROD` | Cloudflare Web Analytics token (production) |
+| `CLOUDFLARE_TOKEN_STAGING` | Cloudflare Web Analytics token (staging, optional) |
+
+### Verifying Secrets Configuration
+
+Use the manual **secrets-check.yml** workflow to verify tokens are configured:
+
+```bash
+# Via GitHub UI: Actions → Secrets Check → Run workflow
+# Or via gh CLI:
+gh workflow run secrets-check.yml
+```
+
+This workflow checks both staging and production Cloudflare Analytics tokens without exposing their values.
 
 ### Process
 
@@ -120,6 +144,8 @@ The production workflow sets up intelligent caching:
 
 ## Environment Variables
 
+### Local Development
+
 Create a `.env.local` file (not committed to git) with:
 
 ```env
@@ -128,7 +154,31 @@ PUBLIC_GA_ID=G-XXXXX
 
 # Disqus comments (configured in DisqusComments component)
 PUBLIC_DISQUS_SHORTNAME=kds38-duke-blog
+
+# Cloudflare Web Analytics (production)
+PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_cloudflare_token
 ```
+
+### CI/CD Environment Variables
+
+Configure in GitHub repository settings (Settings → Secrets and variables → Actions):
+
+**Analytics Secrets**:
+- `CLOUDFLARE_TOKEN_PROD` - Production Cloudflare Web Analytics token (required for production analytics)
+- `CLOUDFLARE_TOKEN_STAGING` - Staging token (optional, leave blank to disable staging analytics)
+
+**AWS Deployment Variables** (see AWS IAM Setup section above):
+- `AWS_ACCOUNT_ID` - Your AWS account ID
+- `AWS_DEPLOY_ROLE` - IAM role name for deployment
+- `AWS_REGION` - AWS region
+- `AWS_S3_BUCKET` - S3 bucket name
+- `AWS_CLOUDFRONT_DISTRIBUTION_ID` - CloudFront distribution ID
+
+**How Analytics Work**:
+- Cloudflare beacon loads only in production (`import.meta.env.PROD === true`) when token is present
+- Respects Do Not Track (DNT) and Global Privacy Control (GPC) signals
+- No cookies, minimal data collection
+- See `docs/operations/build-configuration.md` for detailed analytics configuration
 
 ## Monitoring Deployments
 
@@ -199,7 +249,45 @@ Build size and performance metrics:
 - All pages: ~40 HTML files
 
 Monitor in GitHub Actions logs.
-## Troubleshooting
+
+## Automated Quality Gates
+
+PRs to staging and main branches run automated visual regression testing. Additional quality checks run on scheduled intervals:
+
+### Visual Regression Testing
+
+**What happens:**
+1. PR opened/updated → `pr-visual-check.yml` triggered
+2. Downloads baseline from latest main deployment
+3. Builds PR code with production settings
+4. Compares screenshots to baseline
+5. Posts results to PR (`pr-visual-comment.yml`)
+
+**PR Comment Indicators:**
+- ⚠️ **Visual Regression Detected** - PR comment posted with link to diff artifacts
+- ✅ **Tests passed** - No comment posted
+- **No baseline found** - Warning in workflow logs only (no PR comment), tests skipped, safe to merge
+
+**Viewing Diffs:**
+Click artifact link in PR comment to download:
+- Diff images (expected vs actual)
+- Playwright HTML report
+
+**Updating Baselines:**
+Baselines auto-update when PR merges to main and production deploys successfully.
+
+### Link Validation
+
+Nightly `linkwatch.yml` workflow checks for broken links:
+- Runs htmltest + browser verification
+- Creates GitHub issue if genuinely broken links found
+- Filters out bot-detected false positives (403s that work in browser)
+
+See also:
+- `/docs/testing/visual-regression.md` - Visual regression details
+- `/docs/link-checking.md` - Link validation workflow
+
+## Common Build & Configuration Issues
 
 ### Build Fails with "cannot stat 'dist/pagefind'"
 

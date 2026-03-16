@@ -47,12 +47,7 @@ This document catalogs special use cases, custom implementations, and unique con
 - Most use external services (Google Slides, etc.) instead
 - Slidev is designed for single projects, not batch deployment
 
-**Future Use**:
-```bash
-# Deploy Slidev independently:
-npm run presentations:dev    # Dev server
-npm run presentations:build  # Build for deployment
-```
+**Note**: Slidev presentations are in a separate `slidev-presentations/` directory containing slide source files. Build tooling is managed at the repo root (see `scripts/build-presentations.js` and root `package.json`). Not part of main blog build pipeline.
 
 ---
 
@@ -91,16 +86,50 @@ npm run build:presentations
 
 ---
 
-#### 3. **Migration Scripts** (One-Time Use)
+#### 3. **CI/CD Visual Regression Testing**
 
-Located in root directory:
+**The Implementation**:
+- Automated Playwright visual regression on PRs to staging/main
+- Artifact-based baseline system (no cloud service dependency)
+- Secure two-workflow pattern (pr-visual-check + pr-visual-comment)
+
+**Why This is Custom**:
+Most projects use Percy.io, Chromatic, or other cloud services. This project uses:
+- GitHub Actions artifacts for baseline storage (90-day retention)
+- Custom secure workflow pattern to prevent PR comment injection attacks
+- Two-workflow separation: untrusted PR execution + secure commenting
+
+**Production Since**: March 2026
+
+**Files**:
+- `.github/workflows/pr-visual-check.yml` - Test execution (read-only PR context)
+- `.github/workflows/pr-visual-comment.yml` - PR commenting (secure workflow_run)
+- `.github/workflows/production-deploy.yml` - Baseline generation
+- `tests/visual/visual-regression.spec.ts` - Test suite
+
+**Trade-offs**:
+- ✅ No cloud service cost
+- ✅ Full control over baseline storage
+- ✅ Secure workflow pattern (prevents injection attacks)
+- ⚠️ 90-day artifact retention (baselines expire, regenerate from main deploy)
+- ⚠️ No visual diff UI in PR (must download artifacts to view)
+
+**Reusability**:
+The workflow pattern is reusable for other projects needing PR visual regression without cloud dependencies.
+
+---
+
+#### 4. **Migration Scripts** (One-Time Use)
+
+**Note**: These scripts were used during the Jekyll→Astro migration and have been removed from the repository after completion. Listed here for historical reference:
+
 - `migrate-posts.js` - Converted 36 Jekyll posts → Astro
 - `migrate-pages.js` - Converted 9 Jekyll pages → Astro
 - `migrate-presentations.js` - Converted 8 Reveal.js presentations → Slidev
 - `fix-yaml.js` - Fixed YAML indentation issues
 - `add-descriptions.js` - Added missing post descriptions
 
-**Status**: ✅ Complete, archived for reference
+**Status**: ✅ Complete, scripts removed after successful migration
 
 **Reusability**:
 - Not reusable as-is (Jekyll-specific)
@@ -173,13 +202,7 @@ npm run build
 
 ### Presentations Build (Standalone)
 
-```bash
-npm run presentations:dev
-npm run presentations:build
-npm run presentations:export
-```
-
-**Deployed separately** to Netlify/Vercel or AWS
+**Note**: Presentations are in a separate `slidev-presentations/` directory containing slide sources. Build scripts are managed at the repo root via `npm run build:presentations` (see `scripts/build-presentations.js`).
 
 ---
 
@@ -286,14 +309,13 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 ### Updating Presentations
 
 1. Edit `slidev-presentations/slides/NN-*.md`
-2. `npm run presentations:dev` to preview
-3. `npm run presentations:build` to compile
-4. Deploy independently (not part of blog build)
+2. Build using root-level script: `npm run build:presentations` (see `scripts/build-presentations.js`)
+3. Deploy independently (not part of blog build)
 
 ### Updating Deployment
 
-1. Modify `.github/workflows/production.yml` for AWS changes
-2. Modify `.github/workflows/staging.yml` for GitHub Pages changes
+1. Modify `.github/workflows/production-deploy.yml` for AWS changes
+2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages changes
 3. Test on staging branch first
 
 ---

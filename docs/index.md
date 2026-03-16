@@ -8,21 +8,21 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 - [Local Setup](./getting-started/) - Running the project locally
 - [Creating Posts](./getting-started/creating-posts.md) - Quick guide for writing blog posts
 - [Image Workflow](./getting-started/images.md) - Complete guide for adding images
-- [Tech Stack](./getting-started/tech-stack.md) - Technology overview (when created)
-- [File Structure](./getting-started/file-structure.md) - How the project is organized (when created)
+- [Tech Stack](./getting-started/tech-stack.md) - Technology overview
+- [File Structure](./getting-started/file-structure.md) - How the project is organized
 
 ## 🔧 Operations
 
 **For deployments and maintenance:**
 - [Deployment Guide](./operations/deployment.md) - How to deploy to staging and production
-- [Maintenance](./operations/maintenance.md) - Health checks and monitoring (when created)
-- [Troubleshooting](./operations/troubleshooting.md) - Common issues and fixes (when created)
+- [Maintenance](./operations/maintenance.md) - Health checks and monitoring
+- [Troubleshooting](./operations/troubleshooting.md) - Common issues and fixes
 
 ## ✨ Features
 
 **Understanding project capabilities:**
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
-- [Architecture Overview](./features/architecture.md) - How it all fits together (when created)
+- [Architecture Overview](./features/architecture.md) - How it all fits together
 
 ## 📚 Migration History (Archived)
 
@@ -65,18 +65,17 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 ### 🚀 DevOps/Deployment
 1. [Deployment Guide](./operations/deployment.md)
-2. [Pre-Launch Gaps](./launch/pre-launch-gaps.md)
-3. [Launch Checklist](./launch/launch-checklist.md)
+2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
 
 ### 📖 Understanding the Project
-1. [Migration Status](./migration/status.md)
-2. [Performance Analysis](./migration/jekyll-astro-comparison.md)
+1. [Migration Status](./archive/migration/status.md) *(archived)*
+2. [Performance Analysis](./archive/migration/jekyll-astro-comparison.md) *(archived)*
 3. [Special Features](./features/special-implementations.md)
-4. [Presentations](./migration/presentations-deployment.md)
+4. [Presentations](./archive/migration/presentations-deployment.md) *(archived)*
 
 ### 🔍 Troubleshooting
 1. [Troubleshooting Guide](./operations/troubleshooting.md)
-2. [Pre-Launch Gaps](./launch/pre-launch-gaps.md)
+2. [Pre-Launch Gaps](./archive/launch/pre-launch-gaps.md) *(archived)*
 3. [Test Findings](./testing/findings.md)
 
 ---
@@ -104,19 +103,8 @@ docs/
 │   ├── special-implementations.md
 │   └── architecture.md
 │
-├── migration/                         # Historical context
-│   ├── status.md
-│   ├── url-mapping.md
-│   ├── jekyll-astro-comparison.md
-│   ├── presentations-deployment.md
-│   └── presentations-fix.md
-│
-├── launch/                            # Current launch status
-│   ├── launch-ready.md
-│   ├── pre-launch-gaps.md
-│   └── launch-checklist.md
-│
 ├── testing/                           # QA and validation
+│   ├── index.md
 │   ├── visual-regression.md
 │   └── findings.md
 │
@@ -124,11 +112,20 @@ docs/
 │
 └── archive/                           # Historical documentation
     ├── README.md
-    ├── migration/
-    └── launch/
+    ├── migration/                     # Jekyll → Astro migration (Jan 2026)
+    │   ├── index.md
+    │   ├── status.md
+    │   ├── url-mapping.md
+    │   ├── jekyll-astro-comparison.md
+    │   ├── presentations-deployment.md
+    │   └── presentations-fix.md
+    └── launch/                        # Pre-launch & launch (Jan 2026)
+        ├── index.md
+        ├── launch-ready.md
+        └── pre-launch-gaps.md
 ```
 
 ---
 
-**Last Updated**: February 16, 2026
-**Status**: Documentation updated - link checking consolidated to two-tier system
+**Last Updated**: March 15, 2026
+**Status**: Documentation updated - visual regression testing in production, link checking two-tier system
