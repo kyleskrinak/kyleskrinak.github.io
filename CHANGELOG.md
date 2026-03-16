@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [Unreleased]
+
+### Feat
+
+- add automated visual regression testing to PR workflow (#67)
+- consolidate link checking into single two-tier script (#67)
+
+### Refactor
+
+- centralize Node.js setup in composite action (#67)
+- migrate to Node.js 24 across all workflows (#67)
+
+### Infrastructure
+
+- add `pr-visual-check.yml` and `pr-visual-comment.yml` workflows
+- implement artifact-based baseline system for visual regression
+- add `setup-node-build` composite action for DRY workflow setup
+- update redirect pages to valid HTML structure
+- modernize API endpoint to Astro v4+ syntax
+
+### Security
+
+- implement secure PR comment workflow (workflow_run pattern)
+- add pagination support for PR comment management
+- validate PR matching by head SHA
+
 ## v5.5.1 (2026-01-08)
 
 ### Fix

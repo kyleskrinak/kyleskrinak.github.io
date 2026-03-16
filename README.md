@@ -8,7 +8,7 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 
 **Live Sites**:
 - 🚀 [Production](https://kyle.skrinak.com/) - Main blog
-- 🧪 [Staging](https://kyleskrinak.github.io/astro-blog/) - Testing environment
+- 🧪 [Staging](https://kyleskrinak.github.io/) - Testing environment (GitHub Pages user site, root path)
 
 ## ✨ Features
 
@@ -74,6 +74,21 @@ npm run check:links      # Two-tier link checking (htmltest + Playwright)
 npm run test:console     # Check for console errors
 npm run test:visual      # Visual regression testing
 ```
+
+## 🧪 Testing & Quality Assurance
+
+**PR Checks** (run on PRs to staging/main):
+- **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
+
+**Scheduled Checks** (nightly):
+- **Link Validation** - Two-tier verification (htmltest + browser) that filters false positives
+
+**Test Suites** (run manually or in CI):
+- **Console Error Detection** - Scans for JavaScript errors on key pages
+- **SEO Validation** - Meta tags verification, sitemap accuracy, canonical URL checks
+- **Analytics Privacy** - DNT/GPC compliance
+
+See `/docs/testing/` for detailed guides.
 
 ## 📊 Project Structure
 

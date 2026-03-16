@@ -15,23 +15,23 @@ ENVIRONMENT=${1:-local}
 case $ENVIRONMENT in
   local)
     echo "🧪 Running visual tests against LOCAL (http://localhost:4321)"
-    npx playwright test --config=playwright.config.ts
+    npm run test:visual
     ;;
 
   staging)
     echo "🧪 Running visual tests against STAGING (GitHub Pages)"
-    PLAYWRIGHT_TEST_BASE_URL="https://kyleskrinak.github.io/astro-blog" npx playwright test --config=playwright.config.ts
+    PLAYWRIGHT_TEST_BASE_URL="https://kyleskrinak.github.io" npm run test:visual
     ;;
 
   production)
     echo "🧪 Running visual tests against PRODUCTION (kyle.skrinak.com)"
-    PLAYWRIGHT_TEST_BASE_URL="https://kyle.skrinak.com" npx playwright test --config=playwright.config.ts
+    PLAYWRIGHT_TEST_BASE_URL="https://kyle.skrinak.com" npm run test:visual
     ;;
 
   baseline)
     echo "📸 Creating/updating baselines from LOCAL dev"
-    npx playwright test --config=playwright.config.ts --update-snapshots
-    echo "✓ Baselines updated in tests/visual/__screenshots__/"
+    npm run test:visual -- --update-snapshots
+    echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/"
     ;;
 
   compare)

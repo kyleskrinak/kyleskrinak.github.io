@@ -14,8 +14,11 @@ import { rehypeImageOptimization } from "./src/lib/rehype-components";
 import { SITE } from "./src/config/index";
 
 // https://astro.build/config
-const buildEnv = process.env.BUILD_ENV || "production";
-const base = buildEnv === "staging" ? "/astro-blog/" : "/";
+// NOTE: Repository "kyleskrinak.github.io" is a GitHub Pages USER SITE and MUST deploy to root (/).
+// GitHub Pages does not allow user sites to deploy to subpaths like /astro-blog/.
+// Both staging and production use base: "/" (root path).
+// See: docs/operations/staging-url-reference.md for authoritative staging URL documentation.
+const base = "/";
 
 export default defineConfig({
   base,
