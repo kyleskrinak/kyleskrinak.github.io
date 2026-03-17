@@ -49,14 +49,10 @@ npm run test:production -- --project=console
    ✅ No console errors
 
 📄 Testing: Search (/search/)
-   ❌ Found 1 console error(s):
-      - [404] Failed to load: https://kyleskrinak.github.io/site.webmanifest
+   ✅ No console errors
 
 📊 CONSOLE ERROR SUMMARY
-❌ 1 page(s) have console errors:
-
-  📄 Search:
-     • [404] Failed to load: https://kyleskrinak.github.io/site.webmanifest
+✅ All pages passed with no console errors
 ```
 
 ## Analytics Privacy Signal Testing
