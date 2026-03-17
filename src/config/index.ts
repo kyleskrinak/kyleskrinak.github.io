@@ -26,7 +26,7 @@ export const SITE = {
   editPost: {
     enabled: false,
     text: "Edit on GitHub",
-    url: "https://github.com/kyleskrinak/astro-blog/edit/staging/",
+    url: "https://github.com/kyleskrinak/kyleskrinak.github.io/edit/main/",
   },
   dynamicOgImage: true,
   dir: "ltr", // "rtl" | "auto"

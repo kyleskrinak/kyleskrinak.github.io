@@ -8,7 +8,7 @@ Playwright-based visual regression tests to catch unintended changes in layout, 
 ```bash
 npm run test:visual:baseline
 ```
-This generates reference screenshots in `tests/visual/__screenshots__/`. Commit these to version control.
+This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/`. **Note**: This directory is gitignored; baselines are managed via CI artifacts (see baseline workflow below).
 
 ### 2. Run Tests Against Local Dev
 ```bash
@@ -18,13 +18,13 @@ Compares current rendering against baselines. Local dev server starts automatica
 
 ### 3. Test Staging Before Launch
 ```bash
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 ```
 Tests against GitHub Pages staging URL. This validates that staging renders identically to local.
 
 ### 4. Verify Production After Launch
 ```bash
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 ```
 Tests against production URL. Should match staging and baselines.
 
@@ -38,10 +38,10 @@ npm run test:visual
 npm run test:visual:baseline
 
 # Test against staging (GitHub Pages)
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 
 # Test against production (kyle.skrinak.com)
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # View HTML report of last test run
 npm run test:visual:report
@@ -95,18 +95,18 @@ npm run test:visual:report
 
 ### 24 Hours Before Launch
 ```bash
-# 1. Deploy staging build (with BUILD_ENV=staging in GitHub Actions)
+# 1. Deploy staging build (with BUILD_ENV=production in GitHub Actions)
 # 2. Test staging renders correctly
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 
-# 3. Review report - staging may differ from local due to base path
-# Expected: Layout variations due to /astro-blog/ base path, but no broken images/content
+# 3. Review report - staging should match local (both use base = "/")
+# Expected: Identical rendering to local baselines
 npm run test:visual:report
 
 # 4. Verify key pages load correctly:
-#    - https://kyleskrinak.github.io/astro-blog/ (home)
-#    - https://kyleskrinak.github.io/astro-blog/posts/ (blog archive)
-#    - https://kyleskrinak.github.io/astro-blog/about.html (about)
+#    - https://kyleskrinak.github.io/ (home)
+#    - https://kyleskrinak.github.io/posts/ (blog archive)
+#    - https://kyleskrinak.github.io/about/ (about)
 ```
 
 ### Launch Day
@@ -114,7 +114,7 @@ npm run test:visual:report
 # 1. Deploy to production
 # 2. Production should use base path "/"
 # 3. Run visual tests against production
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # 4. Production should match local baselines (same base path "/")
 npm run test:visual:report
@@ -128,7 +128,7 @@ npm run test:visual:report
 ### Post-Launch
 ```bash
 # Run weekly to catch regressions
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 
 # Compare to baseline report
 npm run test:visual:report
@@ -180,40 +180,45 @@ Re-generates screenshots as new baselines (after code changes).
 
 ### Important: Base Path Configuration
 
-This blog uses **environment-specific base paths** set in `astro.config.ts`:
-- **Local/Production**: `base: "/"`
-- **Staging (GitHub Pages)**: `base: "/astro-blog/"`
+This blog uses **consistent base path** across all environments set in `astro.config.ts`:
+- **All environments (Local/Staging/Production)**: `base: "/"`
 
-This means **local and staging render differently by design**. Asset paths, links, and layout may vary based on the environment.
+This means **all environments render identically**. Staging (GitHub Pages) deploys as a user site at the root path, matching local and production behavior.
 
-### Baseline Management by Environment
+### Baseline Management
 
-Each environment should have its own baseline set:
+All environments use the same baseline set (managed via CI artifacts):
 
 ```
-tests/visual/__screenshots__/                  # Local dev baselines
-  ├── home-desktop-chromium-darwin.png
-  ├── home-mobile-chromium-darwin.png
-  └── ... (36 baseline images)
+tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitignored)
+  ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
+  ├── blog-archive-desktop-visual-desktop-{os}.png
+  ├── home-page-desktop-visual-desktop-{os}.png
+  └── ... (36 baseline images: 18 screenshots × 2 projects)
 ```
 
-**Generate baselines for each environment:**
+**Baseline Workflow:**
+- **Production deploys** (main branch) automatically upload baselines as `visual-baseline-main` artifact
+- **PR visual checks** download baselines from latest main deployment
+- **Local testing** generates baselines with `npm run test:visual:baseline` (gitignored, not committed)
+
+**Test commands:**
 
 ```bash
-# Local dev (base = "/")
+# Generate baselines from local dev (base = "/")
 npm run test:visual:baseline
 
-# Staging (base = "/astro-blog/" + GitHub Pages subdirectory)
-npm run test:visual:staging
+# Test staging against baselines (also base = "/")
+npm run test:staging -- --project=visual-*
 
-# Production (base = "/" at kyle.skrinak.com)
-npm run test:visual:production
+# Test production against baselines (base = "/" at kyle.skrinak.com)
+npm run test:production -- --project=visual-*
 ```
 
 **Expected behavior:**
-- Local tests should always pass when compared to local baselines
-- Staging tests may show layout differences due to base path redirects
-- Production tests should match staging (same base path configuration)
+- All environments should match baselines (identical rendering with base = "/")
+- Tests should pass consistently across local, staging, and production
+- Failures indicate unintended visual regressions
 
 ### Testing Multiple Browsers
 Config includes Chromium and mobile browsers. To test Firefox:
@@ -285,19 +290,18 @@ tests/
 ├── visual/
 │   ├── README.md (this file)
 │   ├── visual-regression.spec.ts (test definitions)
-│   └── __screenshots__/ (generated baselines)
-│       ├── home-desktop.png
-│       ├── home-mobile.png
-│       ├── blog-archive-desktop.png
-│       ├── blog-post-2025-09-19-desktop.png
-│       └── ... (35+ screenshots)
+│   └── visual-regression.spec.ts-snapshots/ (generated baselines)
+│       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
+│       ├── blog-archive-desktop-visual-desktop-{os}.png
+│       ├── home-page-desktop-visual-desktop-{os}.png
+│       └── ... (36 snapshots: 18 screenshots × 2 projects, OS varies by environment)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```
 
 ## Tips for Success
 
-1. **Commit baselines** to version control so team sees expected changes
+1. **Baselines managed via CI** - Production deploys upload baselines as artifacts; PRs download and compare
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
 4. **Test all environments** before launch (local → staging → production)

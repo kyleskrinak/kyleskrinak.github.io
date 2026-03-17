@@ -72,4 +72,4 @@ For current issues, check:
 - [Deployment Guide](./deployment.md)
 - [Build Configuration](./build-configuration.md)
 - [GitFlow Workflow](./gitflow.md)
-- Project [GitHub Issues](https://github.com/kyleskrinak/astro-blog/issues)
+- Project [GitHub Issues](https://github.com/kyleskrinak/kyleskrinak.github.io/issues)

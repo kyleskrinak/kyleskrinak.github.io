@@ -1,22 +1,25 @@
 import { test, expect } from "@playwright/test";
-import { BASE_URL } from "../test-utils";
+import { BASE_URL, isLocalUrl } from "../test-utils";
 
 /**
  * Test Cloudflare Analytics privacy signal detection
  * Verifies that the beacon respects DNT and GPC signals
  *
+ * App-side gating: Beacon loads only when import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN
+ * Test-side policy: Tests skip on local URLs to avoid relying on local prod-build setup and to prevent analytics noise
+ *
  * Usage:
- *   # Ensure PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN is set for the preview build.
- *   # A dummy non-empty value is sufficient if you only need to validate the gating logic, e.g.:
- *   #   PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
- *   npm run build && npm run preview  # In terminal 1
- *   npx playwright test tests/analytics-privacy.spec.ts   # In terminal 2
+ *   # Test against staging/production
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
+ *
+ *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) by test policy,
+ *   # not because the app can't load analytics locally (it could with a prod build + token)
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {
   // Skip unless running against a remote URL (staging/production)
-  // Analytics only load in production builds; localhost covers both dev and preview
-  test.skip(!process.env.PLAYWRIGHT_TEST_BASE_URL || BASE_URL.includes('localhost'), 'Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)');
+  // Analytics only load in production builds; skip for all local development URLs
+  test.skip(isLocalUrl, "Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)");
 
   test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
     // Mock navigator properties with no privacy signals

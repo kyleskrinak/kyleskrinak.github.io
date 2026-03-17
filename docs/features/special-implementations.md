@@ -39,8 +39,10 @@ This document catalogs special use cases, custom implementations, and unique con
 
 **Files**:
 - `slidev-presentations/` - Independent Slidev project
-- `PRESENTATIONS_DEPLOYMENT.md` - Detailed architecture docs
-- `build-presentations.js` - Legacy script (archived, not in main build)
+- `scripts/build-presentations.js` - Legacy script (archived, not in main build)
+
+**Documentation**:
+- See CHANGELOG.md "Jekyll → Astro Migration" section for architectural decisions
 
 **Why This is Custom**:
 - Most blogs don't have embedded presentations
@@ -53,7 +55,7 @@ This document catalogs special use cases, custom implementations, and unique con
 
 #### 2. **Custom Markdown-to-HTML Presentation Converter** (Archived)
 
-**What It Does** (in `build-presentations.js`):
+**What It Does** (in `scripts/build-presentations.js`):
 - Converts Slidev markdown to standalone HTML
 - Handles markdown syntax:
   - All heading levels (# through #####)
@@ -156,7 +158,8 @@ Zod schemas enforce type safety on all content.
 ### Dynamic Routing
 
 ✅ **Files**:
-- `src/pages/blog/[...slug].astro` - Individual posts
+- `src/pages/posts/[...slug]/index.astro` - Individual post pages (uses PostDetails layout)
+- `src/pages/[year]/[month]/[day]/[...slug].astro` - Legacy redirect route (Jekyll URL compatibility)
 - `src/pages/categories/[category].astro` - Category archives
 - `src/pages/tags/[tag].astro` - Tag archives
 
@@ -180,7 +183,7 @@ Indexes all 48 pages (blog posts + static pages) with 4,688 words.
 
 ### Social Sharing
 
-✅ **File**: `src/components/SocialShare.astro`
+✅ **File**: `src/components/ShareLinks.astro`
 ✅ **Standard**: Yes - common blog feature
 ✅ **Platforms**: Twitter, Facebook, LinkedIn, Email
 
@@ -210,7 +213,7 @@ npm run build
 
 ### Astro Configuration
 
-**File**: `astro.config.mjs`
+**File**: `astro.config.ts`
 
 ```javascript
 export default defineConfig({
@@ -373,11 +376,9 @@ These can be added without changing core architecture:
 
 | File | Purpose |
 |------|---------|
-| `MIGRATION_STATUS.md` | Current state of migration, all 5 phases |
-| `PRESENTATIONS_DEPLOYMENT.md` | How presentations are deployed (Option 2) |
-| `DEPLOYMENT.md` | AWS setup, GitHub secrets, troubleshooting |
-| `PRESENTATIONS_FIX.md` | Details on presentation HTML generation |
-| `SPECIAL_FEATURES.md` | This file - unique features & decisions |
+| `CHANGELOG.md` | Migration history and technical decisions (see "Jekyll → Astro Migration" section) |
+| `docs/operations/deployment.md` | AWS setup, GitHub secrets, troubleshooting |
+| `docs/features/special-implementations.md` | This file - unique features & decisions |
 
 ---
 

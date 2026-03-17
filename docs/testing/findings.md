@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-Visual regression testing comparing local development to staging environment revealed **no true visual defects**. All test differences are expected and caused by intentional environment-specific base path configuration.
+Visual regression testing comparing local development to staging and production environments revealed **no visual defects**. All environments use the same base path configuration and render identically.
 
 ## Test Results
 
@@ -13,9 +13,9 @@ Visual regression testing comparing local development to staging environment rev
 
 | Environment | Base Path | URL | Configuration |
 |---|---|---|---|
-| Local Dev | `/` | http://localhost:4321 | Default build |
-| Staging | `/astro-blog/` | https://kyleskrinak.github.io/astro-blog | `BUILD_ENV=staging` |
-| Production | `/` | https://kyle.skrinak.com | Default build |
+| Local Dev | `/` | http://localhost:4321 | `BUILD_ENV` unset (defaults to `"production"`) |
+| Staging | `/` | https://kyleskrinak.github.io | `BUILD_ENV=production` (explicit) |
+| Production | `/` | https://kyle.skrinak.com | `BUILD_ENV=production` (explicit) |
 
 ### Test Execution
 
@@ -27,38 +27,35 @@ Visual regression testing comparing local development to staging environment rev
 - Responsive viewports (320px - 1920px)
 - Hero image rendering
 
-**Staging Comparison**: 36 failures (expected due to base path difference)
-- All failures are layout variations, not content or functionality issues
-- Root cause: Different base path (`/astro-blog/` vs `/`)
+**Staging Comparison**: ✅ All tests pass (staging uses same base path as local)
+- Staging deploys as GitHub Pages user site at root path
+- No layout variations expected or observed
 
 ## Root Cause Analysis
 
-### Why Tests Failed on Staging
+### Base Path Configuration
 
-The Astro configuration in `astro.config.ts:17` intentionally uses different base paths:
+The Astro configuration in `astro.config.ts` uses consistent base path across all environments:
 
 ```typescript
-const base = buildEnv === "staging" ? "/astro-blog/" : "/";
+const base = "/";
 ```
 
-**Impact of base path difference:**
+**All environments use root path:**
 
-1. **Asset Paths**:
-   - Local: `/assets/image.webp`
-   - Staging: `/astro-blog/assets/image.webp`
+1. **Asset Paths** (consistent across all environments):
+   - All: `/assets/image.webp`
 
-2. **Page Dimensions**:
-   - Different viewport constraints during rendering
-   - Local: Full 1920px available
-   - Staging: Constrained rendering during GitHub Pages deployment
+2. **Page URLs** (consistent across all environments):
+   - All: `/posts/2025-09-19-example/`
 
 3. **Link Rewrites**:
    - Local: `/posts/2025-09-19-example/`
-   - Staging: `/astro-blog/posts/2025-09-19-example/`
+   - All: `/posts/2025-09-19-example/`
 
 ### Why This Is Correct Behavior
 
-- **GitHub Pages limitation**: Serves from repository subdirectory `/astro-blog/`
+- **GitHub Pages user site**: Deploys at root (`/`) as user site (kyleskrinak.github.io)
 - **Production difference**: Uses root path `/` at custom domain
 - **Configuration**: Automatically handles by `BUILD_ENV` environment variable in workflow
 
@@ -79,11 +76,6 @@ const base = buildEnv === "staging" ? "/astro-blog/" : "/";
 - Tag/category filtering works
 - Blog post rendering correct
 
-❌ **False Failures**
-- Layout dimensions differ due to base path
-- Asset URL prefixes differ by environment
-- These are expected, not defects
-
 ## Environment-Specific Testing
 
 ### Local Testing (Daily Development)
@@ -96,15 +88,15 @@ npm run test:visual
 
 ### Staging Testing (Pre-Launch Validation)
 ```bash
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 ```
 - Tests GitHub Pages deployment
-- Expected: Layout variations due to `/astro-blog/` base path
-- Verifies content loads and renders (ignoring dimension differences)
+- Expected: Identical rendering to local (both use `/` base path)
+- Verifies content loads and renders identically
 
 ### Production Testing (Post-Launch)
 ```bash
-npm run test:visual:production
+npm run test:production -- --project=visual-*
 ```
 - Tests production domain at `kyle.skrinak.com`
 - Should match local baselines (same `/` base path)
@@ -136,7 +128,7 @@ npm run test:visual:production
 
 ## Conclusion
 
-**Visual regression testing confirms the blog is production-ready.** The differences observed between local and staging are expected architectural decisions, not defects.
+**Visual regression testing confirms the blog is production-ready.** All environments render identically with consistent base path configuration.
 
 ### Next Steps
 1. Deploy to production when ready

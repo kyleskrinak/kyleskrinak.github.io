@@ -21,7 +21,7 @@ npm run test:console
 ### Running Against Staging
 
 ```bash
-npm run test:console:staging
+npm run test:staging -- --project=console
 ```
 
 This will test the live staging site on GitHub Pages and report any console errors.
@@ -29,7 +29,7 @@ This will test the live staging site on GitHub Pages and report any console erro
 ### Running Against Production
 
 ```bash
-npm run test:console:production
+npm run test:production -- --project=console
 ```
 
 ### What It Tests
@@ -49,14 +49,10 @@ npm run test:console:production
    ✅ No console errors
 
 📄 Testing: Search (/search/)
-   ❌ Found 1 console error(s):
-      - [404] Failed to load: https://kyleskrinak.github.io/astro-blog/site.webmanifest
+   ✅ No console errors
 
 📊 CONSOLE ERROR SUMMARY
-❌ 1 page(s) have console errors:
-
-  📄 Search:
-     • [404] Failed to load: https://kyleskrinak.github.io/astro-blog/site.webmanifest
+✅ All pages passed with no console errors
 ```
 
 ## Analytics Privacy Signal Testing
@@ -65,19 +61,16 @@ npm run test:console:production
 
 **When to run**: After making changes to analytics loading logic or before merging privacy-related features.
 
-### Running Locally
+### Running Against Remote URLs
 
 ```bash
-# Terminal 1: Build and preview (analytics only loads in production builds)
-# IMPORTANT: Set PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN for the beacon loader to be included.
-# A dummy non-empty value is sufficient for validating gating logic:
-PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=dummy-token npm run build && npm run preview
+# Analytics tests require a remote URL (tests skip on localhost)
+# Use staging or production:
+PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
 
-# Terminal 2: Run the test
-npx playwright test tests/analytics-privacy.spec.ts
-
-# Alternative: Use the convenience scripts for staging/production:
-npm run test:analytics:staging  # or test:analytics:prod
+# Or use the convenience scripts:
+npm run test:staging -- --project=analytics
+npm run test:production -- --project=analytics
 ```
 
 ### What It Tests
@@ -118,7 +111,7 @@ npm run test:visual:baseline
 ### Running Against Staging
 
 ```bash
-npm run test:visual:staging
+npm run test:staging -- --project=visual-*
 ```
 
 ## Troubleshooting
