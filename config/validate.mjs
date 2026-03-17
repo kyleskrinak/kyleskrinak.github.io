@@ -34,8 +34,9 @@ if (existsSync('src/layouts/Layout.astro')) {
 
 if (existsSync('src/components/GoogleAnalytics.astro')) {
   const ga = readFileSync('src/components/GoogleAnalytics.astro', 'utf-8');
-  if (!ga.includes('import.meta.env.PROD')) {
-    issues.push('GA analytics gating mismatch');
+  const expectedGating = ConfigRegistry.analytics.googleAnalytics.gating;
+  if (!ga.includes(expectedGating)) {
+    issues.push(`GA analytics gating mismatch: expected "${expectedGating}" in GoogleAnalytics.astro`);
   }
 }
 

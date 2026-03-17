@@ -12,8 +12,8 @@
 | `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | `null` | `G-1EES7VJW1J` ✓ | `G-1EES7VJW1J` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | - | `G-1EES7VJW1J` ✓ | `G-1EES7VJW1J` ✓ |
 
 ✓ = Required
 
@@ -41,8 +41,8 @@
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 ### Google Analytics
-- Gating: `import.meta.env.PROD`
-- Location: src/components/GoogleAnalytics.astro:7
+- Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID`
+- Location: src/components/GoogleAnalytics.astro:6
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.

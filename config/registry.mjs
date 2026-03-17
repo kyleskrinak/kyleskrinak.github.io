@@ -39,6 +39,7 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyleskrinak.github.io/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'pr-visual-check': {
@@ -69,8 +70,8 @@ export const ConfigRegistry = {
       testLocation: 'tests/test-utils.ts:isLocalUrl'
     },
     googleAnalytics: {
-      gating: 'import.meta.env.PROD',
-      location: 'src/components/GoogleAnalytics.astro:7',
+      gating: 'import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID',
+      location: 'src/components/GoogleAnalytics.astro:6',
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
       testLocation: 'tests/test-utils.ts:isLocalUrl'
     }
