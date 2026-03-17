@@ -17,10 +17,10 @@ test.describe("Cloudflare Analytics Privacy Signals", () => {
   // Skip unless running against a remote URL (staging/production)
   // Analytics only load in production builds; skip for all local development URLs
   const isLocalUrl = !process.env.PLAYWRIGHT_TEST_BASE_URL ||
-    BASE_URL.includes('localhost') ||
-    BASE_URL.includes('127.0.0.1') ||
-    BASE_URL.includes('.local') ||
-    BASE_URL.includes('::1');
+    BASE_URL.includes("localhost") ||
+    BASE_URL.includes("127.0.0.1") ||
+    BASE_URL.includes(".local") ||
+    BASE_URL.includes("::1");
   test.skip(isLocalUrl, 'Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)');
 
   test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
