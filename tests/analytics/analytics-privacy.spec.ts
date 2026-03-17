@@ -6,17 +6,22 @@ import { BASE_URL } from "../test-utils";
  * Verifies that the beacon respects DNT and GPC signals
  *
  * Usage:
- *   # Test against staging/production (analytics only load on remote, non-localhost URLs)
+ *   # Test against staging/production (analytics only load on remote URLs)
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
  *
- *   # Note: Tests are skipped on localhost (including npm run preview) because
+ *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) because
  *   # the analytics beacon only loads when BASE_URL is a remote domain
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {
   // Skip unless running against a remote URL (staging/production)
-  // Analytics only load in production builds; localhost covers both dev and preview
-  test.skip(!process.env.PLAYWRIGHT_TEST_BASE_URL || BASE_URL.includes('localhost'), 'Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)');
+  // Analytics only load in production builds; skip for all local development URLs
+  const isLocalUrl = !process.env.PLAYWRIGHT_TEST_BASE_URL ||
+    BASE_URL.includes('localhost') ||
+    BASE_URL.includes('127.0.0.1') ||
+    BASE_URL.includes('.local') ||
+    BASE_URL.includes('::1');
+  test.skip(isLocalUrl, 'Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)');
 
   test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
     // Mock navigator properties with no privacy signals

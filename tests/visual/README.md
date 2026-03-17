@@ -193,7 +193,7 @@ All environments use the same baseline set (managed via CI artifacts):
 tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitignored)
   ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
   ├── blog-archive-desktop-visual-desktop-{os}.png
-  ├── home-desktop-visual-desktop-{os}.png
+  ├── home-page-desktop-visual-desktop-{os}.png
   └── ... (36 baseline images: 18 screenshots × 2 projects)
 ```
 
@@ -293,7 +293,7 @@ tests/
 │   └── visual-regression.spec.ts-snapshots/ (generated baselines)
 │       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
 │       ├── blog-archive-desktop-visual-desktop-{os}.png
-│       ├── home-desktop-visual-desktop-{os}.png
+│       ├── home-page-desktop-visual-desktop-{os}.png
 │       └── ... (36 snapshots: 18 screenshots × 2 projects, OS varies by environment)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
