@@ -4,7 +4,7 @@
  */
 
 import { ConfigRegistry } from './registry.mjs';
-import { generateEnvironmentMatrix } from './shared.mjs';
+import { generateDocContent } from './shared.mjs';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 
@@ -50,7 +50,11 @@ const WORKFLOW_TO_ENV_MAP = {
 
 function extractEnvVars(workflowContent) {
   const envVars = {};
-  const envBlockRegex = /env:\s*\n((?:\s+\w+:.*\n)+)/g;
+  // Match key-value lines OR comment lines within the env block.
+  // Allowing # comment lines prevents a mid-block comment from silently
+  // truncating the match. The inner varRegex skips comment lines naturally
+  // since \w+ does not match #.
+  const envBlockRegex = /env:\s*\n((?:\s+(?:#[^\n]*|\w+:[^\n]*)\n)+)/g;
   const matches = [...workflowContent.matchAll(envBlockRegex)];
 
   for (const match of matches) {
@@ -82,7 +86,10 @@ if (existsSync(workflowDir)) {
 
   for (const workflowFile of workflowFiles) {
     const envName = WORKFLOW_TO_ENV_MAP[workflowFile];
-    if (!envName) continue; // Skip unmapped workflows
+    if (!envName) {
+      console.log(`ℹ️  Skipping unmapped workflow: ${workflowFile} (not in WORKFLOW_TO_ENV_MAP)`);
+      continue;
+    }
 
     const workflowPath = join(workflowDir, workflowFile);
     const workflowContent = readFileSync(workflowPath, 'utf-8');
@@ -114,9 +121,9 @@ if (existsSync(workflowDir)) {
       }
     }
 
-    // Check: registry vars present in workflow (except import.meta.env.PROD and optional vars)
+    // Check: registry vars present in workflow (except optional vars).
+    // import.meta.env.PROD is in buildFlags (not environments), so no special-case needed.
     for (const varName of Object.keys(registryEnv)) {
-      if (varName === 'import.meta.env.PROD') continue; // Not in workflow env
       const registryVar = registryEnv[varName];
       if (registryVar.required === false) continue; // Optional vars may not be in workflow
       if (!actualEnvVars[varName]) {
@@ -239,7 +246,7 @@ if (existsSync('src/config/index.ts')) {
 
   // Extract hardcoded URLs from fallback logic
   const prodUrlMatch = configContent.match(/isProduction \? "([^"]+)"/);
-  const stagingUrlMatch = configContent.match(/: "([^"]+)"\)/);
+  const stagingUrlMatch = configContent.match(/isProduction \? "[^"]+" : "([^"]+)"/);
   const buildEnvDefaultMatch = configContent.match(/process\.env\.BUILD_ENV \|\| "([^"]+)"/);
 
   if (prodUrlMatch) {
@@ -269,69 +276,12 @@ if (existsSync('src/config/index.ts')) {
 }
 
 // Validate generated docs are up to date
-// Uses shared generateEnvironmentMatrix() to ensure validation matches generation
+// Uses shared generateDocContent() to ensure validator and generator use identical logic
 const docsPath = 'docs/operations/environment-configuration.md';
 if (!existsSync(docsPath)) {
   issues.push('Generated docs not found. Run: npm run config:generate');
 } else {
-  const expectedDoc = `# Environment Configuration Reference
-
-> **⚠️ AUTO-GENERATED** from \`config/registry.mjs\`
-> Do not edit manually - run \`npm run config:generate\`
-
-## Environment Variable Matrix
-
-${generateEnvironmentMatrix(ConfigRegistry)}
-
-✓ = Required
-
-## Astro Configuration
-
-### base: \`${ConfigRegistry.astro.base.value}\`
-- Location: ${ConfigRegistry.astro.base.location}
-- Reason: ${ConfigRegistry.astro.base.reason}
-- Impacts: ${ConfigRegistry.astro.base.impact.join(', ')}
-
-### trailingSlash: \`${ConfigRegistry.astro.trailingSlash.value}\`
-- Location: ${ConfigRegistry.astro.trailingSlash.location}
-- Reason: ${ConfigRegistry.astro.trailingSlash.reason}
-- Impacts:
-${ConfigRegistry.astro.trailingSlash.impact.map(i => `  - ${i}`).join('\n')}
-
-## Analytics Gating
-
-### Cloudflare
-- Gating: \`${ConfigRegistry.analytics.cloudflare.gating}\`
-- Location: ${ConfigRegistry.analytics.cloudflare.location}
-- Test policy: ${ConfigRegistry.analytics.cloudflare.testPolicy}
-
-### Google Analytics
-- Gating: \`${ConfigRegistry.analytics.googleAnalytics.gating}\`
-- Location: ${ConfigRegistry.analytics.googleAnalytics.location}
-- Test policy: ${ConfigRegistry.analytics.googleAnalytics.testPolicy}
-
-**Key:** Analytics gating based on \`import.meta.env.PROD\`, NOT hostname.
-
-## Deployment Infrastructure
-
-### Staging (GitHub Pages)
-- Platform: ${ConfigRegistry.deployment['staging-gh'].platform}
-- Mechanism: ${ConfigRegistry.deployment['staging-gh'].mechanism}
-- Variables: None (uses automatic GITHUB_TOKEN)
-
-### Production (AWS S3 + CloudFront)
-- Platform: ${ConfigRegistry.deployment['main-aws'].platform}
-- Mechanism: ${ConfigRegistry.deployment['main-aws'].mechanism}
-- Variables (GitHub repository vars):
-${Object.entries(ConfigRegistry.deployment['main-aws'].variables)
-  .map(([name, config]) => `  - \`${name}\`: ${config.source} (used in ${config.location})`)
-  .join('\n')}
-
-### PR Visual Check
-- Platform: ${ConfigRegistry.deployment['pr-visual-check'].platform}
-- Mechanism: ${ConfigRegistry.deployment['pr-visual-check'].mechanism}
-- Variables: None (build artifacts only, no deployment)
-`;
+  const expectedDoc = generateDocContent(ConfigRegistry);
 
   const actualDoc = readFileSync(docsPath, 'utf-8');
 

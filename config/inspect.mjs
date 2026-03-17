@@ -40,5 +40,5 @@ console.log(`BUILD_ENV: ${process.env.BUILD_ENV || '(not set)'}`);
 console.log(`SITE_URL: ${process.env.SITE_URL || '(not set)'}`);
 console.log(`PUBLIC_DEPLOY_ENV: ${process.env.PUBLIC_DEPLOY_ENV || '(not set)'}`);
 
-console.log('\n═'.repeat(60));
+console.log('\n' + '═'.repeat(60));
 console.log('\n💡 Tip: Run "npm run config:validate" to check for drift\n');

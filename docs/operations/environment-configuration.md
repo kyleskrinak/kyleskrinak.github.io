@@ -9,13 +9,20 @@
 |----------|----------|----------|----------|----------|
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
 | `SITE_URL` | (omitted) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
 | `PUBLIC_GOOGLE_ANALYTICS_ID` | - | (omitted) | `required` ✓ | `required` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | (omitted) | `required` ✓ | `required` ✓ |
 
 ✓ = Required
+
+## Build Flags
+
+Astro build flags set automatically by the framework (not configurable via workflow env vars):
+
+| Flag | local-develop | staging-gh | pr-visual-check | main-aws |
+|------|----------|----------|----------|----------|
+| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 
 ## Astro Configuration
 

@@ -2,6 +2,18 @@
  * Central Configuration Registry
  *
  * Single source of truth for all configuration values across environments.
+ *
+ * Naming conventions:
+ * - environments: Uses Astro env var names (PUBLIC_*, BUILD_ENV, SITE_URL).
+ *   These are the names set in workflow `env:` blocks and consumed by Astro.
+ * - deployment.variables: Uses GitHub repository variable names (AWS_ACCOUNT_ID, etc.).
+ *   These are referenced as `vars.VARIABLE_NAME` in workflow `with:` blocks,
+ *   not in `env:` blocks — a different YAML namespace than environment vars.
+ *   Secrets (source: 'secret') are referenced as `secrets.NAME` in workflows;
+ *   their Astro-side name may differ (e.g., GOOGLE_ANALYTICS_ID secret →
+ *   PUBLIC_GOOGLE_ANALYTICS_ID env var).
+ * - buildFlags: Astro framework flags set automatically at build time; these
+ *   are NOT workflow env vars and cannot be overridden via `env:` blocks.
  */
 
 export const ConfigRegistry = {
@@ -31,8 +43,7 @@ export const ConfigRegistry = {
   environments: {
     'local-develop': {
       BUILD_ENV: { value: 'production', source: 'default', required: false },
-      SITE_URL: { value: null, source: 'optional', required: false },
-      'import.meta.env.PROD': { value: false, source: 'astro-dev', required: false }
+      SITE_URL: { value: null, source: 'optional', required: false }
     },
     'staging-gh': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
@@ -40,8 +51,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false },
-      'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
     },
     'pr-visual-check': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
@@ -49,8 +59,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true },
-      'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true }
     },
     'main-aws': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
@@ -58,8 +67,18 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true },
-      'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true }
+    }
+  },
+
+  // Astro framework flags set automatically at build time.
+  // NOT workflow env vars — cannot be set or overridden via workflow `env:` blocks.
+  buildFlags: {
+    'import.meta.env.PROD': {
+      'local-develop': false,    // astro dev: always false
+      'staging-gh': true,        // astro build: always true
+      'pr-visual-check': true,   // astro build: always true
+      'main-aws': true           // astro build: always true
     }
   },
 
