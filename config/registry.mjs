@@ -47,6 +47,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'G-1EES7VJW1J', source: 'workflow', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'main-aws': {
@@ -55,6 +56,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'G-1EES7VJW1J', source: 'workflow', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     }
   },

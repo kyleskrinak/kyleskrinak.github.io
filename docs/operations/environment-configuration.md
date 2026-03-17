@@ -13,6 +13,7 @@
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | - | `G-1EES7VJW1J` ✓ | `G-1EES7VJW1J` ✓ |
 
 ✓ = Required
 
