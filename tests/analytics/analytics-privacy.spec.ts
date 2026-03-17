@@ -5,12 +5,15 @@ import { BASE_URL, isLocalUrl } from "../test-utils";
  * Test Cloudflare Analytics privacy signal detection
  * Verifies that the beacon respects DNT and GPC signals
  *
+ * App-side gating: Beacon loads only when import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN
+ * Test-side policy: Tests skip on local URLs to avoid relying on local prod-build setup and to prevent analytics noise
+ *
  * Usage:
- *   # Test against staging/production (analytics only load on remote URLs)
+ *   # Test against staging/production
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
  *
- *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) because
- *   # the analytics beacon only loads when BASE_URL is a remote domain
+ *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) by test policy,
+ *   # not because the app can't load analytics locally (it could with a prod build + token)
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {

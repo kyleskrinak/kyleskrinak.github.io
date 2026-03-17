@@ -5,12 +5,15 @@ import { BASE_URL, isLocalUrl } from "../test-utils";
  * Test Google Analytics (GA4) privacy signal detection
  * Verifies that GA4 respects DNT and GPC signals
  *
+ * App-side gating: GA loads only when import.meta.env.PROD
+ * Test-side policy: Tests skip on local URLs to avoid relying on local prod-build setup and to prevent analytics noise
+ *
  * Usage:
- *   # Test against staging/production (analytics only load on remote URLs)
+ *   # Test against staging/production
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy-ga.spec.ts
  *
- *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) because
- *   # GA/analytics only load when BASE_URL is a remote domain
+ *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) by test policy,
+ *   # not because the app can't load GA locally (it could with a prod build)
  */
 
 test.describe("Google Analytics Privacy Signals", () => {
