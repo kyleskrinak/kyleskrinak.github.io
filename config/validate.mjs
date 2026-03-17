@@ -46,8 +46,6 @@ const WORKFLOW_TO_ENV_MAP = {
   'pr-visual-check.yml': 'pr-visual-check'
 };
 
-const TRACKED_ENV_VARS = ['BUILD_ENV', 'SITE_URL', 'PUBLIC_DEPLOY_ENV', 'PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN'];
-
 function extractEnvVars(workflowContent) {
   const envVars = {};
   const envBlockRegex = /env:\s*\n((?:\s+\w+:.*\n)+)/g;
@@ -55,18 +53,21 @@ function extractEnvVars(workflowContent) {
 
   for (const match of matches) {
     const block = match[1];
-    for (const varName of TRACKED_ENV_VARS) {
-      const varRegex = new RegExp(`${varName}:\\s*(.+)`);
-      const varMatch = block.match(varRegex);
-      if (varMatch) {
-        const rawValue = varMatch[1].trim();
-        // Extract actual value, ignoring secrets syntax
-        let value = rawValue;
-        if (rawValue.includes('secrets.')) {
-          value = 'required'; // Secret reference
-        }
-        envVars[varName] = value;
+    // Extract ALL env vars from the block, not just a hardcoded list
+    const varRegex = /^\s+(\w+):\s*(.+)$/gm;
+    let varMatch;
+
+    while ((varMatch = varRegex.exec(block)) !== null) {
+      const varName = varMatch[1];
+      const rawValue = varMatch[2].trim();
+
+      // Extract actual value, ignoring secrets syntax
+      let value = rawValue;
+      if (rawValue.includes('secrets.')) {
+        value = 'required'; // Secret reference
       }
+
+      envVars[varName] = value;
     }
   }
   return envVars;
@@ -92,7 +93,13 @@ if (existsSync(workflowDir)) {
     }
 
     // Check: workflow vars present in registry
+    // Exempt test-tool variables (not part of app runtime config)
+    const testToolVars = new Set(['PLAYWRIGHT_TEST_BASE_URL']);
+
     for (const [varName, actualValue] of Object.entries(actualEnvVars)) {
+      // Skip test-tool variables
+      if (testToolVars.has(varName)) continue;
+
       const registryVar = registryEnv[varName];
       if (!registryVar) {
         issues.push(`${workflowFile} sets ${varName} but registry environment "${envName}" omits it`);
