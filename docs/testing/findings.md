@@ -92,7 +92,7 @@ npm run test:staging -- --project=visual-*
 ```
 - Tests GitHub Pages deployment
 - Expected: Identical rendering to local (both use `/` base path)
-- Verifies content loads and renders (ignoring dimension differences)
+- Verifies content loads and renders identically
 
 ### Production Testing (Post-Launch)
 ```bash

@@ -61,7 +61,7 @@ npm run test:production -- --project=console
 
 **When to run**: After making changes to analytics loading logic or before merging privacy-related features.
 
-### Running Locally
+### Running Against Remote URLs
 
 ```bash
 # Analytics tests require a remote URL (tests skip on localhost)
