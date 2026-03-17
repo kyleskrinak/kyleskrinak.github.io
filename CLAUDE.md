@@ -59,18 +59,23 @@ If my instruction is unclear, ask what I want. Don't assume.
 - Hardcode reasonable defaults
 - Don't over-engineer
 
-**Infrastructure** (scripts, build, CI/CD, tooling):
+**Infrastructure** (scripts, build, CI/CD, tooling, **configuration**):
 - Production-grade from start
 - Configurable (not hardcoded)
 - Proper error handling required (code-level errors; operational failures: see Blocker Resolution Protocol)
 - Must work in CI/CD environments
 - Resource cleanup (try/finally for processes/connections)
+- **Configuration files** (astro.config.ts, src/config/index.ts, env schemas):
+  - Must be centralized and validated
+  - Abstraction justified when preventing drift/repeated fixes
+  - Examples: Config registry, validation scripts, auto-generated docs
 
 ### General Principles
 - Start with simplest solution that works
-- Don't add unnecessary abstractions
+- Don't add unnecessary abstractions **unless infrastructure requires it**
 - Skip edge case handling unless critical
 - Ask: "Would copying be easier than generalizing?" If yes, copy.
+- **Exception:** Infrastructure abstractions (config registry, validation) justified when preventing repeated manual fixes
 
 ## Git Workflow
 
@@ -186,24 +191,37 @@ Confirmed: proceeding with [task] despite [blocker].
    grep -rn "pattern" src/ scripts/ public/  # MUST return zero results
    ```
 
-2. **Check side effects:**
+2. **Verify documentation against source code:**
+   - **Read implementation first, not other docs**
+   - Every documentation claim → verify in actual code
+   - Example: Doc says "analytics load on remote URLs"
+     - ❌ Don't trust the doc
+     - ✅ Read src/components/GoogleAnalytics.astro to verify actual gating logic
+   - Config behavior claims → read astro.config.ts, src/config/index.ts
+   - Test behavior claims → read actual test files
+
+3. **Check side effects:**
    - Documentation referencing changed files?
    - PR description mentioning changed behavior?
    - Related files with similar patterns?
    - Other files in same directory?
 
-3. **Quality Gates - MANDATORY before pushing:**
-   ```bash
-   npm run build
-   npm run check:links
-   npm run test:visual
-   ```
-   - All three MUST pass before git push
-   - If any fail, see Blocker Resolution Protocol
-   - Never push without running these tests
-   - "I'll let CI catch it" is NOT acceptable
+4. **Quality Gates (scope-dependent):**
 
-4. **Never commit without verification**
+   **For code changes (src/, scripts/, config files):**
+   ```bash
+   npm run build           # MUST pass
+   npm run check:links     # MUST pass
+   npm run test:visual     # MUST pass
+   ```
+   All three MUST pass before git push. If any fail, see Blocker Resolution Protocol.
+
+   **For documentation-only changes (docs/, README.md):**
+   - Verification steps 1-3 required
+   - Quality gates optional if changes are trivial (typo fixes, wording)
+   - Use judgment: if doc change affects behavior understanding, run tests
+
+5. **Never commit without verification**
 
 ## Text Processing & Parsing Rules
 
@@ -373,17 +391,36 @@ This is NOT optional. This is NOT a suggestion. Before ANY commit:
 
 **When addressing review comments:**
 
-1. **Identify ROOT issue, not just the line**
+1. **Check for architecture problem pattern:**
+
+   **STOP and analyze if:**
+   - 10+ rounds of similar fixes
+   - Environment-specific drift (local vs staging vs production)
+   - User mentions: "count mismatches," "variable settings," "important details missed"
+   - Documentation keeps drifting from reality
+
+   **If pattern detected:**
+   - This is scattered config/architecture problem, not individual fix problem
+   - Read config files: astro.config.ts, src/config/index.ts, workflows
+   - Propose config abstraction layer:
+     - Centralized config registry with metadata
+     - Auto-generated docs from config
+     - Validation script (CI check: code vs docs)
+   - THEN address individual fixes
+
+   **Don't:** Fix docs again without addressing root cause
+
+2. **Identify ROOT issue, not just the line**
    - Comment mentions line 25 → Find the pattern/issue CLASS
    - Example: "Line 25 uses /" → Issue is "hardcoded root paths break BASE_URL"
 
-2. **Identify the PATTERN type:**
+3. **Identify the PATTERN type:**
    - Missing tests? → Check ALL features for test coverage gaps
    - Missing comment? → Check ALL similar code for comment patterns
    - Systemic gap? → Map ALL affected systems (sitemap, robots.txt, etc.)
    - Inconsistency? → Find what it should match and ensure parity
 
-3. **BEFORE fixing, execute verification searches:**
+4. **BEFORE fixing, execute verification searches:**
    ```bash
    # Find ALL instances of the issue
    grep -rn "pattern" relevant-paths/
@@ -393,13 +430,13 @@ This is NOT optional. This is NOT a suggestion. Before ANY commit:
    ```
    **SHOW OUTPUT** before proceeding with fixes.
 
-4. **Fix comprehensively**
+5. **Fix comprehensively**
    - Fix the specific issue mentioned
    - Fix ALL instances of the pattern found
    - Add missing tests/comments/docs to match existing code
    - Update ALL interacting systems
 
-5. **MANDATORY: Execute Pre-Commit Verification Protocol**
+6. **MANDATORY: Execute Pre-Commit Verification Protocol**
    - Run all verification searches
    - Show output for each search
    - Provide verification summary
@@ -415,6 +452,19 @@ This is NOT optional. This is NOT a suggestion. Before ANY commit:
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
 - Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
 - **Exception:** Blocker reporting requires verbose detail (state, options, consequences) per Blocker Resolution Protocol
+
+## Instruction Precedence
+
+When instructions appear to conflict:
+
+1. **Safety first:** Blocker Resolution Protocol overrides all other instructions
+2. **Category rules:** Infrastructure rules override MVP rules for:
+   - Configuration files (astro.config.ts, src/config/index.ts)
+   - Build scripts, CI/CD workflows
+   - Test files and test infrastructure
+3. **Source hierarchy:** CLAUDE.md overrides Memory (Memory may be outdated)
+4. **User authority:** User explicit instructions override all written rules
+5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
 ---
 
