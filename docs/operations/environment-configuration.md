@@ -45,3 +45,25 @@
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.
+
+## Deployment Infrastructure
+
+### Staging (GitHub Pages)
+- Platform: GitHub Pages
+- Mechanism: GitHub Actions pages deployment
+- Variables: None (uses automatic GITHUB_TOKEN)
+
+### Production (AWS S3 + CloudFront)
+- Platform: AWS S3 + CloudFront
+- Mechanism: OIDC authentication + AWS CLI
+- Variables (GitHub repository vars):
+  - `AWS_ACCOUNT_ID`: github-var (used in production-deploy.yml:57)
+  - `AWS_DEPLOY_ROLE`: github-var (used in production-deploy.yml:57)
+  - `AWS_REGION`: github-var (used in production-deploy.yml:58)
+  - `AWS_S3_BUCKET`: github-var (used in production-deploy.yml:63,75)
+  - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in production-deploy.yml:85)
+
+### PR Visual Check
+- Platform: Local (no deployment)
+- Mechanism: Build artifacts only
+- Variables: None (build artifacts only, no deployment)

@@ -72,5 +72,35 @@ export const ConfigRegistry = {
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
       testLocation: 'tests/test-utils.ts:isLocalUrl'
     }
+  },
+
+  deployment: {
+    'staging-gh': {
+      platform: 'GitHub Pages',
+      mechanism: 'GitHub Actions pages deployment',
+      location: '.github/workflows/staging-deploy.yml',
+      variables: {
+        // GitHub Pages deployment uses GITHUB_TOKEN (automatic) and pages permissions
+        // No explicit deployment variables required
+      }
+    },
+    'main-aws': {
+      platform: 'AWS S3 + CloudFront',
+      mechanism: 'OIDC authentication + AWS CLI',
+      location: '.github/workflows/production-deploy.yml',
+      variables: {
+        AWS_ACCOUNT_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:57' },
+        AWS_DEPLOY_ROLE: { value: 'required', source: 'github-var', location: 'production-deploy.yml:57' },
+        AWS_REGION: { value: 'required', source: 'github-var', location: 'production-deploy.yml:58' },
+        AWS_S3_BUCKET: { value: 'required', source: 'github-var', location: 'production-deploy.yml:63,75' },
+        AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:85' }
+      }
+    },
+    'pr-visual-check': {
+      platform: 'Local (no deployment)',
+      mechanism: 'Build artifacts only',
+      location: '.github/workflows/pr-visual-check.yml',
+      variables: {}
+    }
   }
 };

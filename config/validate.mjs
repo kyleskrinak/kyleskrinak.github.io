@@ -124,6 +124,35 @@ if (existsSync(workflowDir)) {
         issues.push(`Registry environment "${envName}" documents ${varName} but ${workflowFile} doesn't set it`);
       }
     }
+
+    // Validate deployment variables (GitHub vars.*)
+    if (ConfigRegistry.deployment && ConfigRegistry.deployment[envName]) {
+      const deploymentConfig = ConfigRegistry.deployment[envName];
+      const registryDeployVars = deploymentConfig.variables || {};
+
+      // Extract GitHub variables from workflow content (vars.VARIABLE_NAME)
+      const githubVarRegex = /vars\.(\w+)/g;
+      const actualDeployVars = new Set();
+      let deployMatch;
+
+      while ((deployMatch = githubVarRegex.exec(workflowContent)) !== null) {
+        actualDeployVars.add(deployMatch[1]);
+      }
+
+      // Check: workflow deployment vars present in registry
+      for (const varName of actualDeployVars) {
+        if (!registryDeployVars[varName]) {
+          issues.push(`${workflowFile} uses vars.${varName} but registry deployment "${envName}" doesn't document it`);
+        }
+      }
+
+      // Check: registry deployment vars present in workflow
+      for (const varName of Object.keys(registryDeployVars)) {
+        if (!actualDeployVars.has(varName)) {
+          issues.push(`Registry deployment "${envName}" documents ${varName} but ${workflowFile} doesn't use it`);
+        }
+      }
+    }
   }
 }
 
