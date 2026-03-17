@@ -12,7 +12,7 @@
 | `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | `required` | `required` |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | `required` ✓ | `required` ✓ |
 
 ✓ = Required
 

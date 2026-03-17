@@ -106,11 +106,8 @@ if (existsSync(workflowDir)) {
         continue;
       }
 
-      // For secrets, just check presence; for literals, check exact value
-      if (actualValue === 'required' && registryVar.value !== 'required') {
-        // Workflow uses secret but registry has literal value - possibly wrong
-        continue; // Allow this for now
-      } else if (actualValue !== 'required' && actualValue !== registryVar.value) {
+      // Validate value consistency: registry and workflow must match
+      if (actualValue !== registryVar.value) {
         issues.push(`${workflowFile} ${varName} mismatch: registry="${registryVar.value}", workflow="${actualValue}"`);
       }
     }

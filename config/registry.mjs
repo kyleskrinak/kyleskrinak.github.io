@@ -46,7 +46,7 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: false },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'main-aws': {
@@ -54,7 +54,7 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: false },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     }
   },

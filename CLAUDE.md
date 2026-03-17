@@ -10,7 +10,7 @@ Tech stack: Astro, TypeScript, Tailwind CSS, Pagefind, Playwright
 - Primary source: `src/`
 - Tests: `tests/` (Playwright visual & functional tests)
 - Design assets: `design/` (graphic source files, not deployed)
-- Config: `astro.config.ts`, `playwright.config.ts`
+- Config: `astro.config.ts`, `playwright.config.ts`, `config/registry.mjs` (single source of truth)
 - Documentation: `docs/` (comprehensive project docs)
 
 ## Forbidden Directories
