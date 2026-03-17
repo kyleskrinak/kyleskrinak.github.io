@@ -25,7 +25,10 @@
     "test:production": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test",
     "htmltest": "htmltest",
     "htmltest:verbose": "htmltest -l 3",
-    "check:links": "node scripts/check-links.js"
+    "check:links": "node scripts/check-links.js",
+    "config:generate": "node config/generate-docs.mjs",
+    "config:validate": "node config/validate.mjs",
+    "config:inspect": "node config/inspect.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.15",
