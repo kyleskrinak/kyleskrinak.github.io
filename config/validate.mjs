@@ -38,6 +38,23 @@ if (existsSync('src/components/GoogleAnalytics.astro')) {
   }
 }
 
+// Validate workflow environment variables
+if (existsSync('.github/workflows/staging-deploy.yml')) {
+  const stagingWorkflow = readFileSync('.github/workflows/staging-deploy.yml', 'utf-8');
+  const stagingDeployEnv = stagingWorkflow.match(/PUBLIC_DEPLOY_ENV:\s*(\w+)/);
+  if (!stagingDeployEnv || stagingDeployEnv[1] !== ConfigRegistry.environments['staging-gh'].PUBLIC_DEPLOY_ENV.value) {
+    issues.push(`staging-deploy.yml PUBLIC_DEPLOY_ENV mismatch: registry says "${ConfigRegistry.environments['staging-gh'].PUBLIC_DEPLOY_ENV.value}", workflow has "${stagingDeployEnv?.[1] || 'not set'}"`);
+  }
+}
+
+if (existsSync('.github/workflows/production-deploy.yml')) {
+  const prodWorkflow = readFileSync('.github/workflows/production-deploy.yml', 'utf-8');
+  const prodDeployEnv = prodWorkflow.match(/PUBLIC_DEPLOY_ENV:\s*(\w+)/);
+  if (!prodDeployEnv || prodDeployEnv[1] !== ConfigRegistry.environments['main-aws'].PUBLIC_DEPLOY_ENV.value) {
+    issues.push(`production-deploy.yml PUBLIC_DEPLOY_ENV mismatch: registry says "${ConfigRegistry.environments['main-aws'].PUBLIC_DEPLOY_ENV.value}", workflow has "${prodDeployEnv?.[1] || 'not set'}"`);
+  }
+}
+
 // Check if docs exist
 if (!existsSync('docs/operations/environment-configuration.md')) {
   console.warn('⚠️  Generated docs not found. Run: npm run config:generate');

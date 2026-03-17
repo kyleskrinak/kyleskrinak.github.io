@@ -2,7 +2,7 @@
 
 > **⚠️ AUTO-GENERATED** from `config/registry.mjs`
 >
-> Last generated: 2026-03-17T13:39:38.562Z
+> Last generated: 2026-03-17T14:07:52.047Z
 
 ## Environment Variable Matrix
 
@@ -11,7 +11,7 @@
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ |
 | `SITE_URL` | `null` | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ |
 | `import.meta.env.PROD` | `false` | `true` | `true` |
-| `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | - |
+| `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | - | `required` ✓ |
 
 ✓ = Required
