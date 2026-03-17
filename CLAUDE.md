@@ -77,6 +77,57 @@ If my instruction is unclear, ask what I want. Don't assume.
 - Ask: "Would copying be easier than generalizing?" If yes, copy.
 - **Exception:** Infrastructure abstractions (config registry, validation) justified when preventing repeated manual fixes
 
+## Configuration Abstraction Layer
+
+**Single Source of Truth:** `config/registry.mjs`
+
+All configuration values (env vars, deployment settings, Astro config) are documented in the registry and validated automatically in CI.
+
+### Validation Coverage
+
+The config validator (`npm run config:validate`) enforces consistency across:
+
+1. **Workflows ↔ Registry**: Environment variables in `.github/workflows/*.yml` must match registry
+2. **Env Schema ↔ Registry**: Variables in `astro.config.ts` env schema must be documented in registry
+3. **Code ↔ Env Schema**: All `process.env.*` usage must be declared in env schema
+4. **Deployment ↔ Registry**: GitHub repository variables (`vars.*`) must match deployment config
+5. **Docs ↔ Registry**: Generated docs (`docs/operations/environment-configuration.md`) must be up to date
+6. **Hardcoded Fallbacks ↔ Registry**: Literal values in `src/config/index.ts` must match registry
+
+### Design Decisions
+
+**Why `src/config/index.ts` uses `process.env` instead of `astro:env`:**
+- Runs at build initialization before Astro env is fully available
+- Implements fallback logic for local development
+- Hardcoded fallback URLs are **validated** against registry to prevent drift
+- Validation-only approach chosen over refactoring for reliability
+
+**When to update configuration:**
+1. Change value in `config/registry.mjs`
+2. Run `npm run config:generate` to update docs
+3. Run `npm run config:validate` to verify consistency
+4. Update workflows if needed
+5. Commit all changes together
+
+**CI Enforcement:**
+- Validation runs in all deployment workflows (PR, staging, production)
+- Prevents merging/deploying with configuration drift
+- Fails fast with clear error messages
+
+### Common Scenarios
+
+**Adding a new env var:**
+1. Add to `astro.config.ts` env schema
+2. Add to `config/registry.mjs` environments
+3. Add to workflows that need it
+4. Run `npm run config:generate && npm run config:validate`
+
+**Changing a URL:**
+1. Update in `config/registry.mjs`
+2. Update in workflows
+3. If used in `src/config/index.ts` fallbacks, update there too
+4. Validation will catch mismatches
+
 ## Git Workflow
 
 ### Branch Structure

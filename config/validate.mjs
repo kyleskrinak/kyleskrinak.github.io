@@ -227,6 +227,11 @@ for (const filePath of processEnvUsageFiles) {
 }
 
 // Validate hardcoded literal values in src/config/index.ts against registry
+//
+// Design decision: src/config/index.ts uses process.env with hardcoded fallbacks
+// instead of astro:env because it runs at build initialization before Astro env
+// is fully available. We validate the literals against the registry to prevent
+// drift while maintaining build-time reliability.
 if (existsSync('src/config/index.ts')) {
   const configContent = readFileSync('src/config/index.ts', 'utf-8');
 

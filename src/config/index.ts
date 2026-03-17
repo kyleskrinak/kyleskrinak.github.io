@@ -3,6 +3,10 @@
 // Local dev without SITE_URL: BUILD_ENV defaults to "production" → kyle.skrinak.com
 // To test staging behavior locally: set BUILD_ENV to non-"production" value OR set SITE_URL explicitly
 // See: docs/operations/staging-url-reference.md for details
+//
+// NOTE: Uses process.env instead of astro:env because this runs at build time before
+// Astro env is fully initialized. Hardcoded fallback values are validated against
+// config/registry.mjs by config/validate.mjs to prevent drift.
 const buildEnv = process.env.BUILD_ENV || "production";
 const siteUrl = process.env.SITE_URL; // Explicit override from workflow (staging: github.io, production: kyle.skrinak.com)
 const isProduction = buildEnv === "production";
