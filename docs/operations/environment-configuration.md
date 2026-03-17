@@ -1,8 +1,7 @@
 # Environment Configuration Reference
 
 > **⚠️ AUTO-GENERATED** from `config/registry.mjs`
->
-> Last generated: 2026-03-17T14:36:58.969Z
+> Do not edit manually - run `npm run config:generate`
 
 ## Environment Variable Matrix
 

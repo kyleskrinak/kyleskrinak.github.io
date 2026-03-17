@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate configuration registry
+        run: npm run config:validate
+
       - name: Build site (PR code)
         run: npm run build:ci
         env:

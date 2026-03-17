@@ -33,8 +33,7 @@ function generateEnvironmentMatrix() {
 const doc = `# Environment Configuration Reference
 
 > **⚠️ AUTO-GENERATED** from \`config/registry.mjs\`
->
-> Last generated: ${new Date().toISOString()}
+> Do not edit manually - run \`npm run config:generate\`
 
 ## Environment Variable Matrix
 

@@ -124,35 +124,72 @@ if (existsSync(workflowDir)) {
 if (existsSync('astro.config.ts')) {
   const astroConfig = readFileSync('astro.config.ts', 'utf-8');
 
-  // Extract env schema variable names
-  const envSchemaRegex = /env:\s*\{[^}]*schema:\s*\{([^}]+)\}/s;
-  const schemaMatch = astroConfig.match(envSchemaRegex);
+  // Extract env schema variable names - look for pattern "varName: envField"
+  const varNameRegex = /(\w+):\s*envField/g;
+  const envVars = [];
+  let match;
 
-  if (schemaMatch) {
-    const schemaBlock = schemaMatch[1];
-    const varNameRegex = /(\w+):\s*envField/g;
-    const envVars = [];
-    let match;
+  while ((match = varNameRegex.exec(astroConfig)) !== null) {
+    envVars.push(match[1]);
+  }
 
-    while ((match = varNameRegex.exec(schemaBlock)) !== null) {
-      envVars.push(match[1]);
-    }
+  // Check each env schema var is documented in at least one registry environment
+  for (const varName of envVars) {
+    let foundInRegistry = false;
 
-    // Check each env schema var is documented in at least one registry environment
-    for (const varName of envVars) {
-      let foundInRegistry = false;
-
-      for (const envName of Object.keys(ConfigRegistry.environments)) {
-        if (ConfigRegistry.environments[envName][varName]) {
-          foundInRegistry = true;
-          break;
-        }
-      }
-
-      if (!foundInRegistry) {
-        issues.push(`astro.config.ts env schema declares ${varName} but it's not documented in any registry environment`);
+    for (const envName of Object.keys(ConfigRegistry.environments)) {
+      if (ConfigRegistry.environments[envName][varName]) {
+        foundInRegistry = true;
+        break;
       }
     }
+
+    if (!foundInRegistry) {
+      issues.push(`astro.config.ts env schema declares ${varName} but it's not documented in any registry environment`);
+    }
+  }
+}
+
+// Validate process.env usage against env schema
+const processEnvUsageFiles = [
+  'src/config/index.ts',
+  'astro.config.ts',
+];
+
+// Get env vars declared in astro.config.ts env schema
+const envSchemaVars = new Set();
+if (existsSync('astro.config.ts')) {
+  const astroConfig = readFileSync('astro.config.ts', 'utf-8');
+  const varNameRegex = /(\w+):\s*envField/g;
+  let match;
+
+  while ((match = varNameRegex.exec(astroConfig)) !== null) {
+    envSchemaVars.add(match[1]);
+  }
+}
+
+// Known system env vars that don't need to be in schema
+const systemEnvVars = new Set([
+  'NODE_ENV',
+  'DISABLE_DEV_TOOLBAR', // Dev-only toggle
+]);
+
+for (const filePath of processEnvUsageFiles) {
+  if (!existsSync(filePath)) continue;
+
+  const content = readFileSync(filePath, 'utf-8');
+  const processEnvRegex = /process\.env\.(\w+)/g;
+  let match;
+
+  while ((match = processEnvRegex.exec(content)) !== null) {
+    const varName = match[1];
+
+    // Skip if it's a system var or already in env schema
+    if (systemEnvVars.has(varName) || envSchemaVars.has(varName)) {
+      continue;
+    }
+
+    issues.push(`${filePath} uses process.env.${varName} but it's not declared in astro.config.ts env schema`);
   }
 }
 

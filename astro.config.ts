@@ -83,6 +83,17 @@ export default defineConfig({
         context: "client",
         optional: true,
       }),
+      BUILD_ENV: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+        default: "production",
+      }),
+      SITE_URL: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
     },
   },
   experimental: {
