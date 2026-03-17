@@ -226,6 +226,41 @@ for (const filePath of processEnvUsageFiles) {
   }
 }
 
+// Validate hardcoded literal values in src/config/index.ts against registry
+if (existsSync('src/config/index.ts')) {
+  const configContent = readFileSync('src/config/index.ts', 'utf-8');
+
+  // Extract hardcoded URLs from fallback logic
+  const prodUrlMatch = configContent.match(/isProduction \? "([^"]+)"/);
+  const stagingUrlMatch = configContent.match(/: "([^"]+)"\)/);
+  const buildEnvDefaultMatch = configContent.match(/process\.env\.BUILD_ENV \|\| "([^"]+)"/);
+
+  if (prodUrlMatch) {
+    const hardcodedProdUrl = prodUrlMatch[1];
+    const registryProdUrl = ConfigRegistry.environments['main-aws'].SITE_URL.value;
+    if (hardcodedProdUrl !== registryProdUrl) {
+      issues.push(`src/config/index.ts production URL "${hardcodedProdUrl}" doesn't match registry "${registryProdUrl}"`);
+    }
+  }
+
+  if (stagingUrlMatch) {
+    const hardcodedStagingUrl = stagingUrlMatch[1];
+    const registryStagingUrl = ConfigRegistry.environments['staging-gh'].SITE_URL.value;
+    if (hardcodedStagingUrl !== registryStagingUrl) {
+      issues.push(`src/config/index.ts staging URL "${hardcodedStagingUrl}" doesn't match registry "${registryStagingUrl}"`);
+    }
+  }
+
+  if (buildEnvDefaultMatch) {
+    const hardcodedDefault = buildEnvDefaultMatch[1];
+    // BUILD_ENV default should match astro.config.ts env schema default
+    // The schema default is "production" so we validate against that
+    if (hardcodedDefault !== 'production') {
+      issues.push(`src/config/index.ts BUILD_ENV default "${hardcodedDefault}" should be "production"`);
+    }
+  }
+}
+
 // Validate generated docs are up to date
 const docsPath = 'docs/operations/environment-configuration.md';
 if (!existsSync(docsPath)) {

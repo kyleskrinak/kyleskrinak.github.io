@@ -6,7 +6,7 @@
 const buildEnv = process.env.BUILD_ENV || "production";
 const siteUrl = process.env.SITE_URL; // Explicit override from workflow (staging: github.io, production: kyle.skrinak.com)
 const isProduction = buildEnv === "production";
-const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io");
+const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io/");
 
 console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);
 
