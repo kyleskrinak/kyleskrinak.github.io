@@ -63,7 +63,6 @@
   - `AWS_REGION`: github-var (used in production-deploy.yml:58)
   - `AWS_S3_BUCKET`: github-var (used in production-deploy.yml:63,75)
   - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in production-deploy.yml:85)
-  - `GOOGLE_ANALYTICS_ID`: github-var (used in production-deploy.yml:53)
 
 ### PR Visual Check
 - Platform: Local (no deployment)
