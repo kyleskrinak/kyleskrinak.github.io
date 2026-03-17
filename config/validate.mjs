@@ -4,7 +4,8 @@
  */
 
 import { ConfigRegistry } from './registry.mjs';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 const issues = [];
 
@@ -38,20 +39,82 @@ if (existsSync('src/components/GoogleAnalytics.astro')) {
   }
 }
 
-// Validate workflow environment variables
-if (existsSync('.github/workflows/staging-deploy.yml')) {
-  const stagingWorkflow = readFileSync('.github/workflows/staging-deploy.yml', 'utf-8');
-  const stagingDeployEnv = stagingWorkflow.match(/PUBLIC_DEPLOY_ENV:\s*(\w+)/);
-  if (!stagingDeployEnv || stagingDeployEnv[1] !== ConfigRegistry.environments['staging-gh'].PUBLIC_DEPLOY_ENV.value) {
-    issues.push(`staging-deploy.yml PUBLIC_DEPLOY_ENV mismatch: registry says "${ConfigRegistry.environments['staging-gh'].PUBLIC_DEPLOY_ENV.value}", workflow has "${stagingDeployEnv?.[1] || 'not set'}"`);
+// Comprehensive workflow validation
+const WORKFLOW_TO_ENV_MAP = {
+  'staging-deploy.yml': 'staging-gh',
+  'production-deploy.yml': 'main-aws',
+  'pr-visual-check.yml': 'pr-visual-check'
+};
+
+const TRACKED_ENV_VARS = ['BUILD_ENV', 'SITE_URL', 'PUBLIC_DEPLOY_ENV', 'PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN'];
+
+function extractEnvVars(workflowContent) {
+  const envVars = {};
+  const envBlockRegex = /env:\s*\n((?:\s+\w+:.*\n)+)/g;
+  const matches = [...workflowContent.matchAll(envBlockRegex)];
+
+  for (const match of matches) {
+    const block = match[1];
+    for (const varName of TRACKED_ENV_VARS) {
+      const varRegex = new RegExp(`${varName}:\\s*(.+)`);
+      const varMatch = block.match(varRegex);
+      if (varMatch) {
+        const rawValue = varMatch[1].trim();
+        // Extract actual value, ignoring secrets syntax
+        let value = rawValue;
+        if (rawValue.includes('secrets.')) {
+          value = 'required'; // Secret reference
+        }
+        envVars[varName] = value;
+      }
+    }
   }
+  return envVars;
 }
 
-if (existsSync('.github/workflows/production-deploy.yml')) {
-  const prodWorkflow = readFileSync('.github/workflows/production-deploy.yml', 'utf-8');
-  const prodDeployEnv = prodWorkflow.match(/PUBLIC_DEPLOY_ENV:\s*(\w+)/);
-  if (!prodDeployEnv || prodDeployEnv[1] !== ConfigRegistry.environments['main-aws'].PUBLIC_DEPLOY_ENV.value) {
-    issues.push(`production-deploy.yml PUBLIC_DEPLOY_ENV mismatch: registry says "${ConfigRegistry.environments['main-aws'].PUBLIC_DEPLOY_ENV.value}", workflow has "${prodDeployEnv?.[1] || 'not set'}"`);
+// Scan all workflow files
+const workflowDir = '.github/workflows';
+if (existsSync(workflowDir)) {
+  const workflowFiles = readdirSync(workflowDir).filter(f => f.endsWith('.yml'));
+
+  for (const workflowFile of workflowFiles) {
+    const envName = WORKFLOW_TO_ENV_MAP[workflowFile];
+    if (!envName) continue; // Skip unmapped workflows
+
+    const workflowPath = join(workflowDir, workflowFile);
+    const workflowContent = readFileSync(workflowPath, 'utf-8');
+    const actualEnvVars = extractEnvVars(workflowContent);
+
+    const registryEnv = ConfigRegistry.environments[envName];
+    if (!registryEnv) {
+      issues.push(`Workflow ${workflowFile} maps to environment "${envName}" but registry has no such environment`);
+      continue;
+    }
+
+    // Check: workflow vars present in registry
+    for (const [varName, actualValue] of Object.entries(actualEnvVars)) {
+      const registryVar = registryEnv[varName];
+      if (!registryVar) {
+        issues.push(`${workflowFile} sets ${varName} but registry environment "${envName}" omits it`);
+        continue;
+      }
+
+      // For secrets, just check presence; for literals, check exact value
+      if (actualValue === 'required' && registryVar.value !== 'required') {
+        // Workflow uses secret but registry has literal value - possibly wrong
+        continue; // Allow this for now
+      } else if (actualValue !== 'required' && actualValue !== registryVar.value) {
+        issues.push(`${workflowFile} ${varName} mismatch: registry="${registryVar.value}", workflow="${actualValue}"`);
+      }
+    }
+
+    // Check: registry vars present in workflow (except import.meta.env.PROD)
+    for (const varName of Object.keys(registryEnv)) {
+      if (varName === 'import.meta.env.PROD') continue; // Not in workflow env
+      if (!actualEnvVars[varName]) {
+        issues.push(`Registry environment "${envName}" documents ${varName} but ${workflowFile} doesn't set it`);
+      }
+    }
   }
 }
 

@@ -38,6 +38,13 @@ export const ConfigRegistry = {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyleskrinak.github.io/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
+      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
+      'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
+    },
+    'pr-visual-check': {
+      BUILD_ENV: { value: 'production', source: 'workflow', required: true },
+      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
+      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'main-aws': {

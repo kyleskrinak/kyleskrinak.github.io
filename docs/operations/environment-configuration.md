@@ -2,17 +2,17 @@
 
 > **⚠️ AUTO-GENERATED** from `config/registry.mjs`
 >
-> Last generated: 2026-03-17T14:07:52.047Z
+> Last generated: 2026-03-17T14:21:12.885Z
 
 ## Environment Variable Matrix
 
-| Variable | local-develop | staging-gh | main-aws |
-|----------|----------|----------|----------|
-| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ |
-| `SITE_URL` | `null` | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `import.meta.env.PROD` | `false` | `true` | `true` |
-| `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ |
-| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | - | `required` ✓ |
+| Variable | local-develop | staging-gh | pr-visual-check | main-aws |
+|----------|----------|----------|----------|----------|
+| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
+| `SITE_URL` | `null` | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
+| `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
+| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | - | `required` ✓ |
 
 ✓ = Required
 
