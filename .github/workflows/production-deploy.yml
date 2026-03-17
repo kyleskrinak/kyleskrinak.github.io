@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate configuration registry
+        run: npm run config:validate
+
       - name: Check Cloudflare production token presence
         run: |
           if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
