@@ -50,7 +50,7 @@ jobs:
           SITE_URL: https://kyle.skrinak.com/
           PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
           PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION_PROD }}
-          PUBLIC_GOOGLE_ANALYTICS_ID: G-1EES7VJW1J
+          PUBLIC_GOOGLE_ANALYTICS_ID: ${{ vars.GOOGLE_ANALYTICS_ID }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

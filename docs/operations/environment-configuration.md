@@ -8,12 +8,12 @@
 | Variable | local-develop | staging-gh | pr-visual-check | main-aws |
 |----------|----------|----------|----------|----------|
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
-| `SITE_URL` | `null` | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `SITE_URL` | (omitted) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
 | `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | `null` | `G-1EES7VJW1J` ✓ | `G-1EES7VJW1J` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | (omitted) | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | (omitted) | `required` ✓ | `required` ✓ |
 
 ✓ = Required
 
@@ -63,6 +63,7 @@
   - `AWS_REGION`: github-var (used in production-deploy.yml:58)
   - `AWS_S3_BUCKET`: github-var (used in production-deploy.yml:63,75)
   - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in production-deploy.yml:85)
+  - `GOOGLE_ANALYTICS_ID`: github-var (used in production-deploy.yml:53)
 
 ### PR Visual Check
 - Platform: Local (no deployment)

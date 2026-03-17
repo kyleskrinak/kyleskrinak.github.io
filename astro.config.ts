@@ -88,6 +88,11 @@ export default defineConfig({
         context: "client",
         optional: true,
       }),
+      // BUILD_ENV and SITE_URL are "type-system only" entries - declared here for
+      // validation but consumed via process.env in src/config/index.ts (not astro:env)
+      // because that file runs at build initialization before Astro env is available.
+      // Hardcoded fallback values in src/config/index.ts are validated against the
+      // registry by config/validate.mjs to prevent drift.
       BUILD_ENV: envField.string({
         access: "secret",
         context: "server",

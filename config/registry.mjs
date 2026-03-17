@@ -40,6 +40,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'pr-visual-check': {
@@ -48,7 +49,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'G-1EES7VJW1J', source: 'workflow', required: true },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'github-var', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     },
     'main-aws': {
@@ -57,7 +58,7 @@ export const ConfigRegistry = {
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'G-1EES7VJW1J', source: 'workflow', required: true },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'github-var', required: true },
       'import.meta.env.PROD': { value: true, source: 'astro-build', required: false }
     }
   },
@@ -96,14 +97,17 @@ export const ConfigRegistry = {
         AWS_DEPLOY_ROLE: { value: 'required', source: 'github-var', location: 'production-deploy.yml:57' },
         AWS_REGION: { value: 'required', source: 'github-var', location: 'production-deploy.yml:58' },
         AWS_S3_BUCKET: { value: 'required', source: 'github-var', location: 'production-deploy.yml:63,75' },
-        AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:85' }
+        AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:85' },
+        GOOGLE_ANALYTICS_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:53' }
       }
     },
     'pr-visual-check': {
       platform: 'Local (no deployment)',
       mechanism: 'Build artifacts only',
       location: '.github/workflows/pr-visual-check.yml',
-      variables: {}
+      variables: {
+        GOOGLE_ANALYTICS_ID: { value: 'required', source: 'github-var', location: 'pr-visual-check.yml:47' }
+      }
     }
   }
 };

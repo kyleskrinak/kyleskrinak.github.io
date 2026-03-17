@@ -4,6 +4,7 @@
  */
 
 import { ConfigRegistry } from './registry.mjs';
+import { generateEnvironmentMatrix } from './shared.mjs';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 
@@ -62,10 +63,10 @@ function extractEnvVars(workflowContent) {
       const varName = varMatch[1];
       const rawValue = varMatch[2].trim();
 
-      // Extract actual value, ignoring secrets syntax
+      // Extract actual value, ignoring secrets/vars syntax
       let value = rawValue;
-      if (rawValue.includes('secrets.')) {
-        value = 'required'; // Secret reference
+      if (rawValue.includes('secrets.') || rawValue.includes('vars.')) {
+        value = 'required'; // Secret or GitHub variable reference
       }
 
       envVars[varName] = value;
@@ -268,35 +269,11 @@ if (existsSync('src/config/index.ts')) {
 }
 
 // Validate generated docs are up to date
+// Uses shared generateEnvironmentMatrix() to ensure validation matches generation
 const docsPath = 'docs/operations/environment-configuration.md';
 if (!existsSync(docsPath)) {
   issues.push('Generated docs not found. Run: npm run config:generate');
 } else {
-  // Generate expected doc content (matching generate-docs.mjs logic)
-  function generateEnvironmentMatrix() {
-    const envs = Object.keys(ConfigRegistry.environments);
-    const allVars = new Set();
-
-    envs.forEach(env => {
-      Object.keys(ConfigRegistry.environments[env]).forEach(v => allVars.add(v));
-    });
-
-    const rows = Array.from(allVars).map(varName => {
-      const cells = envs.map(env => {
-        const config = ConfigRegistry.environments[env][varName];
-        if (!config) return '-';
-        const required = config.required ? ' ✓' : '';
-        return `\`${config.value}\`${required}`;
-      });
-      return `| \`${varName}\` | ${cells.join(' | ')} |`;
-    });
-
-    const headerRow = `| Variable | ${envs.join(' | ')} |`;
-    const separatorRow = `|----------|${envs.map(() => '----------').join('|')}|`;
-
-    return `${headerRow}\n${separatorRow}\n${rows.join('\n')}`;
-  }
-
   const expectedDoc = `# Environment Configuration Reference
 
 > **⚠️ AUTO-GENERATED** from \`config/registry.mjs\`
@@ -304,7 +281,7 @@ if (!existsSync(docsPath)) {
 
 ## Environment Variable Matrix
 
-${generateEnvironmentMatrix()}
+${generateEnvironmentMatrix(ConfigRegistry)}
 
 ✓ = Required
 
