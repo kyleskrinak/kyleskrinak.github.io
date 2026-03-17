@@ -2,7 +2,7 @@
 
 > **⚠️ AUTO-GENERATED** from `config/registry.mjs`
 >
-> Last generated: 2026-03-17T14:21:12.885Z
+> Last generated: 2026-03-17T14:36:58.969Z
 
 ## Environment Variable Matrix
 
@@ -13,6 +13,7 @@
 | `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 | `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | - | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | - | - | `optional` |
 
 ✓ = Required
 

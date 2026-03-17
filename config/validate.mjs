@@ -108,11 +108,49 @@ if (existsSync(workflowDir)) {
       }
     }
 
-    // Check: registry vars present in workflow (except import.meta.env.PROD)
+    // Check: registry vars present in workflow (except import.meta.env.PROD and optional vars)
     for (const varName of Object.keys(registryEnv)) {
       if (varName === 'import.meta.env.PROD') continue; // Not in workflow env
+      const registryVar = registryEnv[varName];
+      if (registryVar.required === false) continue; // Optional vars may not be in workflow
       if (!actualEnvVars[varName]) {
         issues.push(`Registry environment "${envName}" documents ${varName} but ${workflowFile} doesn't set it`);
+      }
+    }
+  }
+}
+
+// Validate astro.config.ts env schema coverage
+if (existsSync('astro.config.ts')) {
+  const astroConfig = readFileSync('astro.config.ts', 'utf-8');
+
+  // Extract env schema variable names
+  const envSchemaRegex = /env:\s*\{[^}]*schema:\s*\{([^}]+)\}/s;
+  const schemaMatch = astroConfig.match(envSchemaRegex);
+
+  if (schemaMatch) {
+    const schemaBlock = schemaMatch[1];
+    const varNameRegex = /(\w+):\s*envField/g;
+    const envVars = [];
+    let match;
+
+    while ((match = varNameRegex.exec(schemaBlock)) !== null) {
+      envVars.push(match[1]);
+    }
+
+    // Check each env schema var is documented in at least one registry environment
+    for (const varName of envVars) {
+      let foundInRegistry = false;
+
+      for (const envName of Object.keys(ConfigRegistry.environments)) {
+        if (ConfigRegistry.environments[envName][varName]) {
+          foundInRegistry = true;
+          break;
+        }
+      }
+
+      if (!foundInRegistry) {
+        issues.push(`astro.config.ts env schema declares ${varName} but it's not documented in any registry environment`);
       }
     }
   }
