@@ -25,3 +25,18 @@ export const isStaging =
   BASE_URL.includes('github.io') ||
   process.env.PLAYWRIGHT_DEPLOY_ENV === 'staging' ||
   process.env.PUBLIC_DEPLOY_ENV === 'staging';
+
+/**
+ * Detect if BASE_URL is a local development URL
+ * Analytics and other production-only features skip tests on local URLs
+ *
+ * Returns true if:
+ * - PLAYWRIGHT_TEST_BASE_URL is not set (defaults to localhost)
+ * - BASE_URL contains localhost, 127.0.0.1, .local, or ::1
+ */
+export const isLocalUrl =
+  !process.env.PLAYWRIGHT_TEST_BASE_URL ||
+  BASE_URL.includes("localhost") ||
+  BASE_URL.includes("127.0.0.1") ||
+  BASE_URL.includes(".local") ||
+  BASE_URL.includes("::1");
