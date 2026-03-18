@@ -21,6 +21,8 @@ export function generateEnvironmentMatrix(ConfigRegistry) {
       if (!config) return '-';
       // Handle null values explicitly
       if (config.value === null) return '(omitted)';
+      // Fallback values come from code logic, not an explicitly set env var
+      if (config.source === 'fallback') return `(fallback: \`${config.value}\`)`;
       const required = config.required ? ' ✓' : '';
       return `\`${config.value}\`${required}`;
     });
@@ -28,6 +30,8 @@ export function generateEnvironmentMatrix(ConfigRegistry) {
   });
 
   const headerRow = `| Variable | ${envs.join(' | ')} |`;
+  // Fixed-width separator: 10 dashes per column regardless of variable name length.
+  // GitHub Markdown renders tables correctly with short separators — cosmetic only.
   const separatorRow = `|----------|${envs.map(() => '----------').join('|')}|`;
 
   return `${headerRow}\n${separatorRow}\n${rows.join('\n')}`;
@@ -70,7 +74,7 @@ export function generateDocContent(ConfigRegistry) {
 
 ${generateEnvironmentMatrix(ConfigRegistry)}
 
-✓ = Required
+✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
 
 ## Build Flags
 

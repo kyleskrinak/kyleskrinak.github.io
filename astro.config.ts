@@ -93,14 +93,19 @@ export default defineConfig({
       // because that file runs at build initialization before Astro env is available.
       // Hardcoded fallback values in src/config/index.ts are validated against the
       // registry by config/validate.mjs to prevent drift.
+      //
+      // access: "secret" here is NOT a credential classification — these are not
+      // sensitive values. "secret" (vs "public") is used to prevent these vars from
+      // being inlined into client-side JavaScript bundles; the server-only constraint
+      // is intentional since these vars are only needed at build time.
       BUILD_ENV: envField.string({
-        access: "secret",
+        access: "secret", // prevents client bundling — not a credential (see comment above)
         context: "server",
         optional: true,
         default: "production",
       }),
       SITE_URL: envField.string({
-        access: "secret",
+        access: "secret", // prevents client bundling — not a credential (see comment above)
         context: "server",
         optional: true,
       }),

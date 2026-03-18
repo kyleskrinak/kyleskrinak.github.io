@@ -8,13 +8,13 @@
 | Variable | local-develop | staging-gh | pr-visual-check | main-aws |
 |----------|----------|----------|----------|----------|
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
-| `SITE_URL` | (omitted) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_DEPLOY_ENV` | - | `staging` ✓ | `production` ✓ | `production` ✓ |
-| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | - | `required` ✓ | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_ANALYTICS_ID` | - | (omitted) | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | - | (omitted) | `required` ✓ | `required` ✓ |
+| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `PUBLIC_DEPLOY_ENV` | (omitted) | `staging` ✓ | `production` ✓ | `production` ✓ |
+| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_ANALYTICS_ID` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
 
-✓ = Required
+✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
 
 ## Build Flags
 
@@ -27,12 +27,12 @@ Astro build flags set automatically by the framework (not configurable via workf
 ## Astro Configuration
 
 ### base: `/`
-- Location: astro.config.ts:21
+- Location: astro.config.ts
 - Reason: GitHub Pages user site must deploy to root
 - Impacts: All URLs, Canonical paths, Asset paths
 
 ### trailingSlash: `always`
-- Location: astro.config.ts:26
+- Location: astro.config.ts
 - Reason: Consistency with Jekyll URL structure
 - Impacts:
   - Canonical URLs must end with /
@@ -44,12 +44,12 @@ Astro build flags set automatically by the framework (not configurable via workf
 
 ### Cloudflare
 - Gating: `import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`
-- Location: src/layouts/Layout.astro:214
+- Location: src/layouts/Layout.astro
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 ### Google Analytics
 - Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID`
-- Location: src/components/GoogleAnalytics.astro:6
+- Location: src/components/GoogleAnalytics.astro
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.
@@ -65,11 +65,11 @@ Astro build flags set automatically by the framework (not configurable via workf
 - Platform: AWS S3 + CloudFront
 - Mechanism: OIDC authentication + AWS CLI
 - Variables (GitHub repository vars):
-  - `AWS_ACCOUNT_ID`: github-var (used in production-deploy.yml:57)
-  - `AWS_DEPLOY_ROLE`: github-var (used in production-deploy.yml:57)
-  - `AWS_REGION`: github-var (used in production-deploy.yml:58)
-  - `AWS_S3_BUCKET`: github-var (used in production-deploy.yml:63,75)
-  - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in production-deploy.yml:85)
+  - `AWS_ACCOUNT_ID`: github-var (used in .github/workflows/production-deploy.yml)
+  - `AWS_DEPLOY_ROLE`: github-var (used in .github/workflows/production-deploy.yml)
+  - `AWS_REGION`: github-var (used in .github/workflows/production-deploy.yml)
+  - `AWS_S3_BUCKET`: github-var (used in .github/workflows/production-deploy.yml)
+  - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in .github/workflows/production-deploy.yml)
 
 ### PR Visual Check
 - Platform: Local (no deployment)

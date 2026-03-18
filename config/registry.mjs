@@ -3,6 +3,13 @@
  *
  * Single source of truth for all configuration values across environments.
  *
+ * Scope: This registry covers deployment/environment configuration —
+ * env vars, build flags, analytics gating, and deployment settings that
+ * vary across environments. `src/config/index.ts` also exports static site
+ * content (author, title, ogImage, social links, etc.) that is intentionally
+ * out of scope here — those values don't vary by environment and don't need
+ * registry tracking.
+ *
  * Naming conventions:
  * - environments: Uses Astro env var names (PUBLIC_*, BUILD_ENV, SITE_URL).
  *   These are the names set in workflow `env:` blocks and consumed by Astro.
@@ -14,20 +21,33 @@
  *   PUBLIC_GOOGLE_ANALYTICS_ID env var).
  * - buildFlags: Astro framework flags set automatically at build time; these
  *   are NOT workflow env vars and cannot be overridden via `env:` blocks.
+ *
+ * Source field values (where configuration values come from):
+ * - 'workflow': Set explicitly in workflow env blocks (required in CI)
+ * - 'secret': Pulled from GitHub secrets (sensitive values, required in CI)
+ * - 'github-var': GitHub repository variables (vars.VARIABLE_NAME in workflows)
+ * - 'default': Defined by env schema default (astro.config.ts), always available
+ * - 'optional': Can be set explicitly; when absent another var provides the value
+ * - 'fallback': Not set as env var; effective value comes from code fallback logic
+ * - 'omitted': Not set in this environment (value: null, not used)
  */
+
+// NOTE: `location` fields specify files where config values are used.
+// Line numbers are omitted because they drift after refactors and become
+// misleading. The gating expression validation ensures correctness.
 
 export const ConfigRegistry = {
   astro: {
     base: {
       value: '/',
-      location: 'astro.config.ts:21',
+      location: 'astro.config.ts',
       reason: 'GitHub Pages user site must deploy to root',
       relatedDocs: 'docs/operations/staging-url-reference.md',
       impact: ['All URLs', 'Canonical paths', 'Asset paths']
     },
     trailingSlash: {
       value: 'always',
-      location: 'astro.config.ts:26',
+      location: 'astro.config.ts',
       reason: 'Consistency with Jekyll URL structure',
       relatedDocs: 'docs/operations/staging-url-reference.md#url-structure',
       impact: [
@@ -43,17 +63,50 @@ export const ConfigRegistry = {
   environments: {
     'local-develop': {
       BUILD_ENV: { value: 'production', source: 'default', required: false },
-      SITE_URL: { value: null, source: 'optional', required: false }
+      SITE_URL: {
+        value: 'https://kyle.skrinak.com/',
+        source: 'fallback',
+        required: false,
+        notes: 'Not set as env var; src/config/index.ts falls back to production URL. Set SITE_URL explicitly to override.'
+      },
+      PUBLIC_DEPLOY_ENV: {
+        value: null,
+        source: 'optional',
+        required: false,
+        notes: 'Not set locally; undefined means no staging-specific UI shown.'
+      },
+      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: {
+        value: null,
+        source: 'omitted',
+        required: false,
+        notes: 'Gated on import.meta.env.PROD — never loads in local dev builds.'
+      },
+      PUBLIC_GOOGLE_ANALYTICS_ID: {
+        value: null,
+        source: 'omitted',
+        required: false,
+        notes: 'Gated on import.meta.env.PROD — never loads in local dev builds.'
+      },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: {
+        value: null,
+        source: 'omitted',
+        required: false,
+        notes: 'Gated on import.meta.env.PROD — never renders in local dev builds.'
+      }
     },
     'staging-gh': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyleskrinak.github.io/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no analytics tracking needed for preview builds' },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no search engine verification needed for deindexed preview builds' }
     },
     'pr-visual-check': {
+      // PR visual checks build with production settings to generate accurate baseline screenshots.
+      // Analytics secrets are required because Layout.astro/GoogleAnalytics.astro render conditionally
+      // on these values, affecting visual output. Using production URL and deploy env ensures
+      // screenshots match what will be deployed after merge.
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
@@ -85,15 +138,21 @@ export const ConfigRegistry = {
   analytics: {
     cloudflare: {
       gating: 'import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN',
-      location: 'src/layouts/Layout.astro:214',
+      location: 'src/layouts/Layout.astro',
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
-      testLocation: 'tests/test-utils.ts:isLocalUrl'
+      testLocation: 'tests/test-utils.ts (isLocalUrl)'
     },
     googleAnalytics: {
       gating: 'import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID',
-      location: 'src/components/GoogleAnalytics.astro:6',
+      location: 'src/components/GoogleAnalytics.astro',
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
-      testLocation: 'tests/test-utils.ts:isLocalUrl'
+      testLocation: 'tests/test-utils.ts (isLocalUrl)'
+    },
+    googleSiteVerification: {
+      gating: 'import.meta.env.PROD && PUBLIC_GOOGLE_SITE_VERIFICATION',
+      location: 'src/layouts/Layout.astro',
+      testPolicy: 'Not tested separately; gating covered by prod-build rule',
+      testLocation: null
     }
   },
 
@@ -112,11 +171,11 @@ export const ConfigRegistry = {
       mechanism: 'OIDC authentication + AWS CLI',
       location: '.github/workflows/production-deploy.yml',
       variables: {
-        AWS_ACCOUNT_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:57' },
-        AWS_DEPLOY_ROLE: { value: 'required', source: 'github-var', location: 'production-deploy.yml:57' },
-        AWS_REGION: { value: 'required', source: 'github-var', location: 'production-deploy.yml:58' },
-        AWS_S3_BUCKET: { value: 'required', source: 'github-var', location: 'production-deploy.yml:63,75' },
-        AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: 'production-deploy.yml:85' }
+        AWS_ACCOUNT_ID: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
+        AWS_DEPLOY_ROLE: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
+        AWS_REGION: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
+        AWS_S3_BUCKET: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
+        AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' }
       }
     },
     'pr-visual-check': {

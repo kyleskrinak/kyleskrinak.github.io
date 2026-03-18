@@ -29,16 +29,31 @@ Object.entries(ConfigRegistry.environments).forEach(([env, vars]) => {
   });
 });
 
+console.log('\n🚩 BUILD FLAGS');
+console.log('─'.repeat(60));
+Object.entries(ConfigRegistry.buildFlags).forEach(([flag, values]) => {
+  console.log(`\n${flag}:`);
+  Object.entries(values).forEach(([env, value]) => {
+    console.log(`  ${env}: ${value}`);
+  });
+});
+
 console.log('\n📊 ANALYTICS');
 console.log('─'.repeat(60));
 console.log(`\nCloudflare: ${ConfigRegistry.analytics.cloudflare.gating}`);
 console.log(`GA: ${ConfigRegistry.analytics.googleAnalytics.gating}`);
+console.log(`GSV: ${ConfigRegistry.analytics.googleSiteVerification.gating}`);
 
 console.log('\n🔧 CURRENT PROCESS ENV');
 console.log('─'.repeat(60));
-console.log(`BUILD_ENV: ${process.env.BUILD_ENV || '(not set)'}`);
-console.log(`SITE_URL: ${process.env.SITE_URL || '(not set)'}`);
-console.log(`PUBLIC_DEPLOY_ENV: ${process.env.PUBLIC_DEPLOY_ENV || '(not set)'}`);
+
+const allVarNames = new Set();
+Object.values(ConfigRegistry.environments).forEach(env =>
+  Object.keys(env).forEach(k => allVarNames.add(k))
+);
+for (const varName of [...allVarNames].sort()) {
+  console.log(`${varName}: ${process.env[varName] || '(not set)'}`);
+}
 
 console.log('\n' + '═'.repeat(60));
 console.log('\n💡 Tip: Run "npm run config:validate" to check for drift\n');

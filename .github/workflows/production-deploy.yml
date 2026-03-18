@@ -33,6 +33,8 @@ jobs:
         run: npm run config:validate
 
       - name: Check Cloudflare production token presence
+        # Informational only — logs presence/absence but does not fail the build.
+        # Enforcement (exit 1 on missing) is in secrets-check.yml (workflow_dispatch).
         run: |
           if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
             echo "Cloudflare production token is set (masked)."
