@@ -9,7 +9,7 @@
 |----------|----------|----------|----------|----------|
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
 | `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_DEPLOY_ENV` | (omitted) | `staging` ✓ | `production` ✓ | `production` ✓ |
+| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | `required` ✓ | `required` ✓ |
 | `PUBLIC_GOOGLE_ANALYTICS_ID` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
@@ -51,6 +51,11 @@ Astro build flags set automatically by the framework (not configurable via workf
 - Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID`
 - Location: src/components/GoogleAnalytics.astro
 - Test policy: Skip on local URLs to avoid prod-build setup
+
+### Google Site Verification
+- Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_SITE_VERIFICATION`
+- Location: src/layouts/Layout.astro
+- Test policy: Not tested separately; gating covered by prod-build rule
 
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.
 

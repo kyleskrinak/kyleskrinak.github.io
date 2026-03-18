@@ -73,18 +73,27 @@ function stripComments(content) {
     .join('\n');
 }
 
+/**
+ * Normalize whitespace for semantic comparison.
+ * Collapses all whitespace sequences (including line breaks) to a single space
+ * so harmless formatting changes (extra spaces, line breaks) don't fail validation.
+ */
+function normalizeWhitespace(str) {
+  return str.replace(/\s+/g, ' ').trim();
+}
+
 // Validate analytics gating
 if (existsSync('src/layouts/Layout.astro')) {
   const layout = readFileSync('src/layouts/Layout.astro', 'utf-8');
   const layoutWithoutComments = stripComments(layout);
 
   const expectedCloudflareGating = ConfigRegistry.analytics.cloudflare.gating;
-  if (!layoutWithoutComments.includes(expectedCloudflareGating)) {
+  if (!normalizeWhitespace(layoutWithoutComments).includes(normalizeWhitespace(expectedCloudflareGating))) {
     issues.push(`Cloudflare analytics gating mismatch: expected "${expectedCloudflareGating}" in Layout.astro`);
   }
 
   const expectedGsvGating = ConfigRegistry.analytics.googleSiteVerification.gating;
-  if (!layoutWithoutComments.includes(expectedGsvGating)) {
+  if (!normalizeWhitespace(layoutWithoutComments).includes(normalizeWhitespace(expectedGsvGating))) {
     issues.push(`GSV gating mismatch: expected "${expectedGsvGating}" in Layout.astro`);
   }
 }
@@ -93,7 +102,7 @@ if (existsSync('src/components/GoogleAnalytics.astro')) {
   const ga = readFileSync('src/components/GoogleAnalytics.astro', 'utf-8');
   const gaWithoutComments = stripComments(ga);
   const expectedGating = ConfigRegistry.analytics.googleAnalytics.gating;
-  if (!gaWithoutComments.includes(expectedGating)) {
+  if (!normalizeWhitespace(gaWithoutComments).includes(normalizeWhitespace(expectedGating))) {
     issues.push(`GA analytics gating mismatch: expected "${expectedGating}" in GoogleAnalytics.astro`);
   }
 }
@@ -120,9 +129,15 @@ function extractEnvVars(workflowContent) {
         const envVars = {};
         for (const [key, value] of Object.entries(step.env)) {
           const raw = String(value);
-          envVars[key] = (raw.includes('${{ secrets.') || raw.includes('${{ vars.'))
-            ? 'required'
-            : raw;
+          const secretMatch = raw.match(/\$\{\{\s*secrets\.(\w+)\s*\}\}/);
+          const varMatch = raw.match(/\$\{\{\s*vars\.(\w+)\s*\}\}/);
+          if (secretMatch) {
+            envVars[key] = { refType: 'secret', refName: secretMatch[1] };
+          } else if (varMatch) {
+            envVars[key] = { refType: 'var', refName: varMatch[1] };
+          } else {
+            envVars[key] = raw;
+          }
         }
         return { found: true, envVars };
       }
@@ -181,8 +196,24 @@ if (existsSync(workflowDir)) {
       }
 
       // Validate value consistency: registry and workflow must match
-      if (actualValue !== registryVar.value) {
-        issues.push(`${workflowFile} ${varName} mismatch: registry="${registryVar.value}", workflow="${actualValue}"`);
+      if (typeof actualValue === 'object') {
+        // Secret or var reference — validate source type alignment to catch miswiring
+        // (e.g., using vars.* where secrets.* is expected, or referencing the wrong namespace)
+        const expectedRefType = registryVar.source === 'secret' ? 'secret'
+          : registryVar.source === 'github-var' ? 'var'
+          : null;
+        const refDisplay = actualValue.refType === 'secret'
+          ? `secrets.${actualValue.refName}`
+          : `vars.${actualValue.refName}`;
+        if (expectedRefType && actualValue.refType !== expectedRefType) {
+          issues.push(`${workflowFile} ${varName}: registry source is '${registryVar.source}' but workflow uses ${refDisplay}`);
+        } else if (registryVar.value !== 'required') {
+          issues.push(`${workflowFile} ${varName}: registry has literal value "${registryVar.value}" but workflow uses ${refDisplay}`);
+        }
+      } else {
+        if (actualValue !== registryVar.value) {
+          issues.push(`${workflowFile} ${varName} mismatch: registry="${registryVar.value}", workflow="${actualValue}"`);
+        }
       }
     }
 
@@ -191,7 +222,7 @@ if (existsSync(workflowDir)) {
     for (const varName of Object.keys(registryEnv)) {
       const registryVar = registryEnv[varName];
       if (registryVar.required === false) continue; // Optional vars may not be in workflow
-      if (!actualEnvVars[varName]) {
+      if (!Object.hasOwn(actualEnvVars, varName)) {
         issues.push(`Registry environment "${envName}" documents ${varName} but ${workflowFile} doesn't set it`);
       }
     }
@@ -390,7 +421,9 @@ for (const file of allSourceFiles) {
 if (existsSync('src/config/index.ts')) {
   const configContent = readFileSync('src/config/index.ts', 'utf-8');
 
-  const prodUrlMatch = configContent.match(/siteUrl \|\| "([^"]+)"/);
+  // Loose regex: tolerates variable renames, || vs ??, and single vs double quotes.
+  // Anchored to https:// URLs to avoid false positives from other fallback expressions.
+  const prodUrlMatch = configContent.match(/(?:\|\||\?\?)\s*["'](https?:\/\/[^"']+)["']/);
   if (prodUrlMatch === null) {
     issues.push('Failed to extract production URL fallback from src/config/index.ts - config format may have changed');
   } else {
@@ -473,10 +506,11 @@ if (!existsSync(docsPath)) {
   issues.push('Generated docs not found. Run: npm run config:generate');
 } else {
   const expectedDoc = generateDocContent(ConfigRegistry);
+  // Normalize line endings before comparing to avoid CRLF/LF false positives
+  const actualDoc = readFileSync(docsPath, 'utf-8').replace(/\r\n/g, '\n');
+  const normalizedExpected = expectedDoc.replace(/\r\n/g, '\n');
 
-  const actualDoc = readFileSync(docsPath, 'utf-8');
-
-  if (actualDoc !== expectedDoc) {
+  if (actualDoc !== normalizedExpected) {
     issues.push('Generated docs are out of date. Run: npm run config:generate');
   }
 }

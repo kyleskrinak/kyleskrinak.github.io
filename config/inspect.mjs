@@ -48,11 +48,22 @@ console.log('\n🔧 CURRENT PROCESS ENV');
 console.log('─'.repeat(60));
 
 const allVarNames = new Set();
-Object.values(ConfigRegistry.environments).forEach(env =>
-  Object.keys(env).forEach(k => allVarNames.add(k))
-);
+const secretVarNames = new Set();
+Object.values(ConfigRegistry.environments).forEach(env => {
+  Object.entries(env).forEach(([key, config]) => {
+    allVarNames.add(key);
+    if (config.source === 'secret') secretVarNames.add(key);
+  });
+});
 for (const varName of [...allVarNames].sort()) {
-  console.log(`${varName}: ${process.env[varName] || '(not set)'}`);
+  const raw = process.env[varName];
+  if (raw === undefined) {
+    console.log(`${varName}: (not set)`);
+  } else if (secretVarNames.has(varName)) {
+    console.log(`${varName}: (set, masked)`);
+  } else {
+    console.log(`${varName}: ${raw}`);
+  }
 }
 
 console.log('\n' + '═'.repeat(60));

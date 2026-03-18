@@ -21,6 +21,9 @@ jobs:
     name: Visual regression test against main baseline
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Skip for fork PRs: secrets are not available in pull_request workflows from forks,
+    # causing empty analytics env vars and visual divergence from the production baseline.
+    if: github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout PR code

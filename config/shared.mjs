@@ -107,6 +107,11 @@ ${ConfigRegistry.astro.trailingSlash.impact.map(i => `  - ${i}`).join('\n')}
 - Location: ${ConfigRegistry.analytics.googleAnalytics.location}
 - Test policy: ${ConfigRegistry.analytics.googleAnalytics.testPolicy}
 
+### Google Site Verification
+- Gating: \`${ConfigRegistry.analytics.googleSiteVerification.gating}\`
+- Location: ${ConfigRegistry.analytics.googleSiteVerification.location}
+- Test policy: ${ConfigRegistry.analytics.googleSiteVerification.testPolicy ?? 'Not tested separately'}
+
 **Key:** Analytics gating based on \`import.meta.env.PROD\`, NOT hostname.
 
 ## Deployment Infrastructure

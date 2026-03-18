@@ -70,10 +70,10 @@ export const ConfigRegistry = {
         notes: 'Not set as env var; src/config/index.ts falls back to production URL. Set SITE_URL explicitly to override.'
       },
       PUBLIC_DEPLOY_ENV: {
-        value: null,
-        source: 'optional',
+        value: 'production',
+        source: 'fallback',
         required: false,
-        notes: 'Not set locally; undefined means no staging-specific UI shown.'
+        notes: 'Not set as env var; Layout.astro and robots.txt.ts fall back to "production" when absent (no staging banner, indexing allowed).'
       },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: {
         value: null,
