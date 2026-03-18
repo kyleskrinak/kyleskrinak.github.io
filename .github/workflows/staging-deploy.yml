@@ -28,7 +28,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate configuration registry
+        run: npm run config:validate
+
       - name: Check Cloudflare staging token presence
+        # Informational only — logs presence/absence but does not fail the build.
+        # Enforcement (exit 1 on missing) is in secrets-check.yml (workflow_dispatch).
         run: |
           if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
             echo "Cloudflare staging token is set (masked)."

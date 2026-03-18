@@ -148,10 +148,11 @@ const structuredData = {
     <meta name="theme-color" content="#0096ff" />
 
     {
-      // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
-      // include google-site-verification tag in the heading
+      // Gated on production builds (import.meta.env.PROD) and env var presence to
+      // prevent the verification tag from rendering in local dev (astro dev always
+      // sets PROD=false). Matches the Cloudflare/GA gating pattern.
       // Learn more: https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag
-      PUBLIC_GOOGLE_SITE_VERIFICATION && (
+      import.meta.env.PROD && PUBLIC_GOOGLE_SITE_VERIFICATION && (
         <meta
           name="google-site-verification"
           content={PUBLIC_GOOGLE_SITE_VERIFICATION}

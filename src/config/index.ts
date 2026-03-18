@@ -1,14 +1,12 @@
-// Determine website URL: SITE_URL is authoritative (set by workflows), fallback uses BUILD_ENV
-// Production/staging workflows both set BUILD_ENV=production and provide SITE_URL
-// Local dev without SITE_URL: BUILD_ENV defaults to "production" → kyle.skrinak.com
-// To test staging behavior locally: set BUILD_ENV to non-"production" value OR set SITE_URL explicitly
-// See: docs/operations/staging-url-reference.md for details
-const buildEnv = process.env.BUILD_ENV || "production";
-const siteUrl = process.env.SITE_URL; // Explicit override from workflow (staging: github.io, production: kyle.skrinak.com)
-const isProduction = buildEnv === "production";
-const website = siteUrl || (isProduction ? "https://kyle.skrinak.com/" : "https://kyleskrinak.github.io");
-
-console.log(`🔍 AstroPaper Config: BUILD_ENV="${buildEnv}", website="${website}"`);
+// Determine website URL: SITE_URL is set by all build workflows (staging and production).
+// Local dev without SITE_URL falls back to the production URL.
+// To test with a different URL locally, set SITE_URL explicitly.
+//
+// NOTE: Uses process.env instead of astro:env because this runs at build time before
+// Astro env is fully initialized. Hardcoded fallback URL is validated against
+// config/registry.mjs by config/validate.mjs to prevent drift.
+const siteUrl = process.env.SITE_URL;
+const website = siteUrl || "https://kyle.skrinak.com/";
 
 export const SITE = {
   website,

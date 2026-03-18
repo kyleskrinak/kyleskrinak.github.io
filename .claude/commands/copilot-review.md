@@ -1,10 +1,6 @@
-# Copilot Review Handler
-
-**Trigger**: `/copilot-review`
-
-**Purpose**: Systematically address GitHub Copilot review comments with comprehensive fixes that address root causes, not just symptoms.
-
-## Context
+---
+description: Systematically address GitHub Copilot review comments with comprehensive pattern fixes
+---
 
 You are reviewing GitHub Copilot feedback on a pull request. Copilot often identifies specific instances of broader patterns. Your job is to fix the entire pattern comprehensively, not just the mentioned line.
 
@@ -39,13 +35,7 @@ For each Copilot comment:
 Before making any changes, search comprehensively:
 
 ```bash
-# Search for the pattern
 grep -rn "pattern" src/ scripts/ public/ docs/
-
-# Search in generated files too
-grep -rn "pattern" dist/ build/ public/
-
-# Search for related concepts
 grep -rn "related-term" src/ docs/
 ```
 
@@ -86,9 +76,6 @@ grep -rn "problematic-pattern" src/ scripts/ public/ docs/
 
 # Verify generated files are rebuilt
 git status  # should show generated files modified
-
-# Verify documentation updated
-grep -rn "old-tool-name" docs/ README.md  # should return ZERO if you replaced a tool
 ```
 
 ### Step 5: Commit Message Format
@@ -103,7 +90,7 @@ fix: address Copilot review comment on [issue class]
 
 Addresses: [describe what pattern was fixed]
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 ```
 
 ### Step 6: Verify Your Work
@@ -116,7 +103,6 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 - [ ] Did I update documentation to match code?
 - [ ] Did I add tests/comments matching similar features?
 - [ ] Can I grep for the pattern and get ZERO results?
-- [ ] Did I follow my own documentation?
 
 **If you can't answer YES to all, you're not done.**
 
@@ -137,45 +123,6 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ❌ **Don't**: Change a dependency without updating docs
 ✅ **Do**: Search ALL docs for references and update them
 
-❌ **Don't**: Trust library behavior without testing
-✅ **Do**: Verify actual behavior with quick tests
-
-## Example: Good vs Bad Response
-
-### ❌ Bad Response
-```
-Copilot: "Line 625 uses fixed window name 'Presenter'"
-Fix: Change line 625 to use channelName
-Commit: "fix: use dynamic presenter window name"
-```
-
-### ✅ Good Response
-```
-Copilot: "Line 625 uses fixed window name 'Presenter'"
-
-Analysis: This represents "fixed names causing collisions" pattern
-
-Search:
-- Found 1 instance in build-presentations.js line 625
-- No other instances of window.open in codebase
-- Related: BroadcastChannel also uses scoped names (already fixed)
-
-Related systems check:
-- Generated HTML needs rebuilding (public/presentations/*.html)
-- Documentation mentions presenter mode (already accurate)
-- No tests for presenter mode (acceptable - browser feature)
-
-Fix:
-1. Change line 625 to use unique window name per presentation
-2. Rebuild all presentations to reflect change
-3. Verify generated HTML contains fix
-
-Commit: "fix: use unique presenter window name per presentation
-- Changed fixed 'Presenter' to 'Presenter-' + channelName
-- Prevents cross-presentation window collisions
-- Rebuilt presentation HTML with updated window names"
-```
-
 ## After Pushing
 
 Once you push to staging/develop:
@@ -183,8 +130,4 @@ Once you push to staging/develop:
 - Wait for user to report if Copilot has more feedback
 - Be ready for additional rounds if patterns were missed
 
-## Remember
-
-**Every fix should be comprehensive and complete. If Copilot is still finding issues after your fix, you didn't fix the pattern - you fixed a symptom.**
-
-The goal is to reduce 15+ rounds of feedback to 1-2 rounds by being thorough upfront.
+**Every fix should be comprehensive and complete. If Copilot is still finding issues after your fix, you didn't fix the pattern — you fixed a symptom.**
