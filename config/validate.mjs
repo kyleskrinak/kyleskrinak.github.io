@@ -342,10 +342,11 @@ for (const filePath of allFiles) {
   while ((match = processEnvRegex.exec(content)) !== null) {
     const varName = match[1];
 
-    // Files in src/ must use env schema vars only
+    // Files in src/ must use only env schema vars — testEnvVars (dev-tool/test-only)
+    // are not permitted in src/ production code. Declare build-time vars in astro.config.ts.
     if (filePath.startsWith('src/')) {
-      if (!envSchemaVars.has(varName) && !testEnvVars.has(varName)) {
-        issues.push(`${filePath} uses process.env.${varName} but it's not declared in astro.config.ts env schema`);
+      if (!envSchemaVars.has(varName)) {
+        issues.push(`${filePath} uses process.env.${varName} but it's not declared in astro.config.ts env schema (testEnvVars are not permitted in src/)`);
       }
     }
     // Files in scripts/ can use test vars too
