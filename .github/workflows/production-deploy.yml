@@ -29,7 +29,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate configuration registry
+        run: npm run config:validate
+
       - name: Check Cloudflare production token presence
+        # Informational only — logs presence/absence but does not fail the build.
+        # Enforcement (exit 1 on missing) is in secrets-check.yml (workflow_dispatch).
         run: |
           if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
             echo "Cloudflare production token is set (masked)."
@@ -46,6 +51,8 @@ jobs:
           PUBLIC_DEPLOY_ENV: production
           SITE_URL: https://kyle.skrinak.com/
           PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
+          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION_PROD }}
+          PUBLIC_GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

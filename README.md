@@ -71,6 +71,11 @@ npm run format           # Auto-format code
 npm run check:links      # Two-tier link checking (htmltest + Playwright)
 npm run test:console     # Check for console errors
 npm run test:visual      # Visual regression testing
+
+# Configuration management
+npm run config:generate  # Generate configuration docs
+npm run config:validate  # Validate config consistency
+npm run config:inspect   # Debug configuration values
 ```
 
 ## 🧪 Testing & Quality Assurance

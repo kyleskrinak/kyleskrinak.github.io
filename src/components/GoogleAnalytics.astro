@@ -1,16 +1,15 @@
 ---
-// Google Analytics measurement ID
-const GA_MEASUREMENT_ID = 'G-1EES7VJW1J';
+import { PUBLIC_GOOGLE_ANALYTICS_ID } from 'astro:env/client';
 
-// Only load GA4 in production builds
+// Only load GA4 in production builds with valid ID
 // Respects user privacy signals (DNT/GPC)
-const shouldLoadGA = import.meta.env.PROD;
+const shouldLoadGA = import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID;
 ---
 
 {shouldLoadGA && (
   <>
     <!-- Google Analytics (GA4) -->
-    <script is:inline define:vars={{ measurementId: GA_MEASUREMENT_ID }}>
+    <script is:inline define:vars={{ measurementId: PUBLIC_GOOGLE_ANALYTICS_ID }}>
       // Respect user privacy signals: bail if DNT or GPC is enabled
       const dnt =
         typeof navigator !== 'undefined' &&
