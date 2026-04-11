@@ -13,7 +13,7 @@ export default defineConfig({
 
   // Shared settings for all tests
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4322',
     trace: 'on-first-retry',
   },
 
@@ -83,15 +83,16 @@ export default defineConfig({
     ['html', { open: 'never' }],
   ],
 
-  // Auto-start dev server when testing localhost
+  // Run against production build (not dev server) to avoid Vite 7 dep
+  // pre-bundling issues (504 Outdated Optimize Dep errors). Port 4322
+  // intentionally differs from dev server (4321) to prevent conflicts.
+  // Uses build:ci (not build) to skip the public/ pagefind copy step.
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
-        command: 'npm run dev',
-        url: 'http://localhost:4321',
+        command: 'npm run build:ci && npx astro preview --port 4322',
+        url: 'http://localhost:4322',
         reuseExistingServer: !process.env.CI,
-        env: {
-          DISABLE_DEV_TOOLBAR: 'true',
-        },
+        timeout: 180_000,
       },
 });
