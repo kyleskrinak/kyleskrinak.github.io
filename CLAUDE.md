@@ -180,7 +180,7 @@ With the "Create a merge commit" strategy, the target branch gains a merge commi
 ```bash
 git fetch origin
 git checkout develop
-git pull origin develop
+git pull --ff-only origin develop
 git merge --ff-only origin/staging
 git push origin develop
 ```
@@ -189,29 +189,41 @@ git push origin develop
 ```bash
 git fetch origin
 git checkout staging
-git pull origin staging
+git pull --ff-only origin staging
 git merge --ff-only origin/main
 git push origin staging
 
 # Then sync develop with the updated staging
 git checkout develop
-git pull origin develop
+git pull --ff-only origin develop
 git merge --ff-only origin/staging
 git push origin develop
 ```
 
 **If merge fails (not fast-forward):**
 
-Your branch has commits the target doesn't have - this shouldn't happen in normal gitflow. Review what diverged, then either:
+The branches have diverged (one or both have unique commits). This shouldn't happen in normal gitflow. Inspect what differs:
+
+```bash
+# Compare the refs to see what diverged
+git log --oneline HEAD..origin/staging  # What's on remote but not local
+git log --oneline origin/staging..HEAD  # What's on local but not remote
+```
+
+Then either create a merge commit or resolve manually:
 
 ```bash
 # If syncing staging with main failed:
+git fetch origin
 git checkout staging
 git merge origin/main --no-edit  # Create a merge commit
+git push origin staging
 
 # If syncing develop with staging failed:
+git fetch origin
 git checkout develop
 git merge origin/staging --no-edit  # Create a merge commit
+git push origin develop
 
 # OR resolve the divergence manually
 ```
