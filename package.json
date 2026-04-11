@@ -2,6 +2,9 @@
   "name": "astro-paper",
   "type": "module",
   "version": "5.5.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist && cp -r dist/_pagefind public/",
