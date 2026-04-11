@@ -202,12 +202,16 @@ git push origin develop
 
 **If merge fails (not fast-forward):**
 
-The branches have diverged (one or both have unique commits). This shouldn't happen in normal gitflow. Inspect what differs:
+The branches have diverged (one or both have unique commits). This shouldn't happen in normal gitflow. Inspect what differs between the branch you're on and the branch you were trying to merge:
 
 ```bash
-# Compare the refs to see what diverged
-git log --oneline HEAD..origin/staging  # What's on remote but not local
-git log --oneline origin/staging..HEAD  # What's on local but not remote
+# If syncing staging with main failed, compare staging (HEAD) to origin/main
+git log --oneline HEAD..origin/main   # What's on main but not staging
+git log --oneline origin/main..HEAD   # What's on staging but not main
+
+# If syncing develop with staging failed, compare develop (HEAD) to origin/staging
+git log --oneline HEAD..origin/staging    # What's on staging but not develop
+git log --oneline origin/staging..HEAD    # What's on develop but not staging
 ```
 
 Then either create a merge commit or resolve manually:
