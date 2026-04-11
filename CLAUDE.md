@@ -201,10 +201,18 @@ git push origin develop
 ```
 
 **If merge fails (not fast-forward):**
+
+Your branch has commits the target doesn't have - this shouldn't happen in normal gitflow. Review what diverged, then either:
+
 ```bash
-# Your branch has commits the target doesn't have - this shouldn't happen in normal gitflow
-# Review what diverged, then either:
+# If syncing staging with main failed:
+git checkout staging
+git merge origin/main --no-edit  # Create a merge commit
+
+# If syncing develop with staging failed:
+git checkout develop
 git merge origin/staging --no-edit  # Create a merge commit
+
 # OR resolve the divergence manually
 ```
 
