@@ -172,16 +172,16 @@ git checkout develop && git pull origin develop
 
 ### After PR Merges
 
-**CRITICAL: After PRs merge, sync branches to prevent divergence.**
+**CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync branches after PRs merge to prevent divergence.**
 
-When a PR merges, it creates a merge commit on the target branch that the source branch doesn't have. This causes branches to diverge in git history.
+With the "Create a merge commit" strategy, the target branch gains a merge commit that the source branch does not have until you sync it back. This workflow keeps branch history aligned after those merges.
 
 **After develop → staging merges:**
 ```bash
 git fetch origin
 git checkout develop
 git pull origin develop
-git merge origin/staging --no-edit
+git merge --ff-only origin/staging
 git push origin develop
 ```
 
@@ -190,20 +190,28 @@ git push origin develop
 git fetch origin
 git checkout staging
 git pull origin staging
-git merge origin/main --no-edit
+git merge --ff-only origin/main
 git push origin staging
 
 # Then sync develop with the updated staging
 git checkout develop
 git pull origin develop
-git merge origin/staging --no-edit
+git merge --ff-only origin/staging
 git push origin develop
 ```
 
+**If merge fails (not fast-forward):**
+```bash
+# Your branch has commits the target doesn't have - this shouldn't happen in normal gitflow
+# Review what diverged, then either:
+git merge origin/staging --no-edit  # Create a merge commit
+# OR resolve the divergence manually
+```
+
 **Why this is necessary:**
-- Merge commits on target branches cause history divergence
-- Without syncing, future PRs show duplicate commits
-- File diffs will be correct, but commit history will be confusing
+- With "Create a merge commit" strategy, target branches get merge commits that source branches don't have
+- Without syncing, future PRs show duplicate commits in history (though file diffs are correct)
+- `--ff-only` safely fast-forwards to include the merge commit without creating extra commits
 - Using `origin/staging` and `origin/main` ensures you merge the latest remote state, not stale local branches
 
 ### PR Review Fixes
