@@ -170,6 +170,42 @@ git checkout develop && git pull origin develop
 5. Create PR: `develop` → `staging`
 6. After staging approval, create PR: `staging` → `main`
 
+### After PR Merges
+
+**CRITICAL: After PRs merge, sync branches to prevent divergence.**
+
+When a PR merges, it creates a merge commit on the target branch that the source branch doesn't have. This causes branches to diverge in git history.
+
+**After develop → staging merges:**
+```bash
+git fetch origin
+git checkout develop
+git pull origin develop
+git merge origin/staging --no-edit
+git push origin develop
+```
+
+**After staging → main merges:**
+```bash
+git fetch origin
+git checkout staging
+git pull origin staging
+git merge origin/main --no-edit
+git push origin staging
+
+# Then sync develop with the updated staging
+git checkout develop
+git pull origin develop
+git merge origin/staging --no-edit
+git push origin develop
+```
+
+**Why this is necessary:**
+- Merge commits on target branches cause history divergence
+- Without syncing, future PRs show duplicate commits
+- File diffs will be correct, but commit history will be confusing
+- Using `origin/staging` and `origin/main` ensures you merge the latest remote state, not stale local branches
+
 ### PR Review Fixes
 - Commit fixes to the **PR's HEAD branch**, not develop
 - Example: Comments on PR (staging→main) → fix on `staging` branch
