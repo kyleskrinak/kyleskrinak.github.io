@@ -28,7 +28,7 @@ I’ve come to learn that “healthy” carbohydrates do not sufficiently suppre
 
 I did an experiment. I ate two pounds of beef. The last few bites were difficult to finish as I felt full. I remember eating 6 – 8 donuts in one setting and only stopping because I rationally knew that was too many, but my body wasn’t stopping me. It’s nice when the brain, stomach, and heart work in tandem. It’s in this way that low carb has been the most natural diet to follow.
 
-If you don’t trust your own experience, there’s been further research on the addictive nature of sugar. While not as addictive as cocaine or meth, it is consistent with the DSM 5 criteria *([Food Addiction in the Light of DSM-5](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4179181/))* for determining addition. Then there’s the matter of the sugar industry gaming public policy to vilify fat to encourage sugar consumption. 
+If you don’t trust your own experience, there’s been further research on the addictive nature of sugar. While not as addictive as cocaine or meth, it is consistent with the DSM 5 criteria *([Food Addiction in the Light of DSM-5](https://pmc.ncbi.nlm.nih.gov/articles/PMC4179181/))* for determining addiction. Then there’s the matter of the sugar industry gaming public policy to vilify fat to encourage sugar consumption. 
 
 Now my brain and heart understand. Sugar, starches, carbs, all want to trick me. The less I eat of these tricky buggers, the better off I am. Got it. As 2 Keto Dude alumni, Richard Morris once mused, “carbohydrates are the packing peanuts of nutrition.”
 
