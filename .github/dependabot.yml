@@ -1,0 +1,102 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    # Open PRs against develop branch (your working branch)
+    target-branch: "develop"
+    # Limit concurrent PRs to prevent spam
+    open-pull-requests-limit: 5
+    # Commit message configuration
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Group related updates to reduce PR count
+    groups:
+      # Astro core and official integrations
+      astro-ecosystem:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Testing infrastructure
+      testing:
+        patterns:
+          - "@playwright/test"
+          - "playwright"
+          - "pagefind"
+          - "@pagefind/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Linting and formatting tools
+      dev-tools:
+        patterns:
+          - "eslint*"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+          - "prettier*"
+          - "globals"
+        update-types:
+          - "minor"
+          - "patch"
+      # TypeScript tooling
+      typescript:
+        patterns:
+          - "typescript"
+          - "@astrojs/check"
+        update-types:
+          - "patch"
+      # Tailwind CSS ecosystem
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Markdown and syntax highlighting
+      markdown:
+        patterns:
+          - "remark-*"
+          - "rehype-*"
+          - "@shikijs/*"
+          - "shiki"
+        update-types:
+          - "minor"
+          - "patch"
+      # Build and optimization tools
+      build-tools:
+        patterns:
+          - "@resvg/*"
+          - "sharp"
+          - "satori"
+        update-types:
+          - "minor"
+          - "patch"
+      # Utilities and helpers
+      utilities:
+        patterns:
+          - "dayjs"
+          - "slugify"
+          - "lodash.*"
+          - "sanitize-html"
+          - "yaml"
+          - "markdown-it"
+        update-types:
+          - "minor"
+          - "patch"
+    # Labels for PRs
+    labels:
+      - "dependencies"
+      - "automated"
+    # Reviewers (optional - add your GitHub username if desired)
+    # reviewers:
+    #   - "kyleskrinak"
