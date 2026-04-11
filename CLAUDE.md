@@ -135,6 +135,17 @@ The config validator (`npm run config:validate`) enforces consistency across:
 - All changes flow: develop → staging → main via pull requests
 
 ### Before Making Changes
+
+**⚠️ CRITICAL: Verify Docker is running FIRST**
+
+Pre-push hooks require Docker for build tests. Pushing will fail if Docker daemon is not running.
+
+```bash
+# Verify Docker is running
+docker ps
+# If error: "Cannot connect to the Docker daemon" → start Docker Desktop first
+```
+
 **ALWAYS sync local branches with origin first:**
 ```bash
 # Sync the branch you're working on
