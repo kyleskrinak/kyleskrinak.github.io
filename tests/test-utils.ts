@@ -3,8 +3,8 @@
  */
 
 /**
- * Base URL for tests - defaults to Astro preview server port (4322).
- * Port 4322 intentionally differs from dev server (4321) to prevent conflicts.
+ * Base URL for tests - defaults to this project's dedicated local preview port (4322).
+ * Port 4322 intentionally differs from the local dev server port (4321) to prevent conflicts.
  * Override with PLAYWRIGHT_TEST_BASE_URL for staging/production testing.
  */
 export const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4322';
