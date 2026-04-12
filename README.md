@@ -80,7 +80,7 @@ npm run config:inspect   # Debug configuration values
 
 ## 🧪 Testing & Quality Assurance
 
-**PR Checks** (run on PRs to staging/main):
+**PR Checks** (run on PRs to main):
 - **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
 
 **Scheduled Checks** (nightly):
@@ -125,7 +125,7 @@ See `/docs/testing/` for detailed guides.
 | **Language** | [TypeScript](https://www.typescriptlang.org/) |
 | **Search** | [Pagefind](https://pagefind.app/) |
 | **Testing** | [Playwright](https://playwright.dev/) |
-| **Deployment** | GitHub Pages (staging) + AWS S3/CloudFront (production) |
+| **Deployment** | GitHub Pages (develop/staging preview) + AWS S3/CloudFront (production) |
 | **CI/CD** | GitHub Actions |
 
 ## 📈 Performance
@@ -142,7 +142,7 @@ See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for perf
 
 Two deployment pipelines:
 
-1. **Staging**: Push to `staging` branch → GitHub Pages
+1. **Staging preview**: Push to `develop` branch → GitHub Pages
 2. **Production**: Push to `main` branch → AWS S3 + CloudFront
 
 See [Deployment Guide](./docs/operations/deployment.md) for details.
@@ -157,7 +157,7 @@ npm run test:console     # Terminal 2
 # Visual regression testing
 npm run test:visual
 
-# Against staging environment
+# Against staging preview (develop branch deploy)
 npm run test:staging -- --project=console
 
 # Against production environment

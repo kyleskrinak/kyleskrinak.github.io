@@ -15,7 +15,7 @@ For detailed architecture information, see:
 ┌─────────────────────────────────────────────────────────────┐
 │                    Developer Workflow                        │
 ├─────────────────────────────────────────────────────────────┤
-│  develop → staging → main (PR-based flow)                   │
+│  develop → main (PR-based flow; develop auto-deploys staging) │
 └───────────────┬─────────────────────────────────────────────┘
                 │
                 ▼

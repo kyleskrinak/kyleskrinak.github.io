@@ -231,7 +231,7 @@ npm run test:console
 ```bash
 git add src/content/blog/2026-01-20-your-post.md
 git commit -m "blog: Add new post about your topic"
-git push origin staging  # Test on staging first
+git push origin develop  # Triggers staging preview deploy
 ```
 
 ## Common Mistakes

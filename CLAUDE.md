@@ -110,7 +110,7 @@ The config validator (`npm run config:validate`) enforces consistency across:
 5. Commit all changes together
 
 **CI Enforcement:**
-- Validation runs in all deployment workflows (PR, staging, production)
+- Validation runs in all deployment workflows (PR, develop/staging, production)
 - Prevents merging/deploying with configuration drift
 - Fails fast with clear error messages
 
@@ -131,8 +131,10 @@ The config validator (`npm run config:validate`) enforces consistency across:
 ## Git Workflow
 
 ### Branch Structure
-- **Three long-lived branches** (never delete): `develop` → `staging` → `main`
-- All changes flow: develop → staging → main via pull requests
+- **Two long-lived branches** (never delete): `develop` → `main`
+- All changes flow: develop → main via pull request
+- Pushing to `develop` triggers staging deploy (GitHub Pages preview)
+- Pushing to `main` triggers production deploy (AWS)
 
 ### Before Making Changes
 
@@ -148,16 +150,6 @@ docker ps
 
 **ALWAYS sync local branches with origin first:**
 ```bash
-# Sync the branch you're working on
-git checkout develop
-git pull origin develop
-```
-(On conflicts or failure, see Blocker Resolution Protocol)
-
-**To sync all branches:**
-```bash
-git checkout main && git pull origin main
-git checkout staging && git pull origin staging
 git checkout develop && git pull origin develop
 ```
 (On conflicts or failure, see Blocker Resolution Protocol)
@@ -167,80 +159,32 @@ git checkout develop && git pull origin develop
 2. Make your changes
 3. Commit with descriptive messages
 4. Push to origin: `git push origin develop` (on failure, see Blocker Resolution Protocol)
-5. Create PR: `develop` → `staging`
-6. After staging approval, create PR: `staging` → `main`
+5. Verify staging deploy passes on GitHub Pages
+6. Create PR: `develop` → `main`
 
 ### After PR Merges
 
-**CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync branches after PRs merge to prevent divergence.**
+**CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync develop after PRs merge to prevent divergence.**
 
-With the "Create a merge commit" strategy, the target branch gains a merge commit that the source branch does not have until you sync it back. This workflow keeps branch history aligned after those merges.
-
-**After develop → staging merges:**
+**After develop → main merges:**
 ```bash
 git fetch origin
 git checkout develop
 git pull --ff-only origin develop
-git merge --ff-only origin/staging
-git push origin develop
-```
-
-**After staging → main merges:**
-```bash
-git fetch origin
-git checkout staging
-git pull --ff-only origin staging
 git merge --ff-only origin/main
-git push origin staging
-
-# Then sync develop with the updated staging
-git checkout develop
-git pull --ff-only origin develop
-git merge --ff-only origin/staging
 git push origin develop
 ```
 
 **If merge fails (not fast-forward):**
-
-The branches have diverged (one or both have unique commits). This shouldn't happen in normal gitflow. Inspect what differs between the branch you're on and the branch you were trying to merge:
-
 ```bash
-# If syncing staging with main failed, compare staging (HEAD) to origin/main
-git log --oneline HEAD..origin/main   # What's on main but not staging
-git log --oneline origin/main..HEAD   # What's on staging but not main
-
-# If syncing develop with staging failed, compare develop (HEAD) to origin/staging
-git log --oneline HEAD..origin/staging    # What's on staging but not develop
-git log --oneline origin/staging..HEAD    # What's on develop but not staging
-```
-
-Then either create a merge commit or resolve manually:
-
-```bash
-# If syncing staging with main failed:
-git fetch origin
-git checkout staging
-git merge origin/main --no-edit  # Create a merge commit
-git push origin staging
-
-# If syncing develop with staging failed:
 git fetch origin
 git checkout develop
-git merge origin/staging --no-edit  # Create a merge commit
+git merge origin/main --no-edit
 git push origin develop
-
-# OR resolve the divergence manually
 ```
 
-**Why this is necessary:**
-- With "Create a merge commit" strategy, target branches get merge commits that source branches don't have
-- Without syncing, future PRs show duplicate commits in history (though file diffs are correct)
-- `--ff-only` safely fast-forwards to include the merge commit without creating extra commits
-- Using `origin/staging` and `origin/main` ensures you merge the latest remote state, not stale local branches
-
 ### PR Review Fixes
-- Commit fixes to the **PR's HEAD branch**, not develop
-- Example: Comments on PR (staging→main) → fix on `staging` branch
+- Commit fixes to the **PR's HEAD branch** (`develop`), not directly to `main`
 - If fixes were made on wrong branch, cherry-pick to correct branch (on failure, see Blocker Resolution Protocol)
 
 ## Blocker Resolution Protocol

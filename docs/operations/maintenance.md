@@ -14,7 +14,7 @@ For now, refer to the following existing documentation:
 - See [Link Checking Guide](../link-checking.md)
 
 **Visual Regression Testing**:
-- Automated on all PRs to staging/main
+- Automated on all PRs to main
 - See [Visual Regression Guide](../testing/visual-regression.md)
 
 ### Manual Health Checks

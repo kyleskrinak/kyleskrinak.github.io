@@ -18,8 +18,8 @@ This section covers deploying, maintaining, and troubleshooting the Astro blog i
 
 ### Quick Deploy
 ```bash
-# To staging (GitHub Pages)
-git push origin staging
+# To staging preview (GitHub Pages)
+git push origin develop
 
 # To production (AWS)
 git push origin main
@@ -35,7 +35,7 @@ git push origin main
 **Staging Environment**:
 - URL: https://kyleskrinak.github.io/ (root - user site constraint)
 - Deployed on: GitHub Pages
-- Triggers on: Push to `staging` branch
+- Triggers on: Push to `develop` branch
 - **See**: [Staging URL Reference](./staging-url-reference.md) for details
 
 **Production Environment**:

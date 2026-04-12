@@ -178,8 +178,8 @@ See `docs/operations/environment-configuration.md` for complete registry documen
 
 ## Deployment Specific
 
-### GitHub Pages (Staging)
-- Uses `staging` branch
+### GitHub Pages (Staging Preview)
+- Uses `develop` branch
 - Automatically builds with entire `public/` directory
 - Search assets included in deployment ✅
 

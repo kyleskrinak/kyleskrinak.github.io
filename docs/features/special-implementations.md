@@ -91,7 +91,7 @@ npm run build:presentations
 #### 3. **CI/CD Visual Regression Testing**
 
 **The Implementation**:
-- Automated Playwright visual regression on PRs to staging/main
+- Automated Playwright visual regression on PRs to main
 - Artifact-based baseline system (no cloud service dependency)
 - Secure two-workflow pattern (pr-visual-check + pr-visual-comment)
 
@@ -251,7 +251,7 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 
 ### Staging (GitHub Pages)
 
-✅ **Trigger**: Push to `staging` branch
+✅ **Trigger**: Push to `develop` branch
 ✅ **Process**: GitHub Actions → Build → Deploy
 ✅ **URL**: GitHub Pages URL
 
@@ -288,9 +288,9 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
    - It's archived (not recommended)
    - Use standalone Slidev instead
 
-5. **Modify GitHub Actions without testing staging first**
-   - Staging → Production workflow
-   - Test CI/CD changes on staging branch
+5. **Modify GitHub Actions without testing on develop first**
+   - develop → main workflow
+   - Test CI/CD changes on develop branch (triggers staging preview)
 
 ---
 
@@ -319,7 +319,7 @@ PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 
 1. Modify `.github/workflows/production-deploy.yml` for AWS changes
 2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages changes
-3. Test on staging branch first
+3. Test on `develop` branch first (auto-deploys to staging preview)
 
 ---
 
