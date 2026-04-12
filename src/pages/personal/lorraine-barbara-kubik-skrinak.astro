@@ -1,4 +1,18 @@
 ---
-// Redirect old Jekyll URL to new Astro URL
-return Astro.redirect('/posts/2019-10-31-lorraine-barbara-kubik-skrinak/', 301);
+// Redirect old Jekyll URL to new Astro URL using static HTML redirect pattern
+const redirectTo = '/posts/2019-10-31-lorraine-barbara-kubik-skrinak/';
 ---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex">
+    <link rel="canonical" href={redirectTo}>
+    <meta http-equiv="refresh" content={`0;url=${redirectTo}`}>
+  </head>
+  <body>
+    <p>Redirecting to <a href={redirectTo}>{redirectTo}</a>…</p>
+  </body>
+</html>
