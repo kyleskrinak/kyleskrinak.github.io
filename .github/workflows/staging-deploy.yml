@@ -3,7 +3,7 @@ name: Staging (GitHub Pages)
 on:
   push:
     branches:
-      - develop
+      - staging
 
 permissions:
   contents: read

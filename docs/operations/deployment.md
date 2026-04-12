@@ -6,7 +6,7 @@ This document describes the deployment process for the Astro blog migration.
 
 The Astro blog supports two deployment pipelines:
 
-1. **Staging preview**: Deployed to GitHub Pages on pushes to the `develop` branch
+1. **Staging**: Deployed to GitHub Pages on pushes to the `staging` branch
 2. **Production**: Deployed to AWS S3 + CloudFront on pushes to the `main` branch
 
 ## GitHub Pages Staging Deployment
@@ -17,7 +17,7 @@ No additional setup required. GitHub Pages is automatically configured when you 
 
 ### Process
 
-1. Push code to the `develop` branch
+1. Push code to the `staging` branch
 2. GitHub Actions automatically builds the site
 3. Site is deployed to GitHub Pages staging URL
 
@@ -185,7 +185,7 @@ Configure in GitHub repository settings (Settings → Secrets and variables → 
 ### GitHub Actions
 
 View deployment status in the repository Actions tab:
-- Staging: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Adevelop
+- Staging: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Astaging
 - Production: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Amain
 
 ### CloudFront
@@ -252,7 +252,7 @@ Monitor in GitHub Actions logs.
 
 ## Automated Quality Gates
 
-PRs to main branch run automated visual regression testing. Additional quality checks run on scheduled intervals:
+PRs to staging and main branches run automated visual regression testing. Additional quality checks run on scheduled intervals:
 
 ### Visual Regression Testing
 
