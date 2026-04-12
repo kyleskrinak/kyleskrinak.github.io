@@ -93,7 +93,7 @@ export default defineConfig({
     ? undefined
     : {
         command: 'npm run build:ci && npx astro preview --port 4322',
-        url: 'http://localhost:4322',
+        url: BASE_URL,
         reuseExistingServer: false,
         timeout: 180_000,
       },
