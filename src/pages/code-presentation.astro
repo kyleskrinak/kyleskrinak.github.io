@@ -1,9 +1,11 @@
 ---
 // Redirect old Jekyll URL to new Astro URL using static HTML redirect pattern
 import { SITE } from '@/config';
+import { createPath } from '@/config/consts';
 
 const target = '/presentations/code-presentation.html';
 const canonicalUrl = new URL(target.slice(1), SITE.website).href;
+const redirectUrl = createPath(target);
 ---
 
 <!doctype html>
@@ -13,11 +15,11 @@ const canonicalUrl = new URL(target.slice(1), SITE.website).href;
     <title>Redirecting…</title>
     <meta name="robots" content="noindex">
     <link rel="canonical" href={canonicalUrl}>
-    <meta http-equiv="refresh" content={`0;url=${target}`}>
+    <meta http-equiv="refresh" content={`0;url=${redirectUrl}`}>
   </head>
   <body>
     <p>
-      Redirecting to <a href={target}>{target}</a>.
+      Redirecting to <a href={redirectUrl}>{redirectUrl}</a>.
     </p>
   </body>
 </html>
