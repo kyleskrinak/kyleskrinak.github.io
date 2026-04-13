@@ -92,7 +92,7 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
-        command: 'npm run build:ci && npx astro preview --port 4322',
+        command: 'npm run build:ci && npx astro preview --host localhost --port 4322',
         url: BASE_URL,
         reuseExistingServer: false,
         timeout: 180_000,
