@@ -172,6 +172,8 @@ git checkout develop && git pull origin develop
 
 ### After PR Merges
 
+**Prerequisites:** Docker must be running before executing these commands (see "Before Making Changes" section).
+
 **CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync branches after PRs merge to prevent divergence.**
 
 With the "Create a merge commit" strategy, the target branch gains a merge commit that the source branch does not have until you sync it back. This workflow keeps branch history aligned after those merges.
