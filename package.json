@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
-    "@pagefind/default-ui": "^1.5.0",
+    "@pagefind/default-ui": "^1.5.2",
     "@playwright/test": "^1.59.1",
     "@shikijs/transformers": "^4.0.2",
     "@tailwindcss/typography": "^0.5.19",
@@ -61,7 +61,7 @@
     "eslint-plugin-astro": "^1.7.0",
     "globals": "^17.5.0",
     "markdown-it": "^14.1.0",
-    "pagefind": "^1.5.0",
+    "pagefind": "^1.5.2",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
