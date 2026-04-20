@@ -24,7 +24,7 @@ compute_input_hash() {
     {
         git ls-files -z
         git ls-files -z --others --exclude-standard
-    } | xargs -0 sha256sum 2>/dev/null | sha256sum | awk '{print $1}'
+    } | xargs -0 sha256sum | sha256sum | awk '{print $1}'
 }
 INPUT_HASH=$(compute_input_hash)
 
@@ -33,8 +33,7 @@ echo "===================="
 
 # Check if we need to rebuild
 if [ -f "$CACHE_FILE" ]; then
-    LAST_HASH=$(awk -F: 'NR==1 {print $1}' "$CACHE_FILE")
-    LAST_TS=$(awk -F: 'NR==1 {print $2}' "$CACHE_FILE")
+    IFS=: read -r LAST_HASH LAST_TS < "$CACHE_FILE"
     if [ "$INPUT_HASH" = "$LAST_HASH" ]; then
         if docker image inspect "$IMAGE_NAME" &>/dev/null; then
             echo "✅ Build already cached (use 'make clean' to rebuild)"
