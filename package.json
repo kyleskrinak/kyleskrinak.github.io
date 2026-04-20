@@ -55,7 +55,7 @@
     "@shikijs/transformers": "^4.0.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@typescript-eslint/parser": "^8.58.2",
+    "@typescript-eslint/parser": "^8.59.0",
     "cross-env": "^10.1.0",
     "eslint": "^10.2.1",
     "eslint-plugin-astro": "^1.7.0",
@@ -67,7 +67,7 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "sanitize-html": "^2.17.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.58.2",
+    "typescript-eslint": "^8.59.0",
     "yaml": "^2.8.2"
   }
 }
