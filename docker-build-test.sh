@@ -12,14 +12,21 @@ CACHE_FILE=".docker-cache"
 # has been GC'd but build inputs are unchanged. Override with DOCKER_CACHE_TTL_DAYS.
 GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
-# Hash build-definition inputs so changes to the Dockerfile or dep lockfiles
-# invalidate the cache. Per-file sha256 then hashed again: filename context is
-# preserved and boundary-shift collisions are avoided vs a raw `cat | hash`.
-# TODO: source-only changes (src/**) do not invalidate this cache. A full fix
-# would hash git-tracked + untracked-non-ignored files. Deferred from PR #89
-# to keep scope tight; filed as follow-up. Docker layer cache still catches
-# most of this on rebuild, and CI always does a clean build.
-INPUT_HASH=$(sha256sum Dockerfile package.json package-lock.json | sha256sum | awk '{print $1}')
+# Hash build inputs: in a git worktree, hash tracked + untracked non-ignored
+# files so source/content changes invalidate the cache. Tracked and untracked
+# sets are disjoint, and $CACHE_FILE is gitignored so it won't appear in either.
+# Outside git, fall back to manifests (e.g., fresh tarball extract).
+compute_input_hash() {
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        sha256sum Dockerfile package.json package-lock.json | sha256sum | awk '{print $1}'
+        return
+    fi
+    {
+        git ls-files -z
+        git ls-files -z --others --exclude-standard
+    } | xargs -0 sha256sum 2>/dev/null | sha256sum | awk '{print $1}'
+}
+INPUT_HASH=$(compute_input_hash)
 
 echo "🐳 Docker build test"
 echo "===================="
