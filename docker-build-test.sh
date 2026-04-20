@@ -4,7 +4,7 @@
 # Builds the project in a Docker container matching GitHub Actions environment
 # Run this before pushing to verify the build works in CI
 
-set -e
+set -eo pipefail
 
 IMAGE_NAME="astro-blog:test"
 CACHE_FILE=".docker-cache"
@@ -26,7 +26,10 @@ compute_input_hash() {
         git ls-files -z --others --exclude-standard
     } | xargs -0 sha256sum | sha256sum | awk '{print $1}'
 }
-INPUT_HASH=$(compute_input_hash)
+if ! INPUT_HASH=$(compute_input_hash) || [ -z "$INPUT_HASH" ]; then
+    echo "❌ Failed to compute input hash" >&2
+    exit 1
+fi
 
 echo "🐳 Docker build test"
 echo "===================="
