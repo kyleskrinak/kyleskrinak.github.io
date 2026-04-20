@@ -12,8 +12,14 @@ CACHE_FILE=".docker-cache"
 # has been GC'd but build inputs are unchanged. Override with DOCKER_CACHE_TTL_DAYS.
 GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
-# Hash all inputs that should invalidate the cache: Dockerfile + lockfiles.
-INPUT_HASH=$(cat Dockerfile package.json package-lock.json | md5sum | awk '{print $1}')
+# Hash build-definition inputs so changes to the Dockerfile or dep lockfiles
+# invalidate the cache. Per-file sha256 then hashed again: filename context is
+# preserved and boundary-shift collisions are avoided vs a raw `cat | hash`.
+# TODO: source-only changes (src/**) do not invalidate this cache. A full fix
+# would hash git-tracked + untracked-non-ignored files. Deferred from PR #89
+# to keep scope tight; filed as follow-up. Docker layer cache still catches
+# most of this on rebuild, and CI always does a clean build.
+INPUT_HASH=$(sha256sum Dockerfile package.json package-lock.json | sha256sum | awk '{print $1}')
 
 echo "🐳 Docker build test"
 echo "===================="
@@ -45,9 +51,7 @@ fi
 echo "📦 Building Docker image..."
 echo ""
 
-docker build -t "$IMAGE_NAME" .
-
-if [ $? -eq 0 ]; then
+if docker build -t "$IMAGE_NAME" .; then
     echo "${INPUT_HASH}:$(date +%s)" > "$CACHE_FILE"
     echo ""
     echo "✅ Docker build successful!"
