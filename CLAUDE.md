@@ -355,7 +355,7 @@ Confirmed: proceeding with [task] despite [blocker].
 
    **Expected failures when adding a new blog post (not real regressions):**
    - `npm run check:links`: self-referential canonical URL (e.g. `https://kyle.skrinak.com/posts/<slug>/`) returns 404 because the post isn't deployed yet. Resolves automatically after deploy.
-   - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npx playwright test --update-snapshots` (ask first).
+   - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npm run test:visual:baseline` (ask first).
    - If OTHER tests fail, or visual diffs appear on pages unrelated to listings (individual posts, standalone pages), those ARE real and need investigation.
 
 5. **Never commit without verification**
@@ -617,6 +617,11 @@ For detailed workflows, see:
 ---
 
 # Blog Writing Rules
+
+## Filename Convention
+- Blog post files in `src/content/blog/` MUST be lowercase-kebab-case (e.g., `2026-04-19-sculpting-down.md`, not `2026-04-19-Sculpting-Down.md`)
+- Format: `YYYY-MM-DD-slug.md` where `slug` is lowercase words joined by hyphens
+- **Why:** Astro's glob loader silently normalizes `post.id` to lowercase, so mixed-case filenames appear to "work" — but we have no guarantee this behavior is stable, and case-insensitive macOS filesystems can hide case bugs that surface only on case-sensitive CI/deploy targets. Matching the filename to the final URL removes the hidden dependency.
 
 ## Voice & Prose
 - **DO NOT** rewrite my narrative voice or prose
