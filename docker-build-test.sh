@@ -36,8 +36,13 @@ echo "===================="
 
 # Check if we need to rebuild
 if [ -f "$CACHE_FILE" ]; then
-    IFS=: read -r LAST_HASH LAST_TS < "$CACHE_FILE"
-    if [ "$INPUT_HASH" = "$LAST_HASH" ]; then
+    # Tolerate empty or truncated cache files: read returns non-zero on EOF
+    # without a newline, which would abort under `set -e`. Default to empty
+    # so the hash comparison below falls through to a rebuild.
+    LAST_HASH=""
+    LAST_TS=""
+    IFS=: read -r LAST_HASH LAST_TS < "$CACHE_FILE" || :
+    if [ -n "$LAST_HASH" ] && [ "$INPUT_HASH" = "$LAST_HASH" ]; then
         if docker image inspect "$IMAGE_NAME" &>/dev/null; then
             echo "✅ Build already cached (use 'make clean' to rebuild)"
             exit 0
