@@ -33,5 +33,5 @@ run_correct_audits.sh
 run_final_audits.sh
 
 # Cache
-.docker-cache/
+.docker-cache
 tmp/

@@ -172,6 +172,8 @@ git checkout develop && git pull origin develop
 
 ### After PR Merges
 
+**Prerequisites:** Docker must be running before executing these commands (see "Before Making Changes" section).
+
 **CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync branches after PRs merge to prevent divergence.**
 
 With the "Create a merge commit" strategy, the target branch gains a merge commit that the source branch does not have until you sync it back. This workflow keeps branch history aligned after those merges.
@@ -351,228 +353,49 @@ Confirmed: proceeding with [task] despite [blocker].
    - Quality gates optional if changes are trivial (typo fixes, wording)
    - Use judgment: if doc change affects behavior understanding, run tests
 
+   **Expected failures when adding a new blog post (not real regressions):**
+   - `npm run check:links`: self-referential canonical URL (e.g. `https://kyle.skrinak.com/posts/<slug>/`) returns 404 because the post isn't deployed yet. Resolves automatically after deploy.
+   - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npm run test:visual:baseline` (ask first).
+   - If OTHER tests fail, or visual diffs appear on pages unrelated to listings (individual posts, standalone pages), those ARE real and need investigation.
+
 5. **Never commit without verification**
 
-## Text Processing & Parsing Rules
+## Text Processing, Validation, Performance Rules
 
-**When implementing text parsing, string manipulation, or range-based operations:**
+**Text parsing/strings:** Use exclusive range end (`pos < range.end`). Account for newlines in offsets (running offset, not `join('\n').length`). Never `.replace(substring, '')` on content that may repeat — use position ranges, slice, rebuild. Always `.trim()` before exact comparison (CRLF vs LF). Handle malformed input (unclosed blocks → extend range to `content.length`). Throw on missing expected resources; don't silently return empty.
 
-### Critical Implementation Rules
-1. **Range boundaries**: Use exclusive end (`pos < range.end`). Closing delimiters already included.
-2. **Offset calculation**: Account for newlines. Use running offset, never `join('\n').length`.
-3. **String removal**: NEVER use `.replace(substring, '')` on potentially duplicate content. Store position ranges, slice, rebuild.
-4. **Cross-platform**: Always `.trim()` before exact string comparison (CRLF vs LF).
-5. **Malformed input**: Handle unclosed blocks/tags — if still in block after scan, extend range to `content.length`.
-6. **Error handling**: Throw errors for missing expected resources. Don't silently return empty arrays.
+**Data validation:** Apply `.trim().min(1).optional()` to all text fields. Distinguish on-page vs metadata contexts. Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs).
 
-### Edge Cases Checklist (Text Processing)
-Before committing parsing/text manipulation code, verify:
-- [ ] Handles malformed input (unclosed blocks, missing delimiters)
-- [ ] Works with CRLF line endings (uses `.trim()`)
-- [ ] Handles duplicate content in different contexts (code blocks vs actual content)
-- [ ] Uses position-based manipulation, not string matching
-- [ ] Range boundaries are exclusive end, offsets include newlines
-- [ ] Fails fast for missing resources (throws, doesn't hide problems)
-
-### Data Validation Rules
-- [ ] Apply `.trim().min(1).optional()` consistently to ALL text fields
-- [ ] Distinguish validation context (on-page vs metadata, interactive vs static)
-- [ ] Security: Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs)
-
-### Web Performance Rules
-- [ ] `sizes` attribute must match actual container width, not viewport width
-- [ ] Always include `width`/`height` on images (including SVGs) for CLS prevention
+**Web performance:** `sizes` attribute must match actual container width, not viewport. Always include `width`/`height` on images (including SVGs) for CLS prevention.
 
 ## Dependency/Tool Change Protocol
 
-**MANDATORY when removing, replacing, or consolidating tools/dependencies:**
+When removing, replacing, or consolidating tools/dependencies:
 
-1. **Search documentation for references:**
-   ```bash
-   # Search for tool name in docs
-   grep -rn "tool-name" docs/ README.md
+1. Grep `docs/`, `README.md`, and `tests/` for references to the old tool — update every reference (command examples, workflow docs, architecture descriptions, tech-stack lists). No orphans.
+2. For workflow changes: verify conditional logic. Common gotcha: `continue-on-error` + `if: failure()` won't fire as expected — capture exit codes explicitly.
+3. Test the docs you write — run the commands, don't assume; confirm `package.json` scripts match what docs claim.
+4. Delete obsolete code: scripts, config files, unused utilities. Grep `scripts/*.js` for orphans.
 
-   # Search for related concepts
-   grep -rn "workflow.*name\|feature.*description" docs/
-   ```
-
-2. **Update ALL found references:**
-   - [ ] README.md - Update command examples, tech stack
-   - [ ] docs/index.md - Update navigation and file lists
-   - [ ] Feature-specific docs (e.g., docs/link-checking.md)
-   - [ ] Workflow documentation - Explain new approach
-   - [ ] Architecture docs - Update system diagrams/descriptions
-
-3. **Search tests for references:**
-   ```bash
-   grep -rn "tool-name" tests/
-   ```
-
-4. **Verify completeness:**
-   - [ ] No orphaned references to old tool
-   - [ ] New tool/approach fully documented
-   - [ ] Automated workflows documented (if applicable)
-   - [ ] Migration path explained (if relevant)
-
-**Example scenario:**
-- Removed: broken-link-checker
-- Added: htmltest + Playwright two-tier system
-- Must update: docs/link-checking.md, docs/index.md, README.md
-- Must search for: "broken-link-checker", "linkwatch", "external link"
-
-**This is NOT optional. If you change tools, you MUST update docs.**
-
-5. **Test critical paths of new implementation:**
-   - [ ] For workflows: Verify conditional logic (if: failure(), continue-on-error, exit codes)
-   - [ ] For scripts: Test happy path and error conditions
-   - [ ] For automation: Verify it triggers correctly
-   - [ ] Common gotchas: continue-on-error + if: failure() won't work (capture exit code instead)
-
-6. **Verify accuracy of documentation you write:**
-   - [ ] Test commands you document (don't assume what they do)
-   - [ ] Verify script/command behavior matches documentation
-   - [ ] Check package.json scripts match what docs claim
-
-7. **Remove obsolete code:**
-   - [ ] Delete unused scripts/files from old approach
-   - [ ] Search for orphaned utilities: `ls scripts/*.js` and verify each is used
-   - [ ] Clean up old config files
+Example: replacing `broken-link-checker` with `htmltest` required updating `docs/link-checking.md`, `docs/index.md`, `README.md`, and searching for "broken-link-checker" and "linkwatch".
 
 ## Pre-Commit Verification Protocol
 
-**MANDATORY: Execute and output ALL steps before ANY commit.**
+Before any commit that changes code/config:
 
-### Step 1: Search for ALL instances (SHOW OUTPUT)
+1. **Search for all instances** of the pattern being changed across `src/`, `scripts/`, `tests/`, `public/` — fix every occurrence, not just the reported one.
+2. **Check documentation** (`docs/`, `README.md`) for references to the changed files/concepts and update them.
+3. **Check interacting systems**: changed code → docs/tests/configs; changed config → code/scripts referencing it; removed tool → all repo-wide references; changed URL → grep all files.
 
-```bash
-# Search for pattern in code
-grep -rn "pattern-being-fixed" src/ scripts/ tests/ public/
-
-# MUST show: "0 results" or "found N, fixing all N"
-```
-
-**OUTPUT REQUIRED**: Show grep results. If N>0, fix all before proceeding.
-
-### Step 2: Check documentation references (SHOW OUTPUT)
-
-```bash
-# Search docs for references to changed files/concepts
-grep -rn "filename\|changed-concept\|old-behavior" docs/ README.md
-
-# MUST show: all found references and confirmation of updates
-```
-
-**OUTPUT REQUIRED**: For EVERY file/concept you change:
-- Search docs/ and README.md for references
-- Show search results
-- Update found references OR explain why no update needed
-
-### Step 3: Verify systemic impact (SHOW OUTPUT)
-
-**For changed files, search for references:**
-```bash
-# Example: Changed astro.config.ts
-grep -rn "astro.config\|buildEnv\|base.*path" docs/
-
-# Example: Changed test commands
-grep -rn "npm run test\|playwright test" docs/ README.md
-```
-
-**OUTPUT REQUIRED**: Show what you searched for and what you found.
-
-### Step 4: Check related systems
-
-**Ask: "What OTHER systems interact with this change?"**
-- Changed code → check docs, tests, configs
-- Changed config → check code, docs, scripts that reference it
-- Removed tool → search ALL references across entire repo
-- Changed URL → check ALL files (grep -rn "old-url")
-
-**OUTPUT REQUIRED**: State what systems you checked and results.
-
-### Step 5: Verification summary (REQUIRED FORMAT)
-
-Before committing, output:
-```
-Pre-commit verification:
-✅ Pattern search: 0 results (all instances fixed)
-✅ Documentation search: found 3 refs in docs/, updated all 3
-✅ Systemic impact: checked tests/, configs/, no updates needed
-✅ Related systems: [list what you checked]
-```
-
-**NO COMMIT without showing this verification summary.**
-
-### ENFORCEMENT
-
-This is NOT optional. This is NOT a suggestion. Before ANY commit:
-
-1. Execute the search commands above
-2. Show the output in your response
-3. Fix everything found
-4. Show verification summary
-5. THEN commit
-
-**Failure mode**: Committing without showing verification output violates this protocol.
+Report a one-line summary of what you searched and what you fixed before committing. No commit without it.
 
 ## Review Response Protocol
 
-**CRITICAL: Review comments MUST trigger Pre-Commit Verification Protocol.**
+When addressing review comments:
 
-**When addressing review comments:**
-
-1. **Check for architecture problem pattern:**
-
-   **STOP and analyze if:**
-   - 10+ rounds of similar fixes
-   - Environment-specific drift (local vs staging vs production)
-   - User mentions: "count mismatches," "variable settings," "important details missed"
-   - Documentation keeps drifting from reality
-
-   **If pattern detected:**
-   - This is scattered config/architecture problem, not individual fix problem
-   - Read config files: astro.config.ts, src/config/index.ts, workflows
-   - Propose config abstraction layer:
-     - Centralized config registry with metadata
-     - Auto-generated docs from config
-     - Validation script (CI check: code vs docs)
-   - THEN address individual fixes
-
-   **Don't:** Fix docs again without addressing root cause
-
-2. **Identify ROOT issue, not just the line**
-   - Comment mentions line 25 → Find the pattern/issue CLASS
-   - Example: "Line 25 uses /" → Issue is "hardcoded root paths break BASE_URL"
-
-3. **Identify the PATTERN type:**
-   - Missing tests? → Check ALL features for test coverage gaps
-   - Missing comment? → Check ALL similar code for comment patterns
-   - Systemic gap? → Map ALL affected systems (sitemap, robots.txt, etc.)
-   - Inconsistency? → Find what it should match and ensure parity
-
-4. **BEFORE fixing, execute verification searches:**
-   ```bash
-   # Find ALL instances of the issue
-   grep -rn "pattern" relevant-paths/
-
-   # Find ALL documentation that might reference this
-   grep -rn "concept\|filename" docs/ README.md
-   ```
-   **SHOW OUTPUT** before proceeding with fixes.
-
-5. **Fix comprehensively**
-   - Fix the specific issue mentioned
-   - Fix ALL instances of the pattern found
-   - Add missing tests/comments/docs to match existing code
-   - Update ALL interacting systems
-
-6. **MANDATORY: Execute Pre-Commit Verification Protocol**
-   - Run all verification searches
-   - Show output for each search
-   - Provide verification summary
-   - THEN commit
-
-**Never fix "just that line" - fix the entire issue class. Never commit without verification output.**
+1. **Architecture-problem pattern**: if you're in 10+ rounds of similar fixes, environment-specific drift (local vs staging vs prod), or repeatedly-drifting docs — STOP. The root is scattered config/architecture, not individual lines. Read config files, propose an abstraction layer (centralized registry, auto-generated docs, validation script) first, then address individual fixes.
+2. **Fix the pattern, not the line**: a comment on one case means find ALL instances of the same issue class and fix together.
+3. Run the Pre-Commit Verification Protocol above before committing.
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
@@ -610,6 +433,11 @@ For detailed workflows, see:
 ---
 
 # Blog Writing Rules
+
+## Filename Convention
+- Blog post files in `src/content/blog/` MUST be lowercase-kebab-case (e.g., `2026-04-19-sculpting-down.md`, not `2026-04-19-Sculpting-Down.md`)
+- Format: `YYYY-MM-DD-slug.md` where `slug` is lowercase words joined by hyphens
+- **Why:** `getPath()` (`src/utils/getPath.ts`) uses `post.id` directly for the URL slug with no lowercasing. Keeping filenames lowercase-kebab-case ensures the filename matches the generated URL with no dependency on any implicit normalization elsewhere. It also avoids case-sensitivity bugs that macOS (case-insensitive APFS) hides but Linux CI/deploy targets surface as 404s.
 
 ## Voice & Prose
 - **DO NOT** rewrite my narrative voice or prose
