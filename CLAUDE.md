@@ -353,6 +353,11 @@ Confirmed: proceeding with [task] despite [blocker].
    - Quality gates optional if changes are trivial (typo fixes, wording)
    - Use judgment: if doc change affects behavior understanding, run tests
 
+   **Expected failures when adding a new blog post (not real regressions):**
+   - `npm run check:links`: self-referential canonical URL (e.g. `https://kyle.skrinak.com/posts/<slug>/`) returns 404 because the post isn't deployed yet. Resolves automatically after deploy.
+   - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npx playwright test --update-snapshots` (ask first).
+   - If OTHER tests fail, or visual diffs appear on pages unrelated to listings (individual posts, standalone pages), those ARE real and need investigation.
+
 5. **Never commit without verification**
 
 ## Text Processing & Parsing Rules
