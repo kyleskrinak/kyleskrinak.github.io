@@ -30,6 +30,7 @@ push: test
 	git push origin staging
 
 clean:
-	@echo "🧹 Cleaning up Docker image..."
+	@echo "🧹 Cleaning up Docker image and build cache..."
 	docker rmi astro-blog:test 2>/dev/null || true
+	rm -f .docker-cache
 	@echo "✅ Cleanup complete"

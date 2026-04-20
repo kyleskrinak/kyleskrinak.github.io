@@ -28,8 +28,11 @@ if [ -f "$CACHE_FILE" ]; then
             exit 0
         fi
         # Image is gone but inputs unchanged — honor grace period.
-        if [ -n "$LAST_TS" ]; then
-            NOW=$(date +%s)
+        case "$LAST_TS" in
+            (*[!0-9]*|'') LAST_TS="" ;;
+        esac
+        NOW=$(date +%s)
+        if [ -n "$LAST_TS" ] && [ "$LAST_TS" -le "$NOW" ]; then
             AGE_DAYS=$(( (NOW - LAST_TS) / 86400 ))
             if [ "$AGE_DAYS" -lt "$GRACE_DAYS" ]; then
                 echo "✅ Inputs unchanged; last green build was ${AGE_DAYS}d ago (grace period: ${GRACE_DAYS}d). Skipping rebuild."
