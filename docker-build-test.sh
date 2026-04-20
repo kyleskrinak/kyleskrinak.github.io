@@ -24,7 +24,7 @@ compute_input_hash() {
     {
         git ls-files -z
         git ls-files -z --others --exclude-standard
-    } | xargs -0 sha256sum | sha256sum | awk '{print $1}'
+    } | xargs -0 sha256sum -- | sha256sum | awk '{print $1}'
 }
 if ! INPUT_HASH=$(compute_input_hash) || [ -z "$INPUT_HASH" ]; then
     echo "❌ Failed to compute input hash" >&2
