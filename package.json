@@ -5,6 +5,7 @@
   "engines": {
     "node": ">=22.13.0"
   },
+  "packageManager": "npm@11.12.1",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist && cp -r dist/_pagefind public/",
