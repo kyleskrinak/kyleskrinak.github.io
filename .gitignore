@@ -3,6 +3,10 @@ node_modules/
 .npm
 npm-debug.log
 
+# unused package manager lockfiles (repo uses npm; see package.json packageManager)
+pnpm-lock.yaml
+yarn.lock
+
 # build output
 dist/
 .astro/
