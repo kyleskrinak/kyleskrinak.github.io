@@ -4,7 +4,7 @@
 # Builds the project in a Docker container matching GitHub Actions environment
 # Run this before pushing to verify the build works in CI
 
-set -e
+set -eo pipefail
 
 IMAGE_NAME="astro-blog:test"
 CACHE_FILE=".docker-cache"
@@ -12,23 +12,37 @@ CACHE_FILE=".docker-cache"
 # has been GC'd but build inputs are unchanged. Override with DOCKER_CACHE_TTL_DAYS.
 GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
-# Hash build-definition inputs so changes to the Dockerfile or dep lockfiles
-# invalidate the cache. Per-file sha256 then hashed again: filename context is
-# preserved and boundary-shift collisions are avoided vs a raw `cat | hash`.
-# TODO: source-only changes (src/**) do not invalidate this cache. A full fix
-# would hash git-tracked + untracked-non-ignored files. Deferred from PR #89
-# to keep scope tight; filed as follow-up. Docker layer cache still catches
-# most of this on rebuild, and CI always does a clean build.
-INPUT_HASH=$(sha256sum Dockerfile package.json package-lock.json | sha256sum | awk '{print $1}')
+# Hash build inputs: in a git worktree, hash tracked + untracked non-ignored
+# files so source/content changes invalidate the cache. Tracked and untracked
+# sets are disjoint, and $CACHE_FILE is gitignored so it won't appear in either.
+# Outside git, fall back to manifests (e.g., fresh tarball extract).
+compute_input_hash() {
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        sha256sum Dockerfile package.json package-lock.json | sha256sum | awk '{print $1}'
+        return
+    fi
+    {
+        git ls-files -z
+        git ls-files -z --others --exclude-standard
+    } | xargs -0 sha256sum -- | sha256sum | awk '{print $1}'
+}
+if ! INPUT_HASH=$(compute_input_hash) || [ -z "$INPUT_HASH" ]; then
+    echo "❌ Failed to compute input hash" >&2
+    exit 1
+fi
 
 echo "🐳 Docker build test"
 echo "===================="
 
 # Check if we need to rebuild
 if [ -f "$CACHE_FILE" ]; then
-    LAST_HASH=$(awk -F: 'NR==1 {print $1}' "$CACHE_FILE")
-    LAST_TS=$(awk -F: 'NR==1 {print $2}' "$CACHE_FILE")
-    if [ "$INPUT_HASH" = "$LAST_HASH" ]; then
+    # Tolerate empty or truncated cache files: read returns non-zero on EOF
+    # without a newline, which would abort under `set -e`. Default to empty
+    # so the hash comparison below falls through to a rebuild.
+    LAST_HASH=""
+    LAST_TS=""
+    IFS=: read -r LAST_HASH LAST_TS < "$CACHE_FILE" || :
+    if [ -n "$LAST_HASH" ] && [ "$INPUT_HASH" = "$LAST_HASH" ]; then
         if docker image inspect "$IMAGE_NAME" &>/dev/null; then
             echo "✅ Build already cached (use 'make clean' to rebuild)"
             exit 0
