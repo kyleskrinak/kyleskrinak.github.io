@@ -76,6 +76,14 @@ export default defineConfig({
         screenshot: 'only-on-failure',
       },
     },
+    {
+      name: 'disqus',
+      testMatch: 'tests/disqus.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+      },
+    },
   ],
 
   // Reporter: HTML for visual tests (detailed), list for others

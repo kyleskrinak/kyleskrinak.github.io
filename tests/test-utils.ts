@@ -47,7 +47,13 @@ export const isLocalUrl =
  * visual snapshots or pollute console-error captures with third-party
  * warnings. The page still renders #disqus_thread (empty) and the
  * fallback message — but no remote content loads.
+ *
+ * Fulfilling with a silent 204 (rather than route.abort()) avoids the
+ * "Failed to load resource" console error Chromium emits for aborted
+ * script requests, which would otherwise leak into console-errors.spec.ts.
  */
 export async function blockDisqus(page: import("@playwright/test").Page) {
-  await page.route(/disqus(?:cdn)?\.com/, (route) => route.abort());
+  await page.route(/disqus(?:cdn)?\.com/, (route) =>
+    route.fulfill({ status: 204, body: "" })
+  );
 }

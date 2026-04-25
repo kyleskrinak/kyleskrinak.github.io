@@ -24,6 +24,7 @@
     "test:seo": "playwright test --project=seo",
     "test:analytics": "playwright test --project=analytics",
     "test:console": "playwright test --project=console",
+    "test:disqus": "playwright test --project=disqus",
     "test:links": "playwright test --project=links",
     "test:staging": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io playwright test",
     "test:production": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com playwright test",

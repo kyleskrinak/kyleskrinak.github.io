@@ -43,18 +43,26 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		}
 	};
 
-	(function () {
-		var d = document,
-			s = d.createElement("script");
-		s.async = true;
-		s.src = "https://" + shortname + ".disqus.com/embed.js";
-		s.setAttribute("data-timestamp", +new Date());
-		s.onerror = function () {
-			var fb = document.getElementById("disqus-fallback");
-			if (fb) fb.hidden = false;
-		};
-		(d.head || d.body).appendChild(s);
-	})();
+	// On the first execution, inject embed.js. On subsequent executions
+	// (data-astro-rerun via view transitions), DISQUS already exists — call
+	// reset() so the existing instance re-reads pageUrl/identifier instead
+	// of double-injecting embed.js.
+	if (typeof window.DISQUS === "undefined") {
+		(function () {
+			var d = document,
+				s = d.createElement("script");
+			s.async = true;
+			s.src = "https://" + shortname + ".disqus.com/embed.js";
+			s.setAttribute("data-timestamp", +new Date());
+			s.onerror = function () {
+				var fb = document.getElementById("disqus-fallback");
+				if (fb) fb.hidden = false;
+			};
+			(d.head || d.body).appendChild(s);
+		})();
+	} else {
+		window.DISQUS.reset({ reload: true, config: window.disqus_config });
+	}
 
 	// data-astro-rerun re-executes this script on view-transition navigation.
 	// Stash observers and timers on `window` so each rerun can disconnect the
@@ -81,6 +89,11 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		window.__disqusThreadObserver = new MutationObserver(function () {
 			if (thread.children.length > 0) {
 				clearTimeout(window.__disqusFallbackTimer);
+				// If the embed lands after the timeout fired, hide the
+				// stale fallback message so it doesn't sit alongside the
+				// loaded comments.
+				var fb = document.getElementById("disqus-fallback");
+				if (fb) fb.hidden = true;
 				window.__disqusThreadObserver.disconnect();
 			}
 		});
