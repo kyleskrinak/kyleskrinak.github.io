@@ -40,6 +40,7 @@ test.describe("Disqus integration", () => {
     const response = await page.goto(`${BASE_URL}/presentations/`);
     if (!response || response.status() !== 200) {
       test.skip(true, "presentations index not available on this environment");
+      return;
     }
     const firstPresentationLink = await page
       .locator('a[href^="/presentations/"]')
@@ -48,6 +49,7 @@ test.describe("Disqus integration", () => {
       .getAttribute("href");
     if (!firstPresentationLink) {
       test.skip(true, "no presentation links found");
+      return;
     }
     await page.goto(`${BASE_URL}${firstPresentationLink}`);
     await expect(page.locator("#disqus_thread")).toHaveCount(0);
