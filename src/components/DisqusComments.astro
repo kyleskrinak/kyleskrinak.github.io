@@ -62,4 +62,16 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 			fb.hidden = false;
 		}
 	}, 2500);
+
+	// Re-render the embed when the site theme toggles so the iframe
+	// picks up the new color-scheme. DISQUS is defined once embed.js loads;
+	// before that, the initial color-scheme is correct so no reset is needed.
+	new MutationObserver(function () {
+		if (typeof window.DISQUS !== "undefined") {
+			window.DISQUS.reset({ reload: true, config: window.disqus_config });
+		}
+	}).observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["data-theme"],
+	});
 </script>
