@@ -9,6 +9,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: '* Converting vb-script site to a modern, responsive heterogeneous site with Drupal 8'
+disqusId: "/drupal/drupalcon-nashville-2018-04-09-2018-higher-ed-summit-day"
 ---
 
 

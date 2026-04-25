@@ -3,6 +3,7 @@ title: Jekyll, Hugo, and Me
 pubDate: 2021-01-16T00:00:00.000Z
 categories: []
 description: The battle for a better static website generator
+disqusId: "/static%20websites/jekyll-hugo-and-me"
 ---
 
 

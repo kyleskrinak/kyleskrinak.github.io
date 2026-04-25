@@ -5,6 +5,7 @@ categories: []
 tags:
   - Vim editor
 description: Here's an excellent article on using Vim for narrative writing, as opposed to technical documentation. I love the idea o...
+disqusId: "/personal%20productivity/vim-for-writers"
 ---
 
 

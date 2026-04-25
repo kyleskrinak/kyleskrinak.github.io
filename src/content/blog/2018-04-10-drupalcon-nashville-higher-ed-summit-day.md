@@ -9,6 +9,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: '* New in 8.5'
+disqusId: "/drupal/drupalcon-nashville-2018-04-10-2018-higher-ed-summit-day"
 ---
 
 

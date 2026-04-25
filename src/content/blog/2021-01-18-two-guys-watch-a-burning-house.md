@@ -3,6 +3,7 @@ title: Two Guys Watch a Burning House, Part I
 pubDate: 2021-01-18T00:00:00.000Z
 description: I forget when in 1973 the Skrinak family house caught on fire. I’m guessing it was in late Spring, but that was so long ago.
 categories: []
+disqusId: "/personal/two-guys-watch-a-burning-house"
 ---
 
 <style>

@@ -1,54 +1,62 @@
 ---
+import { COMMENTS } from "@/config";
+
 interface Props {
-	slug: string;
-	title: string;
+	identifier?: string;
+	url?: string;
 }
 
-const { title } = Astro.props;
-const shortname = 'kds38-duke-blog';
+const { identifier, url } = Astro.props;
+const shortname = COMMENTS.disqus.shortname;
+const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 ---
 
-<div id="disqus_thread"></div>
-<script>
-	declare global {
-		interface Window {
-			disqus_config: () => void;
-			page?: {
-				url: string;
-				identifier: string;
-			};
-		}
-	}
+<section id="comments" class="mt-12 border-t border-dashed pt-8">
+	<div id="disqus_thread"></div>
+	<p
+		id="disqus-fallback"
+		hidden
+		class="text-sm italic text-gray-600 dark:text-gray-400"
+	>
+		Comments could not be loaded. Please check that JavaScript is enabled and
+		that you can reach <code>disqus.com</code>.
+	</p>
+	<noscript
+		>Please enable JavaScript to view the <a
+			href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a
+		></noscript
+	>
+</section>
 
+<script
+	is:inline
+	define:vars={{ shortname, identifier, pageUrl }}
+>
 	window.disqus_config = function () {
-		const pageUrl = window.location.href;
-		const pageIdentifier = document.currentScript?.dataset.slug || 'unknown';
-		if (!window.page) {
-			window.page = { url: '', identifier: '' };
+		this.page.url = pageUrl;
+		if (identifier) {
+			this.page.identifier = identifier;
 		}
-		window.page.url = pageUrl;
-		window.page.identifier = pageIdentifier;
 	};
 
 	(function () {
-		const disqusShortname = 'kds38-duke-blog';
-		const d = document;
-		const s = d.createElement('script');
-		s.src = 'https://' + disqusShortname + '.disqus.com/embed.js';
-		s.setAttribute('data-timestamp', new Date().getTime().toString());
+		var d = document,
+			s = d.createElement("script");
+		s.src = "https://" + shortname + ".disqus.com/embed.js";
+		s.setAttribute("data-timestamp", +new Date());
+		s.async = true;
+		s.onerror = function () {
+			var fb = document.getElementById("disqus-fallback");
+			if (fb) fb.hidden = false;
+		};
 		(d.head || d.body).appendChild(s);
 	})();
-</script>
-<noscript
-	>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript"
-		>comments powered by Disqus.</a
-	></noscript
->
 
-<style>
-	#disqus_thread {
-		margin-top: 2rem;
-		padding-top: 2rem;
-		border-top: 1px solid rgb(var(--gray-light));
-	}
-</style>
+	setTimeout(function () {
+		var thread = document.getElementById("disqus_thread");
+		var fb = document.getElementById("disqus-fallback");
+		if (fb && thread && thread.children.length === 0) {
+			fb.hidden = false;
+		}
+	}, 2500);
+</script>

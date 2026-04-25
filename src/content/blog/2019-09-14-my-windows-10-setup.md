@@ -6,6 +6,7 @@ description: Why Windows and how I like my default Windows 10 configured
 image: ../../assets/images/punch_card.jpg
 alt: "punch card"
 source: jekyll
+disqusId: "/personal%20productivity/my-windows-10-setup"
 ---
 
 
