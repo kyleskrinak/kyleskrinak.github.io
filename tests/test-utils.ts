@@ -41,3 +41,13 @@ export const isLocalUrl =
   BASE_URL.includes("127.0.0.1") ||
   BASE_URL.includes(".local") ||
   BASE_URL.includes("::1");
+
+/**
+ * Block all Disqus traffic so async-loading comments can't flake
+ * visual snapshots or pollute console-error captures with third-party
+ * warnings. The page still renders #disqus_thread (empty) and the
+ * fallback message — but no remote content loads.
+ */
+export async function blockDisqus(page: import("@playwright/test").Page) {
+  await page.route(/disqus(?:cdn)?\.com/, (route) => route.abort());
+}

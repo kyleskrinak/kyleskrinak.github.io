@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { blockDisqus } from '../test-utils';
+
+test.beforeEach(async ({ page }) => {
+  await blockDisqus(page);
+});
 
 /**
  * Visual Regression Tests for Astro Blog
