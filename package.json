@@ -30,6 +30,7 @@
     "htmltest": "htmltest",
     "htmltest:verbose": "htmltest -l 3",
     "check:links": "node scripts/check-links.js",
+    "check:disqus-ids": "node scripts/check-disqus-ids.mjs",
     "config:generate": "node config/generate-docs.mjs",
     "config:validate": "node config/validate.mjs",
     "config:inspect": "node config/inspect.mjs"

@@ -56,32 +56,46 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		(d.head || d.body).appendChild(s);
 	})();
 
-	// Cancel the slow-load fallback as soon as the embed renders content.
+	// data-astro-rerun re-executes this script on view-transition navigation.
+	// Stash observers and timers on `window` so each rerun can disconnect the
+	// previous instances before creating new ones — otherwise observers
+	// accumulate and the theme toggle calls DISQUS.reset() N times.
+	if (window.__disqusFallbackTimer) {
+		clearTimeout(window.__disqusFallbackTimer);
+	}
+	if (window.__disqusThreadObserver) {
+		window.__disqusThreadObserver.disconnect();
+	}
+	if (window.__disqusThemeObserver) {
+		window.__disqusThemeObserver.disconnect();
+	}
+
 	var thread = document.getElementById("disqus_thread");
-	var fallbackTimer = setTimeout(function () {
+	window.__disqusFallbackTimer = setTimeout(function () {
 		var fb = document.getElementById("disqus-fallback");
 		if (fb && thread && thread.children.length === 0) {
 			fb.hidden = false;
 		}
 	}, 6000);
 	if (thread) {
-		var threadObserver = new MutationObserver(function () {
+		window.__disqusThreadObserver = new MutationObserver(function () {
 			if (thread.children.length > 0) {
-				clearTimeout(fallbackTimer);
-				threadObserver.disconnect();
+				clearTimeout(window.__disqusFallbackTimer);
+				window.__disqusThreadObserver.disconnect();
 			}
 		});
-		threadObserver.observe(thread, { childList: true });
+		window.__disqusThreadObserver.observe(thread, { childList: true });
 	}
 
 	// Re-render the embed when the site theme toggles so the iframe
 	// picks up the new color-scheme. DISQUS is defined once embed.js loads;
 	// before that, the initial color-scheme is correct so no reset is needed.
-	new MutationObserver(function () {
+	window.__disqusThemeObserver = new MutationObserver(function () {
 		if (typeof window.DISQUS !== "undefined") {
 			window.DISQUS.reset({ reload: true, config: window.disqus_config });
 		}
-	}).observe(document.documentElement, {
+	});
+	window.__disqusThemeObserver.observe(document.documentElement, {
 		attributes: true,
 		attributeFilter: ["data-theme"],
 	});
