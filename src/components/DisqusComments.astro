@@ -34,6 +34,7 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 <script
 	is:inline
 	define:vars={{ shortname, identifier, pageUrl }}
+	data-astro-rerun
 >
 	window.disqus_config = function () {
 		this.page.url = pageUrl;
@@ -45,9 +46,9 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 	(function () {
 		var d = document,
 			s = d.createElement("script");
+		s.async = true;
 		s.src = "https://" + shortname + ".disqus.com/embed.js";
 		s.setAttribute("data-timestamp", +new Date());
-		s.async = true;
 		s.onerror = function () {
 			var fb = document.getElementById("disqus-fallback");
 			if (fb) fb.hidden = false;
@@ -55,13 +56,23 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		(d.head || d.body).appendChild(s);
 	})();
 
-	setTimeout(function () {
-		var thread = document.getElementById("disqus_thread");
+	// Cancel the slow-load fallback as soon as the embed renders content.
+	var thread = document.getElementById("disqus_thread");
+	var fallbackTimer = setTimeout(function () {
 		var fb = document.getElementById("disqus-fallback");
 		if (fb && thread && thread.children.length === 0) {
 			fb.hidden = false;
 		}
-	}, 2500);
+	}, 6000);
+	if (thread) {
+		var threadObserver = new MutationObserver(function () {
+			if (thread.children.length > 0) {
+				clearTimeout(fallbackTimer);
+				threadObserver.disconnect();
+			}
+		});
+		threadObserver.observe(thread, { childList: true });
+	}
 
 	// Re-render the embed when the site theme toggles so the iframe
 	// picks up the new color-scheme. DISQUS is defined once embed.js loads;

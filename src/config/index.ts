@@ -33,7 +33,6 @@ export const SITE = {
 } as const;
 
 export const COMMENTS = {
-  provider: "disqus",
   disqus: {
     shortname: "kds38-duke-blog",
   },
