@@ -11,7 +11,10 @@ const shortname = COMMENTS.disqus.shortname;
 const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 ---
 
-<section id="comments" class="mt-12 border-t border-dashed pt-8">
+<section
+	id="comments"
+	class="mt-12 border-t border-dashed pt-8 [color-scheme:light] dark:[color-scheme:dark]"
+>
 	<div id="disqus_thread"></div>
 	<p
 		id="disqus-fallback"
