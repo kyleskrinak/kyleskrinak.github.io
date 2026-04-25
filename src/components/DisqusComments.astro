@@ -38,9 +38,10 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 >
 	window.disqus_config = function () {
 		this.page.url = pageUrl;
-		if (identifier) {
-			this.page.identifier = identifier;
-		}
+		// Always assign — including `undefined` for pages without a preserved
+		// identifier — so DISQUS.reset() can't carry the prior page's
+		// identifier forward and load the wrong thread.
+		this.page.identifier = identifier;
 	};
 
 	// On the first execution, inject embed.js. On subsequent executions
@@ -112,4 +113,27 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		attributes: true,
 		attributeFilter: ["data-theme"],
 	});
+
+	// View-transition navigations to a page WITHOUT <DisqusComments> never
+	// re-run this script, so without this listener the theme observer would
+	// keep firing DISQUS.reset() for the rest of the session. Register the
+	// listener once globally; the sentinel guards against accumulation
+	// across data-astro-rerun executions.
+	if (!window.__disqusCleanupRegistered) {
+		window.__disqusCleanupRegistered = true;
+		document.addEventListener("astro:before-swap", function () {
+			if (window.__disqusFallbackTimer) {
+				clearTimeout(window.__disqusFallbackTimer);
+				window.__disqusFallbackTimer = null;
+			}
+			if (window.__disqusThreadObserver) {
+				window.__disqusThreadObserver.disconnect();
+				window.__disqusThreadObserver = null;
+			}
+			if (window.__disqusThemeObserver) {
+				window.__disqusThemeObserver.disconnect();
+				window.__disqusThemeObserver = null;
+			}
+		});
+	}
 </script>
