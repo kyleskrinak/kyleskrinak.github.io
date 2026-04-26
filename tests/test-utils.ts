@@ -43,16 +43,36 @@ export const isLocalUrl =
   BASE_URL.includes("::1");
 
 /**
- * Block all Disqus traffic so async-loading comments can't flake
- * visual snapshots or pollute console-error captures with third-party
- * warnings. The page still renders #disqus_thread (empty) and the
- * fallback message — but no remote content loads.
+ * Stub Disqus so async-loading comments can't flake visual snapshots or
+ * pollute console-error captures.
  *
- * Fulfilling with a silent 204 (rather than route.abort()) avoids the
- * "Failed to load resource" console error Chromium emits for aborted
- * script requests, which would otherwise leak into console-errors.spec.ts.
+ * Strategy:
+ * - Fulfill embed.js with a tiny no-op script that pretends the embed
+ *   loaded successfully: it inserts a placeholder child into
+ *   #disqus_thread (so the component's MutationObserver clears the 6s
+ *   slow-load fallback timer) and stubs window.DISQUS so the theme
+ *   observer's reset() call is a harmless no-op.
+ * - Fulfill all other disqus.com / disquscdn.com requests with a silent
+ *   204, avoiding Chromium's "Failed to load resource" console errors
+ *   that route.abort() would surface.
+ *
+ * Why a stub over route.abort() or a 204 for embed.js:
+ * - route.abort() emits net::ERR_FAILED in console.
+ * - 204 makes embed.js look "successful" but never executes, so the
+ *   thread stays empty and the 6s fallback timer eventually reveals the
+ *   "Comments could not be loaded" message — capturable in a snapshot
+ *   if a test runs slowly.
+ * - The stub guarantees the rendered DOM is identical and deterministic
+ *   regardless of test timing.
  */
 export async function blockDisqus(page: import("@playwright/test").Page) {
+  await page.route(/disqus\.com\/embed\.js/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/javascript",
+      body: `(function(){var t=document.getElementById('disqus_thread');if(t)t.innerHTML='<div data-test-stub="disqus"></div>';window.DISQUS={reset:function(){}};})();`,
+    })
+  );
   await page.route(/disqus(?:cdn)?\.com/, (route) =>
     route.fulfill({ status: 204, body: "" })
   );

@@ -24,11 +24,8 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		Comments could not be loaded. Please check that JavaScript is enabled and
 		that you can reach <code>disqus.com</code>.
 	</p>
-	<noscript
-		>Please enable JavaScript to view the <a
-			href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a
-		></noscript
-	>
+	{/* prettier-ignore */}
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </section>
 
 <script
