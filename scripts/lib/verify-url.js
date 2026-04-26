@@ -19,21 +19,30 @@ export async function verifyUrl(page, url) {
 
     const status = response ? response.status() : 'NO_RESPONSE';
 
-    // 403 means resource exists (access-controlled), not broken
-    // Accept 2xx (OK) and 403 (Forbidden) as success
-    const isSuccess = response && (response.ok() || status === 403);
+    // Two distinct flavors of "not broken":
+    //   reachable: 2xx — the page actually loaded for the browser
+    //   withheld: 403/999 — the resource exists but gates automated
+    //     clients. Same semantic class as a 403 from htmltest.
+    // success keeps the broad "not broken" meaning so callers that only
+    // care about pass/fail don't have to inspect both flags.
+    const reachable = !!(response && response.ok());
+    const withheld = !!(response && (status === 403 || status === 999));
 
     return {
       url,
       status,
       finalUrl: page.url(),
       redirected: page.url() !== url,
-      success: !!isSuccess
+      reachable,
+      withheld,
+      success: reachable || withheld
     };
   } catch (error) {
     return {
       url,
       error: error.message,
+      reachable: false,
+      withheld: false,
       success: false
     };
   }
