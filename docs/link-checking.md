@@ -226,13 +226,14 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` only if:
-- The browser check succeeded (HTTP 200 or redirect)
-- The htmltest failure was NOT a 403 or 999 response (403s and 999s are automatically withheld by the script)
+The URL is "not broken." The script distinguishes two outcomes:
+
+- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
+- **Withheld** — browser returned 403 or 999 (LinkedIn-style anti-bot). The resource exists but is gated against automated clients (Chromium too). The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
 
 ```yaml
 IgnoreURLs:
-  - "example.com"  # Works in browsers, blocks bots (non-403/999 failure)
+  - "example.com"  # Reachable in browser, blocks htmltest (non-403/999 failure)
 ```
 
 Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
@@ -303,7 +304,7 @@ npm run test:links
 ## Ignore List Guidelines
 
 Add domains to `IgnoreURLs` when:
-- ✅ URL works in real browsers (verified with browser)
+- ✅ URL is **reachable** in real browsers (HTTP 2xx — distinct from "withheld")
 - ✅ URL fails automated checks **BUT has explicit status code** (404, 429, 503, etc.)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers

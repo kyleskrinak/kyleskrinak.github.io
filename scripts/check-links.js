@@ -261,8 +261,13 @@ try {
     const result = await verifyUrl(page, url);
     results.push(result);
 
-    if (result.success) {
-      console.log(`  ✅ ${result.status} - Works in browser`);
+    if (result.reachable) {
+      console.log(`  ✅ ${result.status} - Reachable in browser`);
+      if (result.redirected) {
+        console.log(`  → Redirects to: ${result.finalUrl}`);
+      }
+    } else if (result.withheld) {
+      console.log(`  ℹ️  ${result.status} - Withheld (browser also gated; resource exists)`);
       if (result.redirected) {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
@@ -285,16 +290,20 @@ console.log('FINAL REPORT');
 console.log('━'.repeat(60));
 
 const working = results.filter(r => r.success);
+const reachableResults = results.filter(r => r.reachable);
+const withheldResults = results.filter(r => r.withheld);
 const broken = results.filter(r => !r.success);
 
 console.log(`\n📊 Summary:`);
 if (isManualMode) {
   console.log(`   URLs checked: ${failedUrls.length}`);
-  console.log(`   ✅ Working: ${working.length}`);
+  console.log(`   ✅ Reachable: ${reachableResults.length}`);
+  console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
   console.log(`   ❌ Broken: ${broken.length}`);
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
-  console.log(`   ✅ Working in real browser: ${working.length}`);
+  console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
+  console.log(`   ℹ️  Withheld (browser also gated): ${withheldResults.length}`);
   console.log(`   ❌ Actually broken: ${broken.length}`);
 }
 
@@ -321,7 +330,7 @@ if (!isManualMode) {
 if (working.length > 0 && !isManualMode) {
 
   if (ignoreCandidates.length > 0) {
-    console.log('\n✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):');
+    console.log('\n✅ URLs reachable in browser (add to .htmltest.yml IgnoreURLs):');
     console.log('━'.repeat(60));
 
     const domains = [...new Set(ignoreCandidates.map(r => {
@@ -346,11 +355,18 @@ if (working.length > 0 && !isManualMode) {
     });
   }
 
+  const formatWithheld = (r) => {
+    const browserState = r.reachable
+      ? `browser: ${r.status} reachable`
+      : `browser: ${r.status} also gated`;
+    return `  - ${r.url}  (${browserState})`;
+  };
+
   if (withheld403s.length > 0) {
-    console.log('\nℹ️  URLs that work in browser but returned 403 in htmltest (not adding to IgnoreURLs):');
+    console.log('\nℹ️  htmltest reported 403 — withheld by policy (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
     withheld403s.forEach(r => {
-      console.log(`  - ${r.url}`);
+      console.log(formatWithheld(r));
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
@@ -358,10 +374,10 @@ if (working.length > 0 && !isManualMode) {
   }
 
   if (withheld999s.length > 0) {
-    console.log('\nℹ️  URLs that work in browser but returned 999 in htmltest (not adding to IgnoreURLs):');
+    console.log('\nℹ️  htmltest reported 999 — withheld by policy (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
     withheld999s.forEach(r => {
-      console.log(`  - ${r.url}`);
+      console.log(formatWithheld(r));
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
@@ -369,10 +385,11 @@ if (working.length > 0 && !isManualMode) {
   }
 
   if (connectionErrors.length > 0) {
-    console.log('\n⚠️  URLs that work in browser but had connection/TLS errors in htmltest (investigate):');
+    console.log('\n⚠️  htmltest had connection/TLS errors but browser succeeded (investigate):');
     console.log('━'.repeat(60));
     connectionErrors.forEach(r => {
-      console.log(`  - ${r.url}`);
+      const browserState = r.reachable ? 'reachable' : 'withheld';
+      console.log(`  - ${r.url}  (browser: ${browserState})`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
@@ -400,19 +417,20 @@ if (broken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
-// Note: 403s that work in browser are withheld from ignore list by policy, but still represent
-// successful links (not broken), so they don't trigger exit(1). Only genuinely broken links fail.
+// Note: 403/999 responses are withheld from the ignore list by policy but still represent
+// non-broken links (resource exists, just gated against automation), so they don't trigger
+// exit(1). Only genuinely broken links fail.
 if (broken.length > 0) {
   console.log(`\n⚠️  ${broken.length} link(s) need manual attention\n`);
   process.exit(1);
 }
 
 if (isManualMode && working.length > 0) {
-  console.log(`\n✅ All provided URLs are accessible\n`);
+  console.log(`\n✅ All provided URLs are accounted for (reachable or withheld)\n`);
 } else if (ignoreCandidates.length > 0) {
-  console.log(`\n✅ All failed links work in browser - update ignore list\n`);
+  console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
 } else if (working.length > 0) {
-  console.log(`\n✅ All failed links work in browser - no ignore list updates suggested\n`);
+  console.log(`\n✅ All failed links accounted for (reachable or withheld) - no ignore list updates suggested\n`);
 }
 
 process.exit(0);
