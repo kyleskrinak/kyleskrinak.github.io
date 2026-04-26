@@ -3,6 +3,7 @@ title: Shinleaf Campsite
 pubDate: 2021-01-19T00:00:00.000Z
 description: When I was 8, I played alongside a lake, against a star-splattered night with my brother and sister.
 categories: []
+disqusId: "/personal/shinleaf-campsite"
 ---
 
 <style>

@@ -9,6 +9,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: For our Drupal @ Duke meetup, here are my top five take-aways from this year's DrupalCon Nashville.
+disqusId: "/drupal/5-drupalcon-nashville-take-aways"
 ---
 
 

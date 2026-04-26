@@ -6,6 +6,7 @@ description: Imagine asking an alcoholic; "Don't you miss alcohol?"
 image: ../../assets/images/20160619-fathersday.jpg
 alt: "20160619 fathersday"
 source: jekyll
+disqusId: "/lchf/don-t-you-miss-carbs"
 ---
 
 It's a common question for me these days. After talking about my weight-loss, severely reducing my carb intake, and how I must remain low-carb to do so, my interlocutor nearly always will press me;

@@ -9,6 +9,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: Below is my list of videos to catch up on DrupalCon Nashville 2018. The first is the youtube embed of my public playlist...
+disqusId: "/drupal/drupalcon-nashville-2018-video-playlist"
 ---
 
 

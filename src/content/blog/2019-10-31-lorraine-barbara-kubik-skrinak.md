@@ -6,6 +6,7 @@ description: My Eulogy for my Mom. October 31st, 2019, 11 AM, at St. Andrews Cat
 image: ../../assets/images/19-10-31-mom-me.jpg
 alt: "19 10 31 mom me"
 source: jekyll
+disqusId: "/personal/lorraine-barbara-kubik-skrinak"
 ---
 
 ## “Did you know you brighten my day? You are like sunshine to me.”

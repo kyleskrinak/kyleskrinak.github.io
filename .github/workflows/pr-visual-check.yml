@@ -38,6 +38,9 @@ jobs:
       - name: Validate configuration registry
         run: npm run config:validate
 
+      - name: Verify Disqus identifiers preserved on migrated posts
+        run: npm run check:disqus-ids
+
       - name: Build site (PR code)
         run: npm run build:ci
         env:

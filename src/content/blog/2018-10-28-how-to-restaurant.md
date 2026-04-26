@@ -6,6 +6,7 @@ description: Asking about one common and simple ingredient can expose a restaura
 image: ../../assets/images/empty_dining.jpg
 alt: "Empty dining room"
 source: jekyll
+disqusId: "/lchf/how-to-restaurant"
 ---
 
 

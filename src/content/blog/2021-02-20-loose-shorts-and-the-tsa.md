@@ -5,6 +5,7 @@ categories: []
 tags:
   - Story-telling
 description: “Sir, you better grab those shorts tightly, *no one wants them to drop*.” Thank you, captain O.
+disqusId: "/personal/loose-shorts-and-the-tsa"
 ---
 
 

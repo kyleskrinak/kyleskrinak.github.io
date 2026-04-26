@@ -6,6 +6,7 @@ image: ../../assets/images/21-04-02-jekyll-garden.jpg
 alt: "21 04 02 jekyll garden"
 source: jekyll
 description: Continuing my research on a static website workflow, I'm spinning up a new personal website as an excuse to try building...
+disqusId: "/in-the-jekyll-garden"
 ---
 
 
