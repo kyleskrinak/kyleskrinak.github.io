@@ -180,7 +180,7 @@ IgnoreURLs:
   # ... etc
 ```
 
-**Note**: 403 responses and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
+**Note**: 403 responses, 999 responses (LinkedIn-style anti-bot), and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
 
 ## Handling Link Check Failures
 
@@ -226,13 +226,14 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL works for real users but fails automated checks. Add domain to `.htmltest.yml` only if:
-- The browser check succeeded (HTTP 200 or redirect)
-- The htmltest failure was NOT a 403 response (403s are automatically withheld by the script)
+The URL is "not broken." The script distinguishes two outcomes:
+
+- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
+- **Withheld** — browser returned 403 or 999 (LinkedIn-style anti-bot). The resource exists but is gated against automated clients (Chromium too). The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
 
 ```yaml
 IgnoreURLs:
-  - "example.com"  # Works in browsers, blocks bots (non-403 failure)
+  - "example.com"  # Reachable in browser, blocks htmltest (non-403/999 failure)
 ```
 
 Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
@@ -303,18 +304,19 @@ npm run test:links
 ## Ignore List Guidelines
 
 Add domains to `IgnoreURLs` when:
-- ✅ URL works in real browsers (verified with browser)
+- ✅ URL is **reachable** in real browsers (HTTP 2xx — distinct from "withheld")
 - ✅ URL fails automated checks **BUT has explicit status code** (404, 429, 503, etc.)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
-- ⚠️  **Never add** 403 responses (withheld by policy), connection errors, or URLs that also fail in browser
+- ⚠️  **Never add** 403 or 999 responses (withheld by policy), connection errors, or URLs that also fail in browser
 
 Do NOT add to ignore list when:
 - ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
 - ❌ Content has moved to new URL
 - ❌ Site is permanently offline
-- ⚠️  **Policy Exclusions**: 
+- ⚠️  **Policy Exclusions**:
   - 403 responses: withheld by policy (not added even if browser works)
+  - 999 responses: withheld by policy (LinkedIn-style anti-bot; not added even if browser works)
   - Connection/TLS errors (no status code): not suggested (real issues to investigate)
   - 404 in both htmltest and browser: genuinely broken (don't ignore)
 
@@ -325,6 +327,7 @@ Sites may report different errors to bots vs real browsers:
 | Pattern | htmltest Reports | Browser Returns | Action |
 |---------|------------------|-----------------|--------|
 | **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
+| **LinkedIn-style anti-bot** | 999 | 999 (still blocked headless) | Withheld by policy (999s never added) |
 | **Softer bot detection** | 404 | 200 OK | May add to ignore list (script suggests) |
 | **Rate limiting** | 429 | 200 OK | May add to ignore list |
 | **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
