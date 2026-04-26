@@ -289,7 +289,9 @@ console.log('\n━'.repeat(60));
 console.log('FINAL REPORT');
 console.log('━'.repeat(60));
 
-const working = results.filter(r => r.success);
+// notBrokenResults includes both reachable (2xx) and withheld (403/999) URLs;
+// kept as a single set for sectioning logic that doesn't care which flavor.
+const notBrokenResults = results.filter(r => r.success);
 const reachableResults = results.filter(r => r.reachable);
 const withheldResults = results.filter(r => r.withheld);
 const broken = results.filter(r => !r.success);
@@ -307,7 +309,7 @@ if (isManualMode) {
   console.log(`   ❌ Actually broken: ${broken.length}`);
 }
 
-// In automated mode, categorize working URLs by their htmltest status for detailed reporting
+// In automated mode, categorize non-broken URLs by their htmltest status for detailed reporting
 // Manual mode doesn't have htmltest status, so skip this categorization
 let ignoreCandidates = [];
 let withheld403s = [];
@@ -327,12 +329,12 @@ if (!isManualMode) {
     const status = statusByUrl.get(r.url);
     return status !== 403 && status !== 999 && status !== null && status !== undefined;
   });
-  withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
-  withheld999s = working.filter(r => statusByUrl.get(r.url) === 999);
-  connectionErrors = working.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
+  withheld403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403);
+  withheld999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999);
+  connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
 }
 
-if (working.length > 0 && !isManualMode) {
+if (notBrokenResults.length > 0 && !isManualMode) {
 
   if (ignoreCandidates.length > 0) {
     console.log('\n✅ URLs reachable in browser (add to .htmltest.yml IgnoreURLs):');
@@ -390,7 +392,7 @@ if (working.length > 0 && !isManualMode) {
   }
 
   if (connectionErrors.length > 0) {
-    console.log('\n⚠️  htmltest had connection/TLS errors but browser succeeded (investigate):');
+    console.log('\n⚠️  htmltest had connection/TLS errors but browser reached the URL (investigate):');
     console.log('━'.repeat(60));
     connectionErrors.forEach(r => {
       const browserState = r.reachable ? 'reachable' : 'withheld';
@@ -430,11 +432,11 @@ if (broken.length > 0) {
   process.exit(1);
 }
 
-if (isManualMode && working.length > 0) {
+if (isManualMode && notBrokenResults.length > 0) {
   console.log(`\n✅ All provided URLs are accounted for (reachable or withheld)\n`);
 } else if (ignoreCandidates.length > 0) {
   console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
-} else if (working.length > 0) {
+} else if (notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links accounted for (reachable or withheld) - no ignore list updates suggested\n`);
 }
 
