@@ -302,17 +302,19 @@ if (isManualMode) {
 // Manual mode doesn't have htmltest status, so skip this categorization
 let ignoreCandidates = [];
 let withheld403s = [];
+let withheld999s = [];
 let connectionErrors = [];
 
 if (!isManualMode) {
   // Compute candidates in outer scope for use throughout reporting and exit logic
   // Include: URLs with explicit HTTP status (404, 429, 503, etc.) suggesting bot-blocking
-  // Exclude: 403s (withheld by policy), null/undefined (TLS/connection errors)
+  // Exclude: 403s and 999s (withheld by policy), null/undefined (TLS/connection errors)
   ignoreCandidates = working.filter(r => {
     const status = statusByUrl.get(r.url);
-    return status !== 403 && status !== null && status !== undefined;
+    return status !== 403 && status !== 999 && status !== null && status !== undefined;
   });
   withheld403s = working.filter(r => statusByUrl.get(r.url) === 403);
+  withheld999s = working.filter(r => statusByUrl.get(r.url) === 999);
   connectionErrors = working.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
 }
 
@@ -348,6 +350,17 @@ if (working.length > 0 && !isManualMode) {
     console.log('\nℹ️  URLs that work in browser but returned 403 in htmltest (not adding to IgnoreURLs):');
     console.log('━'.repeat(60));
     withheld403s.forEach(r => {
+      console.log(`  - ${r.url}`);
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
+  if (withheld999s.length > 0) {
+    console.log('\nℹ️  URLs that work in browser but returned 999 in htmltest (not adding to IgnoreURLs):');
+    console.log('━'.repeat(60));
+    withheld999s.forEach(r => {
       console.log(`  - ${r.url}`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
