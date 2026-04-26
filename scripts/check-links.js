@@ -311,9 +311,16 @@ if (isManualMode) {
 
 // In automated mode, categorize non-broken URLs by their htmltest status for detailed reporting
 // Manual mode doesn't have htmltest status, so skip this categorization
+//
+// Naming convention: arrays prefixed with `htmltest` are keyed on the htmltest
+// status code; arrays prefixed with `browser` are keyed on the browser result.
+// Mixing the two created a reporting gap (Copilot, PR #105 round 4) where a
+// browser-withheld URL whose htmltest status was non-policy (e.g., 404) would
+// be counted in the summary but appear in no detail section.
 let ignoreCandidates = [];
-let withheld403s = [];
-let withheld999s = [];
+let htmltest403s = [];
+let htmltest999s = [];
+let browserWithheldOther = [];
 let connectionErrors = [];
 
 if (!isManualMode) {
@@ -329,9 +336,16 @@ if (!isManualMode) {
     const status = statusByUrl.get(r.url);
     return status !== 403 && status !== 999 && status !== null && status !== undefined;
   });
-  withheld403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403);
-  withheld999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999);
+  htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403);
+  htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999);
   connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
+  // Catch browser-withheld URLs whose htmltest status doesn't match any policy
+  // bucket above, so every URL counted in the withheld summary appears in some
+  // detail section.
+  browserWithheldOther = withheldResults.filter(r => {
+    const status = statusByUrl.get(r.url);
+    return status !== 403 && status !== 999 && status !== null && status !== undefined;
+  });
 }
 
 if (notBrokenResults.length > 0 && !isManualMode) {
@@ -369,10 +383,10 @@ if (notBrokenResults.length > 0 && !isManualMode) {
     return `  - ${r.url}  (${browserState})`;
   };
 
-  if (withheld403s.length > 0) {
+  if (htmltest403s.length > 0) {
     console.log('\nℹ️  htmltest reported 403 — withheld by policy (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
-    withheld403s.forEach(r => {
+    htmltest403s.forEach(r => {
       console.log(formatWithheld(r));
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
@@ -380,11 +394,23 @@ if (notBrokenResults.length > 0 && !isManualMode) {
     });
   }
 
-  if (withheld999s.length > 0) {
+  if (htmltest999s.length > 0) {
     console.log('\nℹ️  htmltest reported 999 — withheld by policy (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
-    withheld999s.forEach(r => {
+    htmltest999s.forEach(r => {
       console.log(formatWithheld(r));
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
+  if (browserWithheldOther.length > 0) {
+    console.log('\nℹ️  Browser was gated (403/999) but htmltest reported a different status (not added to IgnoreURLs):');
+    console.log('━'.repeat(60));
+    browserWithheldOther.forEach(r => {
+      const htmltestStatus = statusByUrl.get(r.url);
+      console.log(`  - ${r.url}  (htmltest: ${htmltestStatus}, browser: ${r.status} gated)`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
@@ -392,10 +418,10 @@ if (notBrokenResults.length > 0 && !isManualMode) {
   }
 
   if (connectionErrors.length > 0) {
-    console.log('\n⚠️  htmltest had connection/TLS errors but browser reached the URL (investigate):');
+    console.log('\n⚠️  htmltest had connection/TLS errors but browser got a response (investigate):');
     console.log('━'.repeat(60));
     connectionErrors.forEach(r => {
-      const browserState = r.reachable ? 'reachable' : 'withheld';
+      const browserState = r.reachable ? `${r.status} reachable` : `${r.status} gated`;
       console.log(`  - ${r.url}  (browser: ${browserState})`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
