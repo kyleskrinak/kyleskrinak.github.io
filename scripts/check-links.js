@@ -316,9 +316,14 @@ let connectionErrors = [];
 
 if (!isManualMode) {
   // Compute candidates in outer scope for use throughout reporting and exit logic
-  // Include: URLs with explicit HTTP status (404, 429, 503, etc.) suggesting bot-blocking
-  // Exclude: 403s and 999s (withheld by policy), null/undefined (TLS/connection errors)
-  ignoreCandidates = working.filter(r => {
+  // Include: URLs the browser actually reached (HTTP 2xx) AND whose htmltest
+  //   failure had an explicit non-policy status (404, 429, 503, etc.)
+  // Exclude:
+  //   - browser-withheld URLs (403/999) — gated against automation, not safe
+  //     to auto-suggest as a permanent ignore even if htmltest's status differs
+  //   - htmltest 403/999 — withheld by policy regardless of browser outcome
+  //   - htmltest null/undefined — TLS/connection errors, kept visible for investigation
+  ignoreCandidates = reachableResults.filter(r => {
     const status = statusByUrl.get(r.url);
     return status !== 403 && status !== 999 && status !== null && status !== undefined;
   });
