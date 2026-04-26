@@ -31,3 +31,9 @@ export const SITE = {
   lang: "en", // html lang code. Set this empty and default will be "en"
   timezone: "America/New_York", // Default global timezone (IANA format)
 } as const;
+
+export const COMMENTS = {
+  disqus: {
+    shortname: "kds38-duke-blog",
+  },
+} as const;

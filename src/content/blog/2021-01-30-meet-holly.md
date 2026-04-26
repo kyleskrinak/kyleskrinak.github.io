@@ -6,6 +6,7 @@ description: The Skrinaks adopt Holly from the Wake County SPCA
 image: ../../assets/images/holly-pup.jpg
 alt: "Meet Holly Skrinak"
 source: jekyll
+disqusId: "/personal/meet-holly"
 ---
 
 ## HOLLY - ID#A054700

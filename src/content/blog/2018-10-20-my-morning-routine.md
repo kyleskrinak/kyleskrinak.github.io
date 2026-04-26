@@ -3,6 +3,7 @@ title: My Morning Routine
 categories: []
 description: How stumbling into a morning routine became surprisingly transformative and motivational
 pubDate: 2018-10-20T00:00:00.000Z
+disqusId: "/lchf/personal%20productivity/my-morning-routine"
 ---
 
 <style>

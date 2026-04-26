@@ -3,6 +3,7 @@ title: Gratitude, and That's Right
 pubDate: 2021-01-30T00:00:00.000Z
 description: Another day in the life of Kyle Skrinak
 categories: []
+disqusId: "/personal/gratitude-and-that-s-right"
 ---
 
 <style>

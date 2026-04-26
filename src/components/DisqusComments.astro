@@ -1,54 +1,140 @@
 ---
+import { COMMENTS } from "@/config";
+
 interface Props {
-	slug: string;
-	title: string;
+	identifier?: string;
+	url?: string;
 }
 
-const { title } = Astro.props;
-const shortname = 'kds38-duke-blog';
+const { identifier, url } = Astro.props;
+const shortname = COMMENTS.disqus.shortname;
+const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 ---
 
-<div id="disqus_thread"></div>
-<script>
-	declare global {
-		interface Window {
-			disqus_config: () => void;
-			page?: {
-				url: string;
-				identifier: string;
-			};
-		}
-	}
+<section
+	id="comments"
+	class="mt-12 border-t border-dashed pt-8 [color-scheme:light] dark:[color-scheme:dark]"
+>
+	<div id="disqus_thread"></div>
+	<p
+		id="disqus-fallback"
+		hidden
+		class="text-sm italic text-gray-600 dark:text-gray-400"
+	>
+		Comments could not be loaded. Please check that JavaScript is enabled and
+		that you can reach <code>disqus.com</code>.
+	</p>
+	{/* prettier-ignore */}
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
 
+<script
+	is:inline
+	define:vars={{ shortname, identifier, pageUrl }}
+	data-astro-rerun
+>
 	window.disqus_config = function () {
-		const pageUrl = window.location.href;
-		const pageIdentifier = document.currentScript?.dataset.slug || 'unknown';
-		if (!window.page) {
-			window.page = { url: '', identifier: '' };
-		}
-		window.page.url = pageUrl;
-		window.page.identifier = pageIdentifier;
+		// Defensive guard: Disqus has historically always called this with
+		// `this.page = {}`, but initialize ourselves so the function is
+		// self-contained and can't throw if the calling convention shifts.
+		this.page = this.page || {};
+		this.page.url = pageUrl;
+		// Always assign — including `undefined` for pages without a preserved
+		// identifier — so DISQUS.reset() can't carry the prior page's
+		// identifier forward and load the wrong thread.
+		this.page.identifier = identifier;
 	};
 
-	(function () {
-		const disqusShortname = 'kds38-duke-blog';
-		const d = document;
-		const s = d.createElement('script');
-		s.src = 'https://' + disqusShortname + '.disqus.com/embed.js';
-		s.setAttribute('data-timestamp', new Date().getTime().toString());
-		(d.head || d.body).appendChild(s);
-	})();
-</script>
-<noscript
-	>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript"
-		>comments powered by Disqus.</a
-	></noscript
->
-
-<style>
-	#disqus_thread {
-		margin-top: 2rem;
-		padding-top: 2rem;
-		border-top: 1px solid rgb(var(--gray-light));
+	// On the first execution, inject embed.js. On subsequent executions
+	// (data-astro-rerun via view transitions), DISQUS already exists — call
+	// reset() so the existing instance re-reads pageUrl/identifier instead
+	// of double-injecting embed.js.
+	if (typeof window.DISQUS === "undefined") {
+		(function () {
+			var d = document,
+				s = d.createElement("script");
+			s.async = true;
+			s.src = "https://" + shortname + ".disqus.com/embed.js";
+			s.setAttribute("data-timestamp", +new Date());
+			s.onerror = function () {
+				var fb = document.getElementById("disqus-fallback");
+				if (fb) fb.hidden = false;
+			};
+			(d.head || d.body).appendChild(s);
+		})();
+	} else {
+		window.DISQUS.reset({ reload: true, config: window.disqus_config });
 	}
-</style>
+
+	// data-astro-rerun re-executes this script on view-transition navigation.
+	// Stash observers and timers on `window` so each rerun can disconnect the
+	// previous instances before creating new ones — otherwise observers
+	// accumulate and the theme toggle calls DISQUS.reset() N times.
+	if (window.__disqusFallbackTimer) {
+		clearTimeout(window.__disqusFallbackTimer);
+	}
+	if (window.__disqusThreadObserver) {
+		window.__disqusThreadObserver.disconnect();
+	}
+	if (window.__disqusThemeObserver) {
+		window.__disqusThemeObserver.disconnect();
+	}
+
+	var thread = document.getElementById("disqus_thread");
+	window.__disqusFallbackTimer = setTimeout(function () {
+		var fb = document.getElementById("disqus-fallback");
+		if (fb && thread && thread.children.length === 0) {
+			fb.hidden = false;
+		}
+	}, 6000);
+	if (thread) {
+		window.__disqusThreadObserver = new MutationObserver(function () {
+			if (thread.children.length > 0) {
+				clearTimeout(window.__disqusFallbackTimer);
+				// If the embed lands after the timeout fired, hide the
+				// stale fallback message so it doesn't sit alongside the
+				// loaded comments.
+				var fb = document.getElementById("disqus-fallback");
+				if (fb) fb.hidden = true;
+				window.__disqusThreadObserver.disconnect();
+			}
+		});
+		window.__disqusThreadObserver.observe(thread, { childList: true });
+	}
+
+	// Re-render the embed when the site theme toggles so the iframe
+	// picks up the new color-scheme. DISQUS is defined once embed.js loads;
+	// before that, the initial color-scheme is correct so no reset is needed.
+	window.__disqusThemeObserver = new MutationObserver(function () {
+		if (typeof window.DISQUS !== "undefined") {
+			window.DISQUS.reset({ reload: true, config: window.disqus_config });
+		}
+	});
+	window.__disqusThemeObserver.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["data-theme"],
+	});
+
+	// View-transition navigations to a page WITHOUT <DisqusComments> never
+	// re-run this script, so without this listener the theme observer would
+	// keep firing DISQUS.reset() for the rest of the session. Register the
+	// listener once globally; the sentinel guards against accumulation
+	// across data-astro-rerun executions.
+	if (!window.__disqusCleanupRegistered) {
+		window.__disqusCleanupRegistered = true;
+		document.addEventListener("astro:before-swap", function () {
+			if (window.__disqusFallbackTimer) {
+				clearTimeout(window.__disqusFallbackTimer);
+				window.__disqusFallbackTimer = null;
+			}
+			if (window.__disqusThreadObserver) {
+				window.__disqusThreadObserver.disconnect();
+				window.__disqusThreadObserver = null;
+			}
+			if (window.__disqusThemeObserver) {
+				window.__disqusThemeObserver.disconnect();
+				window.__disqusThemeObserver = null;
+			}
+		});
+	}
+</script>

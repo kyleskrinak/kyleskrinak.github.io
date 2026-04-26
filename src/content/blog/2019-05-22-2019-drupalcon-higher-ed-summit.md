@@ -8,6 +8,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: The Higher Ed Summit organizers had considerably redesigned the schedule and makeup of the summit. I say to a significan...
+disqusId: "/drupal/2019-drupalcon-higher-ed-summit"
 ---
 
 

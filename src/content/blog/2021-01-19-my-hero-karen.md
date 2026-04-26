@@ -3,6 +3,7 @@ title: My Hero, Karen &mdash; Part II
 pubDate: 2021-01-19T00:00:00.000Z
 description: My squatting calves, trembling and tiptoe, are eager to get me out of there. Karen and I agreed &mdash; my only option is for me to jump and for Karen to "catch" me.<br/><br/> The two adult men, across the street, continue to savor their evening’s spectacle.
 categories: []
+disqusId: "/personal/my-hero-karen"
 ---
 
 <style>

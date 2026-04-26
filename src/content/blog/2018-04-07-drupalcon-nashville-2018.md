@@ -9,6 +9,7 @@ image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: I will be leading two sessions at the DrupalCon Higher Education Summit on Monday, April 8th, 2018, and I&rsquo;m using ...
+disqusId: "/drupal/drupalcon-nashville-2018"
 ---
 
 

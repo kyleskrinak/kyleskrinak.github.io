@@ -6,6 +6,7 @@ description: Low-carb living has given me the confidence to spend time and money
 image: ../../assets/images/190111-historical-dress.JPG
 alt: "Historical dress"
 source: jekyll
+disqusId: "/lchf/personal%20productivity/old-again-new-again"
 ---
 
  

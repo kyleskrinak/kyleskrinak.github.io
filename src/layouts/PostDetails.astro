@@ -10,6 +10,7 @@ import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
+import DisqusComments from "@/components/DisqusComments.astro";
 import { getPath } from "@/utils/getPath";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { slugifyStr } from "@/utils/slugify";
@@ -38,7 +39,12 @@ const {
   image,
   alt,
   caption,
+  comments,
+  disqusId,
 } = post.data;
+
+const commentsEnabled = comments !== false;
+const postUrl = new URL(getPath(post.id, post.filePath), Astro.site).href;
 
 // timezone is optional and may not exist on all posts
 const timezone = (post.data as any).timezone;
@@ -162,6 +168,10 @@ const nextPost =
     <BackToTopButton />
 
     <ShareLinks />
+
+    {commentsEnabled && (
+      <DisqusComments identifier={disqusId} url={postUrl} />
+    )}
 
     <hr class="my-6 border-dashed" />
 

@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { BASE_URL } from "./test-utils";
+import { BASE_URL, blockDisqus } from "./test-utils";
+
+test.beforeEach(async ({ page }) => {
+  await blockDisqus(page);
+});
 
 /**
  * Test console errors across key pages
