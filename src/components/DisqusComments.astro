@@ -34,6 +34,10 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 	data-astro-rerun
 >
 	window.disqus_config = function () {
+		// Defensive guard: Disqus has historically always called this with
+		// `this.page = {}`, but initialize ourselves so the function is
+		// self-contained and can't throw if the calling convention shifts.
+		this.page = this.page || {};
 		this.page.url = pageUrl;
 		// Always assign — including `undefined` for pages without a preserved
 		// identifier — so DISQUS.reset() can't carry the prior page's
