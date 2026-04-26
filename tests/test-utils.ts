@@ -73,7 +73,11 @@ export async function blockDisqus(page: import("@playwright/test").Page) {
       body: `(function(){var t=document.getElementById('disqus_thread');if(t)t.innerHTML='<div data-test-stub="disqus"></div>';window.DISQUS={reset:function(){}};})();`,
     })
   );
-  await page.route(/disqus(?:cdn)?\.com/, (route) =>
+  // Catch-all uses a negative lookahead so it cannot match embed.js.
+  // Playwright runs handlers in reverse registration order, so without the
+  // exclusion the catch-all (registered second) would 204 the embed.js
+  // request before the stub handler ever ran.
+  await page.route(/disqus(?:cdn)?\.com\/(?!embed\.js)/, (route) =>
     route.fulfill({ status: 204, body: "" })
   );
 }

@@ -4,13 +4,17 @@
  * frontmatter. Without these values, historical Disqus threads orphan
  * because Disqus resolves by identifier first.
  *
- * The list below was derived by extracting `disqus_config.this.page.identifier`
- * from each rendered page in the original Jekyll _site/ build at migration
- * time. See docs/migration notes for context.
+ * The list below was derived at migration time by extracting the
+ * `disqus_config.this.page.identifier` literal from every rendered page
+ * in the legacy Jekyll `_site/` build, then cross-checking the resulting
+ * identifiers against the live Disqus thread list via the Disqus REST API.
+ * Threads that had no comments were dropped; only posts whose identifier
+ * was confirmed to point at a real, populated thread are listed here.
  *
  * `first-blog-post` is intentionally excluded — its thread was reassigned
- * to `a-pound-of-flesh-and-a-hot-tub` to break a stale Disqus identifier
- * alias that paired the two pages.
+ * via the Disqus URL Mapper to `a-pound-of-flesh-and-a-hot-tub` so that a
+ * single canonical post owns the conversation, breaking a stale Disqus
+ * identifier alias that previously paired the two pages.
  */
 import fs from "node:fs";
 import path from "node:path";
