@@ -79,7 +79,7 @@ some edits for clarity.
 
 I forget when in 1973 the Skrinak family house caught on fire. I’m guessing it was in late Spring, but that was so long ago. I do remember this &mdash; it was warm enough for my 11-year-old self to be on the roof of my house in my pajamas.
 
-I went to bed after an ordinary day, around 9 PM. We had largely restored our house after the devastating 1972 flood from <a href="https://www.timesleader.com/news/local/663873/45-years-later-agnes-still-on-peoples-minds">Hurricane Agnes</a> that ravaged the Wyoming valley. The neighborhood had largely returned to its old Kingston self. We had also recently reshuffled the second floor so all of us siblings were able to get our separate rooms. Not that I minded sharing with my brothers, as many of us youngest siblings love our sibling’s company. Unlike now, a kid per room was a luxury.
+I went to bed after an ordinary day, around 9 PM. We had largely restored our house after the devastating 1972 flood from Hurricane Agnes that ravaged the Wyoming valley. The neighborhood had largely returned to its old Kingston self. We had also recently reshuffled the second floor so all of us siblings were able to get our separate rooms. Not that I minded sharing with my brothers, as many of us youngest siblings love our sibling’s company. Unlike now, a kid per room was a luxury.
 
 As for my bedroom, I had three smallish windows. With the room darkened for sleep, I could see the streetlight-diffused night sky illuminate my room in a row of three rectangles. As I drifted off to sleep, I’d peek my eyes open and closed as I settled in.
 

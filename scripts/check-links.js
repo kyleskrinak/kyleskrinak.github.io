@@ -296,17 +296,31 @@ const reachableResults = results.filter(r => r.reachable);
 const withheldResults = results.filter(r => r.withheld);
 const broken = results.filter(r => !r.success);
 
+// HTTP 429 = rate-limited/bot-gated; resource exists but automation is throttled.
+// Like 403/999, these are not genuinely broken links. Separate from trulyBroken so
+// they don't cause false-positive exit(1) while remaining visible in the report.
+// (Only meaningful in automated mode where htmltest status codes are available.)
+const htmltest429s = !isManualMode
+  ? broken.filter(r => statusByUrl.get(r.url) === 429)
+  : [];
+const trulyBroken = !isManualMode
+  ? broken.filter(r => statusByUrl.get(r.url) !== 429)
+  : broken;
+
 console.log(`\n📊 Summary:`);
 if (isManualMode) {
   console.log(`   URLs checked: ${failedUrls.length}`);
   console.log(`   ✅ Reachable: ${reachableResults.length}`);
   console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
-  console.log(`   ❌ Broken: ${broken.length}`);
+  console.log(`   ❌ Broken: ${trulyBroken.length}`);
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
   console.log(`   ℹ️  Withheld (browser also gated): ${withheldResults.length}`);
-  console.log(`   ❌ Actually broken: ${broken.length}`);
+  if (htmltest429s.length > 0) {
+    console.log(`   🚫 Rate-limited / bot-gated (429): ${htmltest429s.length}`);
+  }
+  console.log(`   ❌ Actually broken: ${trulyBroken.length}`);
 }
 
 // In automated mode, categorize non-broken URLs by their htmltest status for detailed reporting
@@ -430,10 +444,23 @@ if (notBrokenResults.length > 0 && !isManualMode) {
   }
 }
 
-if (broken.length > 0) {
+// 429-gated URLs are reported outside the notBrokenResults guard because
+// they appear in `broken` (browser also failed), not in `notBrokenResults`.
+if (!isManualMode && htmltest429s.length > 0) {
+  console.log('\nℹ️  htmltest reported 429 — rate-limited / bot-gated (not added to IgnoreURLs):');
+  console.log('━'.repeat(60));
+  htmltest429s.forEach(r => {
+    console.log(`  - ${r.url}`);
+    if (r.error) {
+      console.log(`    → ${r.error}`);
+    }
+  });
+}
+
+if (trulyBroken.length > 0) {
   console.log('\n❌ URLs that are actually broken (need manual fixes):');
   console.log('━'.repeat(60));
-  broken.forEach(r => {
+  trulyBroken.forEach(r => {
     console.log(`  - ${r.url}`);
     if (r.error) {
       console.log(`    Reason: ${r.error}`);
@@ -450,11 +477,11 @@ if (broken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
-// Note: 403/999 responses are withheld from the ignore list by policy but still represent
+// Note: 403/999/429 responses are withheld from the ignore list by policy but still represent
 // non-broken links (resource exists, just gated against automation), so they don't trigger
 // exit(1). Only genuinely broken links fail.
-if (broken.length > 0) {
-  console.log(`\n⚠️  ${broken.length} link(s) need manual attention\n`);
+if (trulyBroken.length > 0) {
+  console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention\n`);
   process.exit(1);
 }
 
@@ -464,6 +491,8 @@ if (isManualMode && notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
 } else if (notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links accounted for (reachable or withheld) - no ignore list updates suggested\n`);
+} else if (!isManualMode && htmltest429s.length > 0) {
+  console.log(`\n✅ No genuinely broken links — all failures are rate-limited (429 bot-gated)\n`);
 }
 
 process.exit(0);
