@@ -18,15 +18,39 @@ export async function verifyUrl(page, url) {
     });
 
     const status = response ? response.status() : 'NO_RESPONSE';
+    const headers = response ? response.headers() : {};
+    const retryAfter = headers['retry-after'];
 
     // Two distinct flavors of "not broken":
     //   reachable: 2xx — the page actually loaded for the browser
-    //   withheld: 403/999 — the resource exists but gates automated
-    //     clients. Same semantic class as a 403 from htmltest.
+    //   withheld: 403/429/999 — the resource exists but gates automated
+    //     clients. Same semantic class as those statuses from htmltest.
+    //   temporary: 503 maintenance page with strong signals such as
+    //     Retry-After or explicit maintenance-mode page content.
     // success keeps the broad "not broken" meaning so callers that only
     // care about pass/fail don't have to inspect both flags.
     const reachable = !!(response && response.ok());
-    const withheld = !!(response && (status === 403 || status === 999));
+    const withheld = !!(response && (status === 403 || status === 429 || status === 999));
+    let maintenanceSignals = [];
+    if (status === 503) {
+      if (retryAfter) {
+        maintenanceSignals.push(`Retry-After: ${retryAfter}`);
+      }
+
+      const pageHtml = (await page.content()).toLowerCase();
+      const maintenanceMarkers = [
+        'scheduled maintenance',
+        'under maintenance',
+        'maintenance mode',
+        'please check back soon',
+        'temporarily unavailable'
+      ];
+
+      if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
+        maintenanceSignals.push('maintenance page content');
+      }
+    }
+    const temporary = status === 503 && maintenanceSignals.length > 0;
 
     return {
       url,
@@ -35,7 +59,10 @@ export async function verifyUrl(page, url) {
       redirected: page.url() !== url,
       reachable,
       withheld,
-      success: reachable || withheld
+      temporary,
+      retryAfter,
+      maintenanceSignals,
+      success: reachable || withheld || temporary
     };
   } catch (error) {
     return {
@@ -43,6 +70,7 @@ export async function verifyUrl(page, url) {
       error: error.message,
       reachable: false,
       withheld: false,
+      temporary: false,
       success: false
     };
   }

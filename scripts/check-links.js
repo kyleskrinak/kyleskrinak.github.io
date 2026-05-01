@@ -271,6 +271,14 @@ try {
       if (result.redirected) {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
+    } else if (result.temporary) {
+      console.log(`  ⏸️  ${result.status} - Temporarily unavailable (maintenance page)`);
+      if (result.retryAfter) {
+        console.log(`  → Retry-After: ${result.retryAfter}`);
+      }
+      if (result.redirected) {
+        console.log(`  → Redirects to: ${result.finalUrl}`);
+      }
     } else {
       console.log(`  ❌ Failed in browser`);
       if (result.error) {
@@ -289,15 +297,17 @@ console.log('\n━'.repeat(60));
 console.log('FINAL REPORT');
 console.log('━'.repeat(60));
 
-// notBrokenResults includes both reachable (2xx) and withheld (403/999) URLs;
+// notBrokenResults includes reachable (2xx), withheld (403/429/999), and
+// temporary maintenance (503 with strong maintenance signals) URLs.
 // kept as a single set for sectioning logic that doesn't care which flavor.
 const notBrokenResults = results.filter(r => r.success);
 const reachableResults = results.filter(r => r.reachable);
 const withheldResults = results.filter(r => r.withheld);
+const temporaryResults = results.filter(r => r.temporary);
 const broken = results.filter(r => !r.success);
 
 // HTTP 429 = rate-limited/bot-gated; resource exists but automation is throttled.
-// Like 403/999, these are not genuinely broken links. Separate from trulyBroken so
+// Like 403/429/999, these are not genuinely broken links. Separate from trulyBroken so
 // they don't cause false-positive exit(1) while remaining visible in the report.
 // (Only meaningful in automated mode where htmltest status codes are available.)
 const htmltest429s = !isManualMode
@@ -312,11 +322,13 @@ if (isManualMode) {
   console.log(`   URLs checked: ${failedUrls.length}`);
   console.log(`   ✅ Reachable: ${reachableResults.length}`);
   console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
+  console.log(`   ⏸️  Temporarily unavailable (maintenance): ${temporaryResults.length}`);
   console.log(`   ❌ Broken: ${trulyBroken.length}`);
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
   console.log(`   ℹ️  Withheld (browser also gated): ${withheldResults.length}`);
+  console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
   if (htmltest429s.length > 0) {
     console.log(`   🚫 Rate-limited / bot-gated (429): ${htmltest429s.length}`);
   }
@@ -334,7 +346,9 @@ if (isManualMode) {
 let ignoreCandidates = [];
 let htmltest403s = [];
 let htmltest999s = [];
+let htmltest503Temporaries = [];
 let browserWithheldOther = [];
+let browserTemporaryOther = [];
 let connectionErrors = [];
 
 if (!isManualMode) {
@@ -342,7 +356,7 @@ if (!isManualMode) {
   // Include: URLs the browser actually reached (HTTP 2xx) AND whose htmltest
   //   failure had an explicit non-policy status (404, 429, 503, etc.)
   // Exclude:
-  //   - browser-withheld URLs (403/999) — gated against automation, not safe
+  //   - browser-withheld URLs (403/429/999) — gated against automation, not safe
   //     to auto-suggest as a permanent ignore even if htmltest's status differs
   //   - htmltest 403/999 — withheld by policy regardless of browser outcome
   //   - htmltest null/undefined — TLS/connection errors, kept visible for investigation
@@ -352,6 +366,7 @@ if (!isManualMode) {
   });
   htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403);
   htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999);
+  htmltest503Temporaries = temporaryResults.filter(r => statusByUrl.get(r.url) === 503);
   connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
   // Catch browser-withheld URLs whose htmltest status doesn't match any policy
   // bucket above, so every URL counted in the withheld summary appears in some
@@ -359,6 +374,10 @@ if (!isManualMode) {
   browserWithheldOther = withheldResults.filter(r => {
     const status = statusByUrl.get(r.url);
     return status !== 403 && status !== 999 && status !== null && status !== undefined;
+  });
+  browserTemporaryOther = temporaryResults.filter(r => {
+    const status = statusByUrl.get(r.url);
+    return status !== 503 && status !== null && status !== undefined;
   });
 }
 
@@ -419,8 +438,22 @@ if (notBrokenResults.length > 0 && !isManualMode) {
     });
   }
 
+  if (htmltest503Temporaries.length > 0) {
+    console.log('\nℹ️  htmltest reported 503 — temporary maintenance page (not added to IgnoreURLs):');
+    console.log('━'.repeat(60));
+    htmltest503Temporaries.forEach(r => {
+      console.log(`  - ${r.url}  (browser: ${r.status} maintenance page)`);
+      if (r.retryAfter) {
+        console.log(`    → Retry-After: ${r.retryAfter}`);
+      }
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
   if (browserWithheldOther.length > 0) {
-    console.log('\nℹ️  Browser was gated (403/999) but htmltest reported a different status (not added to IgnoreURLs):');
+    console.log('\nℹ️  Browser was gated (403/429/999) but htmltest reported a different status (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
     browserWithheldOther.forEach(r => {
       const htmltestStatus = statusByUrl.get(r.url);
@@ -431,11 +464,30 @@ if (notBrokenResults.length > 0 && !isManualMode) {
     });
   }
 
+  if (browserTemporaryOther.length > 0) {
+    console.log('\nℹ️  Browser showed a temporary maintenance page (503) but htmltest reported a different status:');
+    console.log('━'.repeat(60));
+    browserTemporaryOther.forEach(r => {
+      const htmltestStatus = statusByUrl.get(r.url);
+      console.log(`  - ${r.url}  (htmltest: ${htmltestStatus}, browser: ${r.status} maintenance page)`);
+      if (r.retryAfter) {
+        console.log(`    → Retry-After: ${r.retryAfter}`);
+      }
+      if (r.redirected) {
+        console.log(`    → Redirects to: ${r.finalUrl}`);
+      }
+    });
+  }
+
   if (connectionErrors.length > 0) {
     console.log('\n⚠️  htmltest had connection/TLS errors but browser got a response (investigate):');
     console.log('━'.repeat(60));
     connectionErrors.forEach(r => {
-      const browserState = r.reachable ? `${r.status} reachable` : `${r.status} gated`;
+      const browserState = r.reachable
+        ? `${r.status} reachable`
+        : r.withheld
+          ? `${r.status} gated`
+          : `${r.status} temporary`;
       console.log(`  - ${r.url}  (browser: ${browserState})`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
@@ -477,20 +529,21 @@ if (trulyBroken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
-// Note: 403/999/429 responses are withheld from the ignore list by policy but still represent
-// non-broken links (resource exists, just gated against automation), so they don't trigger
-// exit(1). Only genuinely broken links fail.
+// Note: 403/429/999 withheld responses and 503 maintenance pages stay visible in
+// the report but do not trigger exit(1). Only genuinely broken links fail.
 if (trulyBroken.length > 0) {
   console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention\n`);
   process.exit(1);
 }
 
 if (isManualMode && notBrokenResults.length > 0) {
-  console.log(`\n✅ All provided URLs are accounted for (reachable or withheld)\n`);
+  console.log(`\n✅ All provided URLs are accounted for (reachable, withheld, or temporary)\n`);
+} else if (ignoreCandidates.length > 0 && temporaryResults.length > 0) {
+  console.log(`\n✅ All failed links are accounted for — update ignore list for reachable URLs; temporary maintenance pages need no ignore entry\n`);
 } else if (ignoreCandidates.length > 0) {
   console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
 } else if (notBrokenResults.length > 0) {
-  console.log(`\n✅ All failed links accounted for (reachable or withheld) - no ignore list updates suggested\n`);
+  console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary) - no ignore list updates suggested\n`);
 } else if (!isManualMode && htmltest429s.length > 0) {
   console.log(`\n✅ No genuinely broken links — all failures are rate-limited (429 bot-gated)\n`);
 }
