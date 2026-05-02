@@ -456,7 +456,7 @@ if (notBrokenResults.length > 0 && !isManualMode) {
   }
 
   if (browserWithheldOther.length > 0) {
-    console.log('\nℹ️  Browser was gated (403/429/999) but htmltest reported a different status (not added to IgnoreURLs):');
+    console.log('\nℹ️  Browser was gated (403/429/999) — htmltest status outside dedicated policy buckets (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
     browserWithheldOther.forEach(r => {
       const htmltestStatus = statusByUrl.get(r.url);
