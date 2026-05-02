@@ -35,17 +35,17 @@ export async function verifyUrl(page, url) {
     if (status === 503) {
       if (retryAfter) {
         maintenanceSignals.push(`Retry-After: ${retryAfter}`);
-      }
+      } else {
+        const pageHtml = (await page.content()).toLowerCase();
+        const maintenanceMarkers = [
+          'scheduled maintenance',
+          'under maintenance',
+          'maintenance mode'
+        ];
 
-      const pageHtml = (await page.content()).toLowerCase();
-      const maintenanceMarkers = [
-        'scheduled maintenance',
-        'under maintenance',
-        'maintenance mode'
-      ];
-
-      if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
-        maintenanceSignals.push('maintenance page content');
+        if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
+          maintenanceSignals.push('maintenance page content');
+        }
       }
     }
     const temporary = status === 503 && maintenanceSignals.length > 0;

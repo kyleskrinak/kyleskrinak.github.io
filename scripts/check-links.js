@@ -267,7 +267,10 @@ try {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
     } else if (result.withheld) {
-      console.log(`  ℹ️  ${result.status} - Withheld (browser also gated; resource exists)`);
+      const withheldMsg = result.status === 429
+        ? 'Rate-limited / bot-gated'
+        : 'Withheld (browser also gated; resource exists)';
+      console.log(`  ℹ️  ${result.status} - ${withheldMsg}`);
       if (result.redirected) {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
