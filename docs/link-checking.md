@@ -319,7 +319,7 @@ Do NOT add to ignore list when:
   - 403 responses: withheld by policy (not added even if browser works)
   - 429 responses: withheld (rate-limited/bot-gated; not added even if browser is also gated)
   - 999 responses: withheld by policy (LinkedIn-style anti-bot; not added even if browser works)
-  - 503 maintenance pages: temporary (not added; `Retry-After` header or maintenance-mode page content detected)
+  - 503 maintenance pages: temporary (not added; maintenance-mode page content required; `Retry-After` header used as corroborating evidence only)
   - Connection/TLS errors (no status code): not suggested (real issues to investigate)
   - 404 in both htmltest and browser: genuinely broken (don't ignore)
 

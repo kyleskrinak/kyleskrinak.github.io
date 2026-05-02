@@ -316,7 +316,6 @@ Confirmed: proceeding with [task] despite [blocker].
 ## Code Changes
 - Batch related edits into single operations
 - Make minimal edits to accomplish goal
-- Commit after each working change
 - Use descriptive commit messages
 
 ## Verification Protocol
@@ -432,7 +431,7 @@ When instructions appear to conflict:
 **Approval gates are hard stops, not tradeoffs.**
 - Do not let autonomy, bias-to-action, or end-to-end completion override an approval requirement.
 - Re-check authorization immediately before each gated action.
-- Missing approval means do not execute the action.
+- Missing approval means do not execute the action. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
 
 ---
 
