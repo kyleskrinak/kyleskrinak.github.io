@@ -13,5 +13,3 @@ IgnoreURLs:
   - "about.gitlab.com"  # Connection reset in htmltest, works in browser
   - "claude.ai"  # Connection reset in htmltest, works in browser
   - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers
-  - "linkedin.com"  # Returns inconsistent status codes (404/429/999) per request; bot-gated, works in browsers
-  - "ubuntu.com"  # ERR_CONNECTION_RESET in CI; works in real browsers

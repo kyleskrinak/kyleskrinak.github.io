@@ -42,8 +42,7 @@ export async function verifyUrl(page, url) {
         'scheduled maintenance',
         'under maintenance',
         'maintenance mode',
-        'please check back soon',
-        'temporarily unavailable'
+        'please check back soon'
       ];
 
       if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
