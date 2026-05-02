@@ -180,7 +180,7 @@ IgnoreURLs:
   # ... etc
 ```
 
-**Note**: 403 responses, 999 responses (LinkedIn-style anti-bot), and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
+**Note**: 403 responses and 999 responses (LinkedIn-style anti-bot) are automatically withheld from IgnoreURLs suggestions. 429 responses where the browser is also gated are similarly withheld. Connection/TLS errors are kept visible for investigation — they are not withheld and will fail the run if the browser confirms the URL is unreachable.
 
 ## Handling Link Check Failures
 
@@ -226,10 +226,11 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL is "not broken." The script distinguishes two outcomes:
+The URL is "not broken." The script distinguishes three outcomes:
 
-- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
-- **Withheld** — browser returned 403 or 999 (LinkedIn-style anti-bot). The resource exists but is gated against automated clients (Chromium too). The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
+- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. The script suggests adding to `IgnoreURLs`.
+- **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
+- **Temporary** — browser returned 503 with explicit maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"). A `Retry-After` header is treated as corroborating evidence but is not sufficient alone. The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
 
 ```yaml
 IgnoreURLs:
@@ -305,7 +306,7 @@ npm run test:links
 
 Add domains to `IgnoreURLs` when:
 - ✅ URL is **reachable** in real browsers (HTTP 2xx — distinct from "withheld")
-- ✅ URL fails automated checks **BUT has explicit status code** (404, 429, 503, etc.)
+- ✅ URL fails automated checks **BUT has explicit non-policy status code** (e.g., 404)
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
 - ⚠️  **Never add** 403 or 999 responses (withheld by policy), connection errors, or URLs that also fail in browser
@@ -316,7 +317,9 @@ Do NOT add to ignore list when:
 - ❌ Site is permanently offline
 - ⚠️  **Policy Exclusions**:
   - 403 responses: withheld by policy (not added even if browser works)
+  - 429 responses: withheld (rate-limited/bot-gated; not added even if browser is also gated)
   - 999 responses: withheld by policy (LinkedIn-style anti-bot; not added even if browser works)
+  - 503 maintenance pages: temporary (not added; maintenance-mode page content required; `Retry-After` header used as corroborating evidence only)
   - Connection/TLS errors (no status code): not suggested (real issues to investigate)
   - 404 in both htmltest and browser: genuinely broken (don't ignore)
 
@@ -329,16 +332,17 @@ Sites may report different errors to bots vs real browsers:
 | **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
 | **LinkedIn-style anti-bot** | 999 | 999 (still blocked headless) | Withheld by policy (999s never added) |
 | **Softer bot detection** | 404 | 200 OK | May add to ignore list (script suggests) |
-| **Rate limiting** | 429 | 200 OK | May add to ignore list |
+| **Rate limiting — browser clear** | 429 | 200 OK | May add to ignore list (script suggests) |
+| **Rate limiting — both gated** | 429 | 429 gated | Withheld (rate-limited; not added to IgnoreURLs) |
 | **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
 | **Proxy issues** | 503 | 200 OK | May add to ignore list |
+| **Maintenance page** | 503 | 503 maintenance | Temporary (not added; re-check after maintenance) |
 
 **Key Rule**: Only add to ignore list if the URL **works in browser verification**. If browser also fails, the link is genuinely broken and should be fixed, not ignored.
 
 | Domain | Reason |
 |--------|--------|
 | `nytimes.com` | Aggressive bot detection (rate limiting) |
-| `linkedin.com` | Returns 999 status to block scrapers |
 | `onedrive.live.com` | Bot-blocking (works fine in real browser) |
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |
