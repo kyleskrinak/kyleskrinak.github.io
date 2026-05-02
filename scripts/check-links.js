@@ -318,6 +318,13 @@ const htmltest429s = !isManualMode
   : [];
 const trulyBroken = broken;
 
+// Summary counts segmented by browser status so labels match actual bucket contents.
+// withheld403_999: browser returned 403 or 999 (policy blocks, resource exists)
+// withheld429:     browser returned 429 (rate-limited/bot-gated)
+// Both are non-broken; kept separate because they have different operator meanings.
+const withheld403_999Count = withheldResults.filter(r => r.status === 403 || r.status === 999).length;
+const withheld429Count = withheldResults.filter(r => r.status === 429).length;
+
 console.log(`\n📊 Summary:`);
 if (isManualMode) {
   console.log(`   URLs checked: ${failedUrls.length}`);
@@ -328,11 +335,11 @@ if (isManualMode) {
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
-  console.log(`   ℹ️  Withheld (browser gated: 403/999): ${withheldResults.length - htmltest429s.length}`);
-  console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
-  if (htmltest429s.length > 0) {
-    console.log(`   🚫 Rate-limited / bot-gated (429): ${htmltest429s.length}`);
+  console.log(`   ℹ️  Withheld (browser gated 403/999): ${withheld403_999Count}`);
+  if (withheld429Count > 0) {
+    console.log(`   🚫 Rate-limited / bot-gated (browser 429): ${withheld429Count}`);
   }
+  console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
   console.log(`   ❌ Actually broken: ${trulyBroken.length}`);
 }
 
@@ -545,8 +552,6 @@ if (isManualMode && notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
 } else if (notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary) - no ignore list updates suggested\n`);
-} else if (!isManualMode && htmltest429s.length > 0) {
-  console.log(`\n✅ No genuinely broken links — all failures are rate-limited (429 bot-gated)\n`);
 }
 
 process.exit(0);
