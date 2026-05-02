@@ -226,7 +226,7 @@ This script:
 
 #### If Browser Verification Succeeds ✅
 
-The URL is "not broken." The script distinguishes two outcomes:
+The URL is "not broken." The script distinguishes three outcomes:
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). The resource exists but is gated against automated clients. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.

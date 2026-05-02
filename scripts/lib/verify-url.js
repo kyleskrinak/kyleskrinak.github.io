@@ -21,7 +21,7 @@ export async function verifyUrl(page, url) {
     const headers = response ? response.headers() : {};
     const retryAfter = headers['retry-after'];
 
-    // Two distinct flavors of "not broken":
+    // Three distinct flavors of "not broken":
     //   reachable: 2xx — the page actually loaded for the browser
     //   withheld: 403/429/999 — the resource exists but gates automated
     //     clients. Same semantic class as those statuses from htmltest.

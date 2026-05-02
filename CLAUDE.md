@@ -248,6 +248,11 @@ git push origin develop
 - Example: Comments on PR (staging→main) → fix on `staging` branch
 - If fixes were made on wrong branch, cherry-pick to correct branch (on failure, see Blocker Resolution Protocol)
 
+### No Out-of-Scope Commits
+- Do **not** commit changes unrelated to the current task to any branch mid-session
+- Instructions like "update X" mean make the change in the file; they do not imply commit unless explicitly requested
+- Approval gates apply per-change: a request to edit a file is not approval to commit it
+
 ## Blocker Resolution Protocol
 
 **DEFAULT: When operations fail (exit code != 0 or explicit error):**
@@ -406,6 +411,7 @@ When addressing review comments:
 - Ask clarifying questions before exploration
 - Summarize findings in <100 words when possible
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
+- No anthropomorphizing qualifiers ("Honestly…", "To be frank…", "I should mention…") — just state facts directly
 - Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
 - **Exception:** Blocker reporting requires verbose detail (state, options, consequences) per Blocker Resolution Protocol
 
@@ -419,7 +425,7 @@ When instructions appear to conflict:
    - Build scripts, CI/CD workflows
    - Test files and test infrastructure
 3. **Source hierarchy:** CLAUDE.md overrides Memory (Memory may be outdated)
-4. **User authority:** User explicit instructions override all written rules
+4. **User authority:** User explicit instructions override general written rules — approval gates are satisfied by explicit per-action user instruction (which is the override mechanism, not a bypass)
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
 **Approval gates are hard stops, not tradeoffs.**
