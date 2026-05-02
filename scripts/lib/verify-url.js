@@ -41,8 +41,7 @@ export async function verifyUrl(page, url) {
       const maintenanceMarkers = [
         'scheduled maintenance',
         'under maintenance',
-        'maintenance mode',
-        'please check back soon'
+        'maintenance mode'
       ];
 
       if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
