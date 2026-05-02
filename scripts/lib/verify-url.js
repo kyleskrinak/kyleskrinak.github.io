@@ -23,8 +23,8 @@ export async function verifyUrl(page, url) {
 
     // Three distinct flavors of "not broken":
     //   reachable: 2xx — the page actually loaded for the browser
-    //   withheld: 403/429/999 — the resource exists but gates automated
-    //     clients. Same semantic class as those statuses from htmltest.
+    //   withheld: 403/999 — the resource exists but gates automated clients;
+    //             429 — rate-limited/bot-gated (does NOT imply resource exists)
     //   temporary: 503 maintenance page with strong signals such as
     //     Retry-After or explicit maintenance-mode page content.
     // success keeps the broad "not broken" meaning so callers that only

@@ -39,6 +39,7 @@ When I say:
 - **Hard gate for sensitive actions:** use deny-by-default for `commit`, `push`, branch-changing git actions, and destructive actions.
 - **Exact approval required per action:** "fix" ≠ "commit" ≠ "push". Do not infer one from another.
 - **Fail closed:** if explicit approval for the exact action is missing or ambiguous, STOP.
+- **Workflow exception:** when the user requests a workflow that inherently includes commit/push steps (e.g., "fix and update branches", "apply the fix and push"), those steps are pre-approved by the workflow request. The gate blocks uninstructed ad-hoc actions, not steps implied by an explicitly requested workflow.
 
 **Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
 

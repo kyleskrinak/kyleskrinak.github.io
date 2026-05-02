@@ -229,7 +229,7 @@ This script:
 The URL is "not broken." The script distinguishes three outcomes:
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
-- **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). The resource exists but is gated against automated clients. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
+- **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
 - **Temporary** — browser returned 503 with maintenance signals (a `Retry-After` header, or page content containing "scheduled maintenance", "under maintenance", or "maintenance mode"). The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
 
 ```yaml
