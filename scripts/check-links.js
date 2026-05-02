@@ -378,10 +378,11 @@ if (!isManualMode) {
   connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
   // Catch browser-withheld URLs whose htmltest status doesn't match any policy
   // bucket above, so every URL counted in the withheld summary appears in some
-  // detail section.
+  // detail section. Exclude 429 — those are already covered by htmltest429s,
+  // and including them here would produce duplicate detail output.
   browserWithheldOther = withheldResults.filter(r => {
     const status = statusByUrl.get(r.url);
-    return status !== 403 && status !== 999 && status !== null && status !== undefined;
+    return status !== 403 && status !== 429 && status !== 999 && status !== null && status !== undefined;
   });
   browserTemporaryOther = temporaryResults.filter(r => {
     const status = statusByUrl.get(r.url);

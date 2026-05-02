@@ -180,7 +180,7 @@ IgnoreURLs:
   # ... etc
 ```
 
-**Note**: 403 responses, 429 responses (rate-limited/bot-gated), 999 responses (LinkedIn-style anti-bot), and connection/TLS errors are automatically withheld (not suggested for IgnoreURLs).
+**Note**: 403 responses and 999 responses (LinkedIn-style anti-bot) are automatically withheld from IgnoreURLs suggestions. 429 responses where the browser is also gated are similarly withheld. Connection/TLS errors are kept visible for investigation — they are not withheld and will fail the run if the browser confirms the URL is unreachable.
 
 ## Handling Link Check Failures
 
