@@ -35,7 +35,10 @@ When I say:
 **Before taking ANY action (editing files, committing, pushing):**
 - Check: Did I explicitly ask you to do this action?
 - If I asked to "review" or "discuss" → STOP. Report findings. Wait.
-- If I asked to "fix" or "implement" → Proceed with action.
+- If I asked to "fix" or "implement" → Proceed with edits only.
+- **Hard gate for sensitive actions:** use deny-by-default for `commit`, `push`, branch-changing git actions, and destructive actions.
+- **Exact approval required per action:** "fix" ≠ "commit" ≠ "push". Do not infer one from another.
+- **Fail closed:** if explicit approval for the exact action is missing or ambiguous, STOP.
 
 **Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
 
@@ -166,7 +169,7 @@ git checkout develop && git pull origin develop
 1. Ensure you're on `develop` branch and synced
 2. Make your changes
 3. Commit with descriptive messages
-4. Push to origin: `git push origin develop` (on failure, see Blocker Resolution Protocol)
+4. Push to origin: `git push origin develop` **only if explicitly asked to push** (on failure, see Blocker Resolution Protocol)
 5. Create PR: `develop` → `staging`
 6. After staging approval, create PR: `staging` → `main`
 
@@ -418,6 +421,11 @@ When instructions appear to conflict:
 3. **Source hierarchy:** CLAUDE.md overrides Memory (Memory may be outdated)
 4. **User authority:** User explicit instructions override all written rules
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
+
+**Approval gates are hard stops, not tradeoffs.**
+- Do not let autonomy, bias-to-action, or end-to-end completion override an approval requirement.
+- Re-check authorization immediately before each gated action.
+- Missing approval means do not execute the action.
 
 ---
 
