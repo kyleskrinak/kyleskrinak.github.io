@@ -309,16 +309,14 @@ const withheldResults = results.filter(r => r.withheld);
 const temporaryResults = results.filter(r => r.temporary);
 const broken = results.filter(r => !r.success);
 
-// HTTP 429 = rate-limited/bot-gated; resource exists but automation is throttled.
-// Like 403/429/999, these are not genuinely broken links. Separate from trulyBroken so
-// they don't cause false-positive exit(1) while remaining visible in the report.
+// HTTP 429 = rate-limited/bot-gated: both htmltest and browser were gated.
+// Drawn from withheldResults (browser confirmed gated) so that any 429 URL where
+// the browser found a genuine failure (404/500/TLS) stays in trulyBroken instead.
 // (Only meaningful in automated mode where htmltest status codes are available.)
 const htmltest429s = !isManualMode
-  ? broken.filter(r => statusByUrl.get(r.url) === 429)
+  ? withheldResults.filter(r => statusByUrl.get(r.url) === 429)
   : [];
-const trulyBroken = !isManualMode
-  ? broken.filter(r => statusByUrl.get(r.url) !== 429)
-  : broken;
+const trulyBroken = broken;
 
 console.log(`\n📊 Summary:`);
 if (isManualMode) {
@@ -330,7 +328,7 @@ if (isManualMode) {
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
-  console.log(`   ℹ️  Withheld (browser also gated): ${withheldResults.length}`);
+  console.log(`   ℹ️  Withheld (browser gated: 403/999): ${withheldResults.length - htmltest429s.length}`);
   console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
   if (htmltest429s.length > 0) {
     console.log(`   🚫 Rate-limited / bot-gated (429): ${htmltest429s.length}`);
@@ -367,8 +365,8 @@ if (!isManualMode) {
     const status = statusByUrl.get(r.url);
     return status !== 403 && status !== 999 && status !== null && status !== undefined;
   });
-  htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403);
-  htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999);
+  htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403 && !r.temporary);
+  htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999 && !r.temporary);
   htmltest503Temporaries = temporaryResults.filter(r => statusByUrl.get(r.url) === 503);
   connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
   // Catch browser-withheld URLs whose htmltest status doesn't match any policy
@@ -500,7 +498,7 @@ if (notBrokenResults.length > 0 && !isManualMode) {
 }
 
 // 429-gated URLs are reported outside the notBrokenResults guard because
-// they appear in `broken` (browser also failed), not in `notBrokenResults`.
+// they are a subset of withheldResults and would duplicate that section's display.
 if (!isManualMode && htmltest429s.length > 0) {
   console.log('\nℹ️  htmltest reported 429 — rate-limited / bot-gated (not added to IgnoreURLs):');
   console.log('━'.repeat(60));
