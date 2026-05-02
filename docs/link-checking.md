@@ -228,9 +228,9 @@ This script:
 
 The URL is "not broken." The script distinguishes three outcomes:
 
-- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL works for real users; htmltest's failure is bot detection. The script suggests adding to `IgnoreURLs`.
+- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. The script suggests adding to `IgnoreURLs`.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
-- **Temporary** — browser returned 503 with maintenance signals (a `Retry-After` header, or page content containing "scheduled maintenance", "under maintenance", or "maintenance mode"). The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
+- **Temporary** — browser returned 503 with explicit maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"). A `Retry-After` header is treated as corroborating evidence but is not sufficient alone. The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
 
 ```yaml
 IgnoreURLs:
@@ -343,7 +343,6 @@ Sites may report different errors to bots vs real browsers:
 | Domain | Reason |
 |--------|--------|
 | `nytimes.com` | Aggressive bot detection (rate limiting) |
-| `linkedin.com` | Returns 999 status to block scrapers |
 | `onedrive.live.com` | Bot-blocking (works fine in real browser) |
 | `microsoft.com/store` | Bot detection |
 | Government sites (`.gov`) | Often block automated tools for security |

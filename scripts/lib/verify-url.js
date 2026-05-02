@@ -33,18 +33,21 @@ export async function verifyUrl(page, url) {
     const withheld = !!(response && (status === 403 || status === 429 || status === 999));
     let maintenanceSignals = [];
     if (status === 503) {
-      if (retryAfter) {
-        maintenanceSignals.push(`Retry-After: ${retryAfter}`);
-      } else {
-        const pageHtml = (await page.content()).toLowerCase();
-        const maintenanceMarkers = [
-          'scheduled maintenance',
-          'under maintenance',
-          'maintenance mode'
-        ];
+      // Require explicit maintenance-mode page content as the primary signal.
+      // Retry-After alone is too broad — servers also send it for overload,
+      // abuse mitigation, and transient outages. Only treat it as corroborating
+      // evidence when page content already confirms a maintenance window.
+      const pageHtml = (await page.content()).toLowerCase();
+      const maintenanceMarkers = [
+        'scheduled maintenance',
+        'under maintenance',
+        'maintenance mode'
+      ];
 
-        if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
-          maintenanceSignals.push('maintenance page content');
+      if (maintenanceMarkers.some(marker => pageHtml.includes(marker))) {
+        maintenanceSignals.push('maintenance page content');
+        if (retryAfter) {
+          maintenanceSignals.push(`Retry-After: ${retryAfter}`);
         }
       }
     }

@@ -169,7 +169,7 @@ git checkout develop && git pull origin develop
 ### Making Changes
 1. Ensure you're on `develop` branch and synced
 2. Make your changes
-3. Commit with descriptive messages
+3. Commit with descriptive messages **only if explicitly asked to commit**
 4. Push to origin: `git push origin develop` **only if explicitly asked to push** (on failure, see Blocker Resolution Protocol)
 5. Create PR: `develop` → `staging`
 6. After staging approval, create PR: `staging` → `main`
