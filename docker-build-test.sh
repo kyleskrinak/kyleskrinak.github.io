@@ -12,9 +12,10 @@ CACHE_FILE=".docker-cache"
 # has been GC'd but build inputs are unchanged. Override with DOCKER_CACHE_TTL_DAYS.
 GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
-# Hash build inputs: in a git worktree, hash tracked + untracked non-ignored
-# files so source/content changes invalidate the cache. Tracked and untracked
-# sets are disjoint, and $CACHE_FILE is gitignored so it won't appear in either.
+# Hash build inputs: only include files that can affect the build environment
+# (components, config, dependencies, Dockerfile). Content files under
+# src/content/ are excluded — they're processed data that never affects
+# compilation, so a new blog post should not trigger a Docker rebuild.
 # Outside git, fall back to manifests (e.g., fresh tarball extract).
 compute_input_hash() {
     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -24,7 +25,9 @@ compute_input_hash() {
     {
         git ls-files -z
         git ls-files -z --others --exclude-standard
-    } | xargs -0 sha256sum -- | sha256sum | awk '{print $1}'
+    } | grep -zv '^src/content/' \
+      | xargs -0 sha256sum -- \
+      | sha256sum | awk '{print $1}'
 }
 if ! INPUT_HASH=$(compute_input_hash) || [ -z "$INPUT_HASH" ]; then
     echo "❌ Failed to compute input hash" >&2
