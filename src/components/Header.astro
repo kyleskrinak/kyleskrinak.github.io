@@ -114,7 +114,7 @@ const isActive = (path: string) => {
             id="about-menu"
             class:list={[
               "absolute top-full left-0 z-50 hidden min-w-36 rounded border border-border bg-background py-1 shadow-md",
-              "group-hover/about:block group-focus-within/about:block",
+              "group-hover/about:block",
               "[&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-2 [&>li>a]:text-sm [&>li>a]:font-medium [&>li>a]:hover:text-accent",
             ]}
           >
@@ -224,6 +224,11 @@ const isActive = (path: string) => {
 </script>
 
 <script>
+  // Stored at module scope so the listener reference survives across view
+  // transitions and can be removed before a new one is added — preventing
+  // accumulation of stale keydown listeners on document.
+  let _aboutEscapeListener: ((e: KeyboardEvent) => void) | null = null;
+
   function initAboutDropdown() {
     const btn = document.querySelector<HTMLButtonElement>("#about-menu-btn");
     const menu = document.querySelector<HTMLElement>("#about-menu");
@@ -239,13 +244,17 @@ const isActive = (path: string) => {
       setExpanded(btn.getAttribute("aria-expanded") !== "true");
     });
 
-    // Escape closes the menu and returns focus to the button
-    document.addEventListener("keydown", e => {
+    // Replace previous Escape listener to avoid accumulation across view transitions
+    if (_aboutEscapeListener) {
+      document.removeEventListener("keydown", _aboutEscapeListener);
+    }
+    _aboutEscapeListener = (e: KeyboardEvent) => {
       if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
         setExpanded(false);
         btn.focus();
       }
-    });
+    };
+    document.addEventListener("keydown", _aboutEscapeListener);
 
     // Close when focus moves outside the dropdown group
     btn.closest("li")?.addEventListener("focusout", (e: FocusEvent) => {
@@ -257,4 +266,5 @@ const isActive = (path: string) => {
   }
 
   initAboutDropdown();
-  document.addEventListener("astro:after-swap", initAboutDropdown);</script>
+  document.addEventListener("astro:after-swap", initAboutDropdown);
+</script>
