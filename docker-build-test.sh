@@ -14,8 +14,10 @@ GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
 # Hash build inputs: only include files that can affect the build environment
 # (components, config, dependencies, Dockerfile). Markdown/MDX posts under
-# src/content/ are excluded — they're processed data that never affects
-# compilation, so a new blog post should not trigger a Docker rebuild.
+# src/content/ are excluded so that adding a new blog post doesn't trigger
+# an unnecessary Docker rebuild. Trade-off: a content-only build failure
+# (e.g., bad MDX syntax, schema validation error) won't be caught here —
+# run `npm run build` to validate content changes before pushing.
 # The exclusion is scoped to .md/.mdx so a future helper or config file
 # under src/content/ still invalidates the cache (safe default).
 # Outside git, fall back to manifests (e.g., fresh tarball extract).
