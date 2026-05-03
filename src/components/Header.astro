@@ -93,28 +93,24 @@ const isActive = (path: string) => {
             Tags
           </a>
         </li>
-        {/* Desktop: About dropdown (hidden on mobile) */}
+        {/* Desktop: About link with hover/focus-within disclosure (hidden on mobile) */}
         <li class="group/about relative col-span-2 hidden sm:block">
-          <button
-            id="about-menu-btn"
+          <a
+            href={linkWithBase("/about/")}
+            style="display: inline-flex; align-items: center; gap: 0.25rem;"
             class:list={[
-              "flex cursor-default items-center gap-1 px-2 py-1 font-medium hover:text-accent",
               { "active-nav": isActive("/about") || isActive("/stack") || isActive("/lchf") },
             ]}
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="about-menu"
           >
             About
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 9 6 6 6-6"/>
             </svg>
-          </button>
+          </a>
           <ul
-            id="about-menu"
             class:list={[
               "absolute top-full left-0 z-50 hidden min-w-36 rounded border border-border bg-background py-1 shadow-md",
-              "group-hover/about:block",
+              "group-hover/about:block group-focus-within/about:block",
               "[&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-2 [&>li>a]:text-sm [&>li>a]:font-medium [&>li>a]:hover:text-accent",
             ]}
           >
@@ -123,9 +119,11 @@ const isActive = (path: string) => {
             <li><a href={linkWithBase("/lchf/")} class:list={{ "text-accent": isActive("/lchf") }}>Low-carb</a></li>
           </ul>
         </li>
-        {/* Mobile: flat About sub-items (hidden on desktop) */}
-        <li class="col-span-2 sm:hidden">
-          <span class="block px-4 py-1 text-center text-xs font-semibold uppercase tracking-wide opacity-50">About</span>
+        {/* Mobile: flat About sub-items (hidden on desktop). Section header
+            is decorative — role="presentation" + aria-hidden so AT skips it
+            and the surrounding links read cleanly. */}
+        <li role="presentation" class="col-span-2 sm:hidden">
+          <span aria-hidden="true" class="block px-4 py-1 text-center text-xs font-semibold uppercase tracking-wide opacity-50">About</span>
         </li>
         <li class="col-span-2 sm:hidden">
           <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>Me</a>
@@ -221,50 +219,4 @@ const isActive = (path: string) => {
 
   // Runs on view transitions navigation
   document.addEventListener("astro:after-swap", toggleNav);
-</script>
-
-<script>
-  // Stored at module scope so the listener reference survives across view
-  // transitions and can be removed before a new one is added — preventing
-  // accumulation of stale keydown listeners on document.
-  let _aboutEscapeListener: ((e: KeyboardEvent) => void) | null = null;
-
-  function initAboutDropdown() {
-    const btn = document.querySelector<HTMLButtonElement>("#about-menu-btn");
-    const menu = document.querySelector<HTMLElement>("#about-menu");
-    if (!btn || !menu) return;
-
-    function setExpanded(open: boolean) {
-      btn.setAttribute("aria-expanded", String(open));
-      menu.classList.toggle("!block", open);
-    }
-
-    // Click (and Enter/Space via native button behaviour) toggles the menu
-    btn.addEventListener("click", () => {
-      setExpanded(btn.getAttribute("aria-expanded") !== "true");
-    });
-
-    // Replace previous Escape listener to avoid accumulation across view transitions
-    if (_aboutEscapeListener) {
-      document.removeEventListener("keydown", _aboutEscapeListener);
-    }
-    _aboutEscapeListener = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
-        setExpanded(false);
-        btn.focus();
-      }
-    };
-    document.addEventListener("keydown", _aboutEscapeListener);
-
-    // Close when focus moves outside the dropdown group
-    btn.closest("li")?.addEventListener("focusout", (e: FocusEvent) => {
-      const related = e.relatedTarget as Node | null;
-      if (!btn.closest("li")?.contains(related)) {
-        setExpanded(false);
-      }
-    });
-  }
-
-  initAboutDropdown();
-  document.addEventListener("astro:after-swap", initAboutDropdown);
 </script>

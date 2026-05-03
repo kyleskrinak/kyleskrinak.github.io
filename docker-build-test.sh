@@ -13,9 +13,11 @@ CACHE_FILE=".docker-cache"
 GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
 # Hash build inputs: only include files that can affect the build environment
-# (components, config, dependencies, Dockerfile). Content files under
+# (components, config, dependencies, Dockerfile). Markdown/MDX posts under
 # src/content/ are excluded — they're processed data that never affects
 # compilation, so a new blog post should not trigger a Docker rebuild.
+# The exclusion is scoped to .md/.mdx so a future helper or config file
+# under src/content/ still invalidates the cache (safe default).
 # Outside git, fall back to manifests (e.g., fresh tarball extract).
 compute_input_hash() {
     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -25,7 +27,7 @@ compute_input_hash() {
     {
         git ls-files -z
         git ls-files -z --others --exclude-standard
-    } | grep -zv '^src/content/' \
+    } | grep -zEv '^src/content/.+\.(md|mdx)$' \
       | xargs -0 sha256sum -- \
       | sha256sum | awk '{print $1}'
 }

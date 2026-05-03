@@ -102,11 +102,12 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		}
 	};
 
-	// On subsequent executions (data-astro-rerun via view transitions), DISQUS
-	// is already in memory — reset() immediately and start monitoring.
-	// On the first execution, defer embed.js injection until #comments nears
-	// the viewport (rootMargin 300px) so the script chain doesn't run during
-	// page load and affect TTI/LCP.
+	// First page-load of the session (DISQUS not yet in memory): defer embed.js
+	// injection until #comments nears the viewport (rootMargin 300px) so the
+	// script chain doesn't run during page load and affect TTI/LCP.
+	// On any subsequent rerun (data-astro-rerun via view transitions), embed.js
+	// is already loaded and can't be unloaded — reset() immediately so the
+	// thread re-reads pageUrl/identifier; lazy-load no longer applies.
 	if (typeof window.DISQUS !== "undefined") {
 		window.DISQUS.reset({ reload: true, config: window.disqus_config });
 		startMonitoring();

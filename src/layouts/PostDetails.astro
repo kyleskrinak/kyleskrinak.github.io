@@ -137,6 +137,9 @@ const nextPost =
     </div>
     {optimizedImage && (
       <figure class="hero-image mt-8 mb-8 w-full">
+        {/* fit + position route to Sharp's resize at build time so the
+            generated 1200×600 hero is cropped from the part of the source
+            image specified by frontmatter `imagePosition` (default: center). */}
         <Image
           src={optimizedImage}
           alt={alt || "Post hero image"}
@@ -144,11 +147,12 @@ const nextPost =
           height={600}
           quality={85}
           format="webp"
+          fit="cover"
+          position={imagePosition || "center"}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
           loading="eager"
           decoding="sync"
           class="rounded-lg shadow-md"
-          position={imagePosition || "center"}
         />
         {caption && (
           <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
