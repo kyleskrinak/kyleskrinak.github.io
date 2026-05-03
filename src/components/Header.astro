@@ -119,20 +119,21 @@ const isActive = (path: string) => {
             <li><a href={linkWithBase("/lchf/")} class:list={{ "text-accent": isActive("/lchf") }}>Low-carb</a></li>
           </ul>
         </li>
-        {/* Mobile: flat About sub-items (hidden on desktop). Section header
-            is decorative — role="presentation" + aria-hidden so AT skips it
-            and the surrounding links read cleanly. */}
-        <li role="presentation" class="col-span-2 sm:hidden">
-          <span aria-hidden="true" class="block px-4 py-1 text-center text-xs font-semibold uppercase tracking-wide opacity-50">About</span>
+        {/* Mobile: flat About sub-items (hidden on desktop) */}
+        <li class="col-span-2 sm:hidden">
+          <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>
+            About Me
+          </a>
         </li>
         <li class="col-span-2 sm:hidden">
-          <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>Me</a>
+          <a href={linkWithBase("/stack/")} class:list={{ "active-nav": isActive("/stack") }}>
+            Blog Stack
+          </a>
         </li>
         <li class="col-span-2 sm:hidden">
-          <a href={linkWithBase("/stack/")} class:list={{ "active-nav": isActive("/stack") }}>Blog Stack</a>
-        </li>
-        <li class="col-span-2 sm:hidden">
-          <a href={linkWithBase("/lchf/")} class:list={{ "active-nav": isActive("/lchf") }}>Low-carb</a>
+          <a href={linkWithBase("/lchf/")} class:list={{ "active-nav": isActive("/lchf") }}>
+            Low-carb
+          </a>
         </li>
         <li class="col-span-2">
           <a href={linkWithBase("/presentations/")} class:list={{ "active-nav": isActive("/presentations") }}>
