@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
+import DisqusComments from "@/components/DisqusComments.astro";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 ---
@@ -66,6 +67,7 @@ import { SITE } from "@/config";
 				You can find me on <a href="https://github.com/kyleskrinak">GitHub</a>, <a href="https://www.linkedin.com/in/kyleskrinak/">LinkedIn</a>, or <a href="https://x.com/screenack">X</a>.
 			</p>
 		</section>
+		<DisqusComments url={new URL("/about/", Astro.site).href} />
 	</main>
 	<Footer />
 </Layout>

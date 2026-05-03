@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
+import DisqusComments from "@/components/DisqusComments.astro";
 import { SITE } from "@/config";
 import packageJson from "../../package.json";
 
@@ -151,6 +152,7 @@ function cleanVersion(v: string | undefined): string {
         No post reaches <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> without first passing a review on <a href="https://kyleskrinak.github.io">GitHub Pages</a>. GitHub Actions handles all deployments — automated build, link checking, and visual regression tests run on every pull request.
       </p>
     </section>
+    <DisqusComments url={new URL("/stack/", Astro.site).href} />
   </main>
   <Footer />
 </Layout>
