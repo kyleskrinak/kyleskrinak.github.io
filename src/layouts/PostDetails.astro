@@ -15,6 +15,7 @@ import { getPath } from "@/utils/getPath";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { slugifyStr } from "@/utils/slugify";
 import { getOptimizedImage } from "@/lib/images";
+import { getReadingTime } from "@/utils/readingTime";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
@@ -54,6 +55,8 @@ const timezone = (post.data as any).timezone;
 const optimizedImage = getOptimizedImage(image);
 
 const { Content } = await render(post);
+
+const readingTime = getReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
 
@@ -121,6 +124,8 @@ const nextPost =
     </h1>
     <div class="my-2 flex items-center gap-2">
       <Datetime {pubDate} {updatedDate} {timezone} size="lg" />
+      <span aria-hidden="true" class="text-skin-base opacity-50">·</span>
+      <span class="text-sm text-skin-base opacity-80">{readingTime} min read</span>
       <span
         aria-hidden="true"
         class:list={[
