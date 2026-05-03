@@ -96,11 +96,14 @@ const isActive = (path: string) => {
         {/* Desktop: About dropdown (hidden on mobile) */}
         <li class="group/about relative col-span-2 hidden sm:block">
           <button
+            id="about-menu-btn"
             class:list={[
               "flex cursor-default items-center gap-1 px-2 py-1 font-medium hover:text-accent",
               { "active-nav": isActive("/about") || isActive("/stack") || isActive("/lchf") },
             ]}
             aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="about-menu"
           >
             About
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -108,6 +111,7 @@ const isActive = (path: string) => {
             </svg>
           </button>
           <ul
+            id="about-menu"
             class:list={[
               "absolute top-full left-0 z-50 hidden min-w-36 rounded border border-border bg-background py-1 shadow-md",
               "group-hover/about:block group-focus-within/about:block",
@@ -218,3 +222,39 @@ const isActive = (path: string) => {
   // Runs on view transitions navigation
   document.addEventListener("astro:after-swap", toggleNav);
 </script>
+
+<script>
+  function initAboutDropdown() {
+    const btn = document.querySelector<HTMLButtonElement>("#about-menu-btn");
+    const menu = document.querySelector<HTMLElement>("#about-menu");
+    if (!btn || !menu) return;
+
+    function setExpanded(open: boolean) {
+      btn.setAttribute("aria-expanded", String(open));
+      menu.classList.toggle("!block", open);
+    }
+
+    // Click (and Enter/Space via native button behaviour) toggles the menu
+    btn.addEventListener("click", () => {
+      setExpanded(btn.getAttribute("aria-expanded") !== "true");
+    });
+
+    // Escape closes the menu and returns focus to the button
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
+        setExpanded(false);
+        btn.focus();
+      }
+    });
+
+    // Close when focus moves outside the dropdown group
+    btn.closest("li")?.addEventListener("focusout", (e: FocusEvent) => {
+      const related = e.relatedTarget as Node | null;
+      if (!btn.closest("li")?.contains(related)) {
+        setExpanded(false);
+      }
+    });
+  }
+
+  initAboutDropdown();
+  document.addEventListener("astro:after-swap", initAboutDropdown);</script>

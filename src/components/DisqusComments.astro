@@ -112,7 +112,7 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		startMonitoring();
 	} else {
 		var section = document.getElementById("comments");
-		if (section) {
+		if (typeof IntersectionObserver !== "undefined" && section) {
 			window.__disqusLoadObserver = new IntersectionObserver(
 				function (entries) {
 					if (entries[0].isIntersecting) {
@@ -125,6 +125,10 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 				{ rootMargin: "300px" }
 			);
 			window.__disqusLoadObserver.observe(section);
+		} else {
+			// Fallback for browsers without IntersectionObserver: inject immediately
+			injectDisqus();
+			startMonitoring();
 		}
 	}
 
