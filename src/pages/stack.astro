@@ -28,16 +28,16 @@ function cleanVersion(v: string | undefined): string {
       <h2>What powers this blog</h2>
 
       <p>
-        This blog is a statically generated site — every page is pre-built at deploy time into plain HTML, CSS, and JavaScript. There is no server-side runtime, no database, and no CMS. The result is a site that is fast, secure, and cheap to host.
+        This blog is a statically generated site — Astro pre-builds every page at deploy time into plain HTML, CSS, and JavaScript. No server runtime, no database, no CMS. The result: fast, secure, and cheap to host.
       </p>
 
       <p>
-        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what is explicitly needed. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a>, adapted and extended for this site. Full-text search is handled by <a href="https://pagefind.app/">Pagefind</a>, which indexes the site at build time so search works with no backend. Hero images are processed at build time by <a href="https://sharp.pixelplumbing.com/">Sharp</a>, resizing and cropping to the right dimensions on every deploy.
+        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what each page explicitly requires. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a>, which I've adapted and extended for this site. <a href="https://pagefind.app/">Pagefind</a> handles full-text search, building a search index at deploy time so search works with no backend. <a href="https://sharp.pixelplumbing.com/">Sharp</a> processes every hero image at build time, resizing and cropping to the right dimensions on every deploy.
       </p>
 
       <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
       <p>
-        Before migrating to Astro in January 2026, the site ran on Jekyll. These scores were measured across three matching posts on desktop, using Google Lighthouse. The Astro scores are from the current production site at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a>.
+        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro scores reflect the current production site at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a>.
       </p>
 
       <table>
@@ -73,12 +73,12 @@ function cleanVersion(v: string | undefined): string {
       </table>
 
       <p>
-        Performance and Best Practices scores are modestly tempered by <a href="https://disqus.com/">Disqus</a> comment embeds, which load third-party scripts and affect Largest Contentful Paint. The SEO score is now 100 on production — earlier migration benchmarks showed 66 because scores were measured on a non-canonical staging URL.
+        Disqus comment embeds modestly lower Performance and Best Practices — the third-party scripts affect Largest Contentful Paint. SEO scores 100 on the production URL. Running Lighthouse against a staging or preview URL drops that score because those URLs don't match the canonical address the site declares.
       </p>
 
       <h2>Current versions</h2>
       <p>
-        These versions are read directly from <code>package.json</code> at build time. They update automatically whenever a dependency is bumped — no manual maintenance required.
+        Astro reads these versions directly from <code>package.json</code> at build time. They update automatically whenever a dependency version changes — no manual maintenance.
       </p>
 
       <table>
@@ -128,14 +128,14 @@ function cleanVersion(v: string | undefined): string {
         <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
         <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
         <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>
-        <li><strong>RSS feed.</strong> Full feed generated automatically at build time for every post.</li>
+        <li><strong>RSS feed.</strong> Astro generates the full RSS feed at build time for every post.</li>
         <li><strong>Visual regression testing.</strong> <a href="https://playwright.dev/">Playwright</a> runs screenshot comparisons on every pull request to catch unintended layout changes before they reach production.</li>
       </ul>
 
       <h2>Infrastructure and how a post gets published</h2>
 
       <p>
-        The blog is served from <a href="https://aws.amazon.com/s3/">AWS S3</a> behind <a href="https://aws.amazon.com/cloudfront/">Amazon CloudFront</a>, a global content delivery network. Static files are cheap to store and CloudFront caches them at edge locations worldwide.
+        AWS S3 hosts the blog files; CloudFront delivers them from edge locations worldwide. S3 storage costs almost nothing for static files, and CloudFront caches aggressively.
       </p>
 
       <p>
