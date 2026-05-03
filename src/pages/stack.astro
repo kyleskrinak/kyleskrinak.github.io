@@ -36,7 +36,7 @@ function cleanVersion(v: string | undefined): string {
 
       <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
       <p>
-        Before migrating to Astro in January 2026, the site ran on Jekyll. These scores were measured across three matching posts on desktop, using Google Lighthouse. The Astro scores were captured from the staging environment before the production launch.
+        Before migrating to Astro in January 2026, the site ran on Jekyll. These scores were measured across three matching posts on desktop, using Google Lighthouse. The Astro scores are from the current production site at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a>.
       </p>
 
       <table>
@@ -51,7 +51,7 @@ function cleanVersion(v: string | undefined): string {
           <tr>
             <td>Performance</td>
             <td>57</td>
-            <td>91</td>
+            <td>80</td>
           </tr>
           <tr>
             <td>Accessibility</td>
@@ -61,18 +61,18 @@ function cleanVersion(v: string | undefined): string {
           <tr>
             <td>Best Practices</td>
             <td>73</td>
-            <td>88</td>
+            <td>77</td>
           </tr>
           <tr>
             <td>SEO</td>
             <td>100</td>
-            <td>—*</td>
+            <td>100</td>
           </tr>
         </tbody>
       </table>
 
       <p>
-        <em>* Astro SEO scores were measured on the staging URL (<code>kyleskrinak.github.io/astro-blog/</code>), which has a non-canonical URL. The production site at <code>kyle.skrinak.com</code> scores comparably to Jekyll on SEO.</em>
+        Performance and Best Practices scores are modestly tempered by <a href="https://disqus.com/">Disqus</a> comment embeds, which load third-party scripts and affect Largest Contentful Paint. The SEO score is now 100 on production — earlier migration benchmarks showed 66 because scores were measured on a non-canonical staging URL.
       </p>
 
       <h2>Current versions</h2>
