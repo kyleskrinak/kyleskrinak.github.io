@@ -1,0 +1,115 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { SITE } from "@/config";
+import packageJson from "../../package.json";
+
+const { dependencies, devDependencies, engines, version: themeVersion } = packageJson;
+
+function cleanVersion(v: string | undefined): string {
+  if (!v) return "—";
+  return v.replace(/^[\^~>=<]+/, "");
+}
+---
+
+<Layout
+  title={`Blog Stack | ${SITE.title}`}
+  description="The technology stack behind this blog: Astro, AstroPaper, Tailwind CSS, Pagefind, and how it all gets published."
+>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    <h1 class="text-2xl font-semibold sm:text-3xl">About the Blog Stack</h1>
+
+    <section class="app-prose mt-8">
+      <h2>What powers this blog</h2>
+
+      <p>
+        This blog is a statically generated site — every page is pre-built at deploy time into plain HTML, CSS, and JavaScript. There is no server-side runtime, no database, and no CMS. The result is a site that is fast, secure, and cheap to host.
+      </p>
+
+      <p>
+        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what is explicitly needed. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a>, adapted and extended for this site. Full-text search is handled by <a href="https://pagefind.app/">Pagefind</a>, which indexes the site at build time so search works with no backend. Hero images are processed at build time by <a href="https://sharp.pixelplumbing.com/">Sharp</a>, resizing and cropping to the right dimensions on every deploy.
+      </p>
+
+      <h2>Current versions</h2>
+      <p>
+        These versions are read directly from <code>package.json</code> at build time. They update automatically whenever a dependency is bumped — no manual maintenance required.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="https://astro.build/">Astro</a></td>
+            <td>{cleanVersion(dependencies.astro)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a></td>
+            <td>{themeVersion}</td>
+          </tr>
+          <tr>
+            <td><a href="https://tailwindcss.com/">Tailwind CSS</a></td>
+            <td>{cleanVersion(dependencies.tailwindcss)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://www.typescriptlang.org/">TypeScript</a></td>
+            <td>{cleanVersion(devDependencies.typescript)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://pagefind.app/">Pagefind</a></td>
+            <td>{cleanVersion(devDependencies.pagefind)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://sharp.pixelplumbing.com/">Sharp</a></td>
+            <td>{cleanVersion(dependencies.sharp)}</td>
+          </tr>
+          <tr>
+            <td>Node.js (minimum)</td>
+            <td>{engines.node}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>What makes it a great platform</h2>
+
+      <ul>
+        <li><strong>Zero server runtime.</strong> Every page is a static HTML file. There is nothing to patch, no runtime to exploit, and no server to go down under load.</li>
+        <li><strong>Near-100 Lighthouse scores.</strong> Static HTML with minimal JavaScript loads fast by default. No client-side rendering, no layout shift from dynamic content.</li>
+        <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
+        <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
+        <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>
+        <li><strong>RSS feed.</strong> Full feed generated automatically at build time for every post.</li>
+        <li><strong>Visual regression testing.</strong> <a href="https://playwright.dev/">Playwright</a> runs screenshot comparisons on every pull request to catch unintended layout changes before they reach production.</li>
+      </ul>
+
+      <h2>Infrastructure and how a post gets published</h2>
+
+      <p>
+        The blog is served from <a href="https://aws.amazon.com/s3/">AWS S3</a> behind <a href="https://aws.amazon.com/cloudfront/">Amazon CloudFront</a>, a global content delivery network. Static files are cheap to store and CloudFront caches them at edge locations worldwide.
+      </p>
+
+      <p>
+        Every change flows through a three-branch gitflow before reaching production:
+      </p>
+
+      <ol>
+        <li><strong>develop</strong> — all work lands here first.</li>
+        <li><strong>staging</strong> — a pull request from develop to staging triggers an automatic deploy to <a href="https://kyleskrinak.github.io">GitHub Pages</a>. This is a live pre-production review environment where the full site can be browsed before anything touches S3.</li>
+        <li><strong>main</strong> — a pull request from staging to main triggers the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation.</li>
+      </ol>
+
+      <p>
+        No post reaches <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> without first passing a review on GitHub Pages. <a href="https://github.com/features/actions">GitHub Actions</a> handles all deployments — automated build, link checking, and visual regression tests run on every pull request.
+      </p>
+    </section>
+  </main>
+  <Footer />
+</Layout>
