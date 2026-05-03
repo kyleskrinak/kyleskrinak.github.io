@@ -16,6 +16,7 @@ const blog = defineCollection({
 		ogImage: z.string().trim().min(1).optional(),
 		alt: z.string().trim().min(1).optional(),
 		caption: z.string().trim().min(1).optional(),
+		imagePosition: z.string().trim().min(1).optional(),
 		canonicalURL: z.string().optional(),
 		tags: z.array(z.string()).optional(),
 		categories: z.array(z.string()).optional(),

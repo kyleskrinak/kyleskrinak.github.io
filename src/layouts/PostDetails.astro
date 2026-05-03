@@ -39,6 +39,7 @@ const {
   image,
   alt,
   caption,
+  imagePosition,
   comments,
   disqusId,
 } = post.data;
@@ -142,6 +143,7 @@ const nextPost =
           loading="eager"
           decoding="sync"
           class="rounded-lg shadow-md"
+          position={imagePosition || "center"}
         />
         {caption && (
           <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">

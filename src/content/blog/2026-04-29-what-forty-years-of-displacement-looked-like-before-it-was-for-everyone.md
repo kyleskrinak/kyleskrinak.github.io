@@ -5,6 +5,7 @@ description: "From PostScript in 1985 to AI in 2026, a career spent learning sid
 image: ../../assets/images/2026-04-29-voyage-of-life-old-age.jpg
 alt: "The Voyage of Life: Old Age by Thomas Cole, 1842"
 caption: "Thomas Cole, The Voyage of Life: Old Age (1842). The closing panel of a four-part allegory. Cole's figure is older than I am but looks about as confident as I feel about what's ahead."
+imagePosition: "bottom"
 tags:
   - career
   - ai
