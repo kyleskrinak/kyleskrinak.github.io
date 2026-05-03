@@ -45,33 +45,16 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		this.page.identifier = identifier;
 	};
 
-	// On the first execution, inject embed.js. On subsequent executions
-	// (data-astro-rerun via view transitions), DISQUS already exists — call
-	// reset() so the existing instance re-reads pageUrl/identifier instead
-	// of double-injecting embed.js.
-	if (typeof window.DISQUS === "undefined") {
-		(function () {
-			var d = document,
-				s = d.createElement("script");
-			s.async = true;
-			s.src = "https://" + shortname + ".disqus.com/embed.js";
-			s.setAttribute("data-timestamp", +new Date());
-			s.onerror = function () {
-				var fb = document.getElementById("disqus-fallback");
-				if (fb) fb.hidden = false;
-			};
-			(d.head || d.body).appendChild(s);
-		})();
-	} else {
-		window.DISQUS.reset({ reload: true, config: window.disqus_config });
-	}
-
 	// data-astro-rerun re-executes this script on view-transition navigation.
 	// Stash observers and timers on `window` so each rerun can disconnect the
 	// previous instances before creating new ones — otherwise observers
 	// accumulate and the theme toggle calls DISQUS.reset() N times.
 	if (window.__disqusFallbackTimer) {
 		clearTimeout(window.__disqusFallbackTimer);
+	}
+	if (window.__disqusLoadObserver) {
+		window.__disqusLoadObserver.disconnect();
+		window.__disqusLoadObserver = null;
 	}
 	if (window.__disqusThreadObserver) {
 		window.__disqusThreadObserver.disconnect();
@@ -80,26 +63,69 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 		window.__disqusThemeObserver.disconnect();
 	}
 
-	var thread = document.getElementById("disqus_thread");
-	window.__disqusFallbackTimer = setTimeout(function () {
-		var fb = document.getElementById("disqus-fallback");
-		if (fb && thread && thread.children.length === 0) {
-			fb.hidden = false;
-		}
-	}, 6000);
-	if (thread) {
-		window.__disqusThreadObserver = new MutationObserver(function () {
-			if (thread.children.length > 0) {
-				clearTimeout(window.__disqusFallbackTimer);
-				// If the embed lands after the timeout fired, hide the
-				// stale fallback message so it doesn't sit alongside the
-				// loaded comments.
-				var fb = document.getElementById("disqus-fallback");
-				if (fb) fb.hidden = true;
-				window.__disqusThreadObserver.disconnect();
+	// Inject embed.js and start monitoring for load success/failure.
+	// Called either immediately (DISQUS already in memory) or lazily (first load).
+	var injectDisqus = function () {
+		var d = document,
+			s = d.createElement("script");
+		s.async = true;
+		s.src = "https://" + shortname + ".disqus.com/embed.js";
+		s.setAttribute("data-timestamp", +new Date());
+		s.onerror = function () {
+			var fb = document.getElementById("disqus-fallback");
+			if (fb) fb.hidden = false;
+		};
+		(d.head || d.body).appendChild(s);
+	};
+
+	var startMonitoring = function () {
+		var thread = document.getElementById("disqus_thread");
+		window.__disqusFallbackTimer = setTimeout(function () {
+			var fb = document.getElementById("disqus-fallback");
+			if (fb && thread && thread.children.length === 0) {
+				fb.hidden = false;
 			}
-		});
-		window.__disqusThreadObserver.observe(thread, { childList: true });
+		}, 6000);
+		if (thread) {
+			window.__disqusThreadObserver = new MutationObserver(function () {
+				if (thread.children.length > 0) {
+					clearTimeout(window.__disqusFallbackTimer);
+					// If the embed lands after the timeout fired, hide the
+					// stale fallback message so it doesn't sit alongside the
+					// loaded comments.
+					var fb = document.getElementById("disqus-fallback");
+					if (fb) fb.hidden = true;
+					window.__disqusThreadObserver.disconnect();
+				}
+			});
+			window.__disqusThreadObserver.observe(thread, { childList: true });
+		}
+	};
+
+	// On subsequent executions (data-astro-rerun via view transitions), DISQUS
+	// is already in memory — reset() immediately and start monitoring.
+	// On the first execution, defer embed.js injection until #comments nears
+	// the viewport (rootMargin 300px) so the script chain doesn't run during
+	// page load and affect TTI/LCP.
+	if (typeof window.DISQUS !== "undefined") {
+		window.DISQUS.reset({ reload: true, config: window.disqus_config });
+		startMonitoring();
+	} else {
+		var section = document.getElementById("comments");
+		if (section) {
+			window.__disqusLoadObserver = new IntersectionObserver(
+				function (entries) {
+					if (entries[0].isIntersecting) {
+						window.__disqusLoadObserver.disconnect();
+						window.__disqusLoadObserver = null;
+						injectDisqus();
+						startMonitoring();
+					}
+				},
+				{ rootMargin: "300px" }
+			);
+			window.__disqusLoadObserver.observe(section);
+		}
 	}
 
 	// Re-render the embed when the site theme toggles so the iframe
@@ -126,6 +152,10 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 			if (window.__disqusFallbackTimer) {
 				clearTimeout(window.__disqusFallbackTimer);
 				window.__disqusFallbackTimer = null;
+			}
+			if (window.__disqusLoadObserver) {
+				window.__disqusLoadObserver.disconnect();
+				window.__disqusLoadObserver = null;
 			}
 			if (window.__disqusThreadObserver) {
 				window.__disqusThreadObserver.disconnect();
