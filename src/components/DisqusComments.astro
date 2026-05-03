@@ -66,6 +66,7 @@ const pageUrl = url ?? new URL(Astro.url.pathname, Astro.site).href;
 	// Inject embed.js and start monitoring for load success/failure.
 	// Called either immediately (DISQUS already in memory) or lazily (first load).
 	var injectDisqus = function () {
+		if (document.querySelector('script[src*="' + shortname + '.disqus.com/embed.js"]')) return;
 		var d = document,
 			s = d.createElement("script");
 		s.async = true;
