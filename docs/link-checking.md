@@ -228,14 +228,10 @@ This script:
 
 The URL is "not broken." The script distinguishes three outcomes:
 
-- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. The script suggests adding to `IgnoreURLs`.
+- **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
 - **Temporary** — browser returned 503 with explicit maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"). A `Retry-After` header is treated as corroborating evidence but is not sufficient alone. The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
-
-```yaml
-IgnoreURLs:
-  - "example.com"  # Reachable in browser, blocks htmltest (non-403/999 failure)
-```
+- **Unverifiable** — URL is from a domain that requires authentication (e.g. `linkedin.com`). Unauthenticated browser responses are unreliable — valid profiles and deleted ones can produce the same error. Reported for manual review but does NOT fail CI.
 
 Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
 
@@ -263,17 +259,20 @@ npm run check:links
 # Output automatically:
 # - Runs htmltest
 # - Verifies failures with browser
-# - Reports results with suggested actions:
+# - Reports results:
 #
-# ✅ URLs that work in browser (add to .htmltest.yml IgnoreURLs):
-#   - "example.com"
+# ✅ URLs reachable in browser — no action needed:
+#   - https://example.com/page
+#
+# ⚠️  URLs that could not be verified (require authentication — manual review):
+#   - https://www.linkedin.com/in/someprofile/
 #
 # ❌ URLs that are actually broken (need manual fixes):
 #   - https://other.example.com/page
 #     Reason: net::ERR_NAME_NOT_RESOLVED
 
-# 2. Update .htmltest.yml with suggested domains
-# 3. Fix broken links in content
+# 2. Fix broken links in content
+# 3. Manually verify any auth-required URLs listed above
 # 4. Re-run check
 npm run check:links
 ```
@@ -305,16 +304,18 @@ npm run test:links
 ## Ignore List Guidelines
 
 Add domains to `IgnoreURLs` when:
-- ✅ URL is **reachable** in real browsers (HTTP 2xx — distinct from "withheld")
-- ✅ URL fails automated checks **BUT has explicit non-policy status code** (e.g., 404)
+- ✅ URL **consistently fails htmltest** but is reachable in browser (HTTP 2xx)
+- ✅ The failure is structural (e.g. bot blocking, client app endpoints) — not transient
 - ✅ Site is legitimate and trustworthy
 - ✅ Content is still valuable to readers
 - ⚠️  **Never add** 403 or 999 responses (withheld by policy), connection errors, or URLs that also fail in browser
+- ⚠️  **Never add** auth-required domains (e.g. `linkedin.com`) — use the unverifiable category instead
 
 Do NOT add to ignore list when:
 - ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
 - ❌ Content has moved to new URL
 - ❌ Site is permanently offline
+- ❌ URL is reachable in browser but htmltest flagged it — the two-tier check already handles this; no IgnoreURLs entry needed
 - ⚠️  **Policy Exclusions**:
   - 403 responses: withheld by policy (not added even if browser works)
   - 429 responses: withheld (rate-limited/bot-gated; not added even if browser is also gated)
@@ -331,8 +332,9 @@ Sites may report different errors to bots vs real browsers:
 |---------|------------------|-----------------|--------|
 | **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
 | **LinkedIn-style anti-bot** | 999 | 999 (still blocked headless) | Withheld by policy (999s never added) |
-| **Softer bot detection** | 404 | 200 OK | May add to ignore list (script suggests) |
-| **Rate limiting — browser clear** | 429 | 200 OK | May add to ignore list (script suggests) |
+| **LinkedIn-style anti-bot** | 999 | ❌ Error/non-withheld | Unverifiable (auth-required; reported but not CI failure) |
+| **Softer bot detection** | 404 | 200 OK | No action needed (two-tier confirmed reachable) |
+| **Rate limiting — browser clear** | 429 | 200 OK | No action needed (two-tier confirmed reachable) |
 | **Rate limiting — both gated** | 429 | 429 gated | Withheld (rate-limited; not added to IgnoreURLs) |
 | **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
 | **Proxy issues** | 503 | 200 OK | May add to ignore list |
@@ -364,8 +366,8 @@ The repository runs automated link checks every night via GitHub Actions:
 **Issue Reporting:**
 - **Title:** "Link check failure report"
 - **Trigger:** Only genuinely broken links (failed both htmltest AND browser)
-- **Auto-filtered:** 403s that work in browser are NOT reported
-- **Action:** Review issue, fix broken links, update ignore list as suggested
+- **Auto-filtered:** 403s that work in browser are NOT reported; auth-required domains (linkedin.com) are reported as unverifiable but do NOT fail CI
+- **Action:** Review issue, fix broken links; manually verify any unverifiable URLs listed
 
 **View workflow runs:**
 ```bash
