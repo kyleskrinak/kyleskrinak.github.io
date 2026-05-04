@@ -66,8 +66,16 @@ export async function verifyUrl(page, url) {
       success: reachable || withheld || temporary
     };
   } catch (error) {
+    // Capture the last URL Playwright navigated to before the error, so
+    // redirect-aware bucketing (e.g. isAuthRequiredDomain) works even when
+    // page.goto() throws mid-redirect. Fall back to the original url if
+    // Playwright hasn't navigated yet (page.url() returns 'about:blank').
+    const currentUrl = page.url();
+    const finalUrl = (currentUrl && currentUrl !== 'about:blank') ? currentUrl : url;
     return {
       url,
+      finalUrl,
+      redirected: finalUrl !== url,
       error: error.message,
       reachable: false,
       withheld: false,
