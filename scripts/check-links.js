@@ -563,14 +563,14 @@ if (trulyBroken.length > 0) {
   process.exit(1);
 }
 
-if (isManualMode && notBrokenResults.length > 0) {
-  console.log(`\n✅ All provided URLs are accounted for (reachable, withheld, or temporary)\n`);
-} else if (unverifiable.length > 0) {
+if (unverifiable.length > 0) {
   if (isManualMode) {
     console.log(`\nℹ️  ${unverifiable.length} URL(s) could not be verified automatically (auth-required domain) — check manually.\n`);
   } else {
     console.log(`\n✅ No broken links found. ${unverifiable.length} URL(s) require manual verification (see above).\n`);
   }
+} else if (isManualMode && notBrokenResults.length > 0) {
+  console.log(`\n✅ All provided URLs are accounted for (reachable, withheld, or temporary)\n`);
 } else if (notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary)\n`);
 }

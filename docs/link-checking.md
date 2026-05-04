@@ -332,8 +332,8 @@ Sites may report different errors to bots vs real browsers:
 | Pattern | htmltest Reports | Browser Returns | Action |
 |---------|------------------|-----------------|--------|
 | **Aggressive bot detection** | 403 | 200 OK | Withheld by policy (403s never added) |
-| **LinkedIn-style anti-bot** | 999 | 999 (still blocked headless) | Withheld by policy (999s never added) |
-| **LinkedIn-style anti-bot** | 999 | ❌ Error/non-withheld | Unverifiable (auth-required; reported but not CI failure) |
+| **LinkedIn-style anti-bot (headless-blocked)** | 999 | 999 (still blocked headless) | Withheld by policy (999s never added) |
+| **LinkedIn-style anti-bot (auth-required)** | 999 | ❌ Error/non-withheld | Unverifiable (auth-required; reported but not CI failure) |
 | **Softer bot detection** | 404 | 200 OK | No action needed (two-tier confirmed reachable) |
 | **Rate limiting — browser clear** | 429 | 200 OK | No action needed (two-tier confirmed reachable) |
 | **Rate limiting — both gated** | 429 | 429 gated | Withheld (rate-limited; not added to IgnoreURLs) |
