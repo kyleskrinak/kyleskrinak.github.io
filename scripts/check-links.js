@@ -330,8 +330,17 @@ const htmltest429s = !isManualMode
   : [];
 // Separate auth-required domains (e.g. LinkedIn) from genuinely broken links.
 // Auth-required URLs are reported for manual review but do not fail CI.
-const unverifiable = broken.filter(r => isAuthRequiredDomain(r.url));
-const trulyBroken = broken.filter(r => !isAuthRequiredDomain(r.url));
+// Classify by effective URL (prefer finalUrl to catch cases where a redirect
+// lands on — or away from — an auth-required domain) and partition in one pass.
+const unverifiable = [];
+const trulyBroken = [];
+for (const r of broken) {
+  if (isAuthRequiredDomain(r.finalUrl || r.url)) {
+    unverifiable.push(r);
+  } else {
+    trulyBroken.push(r);
+  }
+}
 
 // Summary counts segmented by browser status so labels match actual bucket contents.
 // withheld403_999: browser returned 403 or 999 (policy blocks, resource exists)
@@ -531,6 +540,9 @@ if (unverifiable.length > 0) {
   console.log('━'.repeat(60));
   unverifiable.forEach(r => {
     console.log(`  - ${r.url}`);
+    if (r.redirected) {
+      console.log(`    → Redirects to: ${r.finalUrl}`);
+    }
     // Prefer a thrown error message; otherwise fall back to the HTTP status
     // (which can be the literal string 'NO_RESPONSE' when the browser got
     // no response object — see scripts/lib/verify-url.js:20).
