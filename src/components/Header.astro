@@ -218,16 +218,15 @@ const isActive = (path: string) => {
   // Runs on view transitions navigation
   document.addEventListener("astro:after-swap", toggleNav);
 
-  function closeAboutOnOutsideClick() {
-    const aboutMenu = document.querySelector<HTMLDetailsElement>("#about-menu");
-    if (!aboutMenu) return;
+  // Register once — handler resolves #about-menu dynamically so it never
+  // holds a stale reference across view transitions.
+  if (!(window as any).__aboutOutsideClickRegistered) {
+    (window as any).__aboutOutsideClickRegistered = true;
     document.addEventListener("click", e => {
-      if (!aboutMenu.contains(e.target as Node)) {
+      const aboutMenu = document.querySelector<HTMLDetailsElement>("#about-menu");
+      if (aboutMenu && !aboutMenu.contains(e.target as Node)) {
         aboutMenu.open = false;
       }
     });
   }
-
-  closeAboutOnOutsideClick();
-  document.addEventListener("astro:after-swap", closeAboutOnOutsideClick);
 </script>
