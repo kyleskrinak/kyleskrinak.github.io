@@ -25,6 +25,18 @@ import { resolveBrowserMode } from './lib/browser-mode.js';
 
 const DIST_DIR = 'dist';
 
+// Domains that require authentication to verify.
+// Unauthenticated browsers receive bot-detection errors or login-wall responses
+// that are indistinguishable from genuine 404s — so failures are reported for
+// manual review rather than failing CI.
+const AUTH_REQUIRED_DOMAINS = ['linkedin.com'];
+const isAuthRequiredDomain = url => {
+  try {
+    const { hostname } = new URL(url);
+    return AUTH_REQUIRED_DOMAINS.some(d => hostname === d || hostname.endsWith('.' + d));
+  } catch { return false; }
+};
+
 // Validate and collect URLs from command-line arguments
 const manualUrls = [];
 for (const arg of process.argv.slice(2)) {
@@ -316,7 +328,19 @@ const broken = results.filter(r => !r.success);
 const htmltest429s = !isManualMode
   ? withheldResults.filter(r => statusByUrl.get(r.url) === 429)
   : [];
-const trulyBroken = broken;
+// Separate auth-required domains (e.g. LinkedIn) from genuinely broken links.
+// Auth-required URLs are reported for manual review but do not fail CI.
+// Classify by effective URL (prefer finalUrl to catch cases where a redirect
+// lands on — or away from — an auth-required domain) and partition in one pass.
+const unverifiable = [];
+const trulyBroken = [];
+for (const r of broken) {
+  if (isAuthRequiredDomain(r.finalUrl || r.url)) {
+    unverifiable.push(r);
+  } else {
+    trulyBroken.push(r);
+  }
+}
 
 // Summary counts segmented by browser status so labels match actual bucket contents.
 // withheld403_999: browser returned 403 or 999 (policy blocks, resource exists)
@@ -332,6 +356,9 @@ if (isManualMode) {
   console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
   console.log(`   ⏸️  Temporarily unavailable (maintenance): ${temporaryResults.length}`);
   console.log(`   ❌ Broken: ${trulyBroken.length}`);
+  if (unverifiable.length > 0) {
+    console.log(`   ⚠️  Unverifiable (requires auth — manual review): ${unverifiable.length}`);
+  }
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
@@ -341,6 +368,9 @@ if (isManualMode) {
   }
   console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
   console.log(`   ❌ Actually broken: ${trulyBroken.length}`);
+  if (unverifiable.length > 0) {
+    console.log(`   ⚠️  Unverifiable (requires auth — manual review): ${unverifiable.length}`);
+  }
 }
 
 // In automated mode, categorize non-broken URLs by their htmltest status for detailed reporting
@@ -368,9 +398,12 @@ if (!isManualMode) {
   //     to auto-suggest as a permanent ignore even if htmltest's status differs
   //   - htmltest 403/999 — withheld by policy regardless of browser outcome
   //   - htmltest null/undefined — TLS/connection errors, kept visible for investigation
+  //   - auth-required domains (e.g. linkedin.com) — policy says never add these to
+  //     IgnoreURLs; use the unverifiable category instead (PR #121)
   ignoreCandidates = reachableResults.filter(r => {
     const status = statusByUrl.get(r.url);
-    return status !== 403 && status !== 999 && status !== null && status !== undefined;
+    return status !== 403 && status !== 999 && status !== null && status !== undefined
+      && !isAuthRequiredDomain(r.finalUrl || r.url);
   });
   htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403 && !r.temporary);
   htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999 && !r.temporary);
@@ -393,29 +426,16 @@ if (!isManualMode) {
 if (notBrokenResults.length > 0 && !isManualMode) {
 
   if (ignoreCandidates.length > 0) {
-    console.log('\n✅ URLs reachable in browser (add to .htmltest.yml IgnoreURLs):');
+    console.log('\n✅ URLs reachable in browser — no action needed (two-tier verification confirmed these):');
     console.log('━'.repeat(60));
-
-    const domains = [...new Set(ignoreCandidates.map(r => {
-      try {
-        const url = new URL(r.url);
-        return url.hostname;
-      } catch {
-        return r.url;
-      }
-    }))];
-
-    domains.forEach(domain => {
-      console.log(`  - "${domain}"`);
-    });
-
-    console.log('\nFull URLs:');
     ignoreCandidates.forEach(r => {
       console.log(`  - ${r.url}`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
     });
+    console.log('  ℹ️  If a URL above consistently fails htmltest on every run, you may add it to .htmltest.yml IgnoreURLs to skip the tier-2 check overhead. Not required — CI already passes without it.');
+    console.log('     Tradeoff: IgnoreURLs also suppresses tier-1 checks for those URLs, so future regressions on them won\'t be caught. Keep the list minimal and revisit periodically.');
   }
 
   const formatWithheld = (r) => {
@@ -518,6 +538,29 @@ if (!isManualMode && htmltest429s.length > 0) {
   });
 }
 
+if (unverifiable.length > 0) {
+  console.log('\n⚠️  URLs that could not be verified (require authentication — manual review):');
+  console.log('━'.repeat(60));
+  unverifiable.forEach(r => {
+    console.log(`  - ${r.url}`);
+    if (r.redirected) {
+      console.log(`    → Redirects to: ${r.finalUrl}`);
+    }
+    // Prefer a thrown error message; otherwise fall back to the HTTP status
+    // (which can be the literal string 'NO_RESPONSE' when the browser got
+    // no response object — see scripts/lib/verify-url.js:20).
+    if (r.error) {
+      console.log(`    → ${r.error}`);
+    } else if (r.status === 'NO_RESPONSE') {
+      console.log(`    → No response from server`);
+    } else if (r.status !== undefined) {
+      console.log(`    → HTTP ${r.status}`);
+    }
+  });
+  console.log('\n  Automated verification is unreliable for these domains.');
+  console.log('  Check manually if you suspect a link may have changed.');
+}
+
 if (trulyBroken.length > 0) {
   console.log('\n❌ URLs that are actually broken (need manual fixes):');
   console.log('━'.repeat(60));
@@ -538,21 +581,24 @@ if (trulyBroken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
-// Note: 403/429/999 withheld responses and 503 maintenance pages stay visible in
-// the report but do not trigger exit(1). Only genuinely broken links fail.
+// Note: 403/429/999 withheld, 503 maintenance, and auth-required unverifiable
+// URLs stay visible in the report but do not trigger exit(1).
+// Only genuinely broken links fail.
 if (trulyBroken.length > 0) {
   console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention\n`);
   process.exit(1);
 }
 
-if (isManualMode && notBrokenResults.length > 0) {
+if (unverifiable.length > 0) {
+  if (isManualMode) {
+    console.log(`\nℹ️  ${unverifiable.length} URL(s) could not be verified automatically (auth-required domain) — check manually.\n`);
+  } else {
+    console.log(`\n✅ No broken links found. ${unverifiable.length} URL(s) require manual verification (see above).\n`);
+  }
+} else if (isManualMode && notBrokenResults.length > 0) {
   console.log(`\n✅ All provided URLs are accounted for (reachable, withheld, or temporary)\n`);
-} else if (ignoreCandidates.length > 0 && temporaryResults.length > 0) {
-  console.log(`\n✅ All failed links are accounted for — update ignore list for reachable URLs; temporary maintenance pages need no ignore entry\n`);
-} else if (ignoreCandidates.length > 0) {
-  console.log(`\n✅ All failed links reachable in browser - update ignore list\n`);
 } else if (notBrokenResults.length > 0) {
-  console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary) - no ignore list updates suggested\n`);
+  console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary)\n`);
 }
 
 process.exit(0);
