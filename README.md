@@ -12,11 +12,11 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 
 ## ✨ Features
 
-- ⚡ **Super fast** - Optimized Astro build with <2s load times
-- 🎨 **Beautiful** - Responsive design that works on all devices
+- ⚡ **Fast by default** - Static HTML with 1.4s LCP on production; Disqus comments load on scroll, not at page load
+- 🎨 **Responsive** - Works on all devices
 - 🌙 **Dark mode** - Light and dark theme toggle
 - 🔍 **Full-text search** - Powered by Pagefind
-- ♿ **Accessible** - WCAG 2.1 compliant
+- ♿ **Accessible** - Lighthouse Accessibility score 94 on production
 - 📱 **Mobile-first** - Perfect on phones, tablets, desktops
 - 📊 **SEO-friendly** - Sitemaps, RSS feeds, canonical URLs
 - 🎯 **TypeScript** - Type-safe markdown and configuration
@@ -101,7 +101,7 @@ See `/docs/testing/` for detailed guides.
 ├── docs/                    # 📚 All documentation (see docs/index.md)
 ├── src/
 │   ├── content/
-│   │   ├── blog/           # 39 blog posts (markdown/MDX)
+│   │   ├── blog/           # Blog posts (markdown/MDX)
 │   │   └── pages/          # Static pages
 │   ├── components/         # Reusable components
 │   ├── layouts/            # Page layouts
@@ -131,40 +131,22 @@ See `/docs/testing/` for detailed guides.
 ## 📈 Performance
 
 **Lighthouse Scores** (Production):
-- Performance: 97
-- Accessibility: 100
-- Best Practices: 100
+- Performance: 80 (Disqus lazy-loads on scroll; still affects main thread on comment pages)
+- Accessibility: 94
+- Best Practices: 77 (third-party Disqus cookies)
 - SEO: 100
 
-See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for performance metrics and technical details.
+See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for Jekyll vs. Astro migration benchmarks.
 
 ## 🚢 Deployment
 
-Two deployment pipelines:
+Changes flow through three long-lived branches:
 
-1. **Staging**: Push to `staging` branch → GitHub Pages
-2. **Production**: Push to `main` branch → AWS S3 + CloudFront
+1. **develop** — all new work lands here; runs CI checks on every push
+2. **staging** → auto-deploys to GitHub Pages for pre-production review
+3. **main** → triggers production deploy to AWS S3 + CloudFront with CDN invalidation
 
 See [Deployment Guide](./docs/operations/deployment.md) for details.
-
-## 🧪 Testing
-
-```bash
-# Console error testing (before pushing)
-npm run dev              # Terminal 1
-npm run test:console     # Terminal 2
-
-# Visual regression testing
-npm run test:visual
-
-# Against staging environment
-npm run test:staging -- --project=console
-
-# Against production environment
-npm run test:production -- --project=console
-```
-
-See [Testing Guide](./docs/testing/) for more.
 
 ## 📋 Version History
 

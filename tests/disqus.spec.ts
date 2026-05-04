@@ -36,6 +36,24 @@ test.describe("Disqus integration", () => {
     expect(config!.url).toMatch(/\/lchf\/$/);
   });
 
+  test("renders on /about/ with correct page URL", async ({ page }) => {
+    await page.goto(`${BASE_URL}/about/`);
+    await expect(page.locator("#disqus_thread")).toBeAttached();
+    const config = await inspectDisqusConfig(page);
+    expect(config).not.toBeNull();
+    expect(config!.identifier).toBeUndefined();
+    expect(config!.url).toMatch(/\/about\/$/);
+  });
+
+  test("renders on /stack/ with correct page URL", async ({ page }) => {
+    await page.goto(`${BASE_URL}/stack/`);
+    await expect(page.locator("#disqus_thread")).toBeAttached();
+    const config = await inspectDisqusConfig(page);
+    expect(config).not.toBeNull();
+    expect(config!.identifier).toBeUndefined();
+    expect(config!.url).toMatch(/\/stack\/$/);
+  });
+
   test("does not render on a presentation page", async ({ page }) => {
     const response = await page.goto(`${BASE_URL}/presentations/`);
     if (!response || response.status() !== 200) {

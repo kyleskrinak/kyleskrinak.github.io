@@ -93,9 +93,43 @@ const isActive = (path: string) => {
             Tags
           </a>
         </li>
-        <li class="col-span-2">
+        {/* Desktop: About <details> disclosure — works on hover, focus, tap (hidden on mobile) */}
+        <li class="relative col-span-2 hidden sm:block">
+          <details id="about-menu" class="group/about">
+            <summary
+              class:list={[
+                "cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1",
+                { "active-nav": isActive("/about") || isActive("/stack") || isActive("/lchf") },
+              ]}
+            >
+              About
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="transition-transform group-open/about:rotate-180">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </summary>
+            <ul
+              class="absolute top-full left-0 z-50 min-w-36 rounded border border-border bg-background py-1 shadow-md [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-2 [&>li>a]:text-sm [&>li>a]:font-medium [&>li>a]:hover:text-accent"
+            >
+              <li><a href={linkWithBase("/about/")} class:list={{ "text-accent": isActive("/about") }}>Me</a></li>
+              <li><a href={linkWithBase("/stack/")} class:list={{ "text-accent": isActive("/stack") }}>Blog Stack</a></li>
+              <li><a href={linkWithBase("/lchf/")} class:list={{ "text-accent": isActive("/lchf") }}>Low-carb</a></li>
+            </ul>
+          </details>
+        </li>
+        {/* Mobile: flat About sub-items (hidden on desktop) */}
+        <li class="col-span-2 sm:hidden">
           <a href={linkWithBase("/about/")} class:list={{ "active-nav": isActive("/about") }}>
-            About
+            About Me
+          </a>
+        </li>
+        <li class="col-span-2 sm:hidden">
+          <a href={linkWithBase("/stack/")} class:list={{ "active-nav": isActive("/stack") }}>
+            Blog Stack
+          </a>
+        </li>
+        <li class="col-span-2 sm:hidden">
+          <a href={linkWithBase("/lchf/")} class:list={{ "active-nav": isActive("/lchf") }}>
+            Low-carb
           </a>
         </li>
         <li class="col-span-2">
@@ -183,4 +217,16 @@ const isActive = (path: string) => {
 
   // Runs on view transitions navigation
   document.addEventListener("astro:after-swap", toggleNav);
+
+  // Register once — handler resolves #about-menu dynamically so it never
+  // holds a stale reference across view transitions.
+  if (!(window as any).__aboutOutsideClickRegistered) {
+    (window as any).__aboutOutsideClickRegistered = true;
+    document.addEventListener("click", e => {
+      const aboutMenu = document.querySelector<HTMLDetailsElement>("#about-menu");
+      if (aboutMenu && !aboutMenu.contains(e.target as Node)) {
+        aboutMenu.open = false;
+      }
+    });
+  }
 </script>

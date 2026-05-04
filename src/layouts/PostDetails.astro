@@ -15,6 +15,7 @@ import { getPath } from "@/utils/getPath";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { slugifyStr } from "@/utils/slugify";
 import { getOptimizedImage } from "@/lib/images";
+import { getReadingTime } from "@/utils/readingTime";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
@@ -39,6 +40,7 @@ const {
   image,
   alt,
   caption,
+  imagePosition,
   comments,
   disqusId,
 } = post.data;
@@ -53,6 +55,8 @@ const timezone = (post.data as any).timezone;
 const optimizedImage = getOptimizedImage(image);
 
 const { Content } = await render(post);
+
+const readingTime = getReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
 
@@ -120,6 +124,8 @@ const nextPost =
     </h1>
     <div class="my-2 flex items-center gap-2">
       <Datetime {pubDate} {updatedDate} {timezone} size="lg" />
+      <span aria-hidden="true" class="text-skin-base opacity-50">·</span>
+      <span class="text-sm text-skin-base opacity-80">{readingTime} min read</span>
       <span
         aria-hidden="true"
         class:list={[
@@ -131,6 +137,9 @@ const nextPost =
     </div>
     {optimizedImage && (
       <figure class="hero-image mt-8 mb-8 w-full">
+        {/* fit + position route to Sharp's resize at build time so the
+            generated 1200×600 hero is cropped from the part of the source
+            image specified by frontmatter `imagePosition` (default: center). */}
         <Image
           src={optimizedImage}
           alt={alt || "Post hero image"}
@@ -138,6 +147,8 @@ const nextPost =
           height={600}
           quality={85}
           format="webp"
+          fit="cover"
+          position={imagePosition || "center"}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
           loading="eager"
           decoding="sync"
