@@ -347,6 +347,9 @@ if (isManualMode) {
   console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
   console.log(`   ⏸️  Temporarily unavailable (maintenance): ${temporaryResults.length}`);
   console.log(`   ❌ Broken: ${trulyBroken.length}`);
+  if (unverifiable.length > 0) {
+    console.log(`   ⚠️  Unverifiable (requires auth — manual review): ${unverifiable.length}`);
+  }
 } else {
   console.log(`   Unique URLs from htmltest: ${failedUrls.length}`);
   console.log(`   ✅ Reachable in real browser: ${reachableResults.length}`);
@@ -420,6 +423,7 @@ if (notBrokenResults.length > 0 && !isManualMode) {
       }
     });
     console.log('  ℹ️  If a domain above consistently fails htmltest on every run, you may add it to .htmltest.yml IgnoreURLs to skip the tier-2 check overhead. Not required — CI already passes without it.');
+    console.log('     Tradeoff: IgnoreURLs also suppresses tier-1 checks for those URLs, so future regressions on them won\'t be caught. Keep the list minimal and revisit periodically.');
   }
 
   const formatWithheld = (r) => {

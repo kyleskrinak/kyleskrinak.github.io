@@ -226,7 +226,7 @@ This script:
 
 #### If Verification Yields a Non-Broken or Manual-Review Outcome ✅
 
-The URL does not fail CI. The script distinguishes four outcomes — three where browser verification succeeds, plus one where verification is skipped because it would be unreliable:
+The URL does not fail CI. The script distinguishes four outcomes — three where browser verification succeeds, plus one where verification is attempted but considered unreliable for auth-required domains, so the result is reported for manual review:
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
@@ -311,6 +311,8 @@ Add domains to `IgnoreURLs` as a **performance optimization** when:
 - ⚠️  **Never add** auth-required domains (e.g. `linkedin.com`) — use the unverifiable category instead
 
 Note: `IgnoreURLs` is optional for browser-reachable URLs. The two-tier check already exits 0 for these without an IgnoreURLs entry — adding one only saves the Playwright overhead for domains that fail htmltest every single run.
+
+**Coverage tradeoff:** an `IgnoreURLs` entry suppresses tier-1 htmltest checks for those URLs entirely, not just the tier-2 Playwright overhead. If the URL later 404s or otherwise breaks, neither tier will catch it. Keep the list minimal, prefer scoping to the most-specific URL pattern that resolves the noise, and revisit periodically to confirm entries are still needed.
 
 Do NOT add to ignore list when:
 - ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
