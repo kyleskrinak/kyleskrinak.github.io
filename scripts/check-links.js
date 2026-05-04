@@ -398,9 +398,12 @@ if (!isManualMode) {
   //     to auto-suggest as a permanent ignore even if htmltest's status differs
   //   - htmltest 403/999 — withheld by policy regardless of browser outcome
   //   - htmltest null/undefined — TLS/connection errors, kept visible for investigation
+  //   - auth-required domains (e.g. linkedin.com) — policy says never add these to
+  //     IgnoreURLs; use the unverifiable category instead (PR #121)
   ignoreCandidates = reachableResults.filter(r => {
     const status = statusByUrl.get(r.url);
-    return status !== 403 && status !== 999 && status !== null && status !== undefined;
+    return status !== 403 && status !== 999 && status !== null && status !== undefined
+      && !isAuthRequiredDomain(r.finalUrl || r.url);
   });
   htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403 && !r.temporary);
   htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999 && !r.temporary);
