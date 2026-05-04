@@ -231,7 +231,7 @@ The URL does not fail CI. The script distinguishes four outcomes — three where
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
 - **Temporary** — browser returned 503 with explicit maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"). A `Retry-After` header is treated as corroborating evidence but is not sufficient alone. The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
-- **Unverifiable** — Browser verification returned a failure (`success: false`) *and* the effective URL (original URL or redirect destination) is on a domain that requires authentication (e.g. `linkedin.com`). Because unauthenticated responses on these domains are unreliable — valid profiles and deleted ones can produce the same error — the failure is treated as non-fatal. If the browser succeeds (2xx, 403, 999) for a LinkedIn URL, it lands in **Reachable** or **Withheld** instead; this bucket only applies when `success: false`. Reported for manual review but does NOT fail CI.
+- **Unverifiable** — Browser verification returned a failure (`success: false`) *and* the effective URL (original URL or redirect destination) is on a domain that requires authentication (e.g. `linkedin.com`). Because unauthenticated responses on these domains are unreliable — valid profiles and deleted ones can produce the same error — the failure is treated as non-fatal. If the browser succeeds for a LinkedIn URL (2xx → **Reachable**; 403/429/999 → **Withheld**; 503 maintenance page → **Temporary**), it lands in the appropriate bucket instead; this bucket only applies when `success: false`. Reported for manual review but does NOT fail CI.
 
 Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
 
@@ -302,7 +302,7 @@ npm run test:links
 
 ## Ignore List Guidelines
 
-Add domains to `IgnoreURLs` as a **performance optimization** when:
+Add URL patterns (domain or specific path) to `IgnoreURLs` as a **performance optimization** when:
 - ✅ URL **consistently and reproducibly fails htmltest** on every run (structural bot blocking, client app endpoints, persistent rate limiting)
 - ✅ Browser verification confirms the URL is reachable (HTTP 2xx)
 - ✅ Site is legitimate and trustworthy
