@@ -224,9 +224,9 @@ This script:
 
 ### Step 3: Take Action Based on Results
 
-#### If Browser Verification Succeeds ✅
+#### If Verification Yields a Non-Broken or Manual-Review Outcome ✅
 
-The URL is "not broken." The script distinguishes three outcomes:
+The URL does not fail CI. The script distinguishes four outcomes — three where browser verification succeeds, plus one where verification is skipped because it would be unreliable:
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.

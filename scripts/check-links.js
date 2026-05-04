@@ -527,8 +527,15 @@ if (unverifiable.length > 0) {
   console.log('━'.repeat(60));
   unverifiable.forEach(r => {
     console.log(`  - ${r.url}`);
+    // Prefer a thrown error message; otherwise fall back to the HTTP status
+    // (which can be the literal string 'NO_RESPONSE' when the browser got
+    // no response object — see scripts/lib/verify-url.js:20).
     if (r.error) {
       console.log(`    → ${r.error}`);
+    } else if (r.status === 'NO_RESPONSE') {
+      console.log(`    → No response from server`);
+    } else if (r.status !== undefined) {
+      console.log(`    → HTTP ${r.status}`);
     }
   });
   console.log('\n  Automated verification is unreliable for these domains.');
