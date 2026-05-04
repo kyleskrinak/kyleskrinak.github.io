@@ -419,6 +419,7 @@ if (notBrokenResults.length > 0 && !isManualMode) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
     });
+    console.log('  ℹ️  If a domain above consistently fails htmltest on every run, you may add it to .htmltest.yml IgnoreURLs to skip the tier-2 check overhead. Not required — CI already passes without it.');
   }
 
   const formatWithheld = (r) => {
@@ -565,7 +566,11 @@ if (trulyBroken.length > 0) {
 if (isManualMode && notBrokenResults.length > 0) {
   console.log(`\n✅ All provided URLs are accounted for (reachable, withheld, or temporary)\n`);
 } else if (unverifiable.length > 0) {
-  console.log(`\n✅ No broken links found. ${unverifiable.length} URL(s) require manual verification (see above).\n`);
+  if (isManualMode) {
+    console.log(`\nℹ️  ${unverifiable.length} URL(s) could not be verified automatically (auth-required domain) — check manually.\n`);
+  } else {
+    console.log(`\n✅ No broken links found. ${unverifiable.length} URL(s) require manual verification (see above).\n`);
+  }
 } else if (notBrokenResults.length > 0) {
   console.log(`\n✅ All failed links accounted for (reachable, withheld, or temporary)\n`);
 }

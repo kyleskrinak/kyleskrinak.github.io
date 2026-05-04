@@ -292,30 +292,31 @@ node scripts/check-links.js \
   "https://other.example.com/page"
 
 # 3. Browser verification shows:
-#    ✅ example.com - works (add to ignore list)
+#    ✅ example.com - works (two-tier confirmed reachable — no action needed)
 #    ❌ other.example.com - fails (update content)
 
-# 4. Update .htmltest.yml
-# 5. Fix broken link in content
-# 6. Re-run test
+# 4. Fix broken link in content
+# 5. Re-run test
 npm run test:links
 ```
 
 ## Ignore List Guidelines
 
-Add domains to `IgnoreURLs` when:
-- ✅ URL **consistently fails htmltest** but is reachable in browser (HTTP 2xx)
-- ✅ The failure is structural (e.g. bot blocking, client app endpoints) — not transient
+Add domains to `IgnoreURLs` as a **performance optimization** when:
+- ✅ URL **consistently and reproducibly fails htmltest** on every run (structural bot blocking, client app endpoints, persistent rate limiting)
+- ✅ Browser verification confirms the URL is reachable (HTTP 2xx)
 - ✅ Site is legitimate and trustworthy
-- ✅ Content is still valuable to readers
+- ✅ Without the entry, every run triggers a tier-2 Playwright check for this domain — adding it skips that overhead
 - ⚠️  **Never add** 403 or 999 responses (withheld by policy), connection errors, or URLs that also fail in browser
 - ⚠️  **Never add** auth-required domains (e.g. `linkedin.com`) — use the unverifiable category instead
+
+Note: `IgnoreURLs` is optional for browser-reachable URLs. The two-tier check already exits 0 for these without an IgnoreURLs entry — adding one only saves the Playwright overhead for domains that fail htmltest every single run.
 
 Do NOT add to ignore list when:
 - ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
 - ❌ Content has moved to new URL
 - ❌ Site is permanently offline
-- ❌ URL is reachable in browser but htmltest flagged it — the two-tier check already handles this; no IgnoreURLs entry needed
+- ❌ The failure is transient (intermittent) — tier-2 already handles one-off htmltest failures correctly
 - ⚠️  **Policy Exclusions**:
   - 403 responses: withheld by policy (not added even if browser works)
   - 429 responses: withheld (rate-limited/bot-gated; not added even if browser is also gated)
