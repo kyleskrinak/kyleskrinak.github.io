@@ -16,6 +16,12 @@ const blog = defineCollection({
 		ogImage: z.string().trim().min(1).optional(),
 		alt: z.string().trim().min(1).optional(),
 		caption: z.string().trim().min(1).optional(),
+		imagePosition: z.enum([
+			'top', 'right top', 'right', 'right bottom', 'bottom',
+			'left bottom', 'left', 'left top', 'center', 'centre',
+			'north', 'northeast', 'east', 'southeast', 'south',
+			'southwest', 'west', 'northwest', 'entropy', 'attention',
+		]).optional(),
 		canonicalURL: z.string().optional(),
 		tags: z.array(z.string()).optional(),
 		categories: z.array(z.string()).optional(),

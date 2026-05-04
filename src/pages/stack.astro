@@ -1,0 +1,158 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import DisqusComments from "@/components/DisqusComments.astro";
+import { SITE } from "@/config";
+import packageJson from "../../package.json";
+
+const { dependencies, devDependencies, engines, version: themeVersion } = packageJson;
+
+function cleanVersion(v: string | undefined): string {
+  if (!v) return "—";
+  return v.replace(/^[\^~>=<]+/, "");
+}
+---
+
+<Layout
+  title={`Blog Stack | ${SITE.title}`}
+  description="The technology stack behind this blog: Astro, AstroPaper, Tailwind CSS, Pagefind, and how it all gets published."
+>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    <h1 class="text-2xl font-semibold sm:text-3xl">About the Blog Stack</h1>
+
+    <section class="app-prose mt-8">
+      <h2>What powers this blog</h2>
+
+      <p>
+        This blog is a statically generated site — Astro pre-builds every page at deploy time into plain HTML, CSS, and JavaScript. No server runtime, no database, no CMS. The result: fast, secure, and cheap to host.
+      </p>
+
+      <p>
+        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what each page explicitly requires. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a>, which I've adapted and extended for this site. <a href="https://pagefind.app/">Pagefind</a> handles full-text search, building a search index at deploy time so search works with no backend. <a href="https://sharp.pixelplumbing.com/">Sharp</a> processes every hero image at build time, resizing and cropping to the right dimensions on every deploy.
+      </p>
+
+      <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
+      <p>
+        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro scores reflect the current production site at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a>.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Jekyll (avg)</th>
+            <th>Astro (avg)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Performance</td>
+            <td>57</td>
+            <td>80</td>
+          </tr>
+          <tr>
+            <td>Accessibility</td>
+            <td>87</td>
+            <td>94</td>
+          </tr>
+          <tr>
+            <td>Best Practices</td>
+            <td>73</td>
+            <td>77</td>
+          </tr>
+          <tr>
+            <td>SEO</td>
+            <td>100</td>
+            <td>100</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Disqus comment embeds modestly lower Performance and Best Practices — the third-party scripts affect Largest Contentful Paint. SEO scores 100 on the production URL. Running Lighthouse against a staging or preview URL drops that score because those URLs don't match the canonical address the site declares.
+      </p>
+
+      <h2>Current versions</h2>
+      <p>
+        Astro reads these versions directly from <code>package.json</code> at build time. They update automatically whenever a dependency version changes — no manual maintenance.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="https://astro.build/">Astro</a></td>
+            <td>{cleanVersion(dependencies.astro)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a></td>
+            <td>{themeVersion}</td>
+          </tr>
+          <tr>
+            <td><a href="https://tailwindcss.com/">Tailwind CSS</a></td>
+            <td>{cleanVersion(dependencies.tailwindcss)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://www.typescriptlang.org/">TypeScript</a></td>
+            <td>{cleanVersion(devDependencies.typescript)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://pagefind.app/">Pagefind</a></td>
+            <td>{cleanVersion(devDependencies.pagefind)}</td>
+          </tr>
+          <tr>
+            <td><a href="https://sharp.pixelplumbing.com/">Sharp</a></td>
+            <td>{cleanVersion(dependencies.sharp)}</td>
+          </tr>
+          <tr>
+            <td>Node.js (minimum)</td>
+            <td>{engines.node}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>What makes it a great platform</h2>
+
+      <ul>
+        <li><strong>Zero server runtime.</strong> Every page is a static HTML file. There is nothing to patch, no runtime to exploit, and no server to go down under load.</li>
+        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 and Accessibility 94 on production without extra configuration. Disqus comments load on scroll, so readers who never reach the comments pay no performance cost for them.</li>
+        <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
+        <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
+        <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>
+        <li><strong>RSS feed.</strong> Astro generates the full RSS feed at build time for every post.</li>
+        <li><strong>Visual regression testing.</strong> <a href="https://playwright.dev/">Playwright</a> runs screenshot comparisons on every pull request to catch unintended layout changes before they reach production.</li>
+      </ul>
+
+      <h2>Infrastructure and how a post gets published</h2>
+
+      <p>
+        AWS S3 hosts the blog files; CloudFront delivers them from edge locations worldwide. S3 storage costs almost nothing for static files, and CloudFront caches aggressively.
+      </p>
+
+      <p>
+        Every change flows through a three-branch gitflow before reaching production:
+      </p>
+
+      <ol>
+        <li><strong>develop</strong> — all work lands here first.</li>
+        <li><strong>staging</strong> — a pull request from develop to staging triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, checks Disqus identifiers, and deploys the output to <a href="https://kyleskrinak.github.io">GitHub Pages</a>. This gives a live pre-production environment where the full site can be browsed before anything touches S3.</li>
+        <li><strong>main</strong> — a pull request from staging to main triggers the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation.</li>
+      </ol>
+
+      <p>
+        No post reaches <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> without first passing a review on <a href="https://kyleskrinak.github.io">GitHub Pages</a>. GitHub Actions handles all deployments — automated build, link checking, and visual regression tests run on every pull request.
+      </p>
+    </section>
+    <DisqusComments url={new URL("/stack/", Astro.site).href} />
+  </main>
+  <Footer />
+</Layout>

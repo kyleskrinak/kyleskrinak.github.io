@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
+import DisqusComments from "@/components/DisqusComments.astro";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 ---
@@ -20,15 +21,19 @@ import { SITE } from "@/config";
 			<h2>Thanks for stopping by</h2>
 
 			<p>
-				Hello and thanks for stopping by. I <a href={linkWithBase("/posts/2016-10-31-first-blog-post/")}>started this blog in 2016</a> as an exercise in using <a href="https://jekyllrb.com/">Jekyll</a>, a static website generator with the <a href="https://mmistakes.github.io/minimal-mistakes/">Minimal Mistakes</a> theme. I discovered I could create a feature-rich web blog serving only HTML resources—no server-side runtime required.
+				Hello and thanks for stopping by. I <a href={linkWithBase("/posts/2016-10-31-first-blog-post/")}>started this blog in 2016</a> while at Duke University, initially as a professional "About me" page, work calendar, and contact hub — freely and easily accessible to anyone who needed to reach me. The static format made it simple to maintain. I started adding personal posts over time; working in an academic environment, it didn't feel out of place. Under the hood, the blog ran on <a href="https://jekyllrb.com/">Jekyll</a> and the <a href="https://mmistakes.github.io/minimal-mistakes/">Minimal Mistakes</a> theme, serving only HTML resources with no server-side runtime required.
 			</p>
 
 			<p>
-				In January 2026, I migrated the blog from Jekyll to <a href="https://astro.build/">Astro</a>, a modern static site generator built on <a href="https://nodejs.org/">Node.js</a> and <a href="https://www.npmjs.com/">npm</a>. The site now uses the <a href="https://github.com/satnaing/astro-paper">AstroPaper</a> theme as a foundation. This migration gave me the chance to modernize the blog's tooling while preserving all the content and history.
+				In January 2019, I migrated the blog from Duke's static hosting to <a href="https://aws.amazon.com/s3/">AWS S3</a> — partly to see if I could. It worked, and <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> has been served from S3 ever since.
 			</p>
 
 			<p>
-				In 2022, I transitioned away from the Drupal ecosystem after years of working deeply with the platform. While I still respect Drupal and its community, I've been exploring a broader range of technologies and approaches ever since.
+				In January 2026, I migrated the blog from Jekyll to <a href="https://astro.build/">Astro</a>, a modern static site generator built on <a href="https://nodejs.org/">Node.js</a> and <a href="https://www.npmjs.com/">npm</a>. The site now uses the <a href="https://github.com/satnaing/astro-paper">AstroPaper</a> theme as a foundation. I documented the process in <a href={linkWithBase("/posts/2026-01-01-ai-assisted-modernization/")}>AI-Assisted Modernization</a>, and followed it up by applying the same approach to <a href={linkWithBase("/posts/2026-03-02-from-squarespace-to-astro/")}>migrating my wife's design portfolio from Squarespace to Astro</a>.
+			</p>
+
+			<p>
+				In 2022, I transitioned away from the Drupal ecosystem after years of working deeply with the platform. While I still respect Drupal and its community, I've been exploring a broader range of technologies and approaches ever since. That shift opened the door to a deeper focus on AI — how it works, what it changes, and how to integrate it practically into what I build and how I work. I've found the best way to develop that judgment is through real projects with real stakes, which is what this blog tends to document.
 			</p>
 
 			<p>
@@ -44,8 +49,10 @@ import { SITE } from "@/config";
 				<li>Web development and static site generators (Astro, Jekyll, Drupal)</li>
 				<li>Package management and build tools (NPM, Node.js)</li>
 				<li>Digital experience platforms and content management systems (Sitecore, Drupal)</li>
-				<li>Cloud infrastructure and DevOps (AWS, Azure)</li>
+				<li>Cloud infrastructure and DevOps (AWS S3 static hosting, Azure)</li>
+				<li>LAMP stack and server-side web development</li>
 				<li>Open source technologies and communities</li>
+				<li>Artificial intelligence and practical AI integration</li>
 				<li>Low-carb lifestyle and personal wellness</li>
 				<li>Technical writing and documentation</li>
 			</ul>
@@ -60,6 +67,7 @@ import { SITE } from "@/config";
 				You can find me on <a href="https://github.com/kyleskrinak">GitHub</a>, <a href="https://www.linkedin.com/in/kyleskrinak/">LinkedIn</a>, or <a href="https://x.com/screenack">X</a>.
 			</p>
 		</section>
+		<DisqusComments url={new URL("/about/", Astro.site).href} />
 	</main>
 	<Footer />
 </Layout>
