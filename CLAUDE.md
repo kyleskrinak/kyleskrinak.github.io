@@ -488,7 +488,7 @@ When making content edits to a previously-published post, apply BOTH:
 
 1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC).
    - Drives the "Revised on:" label in the post header (`src/components/Datetime.astro`)
-   - Re-surfaces the post in RSS feeds as newly published on the update date (RSS `pubDate` is set to `updatedDate ?? pubDate` in `src/pages/rss.xml.ts`)
+   - Changes the item's RSS `pubDate` to the update date (via `updatedDate ?? pubDate` in `src/pages/rss.xml.ts`); most RSS readers sort by this field, so the post re-surfaces as recently updated. XML item order in the feed is unchanged (driven by `getSortedPosts`, which sorts by `pubDate` only)
    - Does **NOT** affect post sort order — original `pubDate` always drives ordering (`src/utils/getSortedPosts.ts`)
 
 2. **Inline marker at each change point** — plain italic line directly after the affected paragraph or block:
