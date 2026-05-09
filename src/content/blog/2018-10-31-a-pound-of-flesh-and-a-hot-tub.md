@@ -54,5 +54,4 @@ Minutes pass…
 
 “Never mind.”
 
-__postscript:__ I wrote this in February, 2018. My skin has tightened up since then, I’m pleased to report. Perhaps related to autophagy? That’s for another post.
-{: .notice--info}
+<div style="padding: 1rem; margin-bottom: 1.5rem; border-left: 4px solid #3498db; background-color: #d5edf7; border-radius: 0 3px 3px 0;"><strong>Postscript:</strong> I wrote this in February, 2018. My skin has tightened up since then, I’m pleased to report. Perhaps related to autophagy? That’s for another post.</div>
