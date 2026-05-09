@@ -505,4 +505,4 @@ The header date stamp tells the reader "this post was revised"; the inline marke
 - `/review` - Review draft for logic and flow (no rewriting)
 - `/factcheck` - Verify claims with web search and provide sources
 
-<!-- Keep total CLAUDE.md under 500 lines -->
+<!-- Keep total CLAUDE.md under 550 lines -->
