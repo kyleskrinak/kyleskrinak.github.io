@@ -25,31 +25,39 @@ const {
 } = Astro.props;
 
 /* ========== Formatted Datetime ========== */
-const isModified = updatedDate && updatedDate > pubDate;
+const tz = postTimezone || SITE.timezone;
+const pubDt = dayjs(pubDate).tz(tz);
+const isModified = !!(updatedDate && updatedDate > pubDate);
+const updDt = isModified ? dayjs(updatedDate).tz(tz) : null;
 
-const datetime = dayjs(isModified ? updatedDate : pubDate).tz(
-  postTimezone || SITE.timezone
-);
-
-const date = datetime.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
+const pubFormatted = pubDt.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
+const updFormatted = updDt?.format("D MMM, YYYY");
 ---
 
-<div class:list={["flex items-center gap-x-2 opacity-80", className]}>
+<div class:list={["flex flex-wrap items-center gap-x-2 opacity-80", className]}>
   <IconCalendar
     class:list={[
       "inline-block size-6 min-w-5.5",
       { "scale-90": size === "sm" },
     ]}
   />
-  {
-    isModified && (
-      <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
-        Updated:
-      </span>
-    )
-  }
   <time
     class:list={["text-sm", { "sm:text-base": size === "lg" }]}
-    datetime={datetime.toISOString()}>{date}</time
+    datetime={pubDt.toISOString()}>{pubFormatted}</time
   >
+  {
+    isModified && updDt && (
+      <>
+        <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
+          Revised on:
+        </span>
+        <time
+          class:list={["text-sm", { "sm:text-base": size === "lg" }]}
+          datetime={updDt.toISOString()}
+        >
+          {updFormatted}
+        </time>
+      </>
+    )
+  }
 </div>

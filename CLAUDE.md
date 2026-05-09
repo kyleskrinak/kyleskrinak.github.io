@@ -482,6 +482,24 @@ When reviewing drafts, follow this priority:
 3. Clarity and precision third
 4. Grammar and polish last
 
+## Post Revisions
+
+When making content edits to a previously-published post, apply BOTH:
+
+1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC).
+   - Drives the "Revised on:" label in the post header (`src/components/Datetime.astro`)
+   - Feeds RSS and schema.org `dateModified`
+   - Does **NOT** affect post sort order — original `pubDate` always drives ordering (`src/utils/getSortedPosts.ts`)
+
+2. **Inline marker at each change point** — plain italic line directly after the affected paragraph or block:
+   ```markdown
+   *Revised YYYY-MM-DD: brief description of what changed.*
+   ```
+
+The header date stamp tells the reader "this post was revised"; the inline marker tells them "and here is exactly what changed." Do not also add an end-of-post summary — it duplicates the header.
+
+**Markdown caveat:** this Astro setup does NOT support Kramdown attribute syntax (`{: .class}`). Use plain markdown italic, not class-based styling.
+
 ## Available Commands
 - `/outline` - Generate structured outline from topic or notes
 - `/review` - Review draft for logic and flow (no rewriting)

@@ -1,6 +1,7 @@
 ---
 title: My Windows 10 Setup
 pubDate: 2019-09-14T00:00:00.000Z
+updatedDate: 2026-05-09T00:00:00.000Z
 categories: []
 description: Why Windows and how I like my default Windows 10 configured
 image: ../../assets/images/punch_card.jpg
@@ -71,7 +72,9 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
         * zstyle :omz:plugins:ssh-agent identities key1 key2
         * You must add `export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH` to the beginning of your .zshrc file.
   1. Install vimfiles
-      * [GitHub - kyleskrinak/vim-files-2.0: My vim configuration files](https://github.com/kyleskrinak/vim-files-2.0)
+      * GitHub - kyleskrinak/vim-files-2.0: My vim configuration files
+        * *Note - I have archived this repo.*
+        * *Revised 2026-05-09: original link to vim-files-2.0 removed.*
       * I might be migrating to NeoVim. I like the configuration setup better. Stay tuned.
         * New repo: [GitHub - kyleskrinak/neovim: My neovim configuration files](https://github.com/kyleskrinak/neovim)
 	* Neovim conf files go here: `%USERPROFILE%\AppData\Local\nvim`
