@@ -48,9 +48,6 @@ const {
 const commentsEnabled = comments !== false;
 const postUrl = new URL(getPath(post.id, post.filePath), Astro.site).href;
 
-// timezone is optional and may not exist on all posts
-const timezone = (post.data as any).timezone;
-
 // Get optimized image metadata for hero image display
 const optimizedImage = getOptimizedImage(image);
 
@@ -123,7 +120,7 @@ const nextPost =
       {title}
     </h1>
     <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDate} {updatedDate} {timezone} size="lg" />
+      <Datetime {pubDate} {updatedDate} size="lg" />
       <span aria-hidden="true" class="text-skin-base opacity-50">·</span>
       <span class="text-sm text-skin-base opacity-80">{readingTime} min read</span>
       <span
