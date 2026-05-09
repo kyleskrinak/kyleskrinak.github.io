@@ -27,8 +27,8 @@ const {
 /* ========== Formatted Datetime ========== */
 const tz = postTimezone || SITE.timezone;
 const pubDt = dayjs(pubDate).tz(tz);
-const isModified = !!(updatedDate && dayjs(updatedDate).tz(tz).isAfter(pubDt));
-const updDt = isModified ? dayjs(updatedDate).tz(tz) : null;
+const updDt = updatedDate ? dayjs(updatedDate).tz(tz) : null;
+const isModified = !!(updDt && updDt.isAfter(pubDt));
 
 const pubFormatted = pubDt.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
 const updFormatted = updDt?.format("D MMM, YYYY");
@@ -43,8 +43,8 @@ const updFormatted = updDt?.format("D MMM, YYYY");
   />
   <time
     class:list={["text-sm", { "sm:text-base": size === "lg" }]}
-    datetime={pubDt.toISOString()}>{pubFormatted}</time
-  >
+    datetime={pubDt.toISOString()}
+  >{pubFormatted}</time>
   {
     isModified && updDt && (
       <>
