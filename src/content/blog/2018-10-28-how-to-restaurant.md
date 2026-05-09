@@ -73,8 +73,7 @@ I&#39;ve found Mexican restaurants to be generally the most accommodating of LCH
 
 When life happens, what to do? Remember the axiom, less is more? That's right, don't eat. For example, if you're at a faux-Italian chain, and it's all bread, pasta, sugar and rapeseed oil? You can order an unsweetened tea or a diet soda, and enjoy the company. Order a house salad and take your time eating it. Skip the croutons, of course. If you've been on LCHF for a long enough period of time, this will not be a problem. My personal experience was this was difficult at first. _"Kyle, aren't you hungry?"_ It was a fair enough question, since, previously, I ate and ate and ate. Now, on LCHF, my satiety is such that I can, and do, skip meals. It's not willpower, per se, I've adapted my body. I don't _have to_ eat now, and not merely because everyone else is.
 
-Remember, we're not dogs. We don't have to reward ourselves with food, nor eat it because we see it.
-{: .notice--info}
+<div style="padding: 1rem; margin-bottom: 1.5rem; border-left: 4px solid #3498db; background-color: #d5edf7; border-radius: 0 3px 3px 0;">Remember, we're not dogs. We don't have to reward ourselves with food, nor eat it because we see it.</div>
 
 It’s that simple. If they have real butter, they are the real deal. I would like to think that LCHF’er and foodie, alike, would agree on this?
 
