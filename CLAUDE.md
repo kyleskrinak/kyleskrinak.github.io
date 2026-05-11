@@ -99,6 +99,8 @@ After any code change:
 
 **Error handling:** Throw on missing expected resources; don't silently return empty.
 
+**Text parsing:** Use exclusive range end (`pos < range.end`). Track running offsets (not `join('\n').length`). Never `.replace(substring, '')` on repeating content — use position ranges. Always `.trim()` before exact comparison (CRLF vs LF). Handle malformed input: unclosed blocks → extend range to `content.length`.
+
 **Web performance:** Always include `width`/`height` on images (including SVGs) for CLS prevention. `sizes` attribute must match actual container width, not viewport.
 
 ## Review Response Protocol
@@ -181,4 +183,4 @@ When making content edits to a previously-published post, apply BOTH:
 - `/review` - Review draft for logic and flow (no rewriting)
 - `/factcheck` - Verify claims with web search and provide sources
 
-<!-- Keep total CLAUDE.md under 190 lines -->
+<!-- Keep total CLAUDE.md under 200 lines -->

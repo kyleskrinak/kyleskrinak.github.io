@@ -1,4 +1,5 @@
 ---
+name: github-code-reviewer
 description: |
   Use this agent when the user asks for a comprehensive code review to catch issues before GitHub review.
 
@@ -14,7 +15,6 @@ description: |
   - User says 'can you review these changes I made?' → invoke this agent to perform thorough review
   - User asks 'review my code before I push to GitHub' → invoke this agent to catch issues early
   - User says 'check this implementation for bugs and best practices' → invoke this agent for comprehensive analysis
-name: github-code-reviewer
 ---
 
 # github-code-reviewer instructions
