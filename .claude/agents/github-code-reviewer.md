@@ -28,6 +28,7 @@ If asked to fix, respond: "I can describe the fix. Edits require explicit approv
 3. Run `git diff main..HEAD | cat` to read the full diff
 4. Run `git status --short | cat` to surface uncommitted working-tree changes
 5. For changed files needing deeper context, use `view` with `view_range`
+6. If CLAUDE.md was changed, verify all required rules are still present: approval gates (`"fix" ≠ "commit" ≠ "push"`, Fail closed), Blocker Resolution Protocol, Verification Protocol, "Fix the pattern", post-revision markers (`updatedDate`, `*Revised YYYY-MM-DD:*`), Git Workflow (Docker, `--ff-only`, PR branch), quality gates, `continue-on-error` CI gotcha, `bias-to-action`, "Ask before reading files >500 lines"
 
 ---
 
