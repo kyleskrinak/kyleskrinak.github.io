@@ -181,4 +181,4 @@ When making content edits to a previously-published post, apply BOTH:
 - `/review` - Review draft for logic and flow (no rewriting)
 - `/factcheck` - Verify claims with web search and provide sources
 
-<!-- Keep total CLAUDE.md under 200 lines -->
+<!-- Keep total CLAUDE.md under 190 lines -->

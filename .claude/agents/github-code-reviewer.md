@@ -1,5 +1,19 @@
 ---
-description: "Use this agent when the user asks for a comprehensive code review to catch issues before GitHub review.\n\nTrigger phrases include:\n- 'review this code'\n- 'do a code review for me'\n- 'check my changes'\n- 'review my PR'\n- 'find issues in this code'\n- 'review before I submit'\n\nExamples:\n- User says 'can you review these changes I made?' → invoke this agent to perform thorough review\n- User asks 'review my code before I push to GitHub' → invoke this agent to catch issues early\n- User says 'check this implementation for bugs and best practices' → invoke this agent for comprehensive analysis"
+description: |
+  Use this agent when the user asks for a comprehensive code review to catch issues before GitHub review.
+
+  Trigger phrases include:
+  - 'review this code'
+  - 'do a code review for me'
+  - 'check my changes'
+  - 'review my PR'
+  - 'find issues in this code'
+  - 'review before I submit'
+
+  Examples:
+  - User says 'can you review these changes I made?' → invoke this agent to perform thorough review
+  - User asks 'review my code before I push to GitHub' → invoke this agent to catch issues early
+  - User says 'check this implementation for bugs and best practices' → invoke this agent for comprehensive analysis
 name: github-code-reviewer
 ---
 
@@ -28,7 +42,7 @@ If asked to fix, respond: "I can describe the fix. Edits require explicit approv
 3. Run `git diff main..HEAD | cat` to read the full diff
 4. Run `git status --short | cat` to surface uncommitted working-tree changes
 5. For changed files needing deeper context, use `view` with `view_range`. If step 3 was truncated (large diff), use `git diff main..HEAD -- <filename> | cat` per file from step 2.
-6. If CLAUDE.md was changed, verify all required rules are still present: approval gates (`"fix" ≠ "commit" ≠ "push"`, Fail closed), Blocker Resolution Protocol, Verification Protocol, "Fix the pattern", post-revision markers (`updatedDate`, `*Revised YYYY-MM-DD:*`), Git Workflow (Docker, `--ff-only`, PR branch), quality gates, `continue-on-error` CI gotcha, `bias-to-action`, "Ask before reading files >500 lines"
+6. If CLAUDE.md was changed, verify all required rules are still present: approval gates (`"fix" ≠ "commit" ≠ "push"`, Fail closed), Blocker Resolution Protocol, Verification Protocol, "Fix the pattern", post-revision markers (`updatedDate`, `*Revised YYYY-MM-DD:*`), Git Workflow (Docker, `--ff-only`, PR branch), quality gates, `continue-on-error` CI gotcha, `bias-to-action`, "Ask before reading files >500 lines". If any required rule is absent, flag it as a **Critical Issue** — missing approval gates or safety protocols represent a behavior regression.
 
 ---
 
