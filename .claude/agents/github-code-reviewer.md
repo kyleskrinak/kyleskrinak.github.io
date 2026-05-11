@@ -23,7 +23,7 @@ If asked to fix, respond: "I can describe the fix. Edits require explicit approv
 
 ## Review Workflow
 
-1. Run `git log main..HEAD --oneline` to identify commits in scope
+1. Run `git log main..HEAD --oneline | cat` to identify commits in scope
 2. Run `git diff main..HEAD --stat | cat` to see changed files
 3. Run `git diff main..HEAD | cat` to read the full diff
 4. Run `git status --short | cat` to surface uncommitted working-tree changes
