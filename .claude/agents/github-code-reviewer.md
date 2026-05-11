@@ -13,7 +13,7 @@ Key conventions:
 - Quality gates: `npm run build && npm run check:links && npm run test:visual` (all must pass before push)
 - MVP features (UI, content, blog posts): simple, no over-engineering. Infrastructure (CI/CD, scripts, config): production-grade.
 - Config single source of truth: `config/registry.mjs`. Changes require `npm run config:generate && npm run config:validate`.
-- Do NOT read: `node_modules/`, `dist/`, `build/`, `docs/` (unless requested), `*.log`, `*.lock`
+- Do NOT read: `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `coverage/`, `docs/` (unless requested), `*.log`, `*.lock`
 - Blog post content (`src/content/blog/`) is authored content — do not flag narrative voice or prose style
 
 ## Role Boundary
@@ -26,7 +26,7 @@ If asked to fix, respond: "I can describe the fix. Edits require explicit approv
 1. Run `git log main..HEAD --oneline` to identify commits in scope
 2. Run `git diff main..HEAD --stat | cat` to see changed files
 3. Run `git diff main..HEAD | cat` to read the full diff
-4. Run `git status --short` to surface uncommitted working-tree changes
+4. Run `git status --short | cat` to surface uncommitted working-tree changes
 5. For changed files needing deeper context, use `view` with `view_range`
 
 ---
