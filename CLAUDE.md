@@ -85,52 +85,18 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 **Single Source of Truth:** `config/registry.mjs`
 
-All configuration values (env vars, deployment settings, Astro config) are documented in the registry and validated automatically in CI.
-
-### Validation Coverage
-
-The config validator (`npm run config:validate`) enforces consistency across:
-
-1. **Workflows ↔ Registry**: Environment variables in `.github/workflows/*.yml` must match registry
-2. **Env Schema ↔ Registry**: Variables in `astro.config.ts` env schema must be documented in registry
-3. **Code ↔ Env Schema**: All `process.env.*` usage must be declared in env schema
-4. **Deployment ↔ Registry**: GitHub repository variables (`vars.*`) must match deployment config
-5. **Docs ↔ Registry**: Generated docs (`docs/operations/environment-configuration.md`) must be up to date
-6. **Hardcoded Fallbacks ↔ Registry**: Literal values in `src/config/index.ts` must match registry
-
-### Design Decisions
-
-**Why `src/config/index.ts` uses `process.env` instead of `astro:env`:**
-- Runs at build initialization before Astro env is fully available
-- Implements fallback logic for local development
-- Hardcoded fallback URLs are **validated** against registry to prevent drift
-- Validation-only approach chosen over refactoring for reliability
+`npm run config:validate` enforces consistency across workflows, env schema, code, deployment, docs, and hardcoded fallbacks. Runs in all deployment workflows.
 
 **When to update configuration:**
 1. Change value in `config/registry.mjs`
-2. Run `npm run config:generate` to update docs
-3. Run `npm run config:validate` to verify consistency
-4. Update workflows if needed
-5. Commit all changes together
-
-**CI Enforcement:**
-- Validation runs in all deployment workflows (PR, staging, production)
-- Prevents merging/deploying with configuration drift
-- Fails fast with clear error messages
+2. Run `npm run config:generate && npm run config:validate`
+3. Update workflows if needed
+4. Commit all changes together
 
 ### Common Scenarios
 
-**Adding a new env var:**
-1. Add to `astro.config.ts` env schema
-2. Add to `config/registry.mjs` environments
-3. Add to workflows that need it
-4. Run `npm run config:generate && npm run config:validate`
-
-**Changing a URL:**
-1. Update in `config/registry.mjs`
-2. Update in workflows
-3. If used in `src/config/index.ts` fallbacks, update there too
-4. Validation will catch mismatches
+- **Adding a new env var:** add to `astro.config.ts` env schema + `config/registry.mjs` + affected workflows, then run `npm run config:generate && npm run config:validate`.
+- **Changing a URL:** update in `config/registry.mjs` + workflows + `src/config/index.ts` fallbacks; validation will catch mismatches.
 
 ## Git Workflow
 
@@ -176,11 +142,7 @@ git checkout develop && git pull origin develop
 
 ### After PR Merges
 
-**Prerequisites:** Docker must be running before executing these commands (see "Before Making Changes" section).
-
-**CRITICAL: If this repository merges PRs using GitHub's "Create a merge commit" strategy, sync branches after PRs merge to prevent divergence.**
-
-With the "Create a merge commit" strategy, the target branch gains a merge commit that the source branch does not have until you sync it back. This workflow keeps branch history aligned after those merges.
+Sync source branch to include the merge commit added to the target branch. Docker must be running (see "Before Making Changes").
 
 **After develop → staging merges:**
 ```bash
@@ -206,43 +168,7 @@ git merge --ff-only origin/staging
 git push origin develop
 ```
 
-**If merge fails (not fast-forward):**
-
-The branches have diverged (one or both have unique commits). This shouldn't happen in normal gitflow. Inspect what differs between the branch you're on and the branch you were trying to merge:
-
-```bash
-# If syncing staging with main failed, compare staging (HEAD) to origin/main
-git log --oneline HEAD..origin/main   # What's on main but not staging
-git log --oneline origin/main..HEAD   # What's on staging but not main
-
-# If syncing develop with staging failed, compare develop (HEAD) to origin/staging
-git log --oneline HEAD..origin/staging    # What's on staging but not develop
-git log --oneline origin/staging..HEAD    # What's on develop but not staging
-```
-
-Then either create a merge commit or resolve manually:
-
-```bash
-# If syncing staging with main failed:
-git fetch origin
-git checkout staging
-git merge origin/main --no-edit  # Create a merge commit
-git push origin staging
-
-# If syncing develop with staging failed:
-git fetch origin
-git checkout develop
-git merge origin/staging --no-edit  # Create a merge commit
-git push origin develop
-
-# OR resolve the divergence manually
-```
-
-**Why this is necessary:**
-- With "Create a merge commit" strategy, target branches get merge commits that source branches don't have
-- Without syncing, future PRs show duplicate commits in history (though file diffs are correct)
-- `--ff-only` safely fast-forwards to include the merge commit without creating extra commits
-- Using `origin/staging` and `origin/main` ensures you merge the latest remote state, not stale local branches
+**If `--ff-only` fails:** branches have diverged (shouldn't happen in normal gitflow). Diagnose with `git log --oneline HEAD..origin/<branch>`, then `git merge origin/<branch> --no-edit && git push`.
 
 ### PR Review Fixes
 - Commit fixes to the **PR's HEAD branch**, not develop
@@ -250,9 +176,7 @@ git push origin develop
 - If fixes were made on wrong branch, cherry-pick to correct branch (on failure, see Blocker Resolution Protocol)
 
 ### No Out-of-Scope Commits
-- Do **not** commit changes unrelated to the current task to any branch mid-session
-- Instructions like "update X" mean make the change in the file; they do not imply commit unless explicitly requested
-- Approval gates apply per-change: a request to edit a file is not approval to commit it
+- "Update X" means edit the file — it does not imply commit. Approval gates apply per-change.
 
 ## Blocker Resolution Protocol
 
@@ -281,20 +205,7 @@ git push origin develop
 
 ### Retry Logic
 
-**Never auto-retry.** Even for transient failures (network timeout), stop and ask.
-
-Example:
-```
-Push failed: network timeout
-Commit ad88b33 exists locally but not on origin.
-
-Options:
-1. Retry push now
-2. You'll push manually later
-3. Amend or discard commit
-
-What do you want to do?
-```
+**Never auto-retry.** Even for transient failures (network timeout), stop and ask. Example: `Push failed: network timeout — commit ad88b33 exists locally but not on origin. Retry / push manually / amend?`
 
 ### Background Task Failures
 
@@ -313,11 +224,6 @@ Confirmed: proceeding with [task] despite [blocker].
 [Specific consequence of proceeding].
 ```
 
-## Code Changes
-- Batch related edits into single operations
-- Make minimal edits to accomplish goal
-- Use descriptive commit messages
-
 ## Verification Protocol
 
 **After making ANY code change:**
@@ -325,10 +231,10 @@ Confirmed: proceeding with [task] despite [blocker].
 1. **Search for ALL instances** before claiming "fixed"
    ```bash
    # Before fixing:
-   grep -rn "pattern" src/ scripts/ public/
+   grep -rn "pattern" src/ scripts/ tests/ public/
 
    # After fixing ALL instances:
-   grep -rn "pattern" src/ scripts/ public/  # MUST return zero results
+   grep -rn "pattern" src/ scripts/ tests/ public/  # MUST return zero results
    ```
 
 2. **Verify documentation against source code:**
@@ -340,11 +246,11 @@ Confirmed: proceeding with [task] despite [blocker].
    - Config behavior claims → read astro.config.ts, src/config/index.ts
    - Test behavior claims → read actual test files
 
-3. **Check side effects:**
+3. **Check side effects and interacting systems:**
    - Documentation referencing changed files?
    - PR description mentioning changed behavior?
-   - Related files with similar patterns?
-   - Other files in same directory?
+   - Related files with similar patterns? Other files in same directory?
+   - Changed code → docs/tests/configs; changed config → code/scripts referencing it; removed tool → all repo-wide references; changed URL → grep all files.
 
 4. **Quality Gates (scope-dependent):**
 
@@ -366,15 +272,15 @@ Confirmed: proceeding with [task] despite [blocker].
    - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npm run test:visual:baseline` (ask first).
    - If OTHER tests fail, or visual diffs appear on pages unrelated to listings (individual posts, standalone pages), those ARE real and need investigation.
 
-5. **Never commit without verification**
+5. **Never commit without verification.** Before committing, report a one-line summary of what you searched and what you fixed.
 
-## Text Processing, Validation, Performance Rules
+## Coding Rules
 
-**Text parsing/strings:** Use exclusive range end (`pos < range.end`). Account for newlines in offsets (running offset, not `join('\n').length`). Never `.replace(substring, '')` on content that may repeat — use position ranges, slice, rebuild. Always `.trim()` before exact comparison (CRLF vs LF). Handle malformed input (unclosed blocks → extend range to `content.length`). Throw on missing expected resources; don't silently return empty.
+**Security/validation:** Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs). Apply `.trim().min(1).optional()` to all text fields.
 
-**Data validation:** Apply `.trim().min(1).optional()` to all text fields. Distinguish on-page vs metadata contexts. Use blocklists for dangerous protocols, not allowlists (allowlists block valid relative URLs).
+**Error handling:** Throw on missing expected resources; don't silently return empty.
 
-**Web performance:** `sizes` attribute must match actual container width, not viewport. Always include `width`/`height` on images (including SVGs) for CLS prevention.
+**Web performance:** Always include `width`/`height` on images (including SVGs) for CLS prevention. `sizes` attribute must match actual container width, not viewport.
 
 ## Dependency/Tool Change Protocol
 
@@ -387,23 +293,12 @@ When removing, replacing, or consolidating tools/dependencies:
 
 Example: replacing `broken-link-checker` with `htmltest` required updating `docs/link-checking.md`, `docs/index.md`, `README.md`, and searching for "broken-link-checker" and "linkwatch".
 
-## Pre-Commit Verification Protocol
-
-Before any commit that changes code/config:
-
-1. **Search for all instances** of the pattern being changed across `src/`, `scripts/`, `tests/`, `public/` — fix every occurrence, not just the reported one.
-2. **Check documentation** (`docs/`, `README.md`) for references to the changed files/concepts and update them.
-3. **Check interacting systems**: changed code → docs/tests/configs; changed config → code/scripts referencing it; removed tool → all repo-wide references; changed URL → grep all files.
-
-Report a one-line summary of what you searched and what you fixed before committing. No commit without it.
-
 ## Review Response Protocol
 
 When addressing review comments:
 
 1. **Architecture-problem pattern**: if you're in 10+ rounds of similar fixes, environment-specific drift (local vs staging vs prod), or repeatedly-drifting docs — STOP. The root is scattered config/architecture, not individual lines. Read config files, propose an abstraction layer (centralized registry, auto-generated docs, validation script) first, then address individual fixes.
-2. **Fix the pattern, not the line**: a comment on one case means find ALL instances of the same issue class and fix together.
-3. Run the Pre-Commit Verification Protocol above before committing.
+2. Run the Verification Protocol before committing.
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
@@ -428,21 +323,7 @@ When instructions appear to conflict:
 4. **User authority:** User explicit instructions override general written rules — approval gates are satisfied by explicit per-action user instruction (which is the override mechanism, not a bypass)
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
-**Approval gates are hard stops, not tradeoffs.**
-- Do not let autonomy, bias-to-action, or end-to-end completion override an approval requirement.
-- Re-check authorization immediately before each gated action.
-- Missing approval means do not execute the action. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
-
----
-
-# Project-Specific Guidelines
-
-# Extended Instructions
-
-For detailed workflows, see:
-- Complex workflows → Use custom skills in `.claude/skills/`
-- Specific tasks → Use slash commands in `.claude/commands/`
-- Automation → Use hooks in `.claude/hooks/`
+**Approval gates are hard stops.** Autonomy/autopilot mode does not override them. Re-check before each gated action. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
 
 ---
 
@@ -505,4 +386,4 @@ The header date stamp tells the reader "this post was revised"; the inline marke
 - `/review` - Review draft for logic and flow (no rewriting)
 - `/factcheck` - Verify claims with web search and provide sources
 
-<!-- Keep total CLAUDE.md under 550 lines -->
+<!-- Keep total CLAUDE.md under 400 lines -->
