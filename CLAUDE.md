@@ -47,232 +47,51 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 ---
 
-# Token Optimization Rules
-
-## Context Management
-- Ask me before reading files >500 lines
-- Read only files directly relevant to current task
-- Use grep/search before reading entire files
-- Summarize findings concisely
-
 ## Development Philosophy
+- **MVP Features** (UI, content, blog posts): simple, hardcode defaults, don't over-engineer.
+- **Infrastructure** (scripts, CI/CD, config): production-grade, configurable, proper error handling, CI/CD-compatible.
 
-### Code Categories
-**MVP Features** (UI, content, blog posts):
-- Simple solutions, iterate fast
-- Hardcode reasonable defaults
-- Don't over-engineer
+## Configuration
 
-**Infrastructure** (scripts, build, CI/CD, tooling, **configuration**):
-- Production-grade from start
-- Configurable (not hardcoded)
-- Proper error handling required (code-level errors; operational failures: see Blocker Resolution Protocol)
-- Must work in CI/CD environments
-- Resource cleanup (try/finally for processes/connections)
-- **Configuration files** (astro.config.ts, src/config/index.ts, env schemas):
-  - Must be centralized and validated
-  - Abstraction justified when preventing drift/repeated fixes
-  - Examples: Config registry, validation scripts, auto-generated docs
-
-### General Principles
-- Start with simplest solution that works
-- Don't add unnecessary abstractions **unless infrastructure requires it**
-- Skip edge case handling unless critical
-- Ask: "Would copying be easier than generalizing?" If yes, copy.
-- **Exception:** Infrastructure abstractions (config registry, validation) justified when preventing repeated manual fixes
-
-## Configuration Abstraction Layer
-
-**Single Source of Truth:** `config/registry.mjs`
-
-`npm run config:validate` enforces consistency across workflows, env schema, code, deployment, docs, and hardcoded fallbacks. Runs in all deployment workflows.
-
-**When to update configuration:**
-1. Change value in `config/registry.mjs`
-2. Run `npm run config:generate && npm run config:validate`
-3. Update workflows if needed
-4. Commit all changes together
-
-### Common Scenarios
-
-- **Adding a new env var:** add to `astro.config.ts` env schema + `config/registry.mjs` + affected workflows, then run `npm run config:generate && npm run config:validate`.
-- **Changing a URL:** update in `config/registry.mjs` + workflows + `src/config/index.ts` fallbacks; validation will catch mismatches.
+**Single Source of Truth:** `config/registry.mjs`. After any config change: `npm run config:generate && npm run config:validate`, update workflows, commit together.
+- **New env var:** add to `astro.config.ts` env schema + registry + affected workflows, then validate.
+- **URL change:** update registry + workflows + `src/config/index.ts` fallbacks; validate.
 
 ## Git Workflow
 
-### Branch Structure
-- **Three long-lived branches** (never delete): `develop` → `staging` → `main`
-- All changes flow: develop → staging → main via pull requests
+Three branches (never delete): `develop` → `staging` → `main`. All changes via pull requests.
 
-### Before Making Changes
+**Before changes:** Docker must be running (push hooks require it). Sync: `git pull origin develop`.
 
-**⚠️ CRITICAL: Verify Docker is running FIRST**
+**After PR merges:** fast-forward source branch to include target's merge commit:
+- develop→staging: `git fetch origin && git checkout develop && git merge --ff-only origin/staging && git push origin develop`
+- staging→main: same for staging, then repeat develop against staging
 
-Pre-push hooks require Docker for build tests. Pushing will fail if Docker daemon is not running.
+**If `--ff-only` fails:** `git log --oneline HEAD..origin/<branch>` to diagnose, then `git merge origin/<branch> --no-edit && git push`.
 
-```bash
-# Verify Docker is running
-docker ps
-# If error: "Cannot connect to the Docker daemon" → start Docker Desktop first
-```
-
-**ALWAYS sync local branches with origin first:**
-```bash
-# Sync the branch you're working on
-git checkout develop
-git pull origin develop
-```
-(On conflicts or failure, see Blocker Resolution Protocol)
-
-**To sync all branches:**
-```bash
-git checkout main && git pull origin main
-git checkout staging && git pull origin staging
-git checkout develop && git pull origin develop
-```
-(On conflicts or failure, see Blocker Resolution Protocol)
-
-### Making Changes
-1. Ensure you're on `develop` branch and synced
-2. Make your changes
-3. Commit with descriptive messages **only if explicitly asked to commit**
-4. Push to origin: `git push origin develop` **only if explicitly asked to push** (on failure, see Blocker Resolution Protocol)
-5. Create PR: `develop` → `staging`
-6. After staging approval, create PR: `staging` → `main`
-
-### After PR Merges
-
-Sync source branch to include the merge commit added to the target branch. Docker must be running (see "Before Making Changes").
-
-**After develop → staging merges:**
-```bash
-git fetch origin
-git checkout develop
-git pull --ff-only origin develop
-git merge --ff-only origin/staging
-git push origin develop
-```
-
-**After staging → main merges:**
-```bash
-git fetch origin
-git checkout staging
-git pull --ff-only origin staging
-git merge --ff-only origin/main
-git push origin staging
-
-# Then sync develop with the updated staging
-git checkout develop
-git pull --ff-only origin develop
-git merge --ff-only origin/staging
-git push origin develop
-```
-
-**If `--ff-only` fails:** branches have diverged (shouldn't happen in normal gitflow). Diagnose with `git log --oneline HEAD..origin/<branch>`, then `git merge origin/<branch> --no-edit && git push`.
-
-### PR Review Fixes
-- Commit fixes to the **PR's HEAD branch**, not develop
-- Example: Comments on PR (staging→main) → fix on `staging` branch
-- If fixes were made on wrong branch, cherry-pick to correct branch (on failure, see Blocker Resolution Protocol)
-
-### No Out-of-Scope Commits
-- "Update X" means edit the file — it does not imply commit. Approval gates apply per-change.
+PR review fixes go to the **PR's HEAD branch**, not develop. "Update X" means edit the file — does not imply commit.
 
 ## Blocker Resolution Protocol
 
-**DEFAULT: When operations fail (exit code != 0 or explicit error):**
+When any operation fails (exit code != 0): **STOP**, report what failed + current state + error output, present options, wait for explicit direction.
 
-1. **STOP immediately** - Do not proceed with other work
-2. **Report the failure:**
-   - What failed (command, operation, step)
-   - Current state (unpushed commits, conflicts, partial completion)
-   - Error message/output
-3. **Present options** - Give user clear choices for resolution
-4. **Wait for explicit direction** - Do not assume, retry, or work around
+**Blockers:** git failures, non-zero exit codes, build/test failures, file operation errors.
+**Not blockers:** warnings, deprecation notices, advisory output.
 
-### What Counts as a Blocker
+**Never auto-retry.** Example: `Push failed: network timeout — commit ad88b33 local only. Retry / push manually / amend?`
 
-**STOP on these:**
-- Git operations fail (push, pull, fetch, merge returns conflicts)
-- Commands return exit code != 0
-- Build/test failures
-- File operations fail (permission denied, file not found when expected)
+On background task failure: report immediately, don't start new work until resolved.
 
-**Do NOT stop on these:**
-- Warnings (operation succeeds with warnings)
-- Deprecation notices
-- Successful operations with advisory output
-
-### Retry Logic
-
-**Never auto-retry.** Even for transient failures (network timeout), stop and ask. Example: `Push failed: network timeout — commit ad88b33 exists locally but not on origin. Retry / push manually / amend?`
-
-### Background Task Failures
-
-When notified of background task failure:
-1. Report immediately in next response
-2. Do not start NEW work until resolved
-3. Ongoing work can complete
-
-### User Override
-
-User can override by explicitly saying "continue anyway" or "ignore the error."
-
-Before proceeding, confirm understanding:
-```
-Confirmed: proceeding with [task] despite [blocker].
-[Specific consequence of proceeding].
-```
+User override: "continue anyway" or "ignore the error" — confirm: `Proceeding with [task] despite [blocker]. [Consequence].`
 
 ## Verification Protocol
 
-**After making ANY code change:**
+After any code change:
 
-1. **Search for ALL instances** before claiming "fixed"
-   ```bash
-   # Before fixing:
-   grep -rn "pattern" src/ scripts/ tests/ public/
-
-   # After fixing ALL instances:
-   grep -rn "pattern" src/ scripts/ tests/ public/  # MUST return zero results
-   ```
-
-2. **Verify documentation against source code:**
-   - **Read implementation first, not other docs**
-   - Every documentation claim → verify in actual code
-   - Example: Doc says "analytics load on remote URLs"
-     - ❌ Don't trust the doc
-     - ✅ Read src/components/GoogleAnalytics.astro to verify actual gating logic
-   - Config behavior claims → read astro.config.ts, src/config/index.ts
-   - Test behavior claims → read actual test files
-
-3. **Check side effects and interacting systems:**
-   - Documentation referencing changed files?
-   - PR description mentioning changed behavior?
-   - Related files with similar patterns? Other files in same directory?
-   - Changed code → docs/tests/configs; changed config → code/scripts referencing it; removed tool → all repo-wide references; changed URL → grep all files.
-
-4. **Quality Gates (scope-dependent):**
-
-   **For code changes (src/, scripts/, config files):**
-   ```bash
-   npm run build           # MUST pass
-   npm run check:links     # MUST pass
-   npm run test:visual     # MUST pass
-   ```
-   All three MUST pass before git push. If any fail, see Blocker Resolution Protocol.
-
-   **For documentation-only changes (docs/, README.md):**
-   - Verification steps 1-3 required
-   - Quality gates optional if changes are trivial (typo fixes, wording)
-   - Use judgment: if doc change affects behavior understanding, run tests
-
-   **Expected failures when adding a new blog post (not real regressions):**
-   - `npm run check:links`: self-referential canonical URL (e.g. `https://kyle.skrinak.com/posts/<slug>/`) returns 404 because the post isn't deployed yet. Resolves automatically after deploy.
-   - `npm run test:visual`: home page, blog archive, and archives page snapshots fail with small height differences (a few px to ~60px) because the new post changes listing-page length across viewports. Update baselines with `npm run test:visual:baseline` (ask first).
-   - If OTHER tests fail, or visual diffs appear on pages unrelated to listings (individual posts, standalone pages), those ARE real and need investigation.
-
-5. **Never commit without verification.** Before committing, report a one-line summary of what you searched and what you fixed.
+1. **Search ALL instances** — `grep -rn "pattern" src/ scripts/ tests/ public/` before and after; must reach zero results.
+2. **Check docs and interacting systems** — read implementation first, not docs. Verify docs match code. Changed code → check docs/tests/configs; removed tool → grep all files.
+3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual` (all must pass). New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected; other failures are real.
+4. Before committing, report a one-line summary of what you searched and what you fixed.
 
 ## Coding Rules
 
@@ -282,28 +101,17 @@ Confirmed: proceeding with [task] despite [blocker].
 
 **Web performance:** Always include `width`/`height` on images (including SVGs) for CLS prevention. `sizes` attribute must match actual container width, not viewport.
 
-## Dependency/Tool Change Protocol
-
-When removing, replacing, or consolidating tools/dependencies:
-
-1. Grep `docs/`, `README.md`, and `tests/` for references to the old tool — update every reference (command examples, workflow docs, architecture descriptions, tech-stack lists). No orphans.
-2. For workflow changes: verify conditional logic. Common gotcha: `continue-on-error` + `if: failure()` won't fire as expected — capture exit codes explicitly.
-3. Test the docs you write — run the commands, don't assume; confirm `package.json` scripts match what docs claim.
-4. Delete obsolete code: scripts, config files, unused utilities. Grep `scripts/*.js` for orphans.
-
-Example: replacing `broken-link-checker` with `htmltest` required updating `docs/link-checking.md`, `docs/index.md`, `README.md`, and searching for "broken-link-checker" and "linkwatch".
-
 ## Review Response Protocol
 
-When addressing review comments:
+Fix the **pattern** (all instances of the same issue class), not just the one flagged line. When removing a tool, grep `docs/`, `README.md`, `tests/` for references and update every one. For workflow changes, verify conditional logic — `continue-on-error` + `if: failure()` won't fire as expected; capture exit codes explicitly. Run the Verification Protocol before committing.
 
-1. **Architecture-problem pattern**: if you're in 10+ rounds of similar fixes, environment-specific drift (local vs staging vs prod), or repeatedly-drifting docs — STOP. The root is scattered config/architecture, not individual lines. Read config files, propose an abstraction layer (centralized registry, auto-generated docs, validation script) first, then address individual fixes.
-2. Run the Verification Protocol before committing.
+If stuck in 10+ rounds of similar fixes or environment-specific drift: STOP. Propose a root-cause abstraction before addressing individual lines.
 
 ## Communication Style
 - Provide clear, numbered steps for complex tasks
 - State assumptions upfront
 - Ask clarifying questions before exploration
+- Ask before reading files >500 lines; read only files directly relevant to the current task
 - Summarize findings in <100 words when possible
 - Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
 - No anthropomorphizing qualifiers ("Honestly…", "To be frank…", "I should mention…") — just state facts directly
@@ -323,16 +131,15 @@ When instructions appear to conflict:
 4. **User authority:** User explicit instructions override general written rules — approval gates are satisfied by explicit per-action user instruction (which is the override mechanism, not a bypass)
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
-**Approval gates are hard stops.** Autonomy/autopilot mode does not override them. Re-check before each gated action. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
+**Approval gates are hard stops.** Bias-to-action, autonomy/autopilot mode, and end-to-end completion drive do not override them. Re-check before each gated action. Missing approval means do not execute. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
 
 ---
 
 # Blog Writing Rules
 
 ## Filename Convention
-- Blog post files in `src/content/blog/` MUST be lowercase-kebab-case (e.g., `2026-04-19-sculpting-down.md`, not `2026-04-19-Sculpting-Down.md`)
-- Format: `YYYY-MM-DD-slug.md` where `slug` is lowercase words joined by hyphens
-- **Why:** `getPath()` (`src/utils/getPath.ts`) uses `post.id` directly for the URL slug with no lowercasing. Keeping filenames lowercase-kebab-case ensures the filename matches the generated URL with no dependency on any implicit normalization elsewhere. It also avoids case-sensitivity bugs that macOS (case-insensitive APFS) hides but Linux CI/deploy targets surface as 404s.
+- Blog post files: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug.md`
+- `getPath()` uses `post.id` directly (no lowercasing) — wrong case causes 404s on Linux CI even if macOS hides it.
 
 ## Voice & Prose
 - **DO NOT** rewrite my narrative voice or prose
@@ -340,10 +147,7 @@ When instructions appear to conflict:
 - Your job is to identify problems, not fix my voice
 
 ## Feedback Approach
-- Flag logic gaps and weak transitions - do not silently fix them
-- Point out issues and explain WHY they're problems
-- Leave the actual fixing to me
-- Be specific about locations (paragraph numbers, sections)
+Flag logic gaps and weak transitions — explain WHY they're problems. Leave fixing to me. Be specific about locations (paragraph numbers, sections).
 
 ## What You Can Edit Directly
 - Grammar corrections (typos, punctuation, subject-verb agreement)
@@ -351,39 +155,30 @@ When instructions appear to conflict:
 - Only when explicitly asked: "apply grammar corrections"
 
 ## Factual Claims
-- Any factual claims must be sourced when verified
-- Flag anything unverifiable - don't guess or assume
-- Prefer primary sources over secondary
-- Note when information might be time-sensitive
+Source verifiable claims; flag anything unverifiable. Prefer primary sources; note time-sensitive information.
 
 ## Review Structure
-When reviewing drafts, follow this priority:
-1. Logic and argument flow first
-2. Structure and transitions second
-3. Clarity and precision third
-4. Grammar and polish last
+1. Logic and argument flow
+2. Structure and transitions
+3. Clarity and precision
+4. Grammar and polish
 
 ## Post Revisions
 
 When making content edits to a previously-published post, apply BOTH:
 
-1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC).
-   - Drives the "Revised on:" label in the post header (`src/components/Datetime.astro`)
-   - Changes the item's RSS `pubDate` to the update date (via `updatedDate ?? pubDate` in `src/pages/rss.xml.ts`); most RSS readers sort by this field, so the post re-surfaces as recently updated. XML item order in the feed is unchanged (driven by `getSortedPosts`, which sorts by `pubDate` only)
-   - Does **NOT** affect post sort order — original `pubDate` always drives ordering (`src/utils/getSortedPosts.ts`)
+1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC). Drives the "Revised on:" label and RSS `pubDate` update; does NOT affect sort order (original `pubDate` controls ordering).
 
-2. **Inline marker at each change point** — plain italic line directly after the affected paragraph or block:
+2. **Inline marker at each change point** — plain italic line directly after the affected paragraph:
    ```markdown
    *Revised YYYY-MM-DD: brief description of what changed.*
    ```
 
-The header date stamp tells the reader "this post was revised"; the inline marker tells them "and here is exactly what changed." Do not also add an end-of-post summary — it duplicates the header.
-
-**Markdown caveat:** this Astro setup does NOT support Kramdown attribute syntax (`{: .class}`). Use plain markdown italic, not class-based styling.
+**Note:** This Astro setup does NOT support Kramdown attribute syntax (`{: .class}`). Use plain markdown italic.
 
 ## Available Commands
 - `/outline` - Generate structured outline from topic or notes
 - `/review` - Review draft for logic and flow (no rewriting)
 - `/factcheck` - Verify claims with web search and provide sources
 
-<!-- Keep total CLAUDE.md under 400 lines -->
+<!-- Keep total CLAUDE.md under 200 lines -->
