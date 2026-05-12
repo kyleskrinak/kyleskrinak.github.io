@@ -1,7 +1,7 @@
 ---
 title: How to Pick a Restaurant
 pubDate: 2018-10-28T00:00:00.000Z
-updatedDate: 2026-05-09T00:00:00.000Z
+updatedDate: 2026-05-12T00:00:00.000Z
 categories: []
 description: Asking about one common and simple ingredient can expose a restaurant
 image: ../../assets/images/empty_dining.jpg
@@ -15,7 +15,9 @@ disqusId: "/lchf/how-to-restaurant"
 
 Who doesn&#39;t love the convenience of eating out? You can sit down, relax, and enjoy company -- or alone time -- while having others serve you drinks, snacks and then dinner. You&#39;re free to try new foods or drinks without renovating your kitchen. You can enjoy a wide range of ethnic cuisines, limited only by what&#39;s available nearby. As for variety, similar to [most Americans](https://web.archive.org/web/20221128083217/https://parade.com/397203/parade/top-10-ethnic-cuisines-americans-crave-most/), I like Mexican cuisine, followed by Asian, whether Chinese, Japanese or Thai and then Indian. On my LCHF way of eating, my new favorite is southern, but we&#39;ll get to that in a minute.
 
-When I changed how I eat, I followed [Dr. Westman&#39;s page four](https://ericwestmanmd.com/page-4/), which makes eating out practical enough. This all started on a week-long trip away from home. This wasn&#39;t by design, but, in retrospect, it was quite serendipitous. Being on the road forced me to eat out all the time. Despite my neophyte status and lack of a personal kitchen, this week also reflects the most dramatic weight loss (yes, yes, mostly water) so eating out on LCHF is possible. Since weight-loss was my key motivator back then, my success provided me with greater motivation to remain LCHF.
+When I changed how I eat, I followed [Dr. Westman&#39;s page four](https://adaptyourlifeacademy.com/start-keto-right/), which makes eating out practical enough. This all started on a week-long trip away from home. This wasn&#39;t by design, but, in retrospect, it was quite serendipitous. Being on the road forced me to eat out all the time. Despite my neophyte status and lack of a personal kitchen, this week also reflects the most dramatic weight loss (yes, yes, mostly water) so eating out on LCHF is possible. Since weight-loss was my key motivator back then, my success provided me with greater motivation to remain LCHF.
+
+*Revised 2026-05-12: Dr. Westman now avails his famous Page 4 list with additional training, available at [https://adaptyourlifeacademy.com/start-keto-right/](https://adaptyourlifeacademy.com/start-keto-right/).*
 
 I much prefer eating at home. I like to know precisely what I&#39;m eating, the ingredients and sources. So much so now that I generally dread eating out, unless it is at precious few select restaurants. Since then I&#39;ve learned some tricks to help guide me. That said, if you&#39;re new to LCHF, I cannot strongly recommend enough that you consult with Dr. Westman or a qualified low-carb practitioner. [I removed this link. Dr. Westman did not continue his Heal Clinic project.] Winging LCHF, solo, or with only the Internet as your guide, is a near certain recipe for disappointment.
 
