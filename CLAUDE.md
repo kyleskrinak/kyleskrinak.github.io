@@ -64,7 +64,7 @@ Three branches (never delete): `develop` → `staging` → `main`. All changes v
 **Before changes:** Docker must be running (push hooks require it). Sync: `git pull origin develop`.
 
 **After PR merges:** fast-forward source branch to include target's merge commit:
-- develop→staging: `git fetch origin && git checkout develop && git merge --ff-only origin/staging && git push origin develop`
+- develop→staging: `git fetch origin && git checkout develop && git pull --ff-only origin develop && git merge --ff-only origin/staging && git push origin develop`
 - staging→main: same for staging, then repeat develop against staging
 
 **If `--ff-only` fails:** `git log --oneline HEAD..origin/<branch>` (what origin has, not you) and `git log --oneline origin/<branch>..HEAD` (what you have, not origin) to diagnose divergence, then `git merge origin/<branch> --no-edit && git push`.
