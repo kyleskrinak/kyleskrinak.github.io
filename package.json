@@ -40,8 +40,8 @@
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
     "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.2.4",
-    "astro": "^6.2.2",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.3.1",
     "dayjs": "^1.11.19",
     "lodash.kebabcase": "^4.1.1",
     "remark-collapse": "^0.1.2",
@@ -54,11 +54,11 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@pagefind/default-ui": "^1.5.2",
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.60.0",
     "@shikijs/transformers": "^4.0.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@typescript-eslint/parser": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.3",
     "cross-env": "^10.1.0",
     "eslint": "^10.3.0",
     "eslint-plugin-astro": "^1.7.0",
@@ -70,7 +70,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "sanitize-html": "^2.17.3",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.59.1",
-    "yaml": "^2.8.4"
+    "typescript-eslint": "^8.59.3",
+    "yaml": "^2.9.0"
   }
 }
