@@ -3,6 +3,7 @@ title: Happy Third Lowcarbiversary
 description: Join me as I celebrate three years of low-carb living. At the three-year mark, it’s safe to say the yo-yo dieting has stopped.
 categories: []
 pubDate: 2020-06-08T00:00:00.000Z
+updatedDate: 2026-05-12T00:00:00.000Z
 disqusId: "/lchf/happy-third-lowcarbiversary"
 ---
 
@@ -108,6 +109,8 @@ Many people warned me against a high-fat, low-carb eating plan. I don’t doubt 
 
 Their intent doesn’t matter &mdash; they’re wrong. This is why I go on and on about low-carb.
 
-Oh, by the way, if you’re so inclined, check out Dr. Westman’s Page Four, which you can buy here for $10: <a href="https://ericwestmanmd.com/page-4/">https://ericwestmanmd.com/page-4/</a> It is a very specific and easy-to-follow low-carb guidance for sane people.
+Oh, by the way, if you’re so inclined, check out Dr. Westman’s Page Four, available at [https://adaptyourlifeacademy.com/start-keto-right/](https://adaptyourlifeacademy.com/start-keto-right/). It is a very specific and easy-to-follow low-carb guidance for sane people.
 
-It’s the best $10 you’ll ever spend.
+It’s the best $15 you’ll ever spend. *(As of May 12, 2026.)*
+
+*Revised 2026-05-12: Dr. Westman now avails his famous Page 4 list with additional training, available at [https://adaptyourlifeacademy.com/start-keto-right/](https://adaptyourlifeacademy.com/start-keto-right/).*
