@@ -13,4 +13,3 @@ IgnoreURLs:
   - "about.gitlab.com"  # Connection reset in htmltest, works in browser
   - "claude.ai"  # Connection reset in htmltest, works in browser
   - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers
-  - "linkedin.com"  # Bot detection (999/404 to crawlers), works in real browsers
