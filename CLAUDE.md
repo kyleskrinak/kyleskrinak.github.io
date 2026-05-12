@@ -61,7 +61,7 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 Three branches (never delete): `develop` → `staging` → `main`. All changes via pull requests.
 
-**Before changes:** Docker must be running (push hooks require it). Sync: `git pull origin develop`.
+**Before changes:** Docker must be running (push hooks require it). Sync: `git pull --ff-only origin develop` (fails fast on divergence; diagnose per `--ff-only` block below).
 
 **After PR merges:** fast-forward source branch to include target's merge commit:
 - develop→staging: `git fetch origin && git checkout develop && git pull --ff-only origin develop && git merge --ff-only origin/staging && git push origin develop`

@@ -28,6 +28,7 @@ Key conventions:
 - MVP features (UI, content, blog posts): simple, no over-engineering. Infrastructure (CI/CD, scripts, config): production-grade.
 - Config single source of truth: `config/registry.mjs`. Changes require `npm run config:generate && npm run config:validate`.
 - Do NOT read: `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `coverage/`, `docs/` (unless specifically requested), `*.log`, `*.lock`, `package-lock.json`
+- The forbidden-paths list governs *unsolicited* reads. When a PR intentionally changes a listed path, those changes are in-scope for review and may be read via the diff (a PR diff IS the "specific request"). `package-lock.json` remains excluded from diffs as noise — inspect dependency changes via `package.json` instead.
 - Blog post content (`src/content/blog/`) is authored content — do not flag narrative voice or prose style
 
 ## Role Boundary
@@ -39,7 +40,7 @@ If asked to fix, respond: "I can describe the fix. Edits require explicit approv
 
 1. Run `git log main..HEAD --oneline | cat` to identify commits in scope
 2. Run `git diff main..HEAD --stat | cat` to see changed files
-3. Run `git diff main..HEAD | cat` to read the full diff
+3. Run `git diff main..HEAD -- ':(exclude)package-lock.json' | cat` to read the full diff (lockfile excluded as noise — review `package.json` instead)
 4. Run `git status --short | cat` to surface uncommitted working-tree changes
 5. For changed files needing deeper context, use `view` with `view_range`. If step 3 was truncated (large diff), use `git diff main..HEAD -- <filename> | cat` per file from step 2.
 6. If CLAUDE.md was changed, verify all required rules are still present: approval gates (`"fix" ≠ "commit" ≠ "push"`, Fail closed), Blocker Resolution Protocol, Verification Protocol, "Fix the pattern", post-revision markers (`updatedDate`, `*Revised YYYY-MM-DD:*`), Git Workflow (Docker, `--ff-only`, PR branch), quality gates, `continue-on-error` CI gotcha, `bias-to-action`, "Ask before reading files >500 lines". If any required rule is absent, flag it as a **Critical Issue** — missing approval gates or safety protocols represent a behavior regression.
