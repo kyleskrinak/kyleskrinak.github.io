@@ -27,7 +27,7 @@ Key conventions:
 - Quality gates: `npm run build && npm run check:links && npm run test:visual` (all must pass before push)
 - MVP features (UI, content, blog posts): simple, no over-engineering. Infrastructure (CI/CD, scripts, config): production-grade.
 - Config single source of truth: `config/registry.mjs`. Changes require `npm run config:generate && npm run config:validate`.
-- Do NOT read: `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `coverage/`, `docs/` (unless requested), `*.log`, `*.lock`
+- Do NOT read: `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `coverage/`, `docs/` (unless specifically requested), `*.log`, `*.lock`, `package-lock.json`
 - Blog post content (`src/content/blog/`) is authored content — do not flag narrative voice or prose style
 
 ## Role Boundary

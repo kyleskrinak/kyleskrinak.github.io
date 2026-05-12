@@ -88,7 +88,7 @@ User override: "continue anyway" or "ignore the error" — confirm: `Proceeding 
 
 After any code change:
 
-1. **Search ALL instances** — `grep -rn "pattern" src/ scripts/ tests/ public/` before and after; must reach zero results.
+1. **Search ALL instances** — `grep -rn "pattern" src/ scripts/ tests/ public/ config/` before and after; must reach zero results.
 2. **Check docs and interacting systems** — read implementation first, not docs. Verify docs match code. Changed code → check docs/tests/configs; removed tool → grep all files.
 3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual` (all must pass). New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits.
 4. Before committing, report a one-line summary of what you searched and what you fixed.
