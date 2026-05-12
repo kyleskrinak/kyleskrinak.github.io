@@ -3,6 +3,7 @@ title: "Fun at Scale"
 pubDate: 2026-02-02T00:00:00.000Z
 description: "How AI tools transformed my blog from languishing Jekyll infrastructure to a modern Astro site—and made computing enjoyable again"
 image: ../../assets/images/fun-at-scale.png
+imagePosition: top
 alt: "Good, Better, Best - progression diagram"
 tags:
   - ai
