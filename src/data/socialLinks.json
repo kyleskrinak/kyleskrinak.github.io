@@ -4,6 +4,11 @@
       "label": "GitHub",
       "url": "https://github.com/kyleskrinak",
       "icon": "github"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://linkedin.com/in/kyleskrinak",
+      "icon": "linkedin"
     }
   ],
   "footer": [
@@ -11,6 +16,11 @@
       "label": "GitHub",
       "url": "https://github.com/kyleskrinak",
       "icon": "github"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://linkedin.com/in/kyleskrinak",
+      "icon": "linkedin"
     }
   ]
 }

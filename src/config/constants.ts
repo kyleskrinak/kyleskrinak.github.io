@@ -1,6 +1,7 @@
 import type { Props } from "astro";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
+import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconShare from "@/assets/icons/IconShare.svg";
 import { SITE } from "@/config/index";
@@ -44,6 +45,12 @@ export const SOCIALS: readonly SocialLink[] = [
     href: "https://x.com/screenack",
     linkTitle: `${SITE.title} on X`,
     icon: IconBrandX,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/kyleskrinak/",
+    linkTitle: `${SITE.title} on LinkedIn`,
+    icon: IconLinkedin,
   },
 ] as const;
 
