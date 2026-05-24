@@ -4,12 +4,10 @@ pubDate: 2017-04-23T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Baltimore 2017
-comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: See the <a href="https://security.duke.edu/">Duke University IT Security Office</a> for comprehensive security standards...
-disqusId: "/drupal/drupalcon-baltimore-2017-mdash-backend-security-notes"
 ---
 
 

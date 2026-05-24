@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import DisqusComments from "@/components/DisqusComments.astro";
 import { SITE } from "@/config";
 import packageJson from "../../package.json";
 
@@ -73,7 +72,11 @@ function cleanVersion(v: string | undefined): string {
       </table>
 
       <p>
-        Disqus comment embeds modestly lower Performance and Best Practices — the third-party scripts affect Largest Contentful Paint. SEO scores 100 on the production URL. Running Lighthouse against a staging or preview URL drops that score because those URLs don't match the canonical address the site declares.
+        Disqus comment embeds used to modestly lower Performance and Best Practices — third-party scripts affect Largest Contentful Paint. After a one-month free trial generated no conversation, I decided a paid Disqus license wasn't worth maintaining for a personal blog and removed the integration. SEO scores 100 on the production URL. Running Lighthouse against a staging or preview URL drops that score because those URLs don't match the canonical address the site declares.
+      </p>
+
+      <p class="text-sm italic opacity-80">
+        <em>Updated 2026-05-24T19:46Z: removed Disqus comment integration after a paid trial period.</em>
       </p>
 
       <h2>Current versions</h2>
@@ -124,7 +127,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ul>
         <li><strong>Zero server runtime.</strong> Every page is a static HTML file. There is nothing to patch, no runtime to exploit, and no server to go down under load.</li>
-        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 and Accessibility 94 on production without extra configuration. Disqus comments load on scroll, so readers who never reach the comments pay no performance cost for them.</li>
+        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 and Accessibility 94 on production without extra configuration. (An earlier version of the site included Disqus comments lazy-loaded on scroll; after a month of paid trial without engagement I decided the license cost outweighed the value and removed the integration.)</li>
         <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
         <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
         <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>
@@ -144,7 +147,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ol>
         <li><strong>develop</strong> — all work lands here first.</li>
-        <li><strong>staging</strong> — a pull request from develop to staging triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, checks Disqus identifiers, and deploys the output to <a href="https://kyleskrinak.github.io">GitHub Pages</a>. This gives a live pre-production environment where the full site can be browsed before anything touches S3.</li>
+        <li><strong>staging</strong> — a pull request from develop to staging triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, and deploys the output to <a href="https://kyleskrinak.github.io">GitHub Pages</a>. This gives a live pre-production environment where the full site can be browsed before anything touches S3.</li>
         <li><strong>main</strong> — a pull request from staging to main triggers the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation.</li>
       </ol>
 
@@ -152,7 +155,6 @@ function cleanVersion(v: string | undefined): string {
         No post reaches <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> without first passing a review on <a href="https://kyleskrinak.github.io">GitHub Pages</a>. GitHub Actions handles all deployments — automated build, link checking, and visual regression tests run on every pull request.
       </p>
     </section>
-    <DisqusComments url={new URL("/stack/", Astro.site).href} />
   </main>
   <Footer />
 </Layout>

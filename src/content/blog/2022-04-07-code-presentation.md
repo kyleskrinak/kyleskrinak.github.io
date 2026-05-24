@@ -8,7 +8,6 @@ tags:
   - Diversity
   - Duke
 description: My presentation to DrupalCon 2022 on Duke's Code+ cocurricular project, which promotes undergraduate diversity, equity, and inclusion
-comments: false
 ---
 
 ## Presentation

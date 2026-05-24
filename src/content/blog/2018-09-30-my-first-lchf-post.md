@@ -6,7 +6,6 @@ description: Posts and logs from Kyle about food
 image: ../../assets/images/flatpanbake.jpg
 alt: "Flat pan bake"
 source: jekyll
-disqusId: "/lchf/my-first-lchf-post"
 ---
 
 

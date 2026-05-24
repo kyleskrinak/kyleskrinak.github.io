@@ -8,7 +8,6 @@ description: “Dad, can you pull your skin out, like a balloon?”
 image: ../../assets/images/hot_tub.jpg
 alt: "Hot tub"
 source: jekyll
-disqusId: "/lchf/a-pound-of-flesh-and-a-hot-tub"
 ---
 
 

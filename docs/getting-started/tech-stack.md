@@ -38,7 +38,6 @@ See [README.md - Tech Stack](../../README.md#-tech-stack) for the current techno
 - **Hosting (Production)**: AWS S3 + CloudFront
 - **Hosting (Staging)**: GitHub Pages
 - **Analytics**: Cloudflare Web Analytics
-- **Comments**: Disqus (optional)
 - **CI/CD**: GitHub Actions workflows
 
 ## Future Content

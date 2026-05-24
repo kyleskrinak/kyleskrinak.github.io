@@ -4,12 +4,10 @@ pubDate: 2017-05-26T00:00:00.000Z
 categories: []
 tags:
   - Multisite
-comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: 'Documentation on Drupal 8 multisite configuration based on code review of Drupal 8.3.2'
-disqusId: "/drupal/drupal-8-multisite-documentation"
 ---
 
 ## Summary

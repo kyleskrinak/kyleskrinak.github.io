@@ -7,7 +7,6 @@ tags:
   - Multisite
   - Trinity
 description: How we Adopted CI/CD for TCA&S's Drupal Multisite Hosting for Trinity's 100+ Drupal websites
-comments: false
 ---
 
 ## Presentation
