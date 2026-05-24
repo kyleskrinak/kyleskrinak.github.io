@@ -33,11 +33,6 @@ All notable changes to this project will be documented in this file. See [standa
 - add pagination support for PR comment management
 - validate PR matching by head SHA
 
-<!-- Follow-up: Lighthouse remeasure post-Disqus-removal is tracked in
-     issue #153, not in this CHANGELOG. README and src/pages/stack.astro
-     both carry a "remeasure pending" qualifier so the stale scores are
-     visible to readers until #153 is closed. -->
-
 ## [MAJOR] Jekyll → Astro Migration (2026-01-20)
 
 ### Migration Complete

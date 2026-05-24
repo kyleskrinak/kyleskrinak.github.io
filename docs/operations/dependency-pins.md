@@ -37,12 +37,13 @@ These are pinned without `^`/`~`, so `npm update` will not advance them. Future 
 ### Review cadence
 **Quarterly.** At each review:
 
-1. Run `npm view <pkg> versions --json` for each pinned package to see what newer versions are available.
-2. For each advisory in the table above, check if a newer non-vulnerable version exists. If so, consider bumping the pin (preferring the oldest still-fixed version).
-3. Run `npm audit` to see whether new advisories have surfaced — extend the overrides block as needed.
-4. Run `npm audit signatures` to confirm registry signature integrity.
-5. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual`.
-6. Re-evaluate the deferred `yaml` chain — when `@astrojs/check` ships a release that no longer pulls the vulnerable `yaml-language-server`, drop the deferral and update.
+1. Run `npm ls <pkg>` for each pinned package to confirm it is still in the dep tree and that the override is still load-bearing. If a pin no longer appears (or naturally resolves to a non-vulnerable version), see "When to remove a pin" below.
+2. Run `npm view <pkg> versions --json` for each pinned package to see what newer versions are available.
+3. For each advisory in the table above, check if a newer non-vulnerable version exists. If so, consider bumping the pin (preferring the oldest still-fixed version).
+4. Run `npm audit` to see whether new advisories have surfaced — extend the overrides block as needed.
+5. Run `npm audit signatures` to confirm registry signature integrity.
+6. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual`.
+7. Re-evaluate the deferred `yaml` chain — when `@astrojs/check` ships a release that no longer pulls the vulnerable `yaml-language-server`, drop the deferral and update.
 
 ### When to remove a pin
 A pin can be removed once the dependency tree naturally resolves to a non-vulnerable version on its own (i.e., a parent package upgraded its dependency range). Verify by temporarily removing the override and running `npm install` followed by `npm audit`. If audit stays clean, the pin is no longer load-bearing.
