@@ -130,7 +130,7 @@ See `/docs/testing/` for detailed guides.
 
 ## 📈 Performance
 
-**Lighthouse Scores** (Production, pre-Disqus-removal; remeasure pending — see `docs/operations/dependency-pins.md`):
+**Lighthouse Scores** (Production, pre-Disqus-removal; remeasure pending — see [issue #153](https://github.com/kyleskrinak/kyleskrinak.github.io/issues/153)):
 - Performance: 80
 - Accessibility: 94
 - Best Practices: 77
