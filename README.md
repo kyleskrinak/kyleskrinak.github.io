@@ -130,7 +130,7 @@ See `/docs/testing/` for detailed guides.
 
 ## 📈 Performance
 
-**Lighthouse Scores** (Production):
+**Lighthouse Scores** (Production, pre-Disqus-removal; remeasure pending — see `docs/operations/dependency-pins.md`):
 - Performance: 80
 - Accessibility: 94
 - Best Practices: 77
