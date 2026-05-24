@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [Unreleased]
 
+### Removed
+
+- **Disqus comments integration**. Component, runtime config, `disqusId` schema field on the blog collection, legacy post frontmatter (`disqusId` and `comments` keys), lazy-load script, test infrastructure (`tests/disqus.spec.ts`, Playwright project, `test-utils` helper), the `check-disqus-ids` workflow step on all three deploy pipelines, and documentation references. Reach-the-author flow now goes through `ShareLinks` (per-post) and `Socials` (footer + homepage). Anyone restoring the schema from an older branch should expect a Zod parse error on the removed field.
+
+### Security
+
+- pin advisory-affected transitive dependencies via `package.json` `overrides`: `devalue@5.8.1`, `fast-uri@3.1.2`, `fast-xml-builder@1.1.7`, `fast-xml-parser@5.7.0`, `flatted@3.4.2`, `brace-expansion@5.0.6`, `postcss@8.5.10`. Resolves 7 npm audit findings (4 high, 3 moderate). These are exact-version pins, not semver ranges — `npm update` will not pick up future patches. Re-evaluate periodically when new advisories surface.
+
 ### Feat
 
 - add automated visual regression testing to PR workflow (#67)
