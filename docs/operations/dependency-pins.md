@@ -16,6 +16,10 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 
 Each pin is set to the **oldest** version that satisfies the advisory, minimizing supply-chain exposure from freshly-published packages.
 
+### Per-pin API-risk notes
+
+- **`brace-expansion`** — v5 is a recent major across the npm ecosystem (long-stable v1/v2 lineage broken by v5's API changes). Our pin is a patch bump within v5 (`5.0.5` → `5.0.6`), not a cross-major jump, because the dep tree was already resolving to v5 before the pin. No additional consumer-side API risk introduced by the pin itself. During quarterly review, verify no consumer in the tree has regressed to a v4 expectation.
+
 ## Deliberately deferred
 
 | Advisory | Affected chain | Why not fixed |
