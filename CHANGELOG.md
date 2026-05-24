@@ -28,10 +28,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Security
 
-- pin advisory-affected transitive dependencies via `package.json` `overrides`: `devalue@5.8.1`, `fast-uri@3.1.2`, `fast-xml-builder@1.1.7`, `fast-xml-parser@5.7.0`, `flatted@3.4.2`, `brace-expansion@5.0.6`, `postcss@8.5.10`. Resolves 7 npm audit findings (4 high, 3 moderate). These are exact-version pins, not semver ranges — `npm update` will not pick up future patches. Re-evaluate periodically when new advisories surface.
+- pin advisory-affected transitive dependencies via `package.json` `overrides`: `devalue@5.8.1`, `fast-uri@3.1.2`, `fast-xml-builder@1.1.7`, `fast-xml-parser@5.7.0`, `flatted@3.4.2`, `brace-expansion@5.0.6`, `postcss@8.5.10`. Resolves 7 of 12 npm audit findings (4 high, 3 moderate). These are exact-version pins, not semver ranges — `npm update` will not pick up future patches. Re-evaluate periodically when new advisories surface. The remaining 5 moderate findings (yaml stack overflow chain in `yaml-language-server` → `@astrojs/check`) are deliberately deferred — fixes require a breaking downgrade of `@astrojs/check`, and the vulnerable code runs in IDE tooling only, not in the build or shipped output.
 - implement secure PR comment workflow (workflow_run pattern)
 - add pagination support for PR comment management
 - validate PR matching by head SHA
+
+### TODO
+
+- **Re-run Lighthouse against production after the Disqus removal deploys.** The README "Performance" section and the Jekyll-vs-Astro comparison table on `src/pages/stack.astro` still show pre-removal scores (Performance: 80, Best Practices: 77). Best Practices was previously attributed to third-party Disqus cookies, so the score should improve. Remeasure on `kyle.skrinak.com` after the production deploy and update both surfaces in a follow-up commit.
 
 ## [MAJOR] Jekyll → Astro Migration (2026-01-20)
 
