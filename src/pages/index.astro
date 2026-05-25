@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getBlogPosts } from "@/utils/getBlogPosts";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -13,7 +13,7 @@ import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
 import { SOCIALS } from "@/config/constants";
 
-const posts = await getCollection("blog");
+const posts = await getBlogPosts();
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);

@@ -20,14 +20,21 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 │   ├── features/         # Feature documentation
 │   └── testing/          # Testing guides
 ├── src/
+│   ├── content.config.ts # Content collection schemas (blog, pages)
 │   ├── content/
-│   │   ├── blog/         # Blog posts (markdown)
-│   │   └── pages/        # Static pages
+│   │   ├── blog/
+│   │   │   └── YYYY-MM-DD-slug/    # Each post is a directory
+│   │   │       ├── index.md        # or index.mdx
+│   │   │       └── *.webp          # Co-located images
+│   │   └── pages/
+│   │       └── <slug>/             # Same per-page co-location pattern
+│   │           └── index.md
 │   ├── components/       # Reusable Astro/React components
 │   ├── layouts/          # Page layouts
 │   ├── pages/            # Route definitions (Astro file-based routing)
 │   └── styles/           # Global styles
-├── public/               # Static assets (copied to dist/)
+├── public/               # Static assets (copied to dist/ verbatim)
+│   └── presentations/    # Standalone presentation HTML + assets
 ├── tests/                # Playwright test suites
 │   ├── visual/           # Visual regression tests
 │   ├── seo/              # SEO validation tests
@@ -51,9 +58,9 @@ See [README.md - Project Structure](../../README.md#-project-structure) for the 
 ## Important Patterns
 
 **Content Collections**:
-- `src/content/config.ts` - Zod schemas for type-safe content
-- `src/content/blog/*.md` - Blog posts with front matter
-- `src/content/pages/*.md` - Static pages
+- `src/content.config.ts` - Zod schemas for type-safe content (uses Astro's `image()` helper so frontmatter image paths resolve to `ImageMetadata`)
+- `src/content/blog/<slug>/index.{md,mdx}` - Blog posts as per-post directories with co-located images
+- `src/content/pages/<slug>/index.{md,mdx}` - Static pages, same co-location pattern
 
 **Dynamic Routes**:
 - `src/pages/posts/[...slug].astro` - Individual blog posts

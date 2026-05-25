@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getBlogPosts } from '@/utils/getBlogPosts';
 import Layout from '@/layouts/Layout.astro';
 import Main from '@/layouts/Main.astro';
 import Header from '@/components/Header.astro';
@@ -10,7 +10,7 @@ import { slugifyStr } from '@/utils/slugify';
 import getUniqueTags from '@/utils/getUniqueTags';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = await getBlogPosts();
 	const tags = getUniqueTags(posts);
 
 	return tags.map(({ tag, tagName }) => ({
@@ -26,7 +26,7 @@ interface Props {
 const { tag } = Astro.params;
 const { tagName } = Astro.props;
 
-const posts = (await getCollection('blog'))
+const posts = (await getBlogPosts())
 	.filter((post) => post.data.tags?.some((t) => slugifyStr(t) === tag))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---

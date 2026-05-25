@@ -168,7 +168,7 @@ test.describe('Link Validation', () => {
 		// Monitor network requests for image loading failures
 		page.on('response', response => {
 			const url = response.url();
-			if (url.includes('/assets/images/code-plus/') && response.status() !== 200) {
+			if (url.includes('/presentations/assets/code-plus/') && response.status() !== 200) {
 				failedRequests.push(`${url} (${response.status()})`);
 			}
 		});
@@ -181,7 +181,7 @@ test.describe('Link Validation', () => {
 		expect(failedRequests, 'All presentation images should load successfully').toEqual([]);
 
 		// Verify expected workflow images are present
-		const images = page.locator('img[src^="/assets/images/code-plus/"]');
+		const images = page.locator('img[src^="/presentations/assets/code-plus/"]');
 		expect(await images.count()).toBe(6);
 	});
 

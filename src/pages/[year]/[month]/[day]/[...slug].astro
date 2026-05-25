@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getBlogPosts } from '@/utils/getBlogPosts';
 import { getPath } from '@/utils/getPath';
 import { linkWithBase } from '@/utils/linkWithBase';
 import { SITE } from '@/config';
@@ -18,7 +18,7 @@ import { SITE } from '@/config';
  */
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = await getBlogPosts();
 
   return posts.map(post => {
     // Post ID format: "2025-09-19-modernizing-an-old-jekyll-blog"

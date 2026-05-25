@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-commit: enforce image conventions on staged files.
+# Bypass (only when necessary): git commit --no-verify
+
+node scripts/check-image-conventions.mjs

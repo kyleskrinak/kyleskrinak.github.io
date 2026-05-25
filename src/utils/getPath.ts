@@ -32,9 +32,17 @@ export function getPath(
   const blogId = id.split("/");
   const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
 
-  const path = !pathSegments || pathSegments.length < 1
+  // Co-located post entry (foo/index.md): Astro's glob loader produces id=`foo`,
+  // and filePath includes `foo/index.md`. After stripping `index.md`, the last
+  // pathSegment equals the slug — drop it to avoid `/posts/foo/foo/` duplication.
+  const dedupedSegments =
+    pathSegments && pathSegments.length > 0 && pathSegments[pathSegments.length - 1] === slug[0]
+      ? pathSegments.slice(0, -1)
+      : pathSegments;
+
+  const path = !dedupedSegments || dedupedSegments.length < 1
     ? [basePath, slug].join("/")
-    : [basePath, ...pathSegments, slug].join("/");
+    : [basePath, ...dedupedSegments, slug].join("/");
 
   if (!includeBase) {
     return path.replace(/^\/+/, "").replace(/\/+$/, "");
