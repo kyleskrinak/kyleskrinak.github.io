@@ -6,7 +6,6 @@ description: Busy staying steady
 image: ../../assets/images/190831-megaphone.jpg
 alt: "190831 megaphone"
 source: jekyll
-disqusId: "/lchf/diminished-zeal-with-steady-commitment"
 ---
 
 ## After 2+ years, the loss continues

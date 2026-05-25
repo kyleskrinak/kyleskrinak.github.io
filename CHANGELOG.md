@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [Unreleased]
 
+### Removed
+
+- **Disqus comments integration**. Component, runtime config, `disqusId` schema field on the blog collection, legacy post frontmatter (`disqusId` and `comments` keys), lazy-load script, test infrastructure (`tests/disqus.spec.ts`, Playwright project, `test-utils` helper), the `check-disqus-ids` workflow step on all three deploy pipelines, and documentation references. Reach-the-author flow now goes through `ShareLinks` (per-post) and `Socials` (footer + homepage). Anyone restoring the old `disqusId` / `comments` keys in post frontmatter will have them silently stripped at build time (schema is non-strict); restore the schema fields in `src/content.config.ts` if you need them honored.
+
 ### Feat
 
 - add automated visual regression testing to PR workflow (#67)
@@ -24,6 +28,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Security
 
+- pin advisory-affected transitive dependencies via `package.json` `overrides`: `devalue@5.8.1`, `fast-uri@3.1.2`, `fast-xml-builder@1.1.7`, `fast-xml-parser@5.7.0`, `flatted@3.4.2`, `brace-expansion@5.0.6`, `postcss@8.5.10`. Resolves 7 of 12 npm audit findings (4 high, 3 moderate). These are exact-version pins, not semver ranges — `npm update` will not pick up future patches. **Review quarterly.** Note: `fast-xml-builder` and `fast-xml-parser` are co-released siblings from the same maintainer; bump them together. The remaining 5 moderate findings (yaml stack overflow chain in `yaml-language-server` → `@astrojs/check`) are deliberately deferred — fixes require a breaking downgrade of `@astrojs/check`, and the vulnerable code runs in IDE tooling only, not in the build or shipped output. See `docs/operations/dependency-pins.md` for the full rationale and review checklist.
 - implement secure PR comment workflow (workflow_run pattern)
 - add pagination support for PR comment management
 - validate PR matching by head SHA

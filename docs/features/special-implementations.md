@@ -17,7 +17,6 @@ This document catalogs special use cases, custom implementations, and unique con
 - GitHub Actions CI/CD workflows
 - AWS S3 + CloudFront deployment
 - Google Analytics integration
-- Disqus comments integration
 - Social sharing component
 
 **These are all best practices that apply to any Astro blog.**
@@ -173,13 +172,12 @@ Zod schemas enforce type safety on all content.
 
 Indexes all 48 pages (blog posts + static pages) with 4,688 words.
 
-### Analytics & Comments
+### Analytics
 
 ✅ **Files**:
 - `src/components/GoogleAnalytics.astro` - GA4 ready (needs ID)
-- `src/components/DisqusComments.astro` - Comment threading
 
-✅ **Standard**: Yes - both have standard integrations
+✅ **Standard**: Yes - standard integration
 
 ### Social Sharing
 
@@ -242,7 +240,6 @@ Defines three collections with strict Zod validation:
 
 ```env
 PUBLIC_GA_ID=G-XXXXX          # Google Analytics
-PUBLIC_DISQUS_SHORTNAME=...   # Disqus shortname
 ```
 
 ---

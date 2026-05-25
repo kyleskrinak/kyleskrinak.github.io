@@ -4,12 +4,10 @@ pubDate: 2018-04-09T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: '* Converting vb-script site to a modern, responsive heterogeneous site with Drupal 8'
-disqusId: "/drupal/drupalcon-nashville-2018-04-09-2018-higher-ed-summit-day"
 ---
 
 

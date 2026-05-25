@@ -12,7 +12,7 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 
 ## ✨ Features
 
-- ⚡ **Fast by default** - Static HTML with 1.4s LCP on production; Disqus comments load on scroll, not at page load
+- ⚡ **Fast by default** - Static HTML with 1.4s LCP on production
 - 🎨 **Responsive** - Works on all devices
 - 🌙 **Dark mode** - Light and dark theme toggle
 - 🔍 **Full-text search** - Powered by Pagefind
@@ -130,10 +130,10 @@ See `/docs/testing/` for detailed guides.
 
 ## 📈 Performance
 
-**Lighthouse Scores** (Production):
-- Performance: 80 (Disqus lazy-loads on scroll; still affects main thread on comment pages)
+**Lighthouse Scores** (Production, pre-Disqus-removal; remeasure pending — see [issue #153](https://github.com/kyleskrinak/kyleskrinak.github.io/issues/153)):
+- Performance: 80
 - Accessibility: 94
-- Best Practices: 77 (third-party Disqus cookies)
+- Best Practices: 77
 - SEO: 100
 
 See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for Jekyll vs. Astro migration benchmarks.
