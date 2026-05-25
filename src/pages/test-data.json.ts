@@ -1,8 +1,8 @@
-import { getCollection } from 'astro:content';
+import { getBlogPosts } from '@/utils/getBlogPosts';
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
-  const posts = await getCollection('blog');
+  const posts = await getBlogPosts();
   const postWithImage = posts.find(p => p.id.includes('first-lchf'));
 
   return new Response(

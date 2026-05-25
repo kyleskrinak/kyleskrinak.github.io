@@ -78,14 +78,24 @@ function sanitizeForImport(filename) {
 }
 
 function splitFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  // Tolerate CRLF line endings (Windows-authored files, paste-from-CMS).
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) throw new Error('No frontmatter found');
   return { fm: match[1], body: match[2] };
 }
 
+// True for anything that "looks like" an absolute remote URL or protocol-relative
+// reference — `https://`, `data:`, `mailto:`, `//cdn.example.com/foo`. Used to
+// skip refs that aren't local image paths the migration should resolve.
+function isRemoteRef(ref) {
+  return /^[a-z][a-z0-9+.-]*:/i.test(ref) || ref.startsWith('//');
+}
+
 function findAllRefs(fm, body) {
   // Returns Map<originalRefPath, { sourcePath, basename, importName }>
+  // and a Set of refs that appeared in HTML <img> tags (need JS imports in MDX).
   const refs = new Map();
+  const htmlImgRefs = new Set();
   const data = parseYaml(fm) ?? {};
 
   function add(refPath) {
@@ -114,7 +124,7 @@ function findAllRefs(fm, body) {
   let m;
   while ((m = mdImg.exec(body)) !== null) {
     const ref = m[1].trim();
-    if (ref.startsWith('http://') || ref.startsWith('https://')) continue;
+    if (isRemoteRef(ref)) continue;
     add(ref);
   }
 
@@ -122,11 +132,12 @@ function findAllRefs(fm, body) {
   const htmlImg = /<img[^>]*\ssrc=["']([^"']+)["'][^>]*>/g;
   while ((m = htmlImg.exec(body)) !== null) {
     const ref = m[1].trim();
-    if (ref.startsWith('http://') || ref.startsWith('https://')) continue;
+    if (isRemoteRef(ref)) continue;
     add(ref);
+    htmlImgRefs.add(ref);
   }
 
-  return { data, refs };
+  return { data, refs, htmlImgRefs };
 }
 
 function rewriteFrontmatter(data, refs) {
@@ -153,7 +164,6 @@ function rewriteBody(body, refs, isMdx) {
   if (!isMdx) return out;
 
   // Strip <style>...</style> blocks: MDX parses CSS `{` `}` as JSX expressions.
-  // These blocks are Jekyll-era cruft that duplicates Figure.astro styles.
   out = out.replace(/<style[^>]*>[\s\S]*?<\/style>\s*/g, '');
 
   // For MDX: rewrite <img src="..." alt="..." class="..." /> to <Image>
@@ -172,10 +182,14 @@ function rewriteBody(body, refs, isMdx) {
   return out;
 }
 
-function buildImportBlock(refs) {
+function buildImportBlock(refs, htmlImgRefs) {
+  // Only HTML <img> rewrites become <Image src={importName}> — those need JS
+  // imports. Frontmatter and markdown ![]() are handled by Astro's content
+  // pipeline and don't need imports.
   const lines = ['import { Image } from "astro:assets";'];
   const seen = new Set();
-  for (const ref of refs.values()) {
+  for (const [refPath, ref] of refs) {
+    if (!htmlImgRefs.has(refPath)) continue;
     if (seen.has(ref.importName)) continue;
     seen.add(ref.importName);
     lines.push(`import ${ref.importName} from "./${ref.basename}";`);
@@ -202,7 +216,7 @@ async function migratePost(slug) {
 
   const content = await readFile(flatPath, 'utf8');
   const { fm, body } = splitFrontmatter(content);
-  const { data, refs } = findAllRefs(fm, body);
+  const { data, refs, htmlImgRefs } = findAllRefs(fm, body);
 
   const hasHtmlImg = /<img\b[^>]*>/.test(body);
   const ext = hasHtmlImg ? 'mdx' : 'md';
@@ -210,7 +224,7 @@ async function migratePost(slug) {
 
   const newData = rewriteFrontmatter(data, refs);
   const newBody = rewriteBody(body, refs, hasHtmlImg);
-  const importBlock = hasHtmlImg && refs.size > 0 ? `\n${buildImportBlock(refs)}\n` : '';
+  const importBlock = hasHtmlImg && htmlImgRefs.size > 0 ? `\n${buildImportBlock(refs, htmlImgRefs)}\n` : '';
 
   const newContent = `---\n${stringifyYaml(newData)}---\n${importBlock}${newBody}`;
 

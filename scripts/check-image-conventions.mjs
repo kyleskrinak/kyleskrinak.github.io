@@ -4,7 +4,11 @@
  *
  * Modes:
  *   (default)  Inspect staged files. Used by the Husky pre-commit hook.
- *   --all      Inspect all tracked files. Used by build:ci in CI.
+ *              Requires git (we're in a git hook by definition).
+ *   --all      Inspect every relevant file in the working tree. Used by
+ *              `npm run build` and build:ci. Walks src/content/ and
+ *              public/assets/ via fs so it works in stripped environments
+ *              (e.g., the local Docker pre-push container has no git).
  *
  * Blocks (exit 1):
  *   1. Any added/modified file under public/assets/  — that tree was removed.
@@ -20,7 +24,8 @@
  * Bypass (only when truly necessary): git commit --no-verify
  */
 import { execFileSync } from 'node:child_process';
-import { statSync, readFileSync } from 'node:fs';
+import { statSync, readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join, sep } from 'node:path';
 
 const args = process.argv.slice(2);
 const mode = args.includes('--all') ? 'all' : 'staged';
@@ -49,9 +54,28 @@ function listStagedFiles() {
 	return out.split('\0').filter(Boolean);
 }
 
-function listAllTrackedFiles() {
-	const out = git('ls-files', '-z');
-	return out.split('\0').filter(Boolean);
+function listAllRelevantFiles() {
+	// All checks are scoped to src/content/ and public/assets/, so walk only
+	// those. This avoids the need for git in --all mode (the Docker pre-push
+	// container has none) while still inspecting every file a check can match.
+	const roots = ['src/content', 'public/assets'];
+	const out = [];
+	for (const root of roots) {
+		if (!existsSync(root)) continue;
+		walk(root, out);
+	}
+	return out;
+}
+
+function walk(dir, out) {
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const full = join(dir, entry.name);
+		if (entry.isDirectory()) {
+			walk(full, out);
+		} else if (entry.isFile()) {
+			out.push(full.split(sep).join('/'));
+		}
+	}
 }
 
 function readStagedContent(path) {
@@ -114,7 +138,7 @@ function checkFile(path, getContent) {
 }
 
 function main() {
-	const files = mode === 'all' ? listAllTrackedFiles() : listStagedFiles();
+	const files = mode === 'all' ? listAllRelevantFiles() : listStagedFiles();
 	const getContent = mode === 'all' ? readWorkingContent : readStagedContent;
 
 	for (const path of files) {

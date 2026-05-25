@@ -112,7 +112,7 @@ import hero from "./hero.webp";
 </figure>
 ```
 
-MDX has one gotcha: CSS `{ }` inside `<style>` blocks parses as JSX and breaks the build. Don't inline `<style>` tags — use a shared component (e.g., `src/components/Figure.astro`) or scoped CSS in a layout.
+MDX has one gotcha: CSS `{ }` inside `<style>` blocks parses as JSX and breaks the build. Don't inline `<style>` tags in `.mdx` files — put styles in a layout's scoped CSS instead.
 
 ## Source files (`/design/`)
 
@@ -206,7 +206,7 @@ If a commit is blocked, fix the file rather than bypassing — these all map to 
 The schema requires `alt` whenever `image` or `heroImage` is set. Add a descriptive `alt:` field.
 
 **MDX build fails on `{` or `}`.**
-You have a `<style>` block, an inline JSX expression with literal braces, or a curly-brace character in body text. Strip the `<style>` block (use `Figure.astro` styles instead) or escape braces with `&lbrace;` / `&rbrace;`.
+You have a `<style>` block, an inline JSX expression with literal braces, or a curly-brace character in body text. Strip the `<style>` block (move styles into a layout) or escape braces with `&lbrace;` / `&rbrace;`.
 
 **Same image needed in two posts.**
 Copy it into both post directories. Sharing via a central directory was the old model — don't reintroduce it.
@@ -225,7 +225,7 @@ grep -rh "!\[.*\](\./" src/content/blog/*/index.md{,x}
 
 # Find oversized images
 find src/content/blog -name '*.webp' -size +500k -ls
-find src/content/blog -name '*.jpg' -o -name '*.png' -size +500k -ls
+find src/content/blog \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) -size +500k -ls
 ```
 
 ---

@@ -66,20 +66,21 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | Field | Example | Notes |
 |-------|---------|-------|
 | `title` | `"Learning Astro"` | Post title (appears in browser tab and listings) |
-| `description` | `"A beginner's guide to Astro"` | Used in search results and social media preview |
-| `pubDate` | `2026-01-20` | Publication date (YYYY-MM-DD format) |
+| `pubDate` | `2026-01-20T00:00:00.000Z` | Publication date. ISO 8601 or `YYYY-MM-DD`. Drives sort order. |
 
 ### Optional Fields
 
 | Field | Example | Notes |
 |-------|---------|-------|
-| `updatedDate` | `2026-01-20` | Last modified date (shows in post metadata) |
-| `image` | `./my-image.webp` | Featured image for post (also used as Open Graph image for social sharing) |
-| `alt` | `"A screenshot of code"` | Accessibility text for featured image (required if `image` is set) |
+| `description` | `"A beginner's guide to Astro"` | Used in search results and social meta. Optional but recommended. |
+| `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
+| `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
+| `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` or `heroImage` is set. |
 | `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image |
 | `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
 | `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
+| `published` | `false` | When `false`, the post is hidden from production builds but still visible in `npm run dev`. Default: published. |
 
 ## Complete Frontmatter Example
 
@@ -255,12 +256,15 @@ Open DevTools (F12) and check:
 npm run test:console
 ```
 
-### 5. Commit and push
+### 5. Commit and open a PR
+
+The repo workflow is `develop → staging → main` via pull request. Push to your working branch (usually `develop`), then open a PR to `staging` so the change deploys to the staging environment first.
 
 ```bash
 git add src/content/blog/2026-01-20-your-post/
 git commit -m "blog: Add new post about your topic"
-git push origin staging  # Test on staging first
+git push origin develop
+gh pr create --base staging --head develop --title "blog: Add new post about your topic"
 ```
 
 ## Common Mistakes

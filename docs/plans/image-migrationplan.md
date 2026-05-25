@@ -1,8 +1,8 @@
-# Image Asset Migration
+# Image Asset Migration — Post-Mortem
 
-Status as of 2026-05-25. Resumable cold — read top-to-bottom.
+**Status: Completed 2026-05-25.** All seven phases shipped on `develop` as commits `af1ec80` (Phases 1–7 consolidated) and the pre-PR review follow-up. This doc is kept as a record of the migration's rationale and gotchas for future reference.
 
-## Status
+## Phases
 
 | Phase | Description | Status |
 |-------|-------------|--------|
@@ -13,11 +13,6 @@ Status as of 2026-05-25. Resumable cold — read top-to-bottom.
 | 5 | `new-post` scaffold script | ✓ Done |
 | 6 | Rewrite `docs/getting-started/images.md` | ✓ Done |
 | 7 | Husky pre-commit guard | ✓ Done |
-
-Patches applied: `imagemigrationfull.patch`, `phase4additions.patch`, `phase4deletes.sh`.
-Local `npx astro build` builds 154 pages clean.
-
-Not committed yet — pending your signing.
 
 ## Context (why)
 
@@ -53,7 +48,7 @@ Frontmatter references images as `./hero.webp`. Body too. The content collection
 **Schema & rendering:**
 - `src/content.config.ts` — both `blog` and `pages` collections use the `({ image })` schema callback with `image()` helper; pages glob now `**/*.{md,mdx}`.
 - `src/layouts/PostDetails.astro` — passes `image` directly to `<Image>` (was `getOptimizedImage(image)`).
-- `src/components/Figure.astro` — prop renamed `image_path` → `src`, accepts `ImageMetadata | string`.
+- `src/components/Figure.astro` — prop renamed `image_path` → `src` during Phase 2. Deleted after the pre-PR review found it had no callers post-migration; the rewritten `.mdx` posts use `<Image>` directly with inline `<figure>` markup.
 - `src/utils/getPath.ts` — drops trailing pathSegment when it equals slug (fixes `/posts/foo/foo/` duplication for `index.md` entries).
 
 **Markdown pipeline:**
@@ -80,14 +75,14 @@ These shaped the patches; capture them so future debugging doesn't waste time re
 
 - **Astro glob loader id convention.** For `foo/index.md`, the entry id is `foo` (the parent directory name), not `foo/index`. The original `getPath` assumed flat-file layout and produced `/posts/foo/foo/` duplication. Fix: drop the last pathSegment when it equals the slug.
 - **MDX integration is required** once any post uses raw HTML `<img>` blocks, because they're rewritten to `<Image>` with an imported `ImageMetadata`. Markdown alone can't do `import` statements.
-- **MDX is strict about CSS-in-`<style>`.** CSS `{ }` braces parse as JSX expressions and blow up the build. The migration script strips `<style>` blocks when emitting `.mdx`. Six posts (including `2018-10-20-my-morning-routine`) had Jekyll-era inline styles that duplicated `Figure.astro`'s styles — now gone.
+- **MDX is strict about CSS-in-`<style>`.** CSS `{ }` braces parse as JSX expressions and blow up the build. The migration script strips `<style>` blocks when emitting `.mdx`. Six posts (including `2018-10-20-my-morning-routine`) had Jekyll-era inline styles — now gone.
 - **Same image referenced twice (frontmatter + body) produces duplicate imports.** Dedupe in `buildImportBlock` by `importName`.
 - **Filename sanitisation matters.** `in memorandum.svg` (with a space) became `in-memorandum.svg` so JS imports work and URLs don't need encoding.
 - **Shared images need copy-not-move.** `drupal_logo.png` is referenced by 8 posts. The migration script copies images into post dirs (not rename), then sweeps the originals once all migrations succeed. Tracked via an explicit `migratedSources` Set rather than basename-grep (which incorrectly matched co-located references).
 - **Presentations are real users of `public/assets/`.** Four presentation HTML files in `public/presentations/` referenced 14 images under `/assets/images/`. They're static HTML, not blog content. The Phase 4 solution: move them to `public/presentations/assets/` (co-located with the HTML that uses them) and update the four HTMLs + one Playwright assertion. This stayed inside the "no raw `/assets/` URLs" rule while leaving the presentation toolchain alone.
 - **lchf page image rendered as metadata-only.** The `lchf.astro` layout never reads `image` from frontmatter — only `title` and `description`. Field kept anyway for schema consistency.
 
-## Open phases
+## Phase deliverables (reference)
 
 ### Phase 5 — `new-post` scaffold script
 
@@ -162,7 +157,7 @@ For a future Claude session resuming this work, the immediate files to read are:
 
 - `src/content.config.ts` — schema definitions (both collections use `image()`).
 - `scripts/migrate-post-to-directory.mjs` — reference for the migration patterns; Phase 5 `new-post.mjs` should share the WebP conversion approach.
-- `src/components/Figure.astro` — current prop shape.
+- (`src/components/Figure.astro` was deleted in the pre-PR review cleanup — see commit history.)
 - `src/layouts/PostDetails.astro` — how `image` flows from schema to render.
 
 Patches (preserved in repo or downloads):

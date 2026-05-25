@@ -8,7 +8,7 @@
   "packageManager": "npm@11.12.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist && cp -r dist/_pagefind public/",
+    "build": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
     "build:ci": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist",
     "build:presentations": "node scripts/build-presentations.js",
     "check:images": "node scripts/check-image-conventions.mjs --all",

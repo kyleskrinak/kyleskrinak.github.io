@@ -27,7 +27,6 @@ const blog = defineCollection({
 		categories: z.array(z.string()).optional(),
 		featured: z.boolean().optional(),
 		published: z.boolean().optional(),
-		hidden: z.boolean().optional(),
 		hideEditPost: z.boolean().optional(),
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
