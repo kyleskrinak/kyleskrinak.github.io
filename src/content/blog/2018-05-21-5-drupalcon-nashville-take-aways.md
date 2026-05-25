@@ -5,12 +5,10 @@ updatedDate: 2026-05-09T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: For our Drupal @ Duke meetup, here are my top five take-aways from this year's DrupalCon Nashville.
-disqusId: "/drupal/5-drupalcon-nashville-take-aways"
 ---
 
 

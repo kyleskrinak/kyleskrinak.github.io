@@ -152,9 +152,6 @@ Create a `.env.local` file (not committed to git) with:
 # Google Analytics (optional, used in GoogleAnalytics component)
 PUBLIC_GA_ID=G-XXXXX
 
-# Disqus comments (configured in DisqusComments component)
-PUBLIC_DISQUS_SHORTNAME=kds38-duke-blog
-
 # Cloudflare Web Analytics (production)
 PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_cloudflare_token
 ```

@@ -31,8 +31,6 @@ const blog = defineCollection({
 		hideEditPost: z.boolean().optional(),
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
-		comments: z.boolean().optional(),
-		disqusId: z.string().trim().min(1).optional(),
 	}).superRefine((data, ctx) => {
 		// Enforce: if any non-empty on-page image field exists, alt text is required for accessibility
 		// trim().min(1) already ensures non-empty strings, but check existence here

@@ -4,7 +4,6 @@ description: Join me as I celebrate three years of low-carb living. At the three
 categories: []
 pubDate: 2020-06-08T00:00:00.000Z
 updatedDate: 2026-05-12T00:00:00.000Z
-disqusId: "/lchf/happy-third-lowcarbiversary"
 ---
 
 <style>

@@ -4,12 +4,10 @@ pubDate: 2018-04-10T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-comments: true
 image: ../../assets/images/drupal_logo.png
 alt: "Drupal logo"
 source: jekyll
 description: '* New in 8.5'
-disqusId: "/drupal/drupalcon-nashville-2018-04-10-2018-higher-ed-summit-day"
 ---
 
 

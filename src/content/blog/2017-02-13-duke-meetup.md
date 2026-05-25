@@ -4,9 +4,7 @@ pubDate: 2017-02-13T00:00:00.000Z
 categories: []
 tags:
   - Drupal @ Duke
-comments: true
 description: Here are my hastily-assembled thoughts on Drupal 8 for 2017 at Trinity Technology Services.
-disqusId: "/drupal/duke-meetup"
 ---
 
 
