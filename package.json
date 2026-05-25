@@ -9,8 +9,10 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist && cp -r dist/_pagefind public/",
-    "build:ci": "astro build && pagefind --site dist",
+    "build:ci": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist",
     "build:presentations": "node scripts/build-presentations.js",
+    "check:images": "node scripts/check-image-conventions.mjs --all",
+    "new-post": "node scripts/new-post.mjs",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
@@ -32,9 +34,11 @@
     "check:links": "node scripts/check-links.js",
     "config:generate": "node config/generate-docs.mjs",
     "config:validate": "node config/validate.mjs",
-    "config:inspect": "node config/inspect.mjs"
+    "config:inspect": "node config/inspect.mjs",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@astrojs/mdx": "^5.0.6",
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
     "@resvg/resvg-js": "^2.6.2",
@@ -61,6 +65,7 @@
     "eslint": "^10.4.0",
     "eslint-plugin-astro": "^1.7.0",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
     "markdown-it": "^14.1.0",
     "pagefind": "^1.5.2",
     "prettier": "^3.8.3",

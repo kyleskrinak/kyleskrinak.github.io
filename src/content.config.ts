@@ -5,15 +5,15 @@ export const BLOG_PATH = 'src/content/blog';
 
 const blog = defineCollection({
 	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
-	schema: z.object({
+	schema: ({ image }) => z.object({
 		title: z.string(),
 		description: z.string().optional(),
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		author: z.string().optional(),
-		image: z.string().trim().min(1).optional(),
-		heroImage: z.string().trim().min(1).optional(),
-		ogImage: z.string().trim().min(1).optional(),
+		image: image().optional(),
+		heroImage: image().optional(),
+		ogImage: image().optional(),
 		alt: z.string().trim().min(1).optional(),
 		caption: z.string().trim().min(1).optional(),
 		imagePosition: z.enum([
@@ -32,8 +32,7 @@ const blog = defineCollection({
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
 	}).superRefine((data, ctx) => {
-		// Enforce: if any non-empty on-page image field exists, alt text is required for accessibility
-		// trim().min(1) already ensures non-empty strings, but check existence here
+		// Enforce: if an on-page image field exists, alt text is required for accessibility
 		const hasOnPageImage = data.image || data.heroImage;
 		if (hasOnPageImage && !data.alt) {
 			ctx.addIssue({
@@ -46,14 +45,16 @@ const blog = defineCollection({
 });
 
 const pages = defineCollection({
-	loader: glob({ base: './src/content/pages', pattern: '*.{md,mdx}' }),
-	schema: z.object({
+	loader: glob({ base: './src/content/pages', pattern: '**/*.{md,mdx}' }),
+	schema: ({ image }) => z.object({
 		title: z.string(),
 		description: z.string().optional(),
 		author: z.string().optional(),
 		pubDate: z.coerce.date().optional(),
 		permalink: z.string().optional(),
 		toc: z.boolean().optional(),
+		image: image().optional(),
+		alt: z.string().trim().min(1).optional(),
 	}),
 });
 

@@ -13,7 +13,6 @@ import BackToTopButton from "@/components/BackToTopButton.astro";
 import { getPath } from "@/utils/getPath";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { slugifyStr } from "@/utils/slugify";
-import { getOptimizedImage } from "@/lib/images";
 import { getReadingTime } from "@/utils/readingTime";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
@@ -42,25 +41,20 @@ const {
   imagePosition,
 } = post.data;
 
-// Get optimized image metadata for hero image display
-const optimizedImage = getOptimizedImage(image);
-
 const { Content } = await render(post);
 
 const readingTime = getReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
 
-// Determine OG image source
-if (typeof initOgImage === "string") {
-  ogImageUrl = initOgImage; // Remote OG image (absolute URL)
-} else if (initOgImage && typeof initOgImage === 'object' && 'src' in initOgImage) {
-  ogImageUrl = (initOgImage as any).src; // Local asset
+// Explicit ogImage from frontmatter (ImageMetadata via image() schema helper)
+if (initOgImage && typeof initOgImage === 'object' && 'src' in initOgImage) {
+  ogImageUrl = initOgImage.src;
 }
 
-// Fall back to hero image if no explicit ogImage (skip SVGs - social scrapers don't render them)
-if (!ogImageUrl && optimizedImage && !optimizedImage.src.toLowerCase().endsWith('.svg')) {
-  ogImageUrl = optimizedImage.src; // Use hero image as OG image (raster only)
+// Fall back to hero image (skip SVGs — social scrapers don't render them)
+if (!ogImageUrl && image && !image.src.toLowerCase().endsWith('.svg')) {
+  ogImageUrl = image.src;
 }
 
 // Use dynamic OG image if enabled and no remote|local ogImage or hero image
@@ -126,13 +120,13 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
-    {optimizedImage && (
+    {image && (
       <figure class="hero-image mt-8 mb-8 w-full">
         {/* fit + position route to Sharp's resize at build time so the
             generated 1200×600 hero is cropped from the part of the source
             image specified by frontmatter `imagePosition` (default: center). */}
         <Image
-          src={optimizedImage}
+          src={image}
           alt={alt || "Post hero image"}
           width={1200}
           height={600}

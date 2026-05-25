@@ -1,34 +1,27 @@
 ---
 import { Image } from 'astro:assets';
-import { getOptimizedImage } from '../lib/images';
+import type { ImageMetadata } from 'astro';
 
 /**
  * Figure Component
- * Displays an optimized image with caption and optional alt text
- * Replaces Jekyll's {% include figure %} include
+ * Displays an image with caption and optional alt text. Replaces Jekyll's
+ * {% include figure %} include.
  *
- * Automatically generates responsive images at 800px, 1600px, and 2400px widths
- * using Astro's Image component (output format follows Astro's defaults, typically the source format)
+ * For local images, pass an ImageMetadata import — Astro's <Image> generates
+ * responsive variants via Sharp at build time. For remote URLs, pass a string
+ * (rendered as a plain <img> with no Sharp processing).
  *
- * Usage in MDX:
- * <Figure
- *   image_path="/assets/images/example.jpg"
- *   alt="Description"
- *   caption="Image caption text"
- *   lazy={true}
- * />
+ * Usage in MDX (local, co-located):
+ *   import hero from './hero.jpg';
+ *   <Figure src={hero} alt="Description" caption="Optional caption" />
  *
- * Captions with HTML are automatically detected and rendered:
- * <Figure
- *   image_path="/assets/images/example.jpg"
- *   alt="Description"
- *   caption="Quote by <a href='https://...'>Tim Ferriss</a>"
- * />
+ * Usage in MDX (remote URL):
+ *   <Figure src="https://example.com/foo.jpg" alt="Description" />
  *
  * Props:
- * - image_path: Filename or path to image file (filename used for optimization lookup; full value used as fallback)
+ * - src: ImageMetadata (local import) or string (remote URL)
  * - alt: Alt text for accessibility (required)
- * - caption: Optional caption (supports HTML; trusted author content only - no user input sanitization)
+ * - caption: Optional caption (supports HTML; trusted author content only)
  * - lazy: Enable lazy loading (default: true)
  *
  * Security note: Caption HTML is rendered via set:html without sanitization.
@@ -36,25 +29,22 @@ import { getOptimizedImage } from '../lib/images';
  */
 
 interface Props {
-  image_path: string;
+  src: ImageMetadata | string;
   alt: string;
   caption?: string;
   lazy?: boolean;
 }
 
-const { image_path, alt, caption, lazy = true } = Astro.props;
+const { src, alt, caption, lazy = true } = Astro.props;
 
-// Try to get optimized image from map, fallback to direct path
-const optimizedImage = getOptimizedImage(image_path);
-
-// Check if this is an SVG - SVGs don't need responsive image generation
-const isSvg = optimizedImage?.src?.toLowerCase().endsWith('.svg');
+const isMetadata = typeof src === 'object' && src !== null && 'src' in src;
+const isSvg = isMetadata && src.src.toLowerCase().endsWith('.svg');
 ---
 
 <figure class="figure">
-  {optimizedImage && !isSvg ? (
+  {isMetadata && !isSvg ? (
     <Image
-      src={optimizedImage}
+      src={src}
       alt={alt}
       class="figure__image"
       quality={90}
@@ -63,21 +53,19 @@ const isSvg = optimizedImage?.src?.toLowerCase().endsWith('.svg');
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
     />
-  ) : optimizedImage && isSvg ? (
-    // SVG: use plain img tag without responsive transforms
+  ) : isMetadata && isSvg ? (
     <img
-      src={optimizedImage.src}
+      src={src.src}
       alt={alt}
       class="figure__image figure__image--svg"
-      width={optimizedImage.width}
-      height={optimizedImage.height}
+      width={src.width}
+      height={src.height}
       loading={lazy ? 'lazy' : 'eager'}
       decoding="async"
     />
   ) : (
-    // Fallback for images not in the map (e.g., external URLs)
     <img
-      src={image_path}
+      src={src as string}
       alt={alt}
       class="figure__image figure__image--fallback"
       loading={lazy ? 'lazy' : 'eager'}
