@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Removed
 
-- **Disqus comments integration**. Component, runtime config, `disqusId` schema field on the blog collection, legacy post frontmatter (`disqusId` and `comments` keys), lazy-load script, test infrastructure (`tests/disqus.spec.ts`, Playwright project, `test-utils` helper), the `check-disqus-ids` workflow step on all three deploy pipelines, and documentation references. Reach-the-author flow now goes through `ShareLinks` (per-post) and `Socials` (footer + homepage). Anyone restoring the schema from an older branch should expect a Zod parse error on the removed field.
+- **Disqus comments integration**. Component, runtime config, `disqusId` schema field on the blog collection, legacy post frontmatter (`disqusId` and `comments` keys), lazy-load script, test infrastructure (`tests/disqus.spec.ts`, Playwright project, `test-utils` helper), the `check-disqus-ids` workflow step on all three deploy pipelines, and documentation references. Reach-the-author flow now goes through `ShareLinks` (per-post) and `Socials` (footer + homepage). Anyone restoring the old `disqusId` / `comments` keys in post frontmatter will have them silently stripped at build time (schema is non-strict); restore the schema fields in `src/content.config.ts` if you need them honored.
 
 ### Feat
 
