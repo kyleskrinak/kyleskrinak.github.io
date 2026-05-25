@@ -36,7 +36,7 @@ function cleanVersion(v: string | undefined): string {
 
       <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
       <p>
-        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro column reflects production before Disqus was removed; a remeasure is pending after the next deploy.
+        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro column reflects production at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> as measured on 2026-05-25, after Disqus was removed.
       </p>
 
       <table>
@@ -51,17 +51,17 @@ function cleanVersion(v: string | undefined): string {
           <tr>
             <td>Performance</td>
             <td>57</td>
-            <td>80</td>
+            <td>99</td>
           </tr>
           <tr>
             <td>Accessibility</td>
             <td>87</td>
-            <td>94</td>
+            <td>93</td>
           </tr>
           <tr>
             <td>Best Practices</td>
             <td>73</td>
-            <td>77</td>
+            <td>100</td>
           </tr>
           <tr>
             <td>SEO</td>
@@ -127,7 +127,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ul>
         <li><strong>Zero server runtime.</strong> Every page is a static HTML file. There is nothing to patch, no runtime to exploit, and no server to go down under load.</li>
-        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 and Accessibility 94 on production without extra configuration. (An earlier version of the site included Disqus comments lazy-loaded on scroll; after a month of paid trial without engagement I decided the license cost outweighed the value and removed the integration.)</li>
+        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 and Accessibility 93 on production without extra configuration. (An earlier version of the site included Disqus comments lazy-loaded on scroll; after a month of paid trial without engagement I decided the license cost outweighed the value and removed the integration.)</li>
         <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
         <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
         <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>

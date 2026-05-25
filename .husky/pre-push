@@ -1,0 +1,7 @@
+#!/bin/sh
+# Pre-push: Run Docker build test before pushing to GitHub.
+# Catches bad builds locally so they don't waste CI cycles.
+#
+# Bypass (not recommended): git push --no-verify
+
+./docker-build-test.sh

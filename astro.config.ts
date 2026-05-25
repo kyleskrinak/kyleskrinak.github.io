@@ -1,5 +1,6 @@
 import { defineConfig, envField, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
+import mdx from "@astrojs/mdx";
 // Removed: using custom sitemap endpoint instead
 // import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
@@ -28,6 +29,7 @@ export default defineConfig({
     enabled: process.env.DISABLE_DEV_TOOLBAR !== "true",
   },
   integrations: [
+    mdx(),
     // Sitemap is generated via custom endpoint (src/pages/sitemap.xml.ts)
   ],
   fonts: [

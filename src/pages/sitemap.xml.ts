@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
+import { getBlogPosts } from "@/utils/getBlogPosts";
 import { SITE } from "@/config";
 
 /**
@@ -21,7 +21,7 @@ import { SITE } from "@/config";
  * - /404/
  */
 export const GET: APIRoute = async ({ site }) => {
-  const posts = await getCollection("blog");
+  const posts = await getBlogPosts();
 
   // Static indexable pages
   const staticPages = [

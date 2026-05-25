@@ -4,22 +4,44 @@ Quick cheat sheet for writing new blog posts in Astro.
 
 ## File Location
 
-All blog posts go in: **`src/content/blog/`**
+Each post is a directory under **`src/content/blog/`** containing an `index.md` (or `index.mdx`) and any images the post uses:
 
-## File Naming Convention
-
-Use this format:
 ```
-YYYY-MM-DD-post-slug.md
+src/content/blog/2026-01-20-my-first-astro-post/
+├── index.md
+└── hero.webp        # optional
+```
+
+## Slug Convention
+
+Use this format for the directory name:
+```
+YYYY-MM-DD-post-slug
 ```
 
 **Examples:**
-- `2026-01-20-my-first-astro-post.md`
-- `2026-01-15-a-great-day.md`
-- `2026-01-10-learning-astro.md`
+- `2026-01-20-my-first-astro-post`
+- `2026-01-15-a-great-day`
+- `2026-01-10-learning-astro`
 
-The filename becomes part of the URL. For `2026-01-20-my-first-astro-post.md`:
+The directory name is the slug — it becomes part of the URL. For `2026-01-20-my-first-astro-post/index.md`:
 - URL: `https://kyle.skrinak.com/posts/2026-01-20-my-first-astro-post/`
+
+Slug must be lowercase letters, digits, and hyphens. Wrong case causes 404s on Linux CI even if macOS hides it locally.
+
+## Scaffold with `npm run new-post`
+
+The fastest way to create a new post is:
+
+```bash
+# Stub only
+npm run new-post -- 2026-01-20-my-first-astro-post
+
+# Stub plus images (converts JPG/PNG to WebP, max 1200px)
+npm run new-post -- 2026-01-20-my-first-astro-post --images ~/Desktop/post-images
+```
+
+This creates the directory, writes `index.md` with a minimal frontmatter stub (`title`, today's UTC `pubDate`, empty `tags`, `published: false`), and — with `--images` — copies/converts images into the post directory and wires the first one in as the hero. See [Image Workflow Guide](./images.md) for details.
 
 ## Frontmatter (Metadata)
 
@@ -31,8 +53,8 @@ title: "Your Post Title Here"
 description: "Brief description for search results and meta tags"
 pubDate: 2026-01-20  # Date the post was published
 updatedDate: 2026-01-20  # Optional: date post was last updated
-image: "../../assets/images/post-image.jpg"  # Optional: featured image
-alt: "Alt text for the image"  # Description for accessibility
+image: ./post-image.webp  # Optional: featured image (co-located in post dir)
+alt: "Alt text for the image"  # Required when image is set
 categories: ["astro", "blogging"]  # Optional: topic tags
 ---
 ```
@@ -44,20 +66,21 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | Field | Example | Notes |
 |-------|---------|-------|
 | `title` | `"Learning Astro"` | Post title (appears in browser tab and listings) |
-| `description` | `"A beginner's guide to Astro"` | Used in search results and social media preview |
-| `pubDate` | `2026-01-20` | Publication date (YYYY-MM-DD format) |
+| `pubDate` | `2026-01-20T00:00:00.000Z` | Publication date. ISO 8601 or `YYYY-MM-DD`. Drives sort order. |
 
 ### Optional Fields
 
 | Field | Example | Notes |
 |-------|---------|-------|
-| `updatedDate` | `2026-01-20` | Last modified date (shows in post metadata) |
-| `image` | `"../../assets/images/my-image.jpg"` | Featured image for post (also used as Open Graph image for social sharing) |
-| `alt` | `"A screenshot of code"` | Accessibility text for featured image (required if `image` is set) |
+| `description` | `"A beginner's guide to Astro"` | Used in search results and social meta. Optional but recommended. |
+| `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
+| `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
+| `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` or `heroImage` is set. |
 | `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image |
-| `ogImage` | `"../../assets/images/social.jpg"` | Override: use different image for social sharing (defaults to `image`) |
+| `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
 | `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
+| `published` | `false` | When `false`, the post is hidden from production builds but still visible in `npm run dev`. Default: published. |
 
 ## Complete Frontmatter Example
 
@@ -67,7 +90,7 @@ title: "Building a Blog with Astro"
 description: "Learn how to set up a fast, modern blog using Astro static site generator"
 pubDate: 2026-01-20
 updatedDate: 2026-01-21
-image: "../../assets/images/astro-blog.jpg"
+image: ./astro-blog.webp
 alt: "Astro logo and code editor"
 categories: ["astro", "web development", "tutorial"]
 ---
@@ -102,38 +125,37 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 [Link text](https://example.com)
 
-![Image alt](../../assets/images/example.jpg)
+![Image alt](./example.webp)
 ```
 
 ## Adding Images
 
 ### Quick Reference
 
-**Store images in:** `src/assets/images/`
+**Store images in:** the post directory, alongside `index.md`.
 
-**Naming format:** `YYYY-MM-DD-descriptive-name.(jpg|png|webp)`
+**Reference with relative path:** `./image-name.webp`.
 
-**Note:** Source images can be JPG or PNG. Astro can generate optimized formats like WebP (with fallbacks) when configured via `format` or `<Picture>`.
+**Preferred format:** WebP. The `npm run new-post --images <dir>` flow converts JPG/PNG to WebP automatically. For images you add manually, see the conversion snippets in the Image Workflow Guide.
 
 **Featured image in frontmatter:**
 ```yaml
-image: ../../assets/images/2026-01-20-my-image.jpg
+image: ./my-image.webp
 alt: "Descriptive alt text"
 ```
 
 **Inline image in content:**
 ```markdown
-![Alt text](../../assets/images/2026-01-20-my-image.jpg)
+![Alt text](./my-image.webp)
 ```
 
 ### Complete Image Workflow
 
-For the full workflow (high-res source → optimized web image → deployment):
-
 **See [Image Workflow Guide](./images.md)** for:
-- Where to save source files
-- How to optimize for web
-- Recommended dimensions and formats
+- The `npm run new-post` scaffold
+- Per-post co-location pattern and gallery sub-directories
+- MDX `<Image>` usage when you need width/height/figure markup
+- Recommended dimensions, formats, and size targets
 - Troubleshooting image issues
 
 ## Markdown Features Supported
@@ -197,9 +219,17 @@ Use `backticks` for inline code
 
 ## Publishing a Post
 
-### 1. Create the file
+### 1. Create the post
 
-Create `src/content/blog/YYYY-MM-DD-slug.md` with your frontmatter and content.
+```bash
+npm run new-post -- YYYY-MM-DD-slug
+```
+
+Then edit `src/content/blog/YYYY-MM-DD-slug/index.md`. Or, scaffold straight from a folder of images:
+
+```bash
+npm run new-post -- YYYY-MM-DD-slug --images ~/Desktop/post-images
+```
 
 ### 2. Test locally
 
@@ -226,23 +256,28 @@ Open DevTools (F12) and check:
 npm run test:console
 ```
 
-### 5. Commit and push
+### 5. Commit and open a PR
+
+The repo workflow is `develop → staging → main` via pull request. Push to your working branch (usually `develop`), then open a PR to `staging` so the change deploys to the staging environment first.
 
 ```bash
-git add src/content/blog/2026-01-20-your-post.md
+git add src/content/blog/2026-01-20-your-post/
 git commit -m "blog: Add new post about your topic"
-git push origin staging  # Test on staging first
+git push origin develop
+gh pr create --base staging --head develop --title "blog: Add new post about your topic"
 ```
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| Wrong date format in filename | Use `YYYY-MM-DD` not `YY-M-D` |
+| Wrong date format in slug | Use `YYYY-MM-DD` not `YY-M-D` |
 | Wrong frontmatter format | Use YAML (colons, not equals) |
-| Image path too many `../../` | Count directories: `src/content/blog` is 2 up from `src` |
-| Image path with quotes inside quotes | Use single quotes around path in markdown |
+| Image path uses `../../assets/…` | Old layout. Use `./name.webp` — images co-locate in the post directory |
+| Uppercase letters in slug | Slug must be lowercase. Wrong case 404s on Linux CI |
+| Spaces in image filenames | Rename to `kebab-case.webp` — JS imports and URLs both fail otherwise |
 | Missing `pubDate` | Required field - must be present |
+| Missing `alt` when `image` is set | Schema rejects this. Add a descriptive `alt:` |
 | Extra spaces in YAML | YAML is whitespace-sensitive - check indentation |
 
 ## Post Ideas
@@ -262,15 +297,16 @@ See existing posts for examples of style and tone.
 
 - **Markdown syntax**: [CommonMark Spec](https://spec.commonmark.org/)
 - **Astro docs**: [astro.build](https://astro.build/)
-- **Image handling**: See `src/assets/images/` for examples
+- **Image handling**: See [Image Workflow Guide](./images.md)
 - **Existing posts**: Check `src/content/blog/` for reference
 
 ---
 
 **Quick checklist before publishing:**
 - [ ] Frontmatter has `title`, `description`, `pubDate`
-- [ ] Filename is `YYYY-MM-DD-slug.md`
-- [ ] Images are in `src/assets/images/`
+- [ ] Directory is `src/content/blog/YYYY-MM-DD-slug/`
+- [ ] Images are co-located in the post directory and referenced as `./name.webp`
+- [ ] `alt` is set whenever `image` is set
 - [ ] Post tested locally with `npm run dev`
 - [ ] No console errors
 - [ ] Links and images working

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getBlogPosts } from "@/utils/getBlogPosts";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -13,7 +13,7 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("blog");
+const posts = await getBlogPosts();
 
 const months = [
   "January",
