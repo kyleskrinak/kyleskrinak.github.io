@@ -6,7 +6,7 @@
  * Scope: This registry covers deployment/environment configuration —
  * env vars, build flags, analytics gating, and deployment settings that
  * vary across environments. `src/config/index.ts` also exports static site
- * content (author, title, ogImage, social links, etc.) that is intentionally
+ * content (author, title, description, social links, etc.) that is intentionally
  * out of scope here — those values don't vary by environment and don't need
  * registry tracking.
  *
