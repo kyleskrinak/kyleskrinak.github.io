@@ -62,7 +62,7 @@ if (!ogImageUrl && SITE.dynamicOgImage) {
   ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
 }
 
-// Resolve OG image URL (or fall through to Layout's `/og.png` default)
+// Resolve OG image URL (or fall through to Layout's default)
 const ogImage = ogImageUrl
   ? new URL(ogImageUrl, Astro.url.origin).href
   : undefined;
