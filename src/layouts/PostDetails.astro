@@ -59,10 +59,10 @@ if (!ogImageUrl && image && !image.src.toLowerCase().endsWith('.svg')) {
 
 // Use dynamic OG image if enabled and no remote|local ogImage or hero image
 if (!ogImageUrl && SITE.dynamicOgImage) {
-  ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
+  ogImageUrl = `${getPath(post.id, post.filePath, true, false)}/index.png`;
 }
 
-// Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
+// Resolve OG image URL (or fall through to Layout's default)
 const ogImage = ogImageUrl
   ? new URL(ogImageUrl, Astro.url.origin).href
   : undefined;
