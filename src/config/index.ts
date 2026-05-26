@@ -14,7 +14,6 @@ export const SITE = {
   profile: "https://github.com/kyleskrinak",
   desc: "Senior Manager, Digital Experience Platform for Gilead Sciences",
   title: "Kyle Skrinak",
-  ogImage: "og_image.jpeg",
   lightAndDarkMode: true,
   postPerIndex: 5,
   postPerPage: 5,
