@@ -25,6 +25,10 @@ export const SITE = {
     text: "Edit on GitHub",
     url: "https://github.com/kyleskrinak/kyleskrinak.github.io/edit/main/",
   },
+  // Default OG image filename, served from the site root.
+  // Resolved by Layout.astro as `${BASE_URL}${defaultOgImage}`.
+  // Generated at build time by src/pages/og.png.ts.
+  defaultOgImage: "og.png",
   dynamicOgImage: true,
   dir: "ltr", // "rtl" | "auto"
   lang: "en", // html lang code. Set this empty and default will be "en"
