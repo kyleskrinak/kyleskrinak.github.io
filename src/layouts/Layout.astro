@@ -43,6 +43,8 @@ const {
   noindex = false,
 } = Astro.props;
 
+// ogImage must be root-relative (e.g. /og.png) or absolute — new URL() resolves
+// root-relative paths against the origin, ignoring the current page path.
 const socialImageURL = new URL(ogImage, Astro.url);
 
 const deployEnv = PUBLIC_DEPLOY_ENV ?? "production";
