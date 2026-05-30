@@ -17,6 +17,7 @@ type Props = {
   author?: string;
   profile?: string;
   description?: string;
+  /** Must be root-relative (e.g. `/og.png`) or absolute — bare relative paths produce wrong URLs via new URL(). */
   ogImage?: string;
   canonicalURL?: string;
   pubDate?: Date;
