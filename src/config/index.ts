@@ -25,7 +25,7 @@ export const SITE = {
     text: "Edit on GitHub",
     url: "https://github.com/kyleskrinak/kyleskrinak.github.io/edit/main/",
   },
-  defaultOgImage: "og.png", // root-relative filename; resolved via `${BASE_URL}${defaultOgImage}` in Layout.astro. Built by src/pages/og.png.ts.
+  defaultOgImage: "og.png", // root-relative filename; resolved via linkWithBase() in Layout.astro. Built by src/pages/og.png.ts.
   dynamicOgImage: true, // when true, posts render Satori per-post OG images instead of falling back to defaultOgImage
   dir: "ltr", // "rtl" | "auto"
   lang: "en", // html lang code. Set this empty and default will be "en"
