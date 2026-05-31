@@ -1,0 +1,36 @@
+name: Unit tests
+
+on:
+  # push covers direct commits to the long-lived branches so the gate can't be
+  # bypassed by pushing straight to develop without opening a PR.
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PR code
+        # Pinned to SHA (v4) — same posture as supply-chain-audit.yml.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node-build
+
+      - name: Install dependencies (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Run unit tests
+        run: npm run test:unit

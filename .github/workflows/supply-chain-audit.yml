@@ -1,0 +1,43 @@
+name: Supply-chain audit
+
+on:
+  # push covers direct commits to the long-lived branches so a dependency change
+  # can't reach a deploy branch without signature verification running.
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supply-chain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signatures:
+    name: Verify npm package signatures
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PR code
+        # Pinned to SHA (v4) — this workflow's purpose is supply-chain verification,
+        # so consuming a floating tag here would undercut the assurance.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node-build
+
+      # --ignore-scripts mirrors the local .npmrc posture: no postinstall code
+      # executes from any package before signature verification runs.
+      - name: Install dependencies (no scripts)
+        run: npm ci --ignore-scripts
+
+      # Caveat: `npm audit signatures` exits 0 for packages with NO signature.
+      # It only fails when a signed package has been tampered with. Unsigned
+      # legacy packages in the tree will not be flagged here. The local
+      # `npm run audit:deps` helper provides additional lockfile-diff scrutiny.
+      - name: Verify package signatures
+        run: npm audit signatures

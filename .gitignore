@@ -39,3 +39,6 @@ run_final_audits.sh
 # Cache
 .docker-cache
 tmp/
+
+# Claude Code runtime state (transient lock/scheduler files, not project content)
+.claude/scheduled_tasks.lock

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Routine bumps grouped by ecosystem (minor + patch only). Major bumps fall through to Renovate's default and open as individual PRs for explicit review. The 'typescript' group is patch-only on purpose — TS minor releases can ship subtle type-system changes, so minor TS bumps open as individual PRs too. The 'utilities' group's `lodash.*` glob matches per-method packages like `lodash.kebabcase` but NOT the bare `lodash` package (no dot); if `lodash` is ever added, either extend matchPackageNames or expect it to open as an individual PR. baseBranches: develop combined with useBaseBranchConfig: merge so Renovate reads this config from develop in addition to main (the GitHub default branch). Security PRs (vulnerabilityAlerts) target develop too with minimumReleaseAge: 0 — they still flow develop → staging → main; for critical CVEs the human operator fast-tracks promotion manually. This preserves the multi-stage gate that the rest of the deploy workflow assumes. enabledManagers is restricted to npm on purpose: the Dockerfile base image and the SHA-pinned GitHub Actions are managed manually as part of the supply-chain posture, so Renovate must not silently open PRs against them.",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["npm"],
+  "baseBranches": ["develop"],
+  "useBaseBranchConfig": "merge",
+  "schedule": ["before 9am on Monday"],
+  "timezone": "America/New_York",
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies", "automated"],
+  "semanticCommits": "disabled",
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageAction": "bump",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "{{currentVersion}} → {{newVersion}}",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dependency Dashboard",
+  "minimumReleaseAge": "7 days",
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days",
+    "labels": ["dependencies", "security"]
+  },
+  "packageRules": [
+    {
+      "groupName": "astro-ecosystem",
+      "matchPackageNames": ["astro", "@astrojs/**"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "testing",
+      "matchPackageNames": ["@playwright/test", "playwright", "pagefind", "@pagefind/**"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "dev-tools",
+      "matchPackageNames": [
+        "typescript-eslint",
+        "globals",
+        "eslint",
+        "eslint-**",
+        "prettier",
+        "prettier-**",
+        "@typescript-eslint/**"
+      ],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript", "@astrojs/check"],
+      "matchUpdateTypes": ["patch"]
+    },
+    {
+      "groupName": "tailwind",
+      "matchPackageNames": ["tailwindcss", "@tailwindcss/**"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "markdown",
+      "matchPackageNames": ["shiki", "remark-**", "rehype-**", "@shikijs/**"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "build-tools",
+      "matchPackageNames": ["sharp", "satori", "@resvg/**"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "utilities",
+      "matchPackageNames": [
+        "dayjs",
+        "slugify",
+        "sanitize-html",
+        "yaml",
+        "markdown-it",
+        "lodash.*"
+      ],
+      "matchUpdateTypes": ["minor", "patch"]
+    }
+  ]
+}
