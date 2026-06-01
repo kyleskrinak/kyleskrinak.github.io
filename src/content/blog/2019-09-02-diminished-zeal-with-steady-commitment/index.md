@@ -3,7 +3,7 @@ title: Diminished Zeal with Steady Commitment
 pubDate: 2019-09-02T00:00:00.000Z
 categories: []
 description: Busy staying steady
-image: ./190831-megaphone.jpg
+image: ./190831-megaphone.webp
 alt: 190831 megaphone
 source: jekyll
 ---

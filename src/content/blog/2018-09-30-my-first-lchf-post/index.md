@@ -3,7 +3,7 @@ title: From My Wife’s Kitchen
 pubDate: 2018-09-30T00:00:00.000Z
 categories: []
 description: Posts and logs from Kyle about food
-image: ./flatpanbake.jpg
+image: ./flatpanbake.webp
 alt: "Flat pan bake"
 source: jekyll
 ---

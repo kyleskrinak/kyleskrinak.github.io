@@ -1,12 +1,12 @@
 ---
 title: Low Carb Living
 description: For decades, dieticians, nutritionists, and advocacy groups have poorly advised us — and most certainly me — about what is a healthy diet. By ignoring this mainstream nutritional advice, the food pyramid, and other common myths about what's healthy, and shifting to a nearly inverse paradigm, I've been able to lose weight, keep it off, and improve my health markers.
-image: ./181008-butter.JPG
+image: ./181008-butter.webp
 alt: Butter on a cutting board
 ---
 
 
-![A self-portrait. Left - me when I was 40. Right, me, at 60.](./60th-birthday.jpg)
+![A self-portrait. Left - me when I was 40. Right, me, at 60.](./60th-birthday.webp)
 *A self-portrait. Left - me when I was 40. Right, me, at 60.*
 
 ## Summary
@@ -29,7 +29,7 @@ In the spring of 2016, after my yearly checkup, my general practitioner noted on
 
 Quite serendipitously, while browsing the official [Duke University](https://www.youtube.com/user/Duke "Duke University YouTube video channel") video feed, I found a presentation featuring Dr. Westman of Duke University, giving a talk titled [“The Science and Practice of Low Carb Diets.”](https://www.youtube.com/watch?v=toLvGpk3HLE "Dr. Westman presents on LCHF") I had done the Atkins diet with great weight-loss success, only to backslide after I failed to correctly follow the Atkins maintenance plan, to the point of complete remission. I guessed that I needed expert help. What if I had the help of a doctor, especially a doctor who had taken the mantle from Dr. Atkins? My GP gave me a referral to see Dr. Westman.
 
-![Me, through the years, from obesity and sore joints to health management](./fifth-year-keto-dates.jpg)
+![Me, through the years, from obesity and sore joints to health management](./fifth-year-keto-dates.webp)
 *Me, through the years, from obesity and sore joints to health management.*
 
 ## The Road to Damascus

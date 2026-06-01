@@ -4,7 +4,7 @@ pubDate: 2017-04-23T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Baltimore 2017
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: See the <a href="https://security.duke.edu/">Duke University IT

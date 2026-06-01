@@ -17,7 +17,8 @@
  *        ](../../assets/images/... (markdown image pointing at deleted src/assets/images/)
  *
  * Warns (print, do not fail):
- *   3. Post-co-located images > 500 KB (src/content/**\/*.{jpg,jpeg,png,webp,gif,svg,avif}).
+ *   3. Post-co-located images > 5 MB (all formats). This is a floor, not a
+ *      target — dimension-aware checks happen at ingestion in new-post.mjs.
  *   4. Post-co-located JPG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
  *      `.original.{jpg,png}` suffix — suggests converting to WebP.
  *
@@ -39,7 +40,9 @@ const ORIGINAL_RASTER_RE = /\.original\.(jpe?g|png)$/i;
 const LEGACY_HTML_SRC_RE = /\bsrc=["']\/assets\//;
 const LEGACY_MD_PATH_RE = /\]\(\.\.\/\.\.\/assets\/images\//;
 
-const MAX_IMAGE_BYTES = 500 * 1024;
+// 5 MB floor: not a target, just a regression guard for egregiously large sources.
+// Dimension-aware checks happen at ingestion time in new-post.mjs.
+const MAX_EGREGIOUS_BYTES = 5 * 1024 * 1024;
 
 const blocks = [];
 const warns = [];
@@ -126,9 +129,9 @@ function checkFile(path, getContent) {
 
 	if (POST_IMG_RE.test(path)) {
 		const size = fileSize(path);
-		if (size !== null && size > MAX_IMAGE_BYTES) {
-			const kb = (size / 1024).toFixed(0);
-			warns.push(`${path} — ${kb} KB exceeds 500 KB target. Consider resizing or re-encoding.`);
+		if (size !== null && size > MAX_EGREGIOUS_BYTES) {
+			const mb = (size / (1024 * 1024)).toFixed(1);
+			warns.push(`${path} — ${mb} MB exceeds 5 MB floor. Web image sources should not be this large.`);
 		}
 	}
 

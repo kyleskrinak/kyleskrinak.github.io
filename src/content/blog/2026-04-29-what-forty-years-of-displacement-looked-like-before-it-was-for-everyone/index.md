@@ -4,7 +4,7 @@ pubDate: 2026-04-29T00:00:00.000Z
 description: From PostScript in 1985 to AI in 2026, a career spent learning
   sideways through successive waves of technological displacement — and what
   that pattern looks like now that the wave is everywhere at once.
-image: ./2026-04-29-voyage-of-life-old-age.jpg
+image: ./2026-04-29-voyage-of-life-old-age.webp
 alt: "The Voyage of Life: Old Age by Thomas Cole, 1842"
 caption: "Thomas Cole, The Voyage of Life: Old Age (1842). The closing panel of
   a four-part allegory. Cole's figure is older than I am but looks about as

@@ -11,10 +11,12 @@
  *   node scripts/new-post.mjs <slug> --images <source-dir>
  *
  * With --images: every image in <source-dir> is copied into the post
- * directory. JPG/PNG are converted to WebP (quality 85, max width 1200px)
+ * directory. JPG/PNG are converted to WebP (quality 85, max width 2400px)
  * via the project's existing sharp dependency. WebP/SVG/GIF are copied
  * as-is. The first image becomes the frontmatter `image:` and the rest
  * are emitted as inline `![alt](./<basename>)` references in the body.
+ * Hero sources narrower than 2400px emit a retina warning (the hero renders
+ * at 1200px 1x / 2400px 2x via PostDetails.astro densities=[1,2]).
  */
 import { readdir, mkdir, copyFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -29,6 +31,7 @@ const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DATE_PREFIX_RE = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
 const RASTER_TO_WEBP = new Set(['.jpg', '.jpeg', '.png']);
 const PASSTHROUGH_IMAGE_EXTS = new Set(['.webp', '.svg', '.gif', '.avif']);
+const RASTER_SHARP_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 
 function parseArgs(argv) {
 	const opts = { slug: null, imagesDir: null };
@@ -109,15 +112,22 @@ async function emitImage(src, destDir) {
 	if (RASTER_TO_WEBP.has(ext)) {
 		const outName = src.name.replace(/\.[^.]+$/, '') + '.webp';
 		const outPath = join(destDir, outName);
+		if (existsSync(outPath)) {
+			throw new Error(`Output already exists: ${outPath}. Two source images share the stem "${outName}" — rename one before importing.`);
+		}
 		await sharp(src.full)
-			.resize({ width: 1200, withoutEnlargement: true })
+			.resize({ width: 2400, withoutEnlargement: true })
 			.webp({ quality: 85 })
 			.toFile(outPath);
 		return outName;
 	}
 	// WebP / SVG / GIF / AVIF — copy as-is.
 	const outName = src.name;
-	await copyFile(src.full, join(destDir, outName));
+	const outPath = join(destDir, outName);
+	if (existsSync(outPath)) {
+		throw new Error(`Output already exists: ${outPath}. A converted raster and a passthrough file share the name "${outName}" — rename one before importing.`);
+	}
+	await copyFile(src.full, outPath);
 	return outName;
 }
 
@@ -170,7 +180,15 @@ async function main() {
 		if (sources.length === 0) {
 			console.warn(`No supported images found in ${imagesDirAbs} (jpg, jpeg, png, webp, svg, gif, avif).`);
 		}
-		for (const src of sources) {
+		for (let i = 0; i < sources.length; i++) {
+			const src = sources[i];
+			const isHero = i === 0;
+			if (isHero && RASTER_SHARP_EXTS.has(src.ext)) {
+				const meta = await sharp(src.full).metadata();
+				if (meta.width && meta.width < 2400) {
+					console.warn(`  ⚠ Hero source is ${meta.width}px wide — 2400px recommended for retina (2x) support.`);
+				}
+			}
 			const outName = await emitImage(src, postDir);
 			writtenImages.push(outName);
 			console.log(`  + ${outName}`);
