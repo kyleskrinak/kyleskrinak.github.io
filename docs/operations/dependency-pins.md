@@ -1,5 +1,7 @@
 # Dependency Pins
 
+> Part of the broader [Supply-Chain Security](./supply-chain.md) posture. This page covers **npm `overrides`** specifically; SHA-pinned GitHub Actions and the Docker base image are documented there.
+
 This site uses `package.json` `overrides` to pin specific transitive dependencies to exact versions. The pins exist to resolve open npm audit advisories without invoking `npm audit fix`, which would also drag in unrelated freshly-published packages.
 
 ## Current pins
@@ -44,6 +46,7 @@ These are pinned without `^`/`~`, so `npm update` will not advance them. Future 
 5. Run `npm audit signatures` to confirm registry signature integrity.
 6. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual`.
 7. Re-evaluate the deferred `yaml` chain — when `@astrojs/check` ships a release that no longer pulls the vulnerable `yaml-language-server`, drop the deferral and update.
+8. Review the **manually pinned** CI/build dependencies (GitHub Action SHAs, Docker base image) — these are excluded from Renovate and do not self-update. See [Supply-Chain Security → Manually pinned](./supply-chain.md#manually-pinned-not-managed-by-renovate).
 
 ### When to remove a pin
 A pin can be removed once the dependency tree naturally resolves to a non-vulnerable version on its own (i.e., a parent package upgraded its dependency range). Verify by temporarily removing the override and running `npm install` followed by `npm audit`. If audit stays clean, the pin is no longer load-bearing.
