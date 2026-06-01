@@ -40,6 +40,7 @@ All project documentation is organized in the `/docs` directory. Start here:
 
 - [Local Setup](./docs/getting-started/) - Run locally in 5 minutes
 - [Deployment Guide](./docs/operations/deployment.md) - How to deploy
+- [Supply-Chain Security](./docs/operations/supply-chain.md) - Dependency hardening, audit tooling, and pin policy
 - [Special Features](./docs/features/special-implementations.md) - Custom implementations
 - [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch)
 
@@ -92,6 +93,18 @@ npm run config:inspect   # Debug configuration values
 - **Analytics Privacy** - DNT/GPC compliance
 
 See `/docs/testing/` for detailed guides.
+
+## 🔒 Security & Supply Chain
+
+Layered dependency hardening to limit exposure from compromised or malicious packages:
+
+- **Renovate** (npm only) with a 7-day cooling-off on routine bumps; security alerts fast-tracked
+- **`ignore-scripts=true`** — no package lifecycle scripts run on install
+- **`npm run audit:deps`** — local pre-install audit: lockfile diff, publish-age, dormant-revival detection, and signature verification with a GO / REVIEW / BLOCK verdict
+- **CI gates** — `npm audit signatures` and the helper unit suite run on PRs and pushes to deploy branches
+- **SHA-pinned** Docker base image, `actions/checkout`, and `actions/setup-node`; other Actions locked to major-version tags; transitive CVEs pinned via npm `overrides`
+
+Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [Dependency Pins](./docs/operations/dependency-pins.md).
 
 ## 📊 Project Structure
 

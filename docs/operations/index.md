@@ -30,6 +30,11 @@ git push origin main
 - **[Maintenance Guide](./maintenance.md)** - Regular health checks and monitoring
 - **[Troubleshooting Guide](./troubleshooting.md)** - Solving common issues
 
+## Security & Dependencies
+
+- **[Supply-Chain Security](./supply-chain.md)** - Single source of truth: Renovate, pre-install audit, CI gates, and manually maintained SHA pins
+- **[Dependency Pins](./dependency-pins.md)** - npm `overrides` for transitive CVE advisories
+
 ## Key Information
 
 **Staging Environment**:

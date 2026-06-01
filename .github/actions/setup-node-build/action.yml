@@ -4,7 +4,10 @@ runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      # Pinned to SHA (v4). Composite action is shared across every workflow; pinning
+      # here keeps the Node runtime tamper-evident for the supply-chain-audit workflow
+      # in particular and tightens posture everywhere else as a side-effect.
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
       with:
         node-version: '24'
         cache: 'npm'
