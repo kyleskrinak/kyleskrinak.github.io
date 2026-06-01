@@ -18,7 +18,7 @@
  * Hero sources narrower than 2400px emit a retina warning (the hero renders
  * at 1200px 1x / 2400px 2x via PostDetails.astro densities=[1,2]).
  */
-import { readdir, mkdir, copyFile, writeFile, stat } from 'node:fs/promises';
+import { readdir, mkdir, rm, copyFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, basename, extname, resolve } from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
@@ -172,14 +172,36 @@ async function main() {
 		}
 	}
 
-	await mkdir(postDir, { recursive: true });
-
-	const writtenImages = [];
+	// Pre-flight: list sources and detect stem collisions before touching disk.
+	let sources = [];
 	if (imagesDirAbs) {
-		const sources = await listSourceImages(imagesDirAbs);
+		sources = await listSourceImages(imagesDirAbs);
 		if (sources.length === 0) {
 			console.warn(`No supported images found in ${imagesDirAbs} (jpg, jpeg, png, webp, svg, gif, avif).`);
+		} else {
+			const outputNames = new Set();
+			for (const src of sources) {
+				const outName = RASTER_TO_WEBP.has(src.ext)
+					? src.name.replace(/\.[^.]+$/, '') + '.webp'
+					: src.name;
+				if (outputNames.has(outName)) {
+					console.error(`Stem collision: multiple source images would produce "${outName}" — rename one before importing.`);
+					process.exit(1);
+				}
+				outputNames.add(outName);
+			}
 		}
+	}
+
+	// All pre-flight checks passed. Create directory and write files.
+	// On any failure, remove the partially-created directory so the user can retry cleanly.
+	// Track creation so the cleanup never removes a directory this run didn't create.
+	let dirCreatedByUs = false;
+	try {
+		await mkdir(postDir);
+		dirCreatedByUs = true;
+
+		const writtenImages = [];
 		for (let i = 0; i < sources.length; i++) {
 			const src = sources[i];
 			const isHero = i === 0;
@@ -193,32 +215,40 @@ async function main() {
 			writtenImages.push(outName);
 			console.log(`  + ${outName}`);
 		}
-	}
 
-	const frontmatter = {
-		title: deriveTitle(opts.slug),
-		pubDate: `${todayUTCDate()}T00:00:00.000Z`,
-		tags: [],
-		published: false,
-	};
-	let bodyImages = '';
-	if (writtenImages.length > 0) {
-		const [hero, ...rest] = writtenImages;
-		frontmatter.image = `./${hero}`;
-		frontmatter.alt = altFromBasename(hero);
-		if (rest.length > 0) {
-			bodyImages = '\n' + rest.map(n => `![${altFromBasename(n)}](./${n})`).join('\n\n') + '\n';
+		const frontmatter = {
+			title: deriveTitle(opts.slug),
+			pubDate: `${todayUTCDate()}T00:00:00.000Z`,
+			tags: [],
+			published: false,
+		};
+		let bodyImages = '';
+		if (writtenImages.length > 0) {
+			const [hero, ...rest] = writtenImages;
+			frontmatter.image = `./${hero}`;
+			frontmatter.alt = altFromBasename(hero);
+			if (rest.length > 0) {
+				bodyImages = '\n' + rest.map(n => `![${altFromBasename(n)}](./${n})`).join('\n\n') + '\n';
+			}
 		}
-	}
 
-	const fm = stringifyYaml(frontmatter);
-	const content = `---\n${fm}---\n${bodyImages}\n`;
-	const indexPath = join(postDir, 'index.md');
-	await writeFile(indexPath, content, 'utf8');
+		const fm = stringifyYaml(frontmatter);
+		const content = `---\n${fm}---\n${bodyImages}\n`;
+		const indexPath = join(postDir, 'index.md');
+		await writeFile(indexPath, content, 'utf8');
 
-	console.log(`\nCreated ${indexPath}`);
-	if (writtenImages.length > 0) {
-		console.log(`Images: ${writtenImages.length} (hero: ${writtenImages[0]})`);
+		console.log(`\nCreated ${indexPath}`);
+		if (writtenImages.length > 0) {
+			console.log(`Images: ${writtenImages.length} (hero: ${writtenImages[0]})`);
+		}
+	} catch (err) {
+		if (dirCreatedByUs) {
+			await rm(postDir, { recursive: true, force: true }).catch((rmErr) => {
+				console.warn(`Warning: could not remove ${postDir}: ${rmErr.message}`);
+				console.warn('Remove it manually before retrying.');
+			});
+		}
+		throw err;
 	}
 }
 
