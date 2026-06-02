@@ -139,7 +139,7 @@ function checkFile(path, getContent) {
 			if (!isUnconvertedRaster) {
 				const limit = isKeptOriginal ? MAX_EGREGIOUS_BYTES : MAX_WEB_BYTES;
 				if (size > limit) {
-					const mb = (size / (1024 * 1024)).toFixed(2);
+					const mb = (Math.ceil(size / (1024 * 1024) * 100) / 100).toFixed(2);
 					const msg = isKeptOriginal
 						? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
 						: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
@@ -150,7 +150,7 @@ function checkFile(path, getContent) {
 	}
 
 	if (POST_RASTER_LEGACY_RE.test(path) && !ORIGINAL_RASTER_RE.test(path)) {
-		warns.push(`${path} — JPG/PNG in a post directory. Convert to WebP, or rename to *.original.{jpg,png} if intentional.`);
+		warns.push(`${path} — JPG/JPEG/PNG in a post directory. Convert to WebP, or rename to *.original.{jpg,jpeg,png} if intentional.`);
 	}
 }
 
