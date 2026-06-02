@@ -139,7 +139,7 @@ function checkFile(path, getContent) {
 			if (!isUnconvertedRaster) {
 				const limit = isKeptOriginal ? MAX_EGREGIOUS_BYTES : MAX_WEB_BYTES;
 				if (size > limit) {
-					const mb = (size / (1024 * 1024)).toFixed(1);
+					const mb = (size / (1024 * 1024)).toFixed(2);
 					const msg = isKeptOriginal
 						? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
 						: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
