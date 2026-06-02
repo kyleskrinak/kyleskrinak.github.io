@@ -113,7 +113,7 @@ async function emitImage(src, destDir) {
 		const outName = src.name.replace(/\.[^.]+$/, '') + '.webp';
 		const outPath = join(destDir, outName);
 		if (existsSync(outPath)) {
-			throw new Error(`Output already exists: ${outPath}. Two source images share the stem "${outName}" — rename one before importing.`);
+			throw new Error(`Output already exists: ${outPath}. Two source images share the output name "${outName}" — rename one before importing.`);
 		}
 		await sharp(src.full)
 			.resize({ width: 2400, withoutEnlargement: true })
@@ -185,7 +185,7 @@ async function main() {
 					? src.name.replace(/\.[^.]+$/, '') + '.webp'
 					: src.name;
 				if (outputNames.has(outName)) {
-					console.error(`Stem collision: multiple source images would produce "${outName}" — rename one before importing.`);
+					console.error(`Output name collision: multiple source images would produce "${outName}" — rename one before importing.`);
 					process.exit(1);
 				}
 				outputNames.add(outName);
