@@ -150,7 +150,7 @@ function checkFile(path, getContent) {
 	}
 
 	if (POST_RASTER_LEGACY_RE.test(path) && !ORIGINAL_RASTER_RE.test(path)) {
-		warns.push(`${path} — JPG/JPEG/PNG in a post directory. Convert to WebP, or rename to *.original.{jpg,jpeg,png} if intentional.`);
+		warns.push(`${path} — JPG/JPEG/PNG in a content directory. Convert to WebP, or rename to *.original.{jpg,jpeg,png} if intentional.`);
 	}
 }
 

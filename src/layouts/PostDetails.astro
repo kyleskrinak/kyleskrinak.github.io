@@ -125,7 +125,7 @@ const nextPost =
         {/* fit + position route to Sharp's resize at build time so the
             generated 1200×600 hero is cropped from the part of the source
             image specified by frontmatter `imagePosition` (default: center).
-            densities=[1,2] emits a 1x/2x srcset; sources <2400px wide get
+            densities={[1, 2]} emits a 1x/2x srcset; sources <2400px wide get
             only the 1x candidate (Sharp skips upscaling). */}
         <Image
           src={image}
