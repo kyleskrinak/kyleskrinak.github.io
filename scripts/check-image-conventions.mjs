@@ -19,7 +19,7 @@
  * Warns (print, do not fail):
  *   3. Post-co-located images exceeding per-format size limits:
  *        - Web output formats (webp, avif, gif, svg) > 1 MB
- *        - Kept originals (.original.jpg/png) > 5 MB (floor only)
+ *        - Kept originals (.original.jpg/png) > 5 MB (ceiling for archived sources)
  *   4. Post-co-located JPG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
  *      `.original.{jpg,png}` suffix — suggests converting to WebP.
  *
@@ -43,7 +43,7 @@ const LEGACY_MD_PATH_RE = /\]\(\.\.\/\.\.\/assets\/images\//;
 
 // Web output images (webp, avif, gif, svg): 1 MB is a meaningful LCP guard.
 const MAX_WEB_BYTES = 1 * 1024 * 1024;
-// Kept originals (.original.jpg/png): 5 MB floor — intentionally large sources.
+// Kept originals (.original.jpg/png): 5 MB ceiling — intentionally large sources.
 const MAX_EGREGIOUS_BYTES = 5 * 1024 * 1024;
 
 const blocks = [];
@@ -137,7 +137,7 @@ function checkFile(path, getContent) {
 			if (size > limit) {
 				const mb = (size / (1024 * 1024)).toFixed(1);
 				const msg = isKeptOriginal
-					? `${path} — ${mb} MB exceeds 5 MB floor for a kept original.`
+					? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
 					: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
 				warns.push(msg);
 			}
