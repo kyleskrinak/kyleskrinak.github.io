@@ -20,7 +20,7 @@
  */
 import { readdir, mkdir, rm, copyFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, basename, extname, resolve } from 'node:path';
+import { join, extname, resolve } from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
 import sharp from 'sharp';
 

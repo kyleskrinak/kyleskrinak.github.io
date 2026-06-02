@@ -19,11 +19,11 @@
  * Warns (print, do not fail):
  *   3. Post-co-located images exceeding per-format size limits:
  *        - Web output formats (webp, avif, gif, svg) > 1 MB
- *        - Kept originals (.original.jpg/png) > 5 MB (ceiling for archived sources)
- *      Unconverted JPG/PNG (non-original) are excluded from size checks — Warning 4
+ *        - Kept originals (.original.jpg/jpeg/png) > 5 MB (ceiling for archived sources)
+ *      Unconverted JPG/JPEG/PNG (non-original) are excluded from size checks — Warning 4
  *      already flags the format; size is secondary to the conversion requirement.
- *   4. Post-co-located JPG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
- *      `.original.{jpg,png}` suffix — suggests converting to WebP.
+ *   4. Post-co-located JPG/JPEG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
+ *      `.original.{jpg,jpeg,png}` suffix — suggests converting to WebP.
  *
  * Bypass (only when truly necessary): git commit --no-verify
  */
