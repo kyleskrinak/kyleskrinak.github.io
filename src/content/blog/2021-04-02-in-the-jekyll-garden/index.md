@@ -2,7 +2,7 @@
 title: In the Jekyll garden
 pubDate: 2021-04-02T00:00:00.000Z
 categories: []
-image: ./21-04-02-jekyll-garden.jpg
+image: ./21-04-02-jekyll-garden.webp
 alt: 21 04 02 jekyll garden
 source: jekyll
 description: Continuing my research on a static website workflow, I'm spinning

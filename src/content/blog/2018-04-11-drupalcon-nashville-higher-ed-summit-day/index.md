@@ -4,7 +4,7 @@ pubDate: 2018-04-11T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: "* Biography, startup failures"

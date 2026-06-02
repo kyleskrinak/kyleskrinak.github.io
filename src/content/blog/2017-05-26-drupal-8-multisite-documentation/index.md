@@ -4,7 +4,7 @@ pubDate: 2017-05-26T00:00:00.000Z
 categories: []
 tags:
   - Multisite
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: Documentation on Drupal 8 multisite configuration based on code

@@ -4,7 +4,7 @@ pubDate: 2018-05-13T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: Below is my list of videos to catch up on DrupalCon Nashville 2018.
