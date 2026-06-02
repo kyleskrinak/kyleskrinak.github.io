@@ -4,7 +4,7 @@ pubDate: 2018-04-07T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Nashville 2018
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: I will be leading two sessions at the DrupalCon Higher Education

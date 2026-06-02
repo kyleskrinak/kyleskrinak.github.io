@@ -4,7 +4,7 @@ pubDate: 2019-05-22T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Seattle 2019
-image: ./drupal_logo.png
+image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
 description: The Higher Ed Summit organizers had considerably redesigned the

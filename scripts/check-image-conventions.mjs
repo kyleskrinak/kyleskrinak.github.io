@@ -17,9 +17,13 @@
  *        ](../../assets/images/... (markdown image pointing at deleted src/assets/images/)
  *
  * Warns (print, do not fail):
- *   3. Post-co-located images > 500 KB (src/content/**\/*.{jpg,jpeg,png,webp,gif,svg,avif}).
- *   4. Post-co-located JPG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
- *      `.original.{jpg,png}` suffix — suggests converting to WebP.
+ *   3. Content-directory images exceeding per-format size limits:
+ *        - Web output formats (webp, avif, gif, svg) > 1 MB
+ *        - Kept originals (.original.jpg/jpeg/png) > 5 MB (ceiling for archived sources)
+ *      Unconverted JPG/JPEG/PNG (non-original) are excluded from size checks — Warning 4
+ *      already flags the format; size is secondary to the conversion requirement.
+ *   4. Content-directory JPG/JPEG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
+ *      `.original.{jpg,jpeg,png}` suffix — suggests converting to WebP.
  *
  * Bypass (only when truly necessary): git commit --no-verify
  */
@@ -39,7 +43,10 @@ const ORIGINAL_RASTER_RE = /\.original\.(jpe?g|png)$/i;
 const LEGACY_HTML_SRC_RE = /\bsrc=["']\/assets\//;
 const LEGACY_MD_PATH_RE = /\]\(\.\.\/\.\.\/assets\/images\//;
 
-const MAX_IMAGE_BYTES = 500 * 1024;
+// Web output images (webp, avif, gif, svg): 1 MB is a meaningful LCP guard.
+const MAX_WEB_BYTES = 1 * 1024 * 1024;
+// Kept originals (.original.jpg/jpeg/png): 5 MB ceiling — intentionally large sources.
+const MAX_EGREGIOUS_BYTES = 5 * 1024 * 1024;
 
 const blocks = [];
 const warns = [];
@@ -126,14 +133,24 @@ function checkFile(path, getContent) {
 
 	if (POST_IMG_RE.test(path)) {
 		const size = fileSize(path);
-		if (size !== null && size > MAX_IMAGE_BYTES) {
-			const kb = (size / 1024).toFixed(0);
-			warns.push(`${path} — ${kb} KB exceeds 500 KB target. Consider resizing or re-encoding.`);
+		if (size !== null) {
+			const isKeptOriginal = ORIGINAL_RASTER_RE.test(path);
+			const isUnconvertedRaster = POST_RASTER_LEGACY_RE.test(path) && !isKeptOriginal;
+			if (!isUnconvertedRaster) {
+				const limit = isKeptOriginal ? MAX_EGREGIOUS_BYTES : MAX_WEB_BYTES;
+				if (size > limit) {
+					const mb = (Math.ceil(size / (1024 * 1024) * 100) / 100).toFixed(2);
+					const msg = isKeptOriginal
+						? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
+						: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
+					warns.push(msg);
+				}
+			}
 		}
 	}
 
 	if (POST_RASTER_LEGACY_RE.test(path) && !ORIGINAL_RASTER_RE.test(path)) {
-		warns.push(`${path} — JPG/PNG in a post directory. Convert to WebP, or rename to *.original.{jpg,png} if intentional.`);
+		warns.push(`${path} — JPG/JPEG/PNG in a content directory. Convert to WebP, or rename to *.original.{jpg,jpeg,png} if intentional.`);
 	}
 }
 

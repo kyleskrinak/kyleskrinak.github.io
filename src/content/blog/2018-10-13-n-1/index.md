@@ -4,7 +4,7 @@ pubDate: 2018-10-13T00:00:00.000Z
 categories: []
 description: When the evidence is scant, the policy is misleading and the result
   is inversely fantastic
-image: ./confusedmeme.jpg
+image: ./confusedmeme.webp
 alt: Confused meme
 source: jekyll
 ---

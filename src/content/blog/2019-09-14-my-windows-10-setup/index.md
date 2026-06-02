@@ -4,7 +4,7 @@ pubDate: 2019-09-14T00:00:00.000Z
 updatedDate: 2026-05-09T00:00:00.000Z
 categories: []
 description: Why Windows and how I like my default Windows 10 configured
-image: ./punch_card.jpg
+image: ./punch_card.webp
 alt: punch card
 source: jekyll
 ---

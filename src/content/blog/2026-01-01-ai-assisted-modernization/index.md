@@ -12,7 +12,7 @@ tags:
 description: "How an AI-assisted sprint refreshed my decade-old Jekyll stack:
   asset vendoring, visual tests, workflow guardrails, and a renewed commitment
   to Minimal Mistakes."
-image: ./ai-modernization-workflow.jpg
+image: ./ai-modernization-workflow.webp
 alt: ai modernization workflow
 source: jekyll
 ---

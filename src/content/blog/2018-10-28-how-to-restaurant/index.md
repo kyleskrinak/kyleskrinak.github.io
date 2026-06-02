@@ -4,7 +4,7 @@ pubDate: 2018-10-28T00:00:00.000Z
 updatedDate: 2026-05-12T00:00:00.000Z
 categories: []
 description: Asking about one common and simple ingredient can expose a restaurant
-image: ./empty_dining.jpg
+image: ./empty_dining.webp
 alt: Empty dining room
 source: jekyll
 ---

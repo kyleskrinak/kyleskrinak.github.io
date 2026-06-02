@@ -5,7 +5,7 @@ categories: []
 tags:
   - Story-telling
 description: “Dad, can you pull your skin out, like a balloon?”
-image: ./hot_tub.jpg
+image: ./hot_tub.webp
 alt: Hot tub
 source: jekyll
 ---

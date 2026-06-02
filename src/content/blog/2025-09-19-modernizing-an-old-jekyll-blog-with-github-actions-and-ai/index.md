@@ -13,7 +13,7 @@ tags:
 description: Well, hello there, 2025. After years away, I rebuilt my Jekyll blog
   with GitHub Actions, CloudFront, and AI—streamlined publishing with modern
   tools and lessons learned.
-image: ./typewriter-to-laptop.jpg
+image: ./typewriter-to-laptop.webp
 alt: typewriter to laptop
 source: jekyll
 ---

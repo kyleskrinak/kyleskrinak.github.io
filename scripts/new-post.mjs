@@ -11,14 +11,16 @@
  *   node scripts/new-post.mjs <slug> --images <source-dir>
  *
  * With --images: every image in <source-dir> is copied into the post
- * directory. JPG/PNG are converted to WebP (quality 85, max width 1200px)
- * via the project's existing sharp dependency. WebP/SVG/GIF are copied
+ * directory. JPG/JPEG/PNG are converted to WebP (quality 85, max width 2400px)
+ * via the project's existing sharp dependency. WebP/AVIF/SVG/GIF are copied
  * as-is. The first image becomes the frontmatter `image:` and the rest
  * are emitted as inline `![alt](./<basename>)` references in the body.
+ * Hero sources narrower than 2400px emit a retina warning (the hero renders
+ * at 1200px 1x / 2400px 2x via PostDetails.astro densities={[1, 2]}).
  */
-import { readdir, mkdir, copyFile, writeFile, stat } from 'node:fs/promises';
+import { readdir, mkdir, rm, copyFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, basename, extname, resolve } from 'node:path';
+import { join, extname, resolve } from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
 import sharp from 'sharp';
 
@@ -29,6 +31,7 @@ const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DATE_PREFIX_RE = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
 const RASTER_TO_WEBP = new Set(['.jpg', '.jpeg', '.png']);
 const PASSTHROUGH_IMAGE_EXTS = new Set(['.webp', '.svg', '.gif', '.avif']);
+const RASTER_SHARP_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 
 function parseArgs(argv) {
 	const opts = { slug: null, imagesDir: null };
@@ -109,15 +112,22 @@ async function emitImage(src, destDir) {
 	if (RASTER_TO_WEBP.has(ext)) {
 		const outName = src.name.replace(/\.[^.]+$/, '') + '.webp';
 		const outPath = join(destDir, outName);
+		if (existsSync(outPath)) {
+			throw new Error(`Output already exists: ${outPath}. Two source images share the output name "${outName}" — rename one before importing.`);
+		}
 		await sharp(src.full)
-			.resize({ width: 1200, withoutEnlargement: true })
+			.resize({ width: 2400, withoutEnlargement: true })
 			.webp({ quality: 85 })
 			.toFile(outPath);
 		return outName;
 	}
 	// WebP / SVG / GIF / AVIF — copy as-is.
 	const outName = src.name;
-	await copyFile(src.full, join(destDir, outName));
+	const outPath = join(destDir, outName);
+	if (existsSync(outPath)) {
+		throw new Error(`Output already exists: ${outPath}. A converted raster and a passthrough file share the name "${outName}" — rename one before importing.`);
+	}
+	await copyFile(src.full, outPath);
 	return outName;
 }
 
@@ -162,45 +172,83 @@ async function main() {
 		}
 	}
 
-	await mkdir(postDir, { recursive: true });
-
-	const writtenImages = [];
+	// Pre-flight: list sources and detect stem collisions before touching disk.
+	let sources = [];
 	if (imagesDirAbs) {
-		const sources = await listSourceImages(imagesDirAbs);
+		sources = await listSourceImages(imagesDirAbs);
 		if (sources.length === 0) {
 			console.warn(`No supported images found in ${imagesDirAbs} (jpg, jpeg, png, webp, svg, gif, avif).`);
+		} else {
+			const outputNames = new Set();
+			for (const src of sources) {
+				const outName = RASTER_TO_WEBP.has(src.ext)
+					? src.name.replace(/\.[^.]+$/, '') + '.webp'
+					: src.name;
+				if (outputNames.has(outName)) {
+					console.error(`Output name collision: multiple source images would produce "${outName}" — rename one before importing.`);
+					process.exit(1);
+				}
+				outputNames.add(outName);
+			}
 		}
-		for (const src of sources) {
+	}
+
+	// All pre-flight checks passed. Create directory and write files.
+	// On any failure, remove the partially-created directory so the user can retry cleanly.
+	// Track creation so the cleanup never removes a directory this run didn't create.
+	let dirCreatedByUs = false;
+	try {
+		await mkdir(postDir);
+		dirCreatedByUs = true;
+
+		const writtenImages = [];
+		for (let i = 0; i < sources.length; i++) {
+			const src = sources[i];
+			const isHero = i === 0;
+			if (isHero && RASTER_SHARP_EXTS.has(src.ext)) {
+				const meta = await sharp(src.full).metadata();
+				if (meta.width && meta.width < 2400) {
+					console.warn(`  ⚠ Hero source is ${meta.width}px wide — 2400px recommended for retina (2x) support.`);
+				}
+			}
 			const outName = await emitImage(src, postDir);
 			writtenImages.push(outName);
 			console.log(`  + ${outName}`);
 		}
-	}
 
-	const frontmatter = {
-		title: deriveTitle(opts.slug),
-		pubDate: `${todayUTCDate()}T00:00:00.000Z`,
-		tags: [],
-		published: false,
-	};
-	let bodyImages = '';
-	if (writtenImages.length > 0) {
-		const [hero, ...rest] = writtenImages;
-		frontmatter.image = `./${hero}`;
-		frontmatter.alt = altFromBasename(hero);
-		if (rest.length > 0) {
-			bodyImages = '\n' + rest.map(n => `![${altFromBasename(n)}](./${n})`).join('\n\n') + '\n';
+		const frontmatter = {
+			title: deriveTitle(opts.slug),
+			pubDate: `${todayUTCDate()}T00:00:00.000Z`,
+			tags: [],
+			published: false,
+		};
+		let bodyImages = '';
+		if (writtenImages.length > 0) {
+			const [hero, ...rest] = writtenImages;
+			frontmatter.image = `./${hero}`;
+			frontmatter.alt = altFromBasename(hero);
+			if (rest.length > 0) {
+				bodyImages = '\n' + rest.map(n => `![${altFromBasename(n)}](./${n})`).join('\n\n') + '\n';
+			}
 		}
-	}
 
-	const fm = stringifyYaml(frontmatter);
-	const content = `---\n${fm}---\n${bodyImages}\n`;
-	const indexPath = join(postDir, 'index.md');
-	await writeFile(indexPath, content, 'utf8');
+		const fm = stringifyYaml(frontmatter);
+		const content = `---\n${fm}---\n${bodyImages}\n`;
+		const indexPath = join(postDir, 'index.md');
+		await writeFile(indexPath, content, 'utf8');
 
-	console.log(`\nCreated ${indexPath}`);
-	if (writtenImages.length > 0) {
-		console.log(`Images: ${writtenImages.length} (hero: ${writtenImages[0]})`);
+		console.log(`\nCreated ${indexPath}`);
+		if (writtenImages.length > 0) {
+			console.log(`Images: ${writtenImages.length} (hero: ${writtenImages[0]})`);
+		}
+	} catch (err) {
+		if (dirCreatedByUs) {
+			await rm(postDir, { recursive: true, force: true }).catch((rmErr) => {
+				console.warn(`Warning: could not remove ${postDir}: ${rmErr.message}`);
+				console.warn('Remove it manually before retrying.');
+			});
+		}
+		throw err;
 	}
 }
 

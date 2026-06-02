@@ -3,7 +3,7 @@ title: Don't You Miss Carbs?
 pubDate: 2019-09-17T00:00:00.000Z
 categories: []
 description: Imagine asking an alcoholic; "Don't you miss alcohol?"
-image: ./20160619-fathersday.jpg
+image: ./20160619-fathersday.webp
 alt: 20160619 fathersday
 source: jekyll
 ---
