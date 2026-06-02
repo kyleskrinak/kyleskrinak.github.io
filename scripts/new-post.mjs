@@ -11,8 +11,8 @@
  *   node scripts/new-post.mjs <slug> --images <source-dir>
  *
  * With --images: every image in <source-dir> is copied into the post
- * directory. JPG/PNG are converted to WebP (quality 85, max width 2400px)
- * via the project's existing sharp dependency. WebP/SVG/GIF are copied
+ * directory. JPG/JPEG/PNG are converted to WebP (quality 85, max width 2400px)
+ * via the project's existing sharp dependency. WebP/AVIF/SVG/GIF are copied
  * as-is. The first image becomes the frontmatter `image:` and the rest
  * are emitted as inline `![alt](./<basename>)` references in the body.
  * Hero sources narrower than 2400px emit a retina warning (the hero renders

@@ -45,7 +45,7 @@ const LEGACY_MD_PATH_RE = /\]\(\.\.\/\.\.\/assets\/images\//;
 
 // Web output images (webp, avif, gif, svg): 1 MB is a meaningful LCP guard.
 const MAX_WEB_BYTES = 1 * 1024 * 1024;
-// Kept originals (.original.jpg/png): 5 MB ceiling — intentionally large sources.
+// Kept originals (.original.jpg/jpeg/png): 5 MB ceiling — intentionally large sources.
 const MAX_EGREGIOUS_BYTES = 5 * 1024 * 1024;
 
 const blocks = [];
