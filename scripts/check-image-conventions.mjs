@@ -20,6 +20,8 @@
  *   3. Post-co-located images exceeding per-format size limits:
  *        - Web output formats (webp, avif, gif, svg) > 1 MB
  *        - Kept originals (.original.jpg/png) > 5 MB (ceiling for archived sources)
+ *      Unconverted JPG/PNG (non-original) are excluded from size checks — Warning 4
+ *      already flags the format; size is secondary to the conversion requirement.
  *   4. Post-co-located JPG/PNG (src/content/**\/*.{jpg,jpeg,png}) without a
  *      `.original.{jpg,png}` suffix — suggests converting to WebP.
  *
@@ -133,13 +135,16 @@ function checkFile(path, getContent) {
 		const size = fileSize(path);
 		if (size !== null) {
 			const isKeptOriginal = ORIGINAL_RASTER_RE.test(path);
-			const limit = isKeptOriginal ? MAX_EGREGIOUS_BYTES : MAX_WEB_BYTES;
-			if (size > limit) {
-				const mb = (size / (1024 * 1024)).toFixed(1);
-				const msg = isKeptOriginal
-					? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
-					: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
-				warns.push(msg);
+			const isUnconvertedRaster = POST_RASTER_LEGACY_RE.test(path) && !isKeptOriginal;
+			if (!isUnconvertedRaster) {
+				const limit = isKeptOriginal ? MAX_EGREGIOUS_BYTES : MAX_WEB_BYTES;
+				if (size > limit) {
+					const mb = (size / (1024 * 1024)).toFixed(1);
+					const msg = isKeptOriginal
+						? `${path} — ${mb} MB exceeds 5 MB limit for a kept original.`
+						: `${path} — ${mb} MB exceeds 1 MB limit for a web-output image. Resize or re-encode.`;
+					warns.push(msg);
+				}
 			}
 		}
 	}
