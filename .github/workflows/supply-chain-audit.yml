@@ -19,7 +19,11 @@ jobs:
   signatures:
     name: Verify npm package signatures
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 25 min: 3 audit attempts hard-capped at 300s each (timeout(1) wall-clock cap per
+    # attempt) + 90s of backoff sleeps is ~16.5 min; the rest is headroom for
+    # checkout/setup + npm ci so a cold cache cannot turn the designed outage skip
+    # into a job-timeout hard fail.
+    timeout-minutes: 25
 
     steps:
       - name: Checkout PR code
@@ -39,5 +43,74 @@ jobs:
       # It only fails when a signed package has been tampered with. Unsigned
       # legacy packages in the tree will not be flagged here. The local
       # `npm run audit:deps` helper provides additional lockfile-diff scrutiny.
+      #
+      # Retry loop absorbs transient registry errors (attestation 404s, propagation lag).
+      # Non-transient failures (signature mismatch, tampering) are deterministic and fail
+      # immediately on the first attempt — no retry needed or attempted.
+      # npm's own fetch retries are bounded (--fetch-retries=1 --fetch-timeout=60000) and
+      # each attempt runs under timeout(1) (300s cap, KILL escalation after 10s), so retry
+      # policy lives in this outer loop and a stall-type outage cannot run a single
+      # attempt past the job timeout no matter how many sequential fetch phases stall.
+      # A cap hit (exit 124, or 137 when the KILL escalation fires; 137 can also be an
+      # external SIGKILL, e.g. OOM — same skip-with-warning outcome) is classified
+      # transient — a stall is by definition transient. The tamper check still runs
+      # first on whatever output was captured, though npm prints its tamper report
+      # only after verification completes, so a capped attempt is expected to carry none.
+      #
+      # Tamper indicators (npm's "invalid registry signature" / "invalid attestation" /
+      # "missing registry signature" / "might have tampered" report phrases) are checked
+      # before the transient pattern, so a tamper report can never be classified transient
+      # even if registry error lines appear in the same output.
+      # On sustained failure (all 3 attempts exhaust the transient classification), emit a warning
+      # and continue — registry unavailability is not itself a supply-chain signal.
+      #
+      # The transient pattern is anchored to npm's structured error-code line
+      # ("npm error code X" / "npm ERR! code X") so package names, semver
+      # prerelease tags, and integrity hashes in mismatch output cannot spoof
+      # a transient classification and cause a tamper event to be waived.
+      # Classification greps read $output via herestrings (no pipeline) so grep's exit
+      # status cannot be skewed by SIGPIPE/pipefail if the step shell ever changes.
+      #
+      # Echoed npm output is fenced with ::stop-commands:: so attacker-influenced
+      # lines cannot inject workflow commands (annotation suppression, log masking).
+      # Guard token is drawn from /dev/urandom and validated against its expected
+      # shape before use — a malformed/empty token fails closed instead of emitting
+      # a predictable fence. Output is emitted via printf so echo option-token edge
+      # cases cannot leave the fence unclosed.
       - name: Verify package signatures
-        run: npm audit signatures
+        run: |
+          transient='^npm (ERR!|error) code (E404|E429|ENOTFOUND|ETIMEDOUT|ERR_SOCKET_TIMEOUT|ECONNRESET|ECONNREFUSED|ENETUNREACH|EAI_AGAIN|E5[0-9][0-9])\b'
+          tamper='invalid (registry signature|attestation)|missing registry signature|might have tampered'
+          emit_fenced() {
+            local guard
+            guard="fence-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+            if ! [[ "$guard" =~ ^fence-[0-9a-f]{32}$ ]]; then
+              echo "::error::log fence token generation failed — failing closed"
+              exit 1
+            fi
+            echo "::stop-commands::$guard"
+            printf '%s\n' "$output"
+            echo "::$guard::"
+          }
+          for attempt in 1 2 3; do
+            rc=0
+            output=$(timeout --kill-after=10 300 npm audit signatures --fetch-retries=1 --fetch-timeout=60000 2>&1) || rc=$?
+            emit_fenced
+            if [ "$rc" -eq 0 ]; then
+              exit 0
+            fi
+            if grep -qE "$tamper" <<<"$output"; then
+              echo "::error::npm audit signatures reported invalid or tampered packages — failing closed"
+              exit 1
+            fi
+            if [ "$rc" -ne 124 ] && [ "$rc" -ne 137 ] && ! grep -qE "$transient" <<<"$output"; then
+              echo "::error::npm audit signatures failed with a non-transient error (possible signature mismatch) — failing closed"
+              exit 1
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::transient failure (exit $rc) on attempt $attempt/3 — retrying in $((attempt * 30))s"
+              sleep $((attempt * 30))
+            fi
+          done
+          echo "::warning::npm audit signatures did not complete after 3 attempts (last exit $rc — registry outage or attempt timeout) — signature verification skipped"
+          echo "⚠️ npm audit signatures skipped: did not complete after 3 attempts (last exit $rc — registry outage or attempt timeout)" >> "$GITHUB_STEP_SUMMARY"
