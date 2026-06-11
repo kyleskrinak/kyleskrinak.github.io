@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=22.13.0"
   },
-  "packageManager": "npm@11.12.1",
+  "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "astro dev",
     "build": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
@@ -81,10 +81,10 @@
   "overrides": {
     "devalue": "5.8.1",
     "fast-uri": "3.1.2",
-    "fast-xml-builder": "1.1.7",
+    "fast-xml-builder": "1.2.0",
     "fast-xml-parser": "5.7.0",
     "flatted": "3.4.2",
     "brace-expansion": "5.0.6",
-    "postcss": "8.5.10"
+    "postcss": "8.5.15"
   }
 }
