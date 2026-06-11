@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=22.13.0"
   },
-  "packageManager": "npm@11.12.1",
+  "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "astro dev",
     "build": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
