@@ -71,9 +71,7 @@ categories: []
 <em>
 <strong>Note:</strong>
 I originally posted this on my Facebook account on
-<a href="https://www.facebook.com/notes/kyle-skrinak/two-guys-watch-a-burning-house/10154279590431625">March 19th, 2017</a>. However, Facebook is getting rid of
-their "notes" blog-like ability, so I've moved this content to my blog, with
-some edits for clarity.
+March 19th, 2017. Facebook has since retired Notes; the original can still be found with some effort. I've moved this content here, with some edits for clarity.
 </em>
 </div>
 
