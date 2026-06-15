@@ -20,3 +20,5 @@ public/_pagefind/
 .vscode/
 .idea/
 .npm/
+lighthouse-reports/
+.playwright/
