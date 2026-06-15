@@ -10,3 +10,12 @@ playwright-report/
 test-results/
 .docker-cache
 *.log
+.env
+.env.local
+.env.*.local
+.DS_Store
+tmp/
+.astro/
+.vscode/
+.idea/
+.npm/
