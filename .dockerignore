@@ -16,6 +16,7 @@ test-results/
 .DS_Store
 tmp/
 .astro/
+public/_pagefind/
 .vscode/
 .idea/
 .npm/
