@@ -4,24 +4,21 @@
  * Displays a notice that content was migrated from Facebook Notes
  *
  * Usage in MDX:
- * <FbMigrate fb_url="https://..." original_date="August 1st, 2009" />
+ * <FbMigrate original_date="August 1st, 2009" />
  */
 
 interface Props {
-  fb_url: string;
   original_date: string;
 }
 
-const { fb_url, original_date } = Astro.props;
+const { original_date } = Astro.props;
 ---
 
 <div class="notice notice--info">
   <em>
     <strong>Note:</strong>
     I originally posted this on my Facebook account on
-    <a href={fb_url}>{original_date}</a>. However, Facebook is getting rid of
-    their "notes" blog-like ability, so I've moved this content to my blog, with
-    some edits for clarity.
+    {original_date}. Facebook has since retired Notes; the original can still be found with some effort. I've moved this content here, with some edits for clarity.
   </em>
 </div>
 
@@ -47,12 +44,4 @@ const { fb_url, original_date } = Astro.props;
     font-weight: 700;
   }
 
-  .notice a {
-    color: #0366d6;
-    text-decoration: none;
-  }
-
-  .notice a:hover {
-    text-decoration: underline;
-  }
 </style>
