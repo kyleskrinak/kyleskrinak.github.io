@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+coverage/
+.git/
+design/
+docs/
+tests/
+playwright-report/
+test-results/
+.docker-cache
+*.log
