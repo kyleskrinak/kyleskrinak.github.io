@@ -1049,7 +1049,7 @@ async function main() {
     try {
       await buildPresentation(input, output, title);
       successCount++;
-    } catch (error) {
+    } catch {
       console.error(`Failed to build ${output}`);
     }
   }

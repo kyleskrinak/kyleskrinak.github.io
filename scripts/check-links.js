@@ -72,7 +72,7 @@ if (isManualMode) {
   // Check if htmltest is installed
   try {
     execSync('htmltest --version', { stdio: 'ignore' });
-  } catch (error) {
+  } catch {
     console.error('❌ Error: htmltest binary not found.');
     console.error('   Install htmltest first. See docs/link-checking.md for instructions.');
     console.error('   macOS: brew install htmltest');
