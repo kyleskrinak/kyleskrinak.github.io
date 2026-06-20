@@ -90,7 +90,7 @@ test.describe('Link Validation', () => {
 		expect(canonical).toMatch(/\/$/);
 	});
 
-	test.skip('category page loads', async ({ page }) => {
+	test.skip('category page loads', async () => {
 		// Skip: No posts have categories (all have empty arrays)
 		// Categories functionality exists but is unused
 	});
