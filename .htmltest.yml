@@ -14,3 +14,9 @@ IgnoreURLs:
   - "claude.ai"  # Connection reset in htmltest, works in browser
   - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers
   - "linkedin.com"  # Bot detection (999/404 to crawlers), works in real browsers
+IgnoreInternalURLs:
+  # Archive PDFs are .gitignored and absent from a plain `npm run build`; the
+  # deploy pipeline guarantees them via the ensure-archive-pdfs action's `test -f`
+  # guards, so ignoring them here cannot mask a real production regression.
+  - "/blog-archive.pdf"
+  - "/presentations-archive.pdf"

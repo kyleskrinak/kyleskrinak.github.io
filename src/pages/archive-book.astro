@@ -213,8 +213,10 @@ const title = `${SITE.author} — Collected Writing`;
         text-decoration: none;
       }
       /* Preserve external link destinations in print (the live site may be gone).
-         Scoped to post bodies so cover/colophon/TOC links stay clean. */
-      .chapter a[href^="http"]::after {
+         Scoped to post bodies so cover/colophon/TOC links stay clean.
+         :not(.url-in-text) skips links whose visible text already IS the URL —
+         the build script tags those so the destination isn't printed twice. */
+      .chapter a[href^="http"]:not(.url-in-text)::after {
         content: " (" attr(href) ")";
         font-size: 9pt;
         color: #1a4d8f;

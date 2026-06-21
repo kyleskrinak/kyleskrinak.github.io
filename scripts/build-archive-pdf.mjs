@@ -121,6 +121,22 @@ async function main() {
     });
     if (rewritten > 0) console.log(`  · replaced ${rewritten} embed(s) with printed URLs`);
 
+    // 4a-bis. Tag external links whose visible text already IS their href, so the
+    // print CSS (.chapter a[href^="http"]::after { content: " (" attr(href) ")" })
+    // does not print the URL twice (e.g. `[https://x](https://x)` or `<https://x>`).
+    const tagged = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll('.chapter a[href^="http"]'));
+      let n = 0;
+      for (const a of links) {
+        if (a.textContent.trim() === a.getAttribute("href")) {
+          a.classList.add("url-in-text");
+          n++;
+        }
+      }
+      return n;
+    });
+    if (tagged > 0) console.log(`  · tagged ${tagged} self-URL link(s) to avoid duplicate printing`);
+
     // 4b. Force lazy images to load: this is one tall page, so off-screen images
     // with loading="lazy" never enter the viewport in headless. Mark them eager
     // and scroll the full height to trigger their fetch.
@@ -174,6 +190,9 @@ async function main() {
     if (browser) await browser.close();
     if (preview && preview.pid) {
       try {
+        // POSIX-only: negative PID signals the whole process group (macOS/ubuntu
+        // CI runners). Windows has no process groups; this path would need a
+        // different teardown there, but the build pipeline never runs on Windows.
         process.kill(-preview.pid, "SIGTERM"); // kill the group, not just npx
       } catch {
         /* already exited */
