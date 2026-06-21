@@ -44,8 +44,12 @@ const lastYear = posts.length
   ? new Date(posts[posts.length - 1].data.pubDate).getFullYear()
   : firstYear;
 // Date the content was last updated (latest post's updatedDate or pubDate). Using
-// the content date — not today's clock — keeps a re-export byte-identical when no
-// posts have changed, so the committed PDF only churns on real content updates.
+// the content date — not today's clock — keeps the printed "current as of" date
+// stable across re-exports, so the visible colophon only changes on real content
+// updates. NOTE: this does NOT make the PDF byte-identical — Chromium stamps a
+// wall-clock /CreationDate + /ModDate into every render, so re-runs always differ
+// at the byte level. Regenerate + commit the binary only when post content
+// actually changes (manual discipline; see archive-pdf-regeneration-policy).
 const latestContent = posts.reduce((max, p) => {
   const t = new Date(p.data.updatedDate || p.data.pubDate).getTime();
   return t > max ? t : max;
@@ -208,6 +212,14 @@ const title = `${SITE.author} — Collected Writing`;
         color: inherit;
         text-decoration: none;
       }
+      /* Preserve external link destinations in print (the live site may be gone).
+         Scoped to post bodies so cover/colophon/TOC links stay clean. */
+      .chapter a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #1a4d8f;
+        word-break: break-all;
+      }
       /* Fallback rendered in place of non-printable embeds by the build script */
       .print-embed-fallback {
         border: 1px solid #999;
@@ -259,9 +271,9 @@ const title = `${SITE.author} — Collected Writing`;
         {
           chapters.map(({ post }, i) => (
             <li>
-              <span class="toc-title">
+              <a class="toc-title" href={`#chapter-${i}`}>
                 {i + 1}. {post.data.title}
-              </span>
+              </a>
               <span class="toc-date">{fmtDate(post.data.pubDate)}</span>
             </li>
           ))
@@ -270,8 +282,8 @@ const title = `${SITE.author} — Collected Writing`;
     </nav>
 
     {
-      chapters.map(({ post, Content }) => (
-        <article class="chapter">
+      chapters.map(({ post, Content }, i) => (
+        <article class="chapter" id={`chapter-${i}`}>
           <header>
             <h2>{post.data.title}</h2>
             <div class="chapter-date">{fmtDate(post.data.pubDate)}</div>

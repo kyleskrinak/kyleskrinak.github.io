@@ -23,7 +23,7 @@
  */
 import { createServer } from "node:http";
 import { readFile, readdir, mkdir, stat } from "node:fs/promises";
-import { dirname, resolve, join, extname, basename } from "node:path";
+import { dirname, resolve, join, extname, basename, sep } from "node:path";
 import { chromium } from "@playwright/test";
 
 const ROOT = process.cwd();
@@ -69,9 +69,10 @@ function startStaticServer() {
     const server = createServer(async (req, res) => {
       try {
         const urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-        const filePath = join(PUBLIC_DIR, urlPath);
-        // Contain within public/ (defense against traversal).
-        if (!filePath.startsWith(PUBLIC_DIR)) {
+        const filePath = resolve(PUBLIC_DIR, "." + urlPath);
+        // Contain within public/ (defense against traversal). Compare against
+        // PUBLIC_DIR + separator so a sibling dir (e.g. "public-x") can't escape.
+        if (filePath !== PUBLIC_DIR && !filePath.startsWith(PUBLIC_DIR + sep)) {
           res.statusCode = 403;
           return res.end("Forbidden");
         }
@@ -192,6 +193,9 @@ async function main() {
         continue;
       }
       if (!sharedStyle) sharedStyle = extracted.style;
+      else if (extracted.style.trim() !== sharedStyle.trim()) {
+        console.warn(`  · ${file} has a different stylesheet; combined PDF assumes uniform decks`);
+      }
       decks.push({ file, title: extracted.title || basename(file, ".html"), html: extracted.container });
       console.log(`  · ${file}`);
     }

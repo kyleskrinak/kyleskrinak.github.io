@@ -79,8 +79,9 @@ async function main() {
     baseUrl = `http://localhost:${PORT}`;
     console.log(`→ Starting astro preview on :${PORT}…`);
     preview = spawn("npx", ["astro", "preview", "--port", String(PORT)], {
-      stdio: "ignore",
+      stdio: ["ignore", "ignore", "inherit"], // surface astro errors (e.g. port in use)
       cwd: ROOT,
+      detached: true, // own process group so we can kill the whole tree
     });
     await waitForServer(baseUrl + "/");
   }
@@ -171,7 +172,13 @@ async function main() {
     console.log(`✅ Wrote ${args.output} (${(size / 1024 / 1024).toFixed(2)} MB)`);
   } finally {
     if (browser) await browser.close();
-    if (preview) preview.kill("SIGTERM");
+    if (preview && preview.pid) {
+      try {
+        process.kill(-preview.pid, "SIGTERM"); // kill the group, not just npx
+      } catch {
+        /* already exited */
+      }
+    }
   }
 }
 
