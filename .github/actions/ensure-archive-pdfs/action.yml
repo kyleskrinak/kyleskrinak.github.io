@@ -28,10 +28,14 @@ runs:
         # contents AND paths — a rename or move counts as a content change.
         # Include the rendering inputs (layout page, build scripts, config) so a
         # template/script/config edit busts the cache, not just content changes.
+        # bundle-test.html is excluded from the presentations PDF (it's a build
+        # test artifact, not a deck), so it must not feed the hash either —
+        # otherwise editing it would bust the cache without changing any output.
         files=$(find src/content/blog public/presentations \
           src/pages/archive-book.astro \
           scripts/build-archive-pdf.mjs scripts/build-presentations-pdf.mjs \
-          src/config -type f | LC_ALL=C sort)
+          src/config -type f \
+          ! -name bundle-test.html | LC_ALL=C sort)
         if [ -z "$files" ]; then
           echo "::error::No archive content inputs found (src/content/blog, public/presentations)." >&2
           exit 1
