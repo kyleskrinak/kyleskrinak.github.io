@@ -5,7 +5,8 @@
  * This page assembles every genuinely-live post into a single, self-describing
  * document sized for a 6x9in trade book. It is NOT meant to be browsed: it is
  * `noindex`, excluded from the sitemap, and carries no Pagefind body marker.
- * `scripts/build-archive-pdf.mjs` renders it to `public/blog-archive.pdf`.
+ * `scripts/build-archive-pdf.mjs` renders it to a PDF (default
+ * public/blog-archive.pdf; the CI deploy writes it into dist/ via --output).
  *
  * Post selection mirrors the live site exactly:
  *   - getBlogPosts() drops drafts (`published: false`) in production builds.

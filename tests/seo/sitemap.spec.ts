@@ -73,6 +73,12 @@ test.describe('Sitemap Validation', () => {
 			const presentationUrls = sitemapUrls.filter(url => url.includes('/presentations/') && url.endsWith('.html'));
 			expect(presentationUrls.length).toBeGreaterThan(5); // We have 8 presentation HTML files
 		});
+
+		test('includes archive PDF downloads', async () => {
+			const productionDomain = 'https://kyle.skrinak.com';
+			expect(sitemapUrls).toContain(`${productionDomain}/blog-archive.pdf`);
+			expect(sitemapUrls).toContain(`${productionDomain}/presentations-archive.pdf`);
+		});
 	});
 
 	test.describe('Pages that should NOT be in sitemap (noindex pages)', () => {
