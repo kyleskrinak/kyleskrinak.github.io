@@ -84,8 +84,10 @@ runs:
 
         if [ "$regen" = "1" ]; then
           npx playwright install --with-deps chromium
-          # Render from the already-built dist/ (preview serves it). --skip-build
-          # avoids a second astro build; both PDFs are written straight into dist/.
+          # Blog archive: rendered from the already-built dist/ via astro preview
+          # (--skip-build avoids a second astro build). Presentations: rendered from
+          # public/presentations by the script's own static server (it never reads
+          # dist/). Both write their output straight into dist/.
           npm run archive:pdf -- --skip-build --output dist/blog-archive.pdf
           npm run archive:presentations -- --output dist/presentations-archive.pdf
           gh release upload "$TAG" \

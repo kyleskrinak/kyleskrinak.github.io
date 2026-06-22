@@ -43,7 +43,6 @@ export const GET: APIRoute = async ({ site }) => {
   const presentationFiles = [
     "presentations/2019-Feb-SLG.html",
     "presentations/2019-drupalcon-drupal-8-multisite.html",
-    "presentations/bundle-test.html",
     "presentations/drupal-intro.html",
     "presentations/drupal-multisite-on-a-dime.html",
     "presentations/tts-profile-mgmt.html",
