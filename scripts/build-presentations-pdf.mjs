@@ -49,8 +49,17 @@ const MIME = {
 
 function parseArgs(argv) {
   const args = { output: "public/presentations-archive.pdf" };
+  // Guard flags that take a value: a missing value (end of argv) or another flag
+  // in its place is a usage error, not a silent `undefined` that fails later.
+  const needValue = (flag, value) => {
+    if (value === undefined || value.startsWith("--")) {
+      console.error(`Missing value for ${flag}`);
+      process.exit(2);
+    }
+    return value;
+  };
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--output") args.output = argv[++i];
+    if (argv[i] === "--output") args.output = needValue("--output", argv[++i]);
     else {
       console.error(`Unknown argument: ${argv[i]}`);
       process.exit(2);

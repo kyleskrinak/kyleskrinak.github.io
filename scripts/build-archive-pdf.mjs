@@ -29,11 +29,20 @@ const ROOT = process.cwd();
 
 function parseArgs(argv) {
   const args = { output: "public/blog-archive.pdf", skipBuild: false, baseUrl: null };
+  // Guard flags that take a value: a missing value (end of argv) or another flag
+  // in its place is a usage error, not a silent `undefined` that fails later.
+  const needValue = (flag, value) => {
+    if (value === undefined || value.startsWith("--")) {
+      console.error(`Missing value for ${flag}`);
+      process.exit(2);
+    }
+    return value;
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--output") args.output = argv[++i];
+    if (a === "--output") args.output = needValue("--output", argv[++i]);
     else if (a === "--skip-build") args.skipBuild = true;
-    else if (a === "--base-url") args.baseUrl = argv[++i];
+    else if (a === "--base-url") args.baseUrl = needValue("--base-url", argv[++i]);
     else {
       console.error(`Unknown argument: ${a}`);
       process.exit(2);

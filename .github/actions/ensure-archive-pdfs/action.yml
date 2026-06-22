@@ -33,6 +33,7 @@ runs:
         # otherwise editing it would bust the cache without changing any output.
         files=$(find src/content/blog public/presentations \
           src/pages/archive-book.astro \
+          src/utils/getBlogPosts.ts src/utils/postFilter.ts src/content.config.ts \
           scripts/build-archive-pdf.mjs scripts/build-presentations-pdf.mjs \
           src/config -type f \
           ! -name bundle-test.html | LC_ALL=C sort)
