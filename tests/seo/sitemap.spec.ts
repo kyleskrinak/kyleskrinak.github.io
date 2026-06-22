@@ -149,9 +149,12 @@ test.describe('Sitemap Validation', () => {
 			});
 		});
 
-		test('all URLs have trailing slashes (except .html files)', async () => {
+		test('all URLs have trailing slashes (except file URLs with an extension)', async () => {
 			sitemapUrls.forEach(url => {
-				if (!url.endsWith('.html')) {
+				// Directory-style URLs must end in "/"; file URLs (a last path segment
+				// containing a ".", e.g. .html or .pdf) are exempt.
+				const lastSegment = url.split('/').pop() ?? '';
+				if (!lastSegment.includes('.')) {
 					expect(url.endsWith('/'), `Expected ${url} to have trailing slash`).toBeTruthy();
 				}
 			});

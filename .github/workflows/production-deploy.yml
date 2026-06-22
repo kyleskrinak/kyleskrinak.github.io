@@ -17,7 +17,7 @@ jobs:
       name: production
       url: https://kyle.skrinak.com
     permissions:
-      contents: read
+      contents: write  # ensure-archive-pdfs reads/writes the release backing store
       id-token: write  # needed for OIDC -> AWS
     steps:
       - name: Checkout
@@ -54,6 +54,14 @@ jobs:
           PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
           PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION_PROD }}
           PUBLIC_GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
+
+      # Runs AFTER the build: renders the PDFs from the built dist/ and writes
+      # them into dist/ so the S3 sync picks them up. Production uses the default
+      # release tag (archive-pdfs) as its backing store.
+      - name: Ensure archive PDFs
+        uses: ./.github/actions/ensure-archive-pdfs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
