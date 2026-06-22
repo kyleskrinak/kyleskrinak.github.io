@@ -48,8 +48,10 @@ const lastYear = posts.length
 // stable across re-exports, so the visible colophon only changes on real content
 // updates. NOTE: this does NOT make the PDF byte-identical — Chromium stamps a
 // wall-clock /CreationDate + /ModDate into every render, so re-runs always differ
-// at the byte level. Regenerate + commit the binary only when post content
-// actually changes (manual discipline; see archive-pdf-regeneration-policy).
+// at the byte level. That byte-instability is why the deploy pipeline keys
+// regeneration on a content hash, not the PDF bytes: CI regenerates and re-uploads
+// the PDF to its release-backed store only when post content changes. The PDF is
+// untracked — never commit the binary (see .github/actions/ensure-archive-pdfs).
 const latestContent = posts.reduce((max, p) => {
   const t = new Date(p.data.updatedDate || p.data.pubDate).getTime();
   return t > max ? t : max;
