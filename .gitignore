@@ -42,3 +42,8 @@ tmp/
 
 # Claude Code runtime state (transient lock/scheduler files, not project content)
 .claude/scheduled_tasks.lock
+
+# Generated archive PDFs — untracked; built in CI and stored on a GitHub Release
+# asset, fetched into public/ at deploy time. See .github/actions/ensure-archive-pdfs.
+public/blog-archive.pdf
+public/presentations-archive.pdf

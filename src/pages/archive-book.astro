@@ -1,0 +1,322 @@
+---
+/**
+ * Print source for the complete-archive PDF book.
+ *
+ * This page assembles every genuinely-live post into a single, self-describing
+ * document sized for a 6x9in trade book. It is NOT meant to be browsed: it is
+ * `noindex`, excluded from the sitemap, and carries no Pagefind body marker.
+ * `scripts/build-archive-pdf.mjs` renders it to a PDF (default
+ * public/blog-archive.pdf; the CI deploy writes it into dist/ via --output).
+ *
+ * Post selection mirrors the live site exactly:
+ *   - getBlogPosts() drops drafts (`published: false`) in production builds.
+ *   - postFilter drops not-yet-due scheduled posts (future pubDate) in prod.
+ * So the book can never contain anything the public site does not already show.
+ */
+import { Image } from "astro:assets";
+import { render } from "astro:content";
+import { getBlogPosts } from "@/utils/getBlogPosts";
+import postFilter from "@/utils/postFilter";
+import { SITE } from "@/config";
+
+const posts = (await getBlogPosts())
+  .filter(postFilter)
+  .sort(
+    (a, b) =>
+      new Date(a.data.pubDate).getTime() - new Date(b.data.pubDate).getTime()
+  );
+
+const chapters = await Promise.all(
+  posts.map(async post => ({ post, Content: (await render(post)).Content }))
+);
+
+const fmtDate = (d: Date | string) =>
+  new Date(d).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: SITE.timezone,
+  });
+
+const firstYear = posts.length
+  ? new Date(posts[0].data.pubDate).getFullYear()
+  : new Date().getFullYear();
+const lastYear = posts.length
+  ? new Date(posts[posts.length - 1].data.pubDate).getFullYear()
+  : firstYear;
+// Date the content was last updated (latest post's updatedDate or pubDate). Using
+// the content date — not today's clock — keeps the printed "current as of" date
+// stable across re-exports, so the visible colophon only changes on real content
+// updates. NOTE: this does NOT make the PDF byte-identical — Chromium stamps a
+// wall-clock /CreationDate + /ModDate into every render, so re-runs always differ
+// at the byte level. That byte-instability is why the deploy pipeline keys
+// regeneration on a content hash, not the PDF bytes: CI regenerates and re-uploads
+// the PDF to its release-backed store only when post content changes. The PDF is
+// untracked — never commit the binary (see .github/actions/ensure-archive-pdfs).
+const latestContent = posts.reduce((max, p) => {
+  const t = new Date(p.data.updatedDate || p.data.pubDate).getTime();
+  return t > max ? t : max;
+}, 0);
+const currentAsOf = posts.length ? fmtDate(new Date(latestContent)) : fmtDate(new Date());
+const title = `${SITE.author} — Collected Writing`;
+---
+
+<!doctype html>
+<html lang={SITE.lang || "en"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+    <style is:global>
+      @page {
+        size: 6in 9in;
+        margin: 0.75in 0.625in;
+      }
+
+      :root {
+        font-family: Georgia, "Times New Roman", serif;
+        color: #111;
+        line-height: 1.5;
+      }
+
+      body {
+        margin: 0;
+        font-size: 11pt;
+      }
+
+      /* Front matter — each on its own page */
+      .cover,
+      .colophon,
+      .toc {
+        break-after: page;
+      }
+
+      .cover {
+        height: 7.5in;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+      }
+      .cover h1 {
+        font-size: 30pt;
+        margin: 0 0 0.3in;
+        line-height: 1.15;
+      }
+      .cover .range {
+        font-size: 14pt;
+        color: #444;
+      }
+      .cover .site {
+        margin-top: 1in;
+        font-size: 11pt;
+        color: #555;
+      }
+
+      .colophon h2,
+      .toc h2 {
+        font-size: 16pt;
+        margin: 0 0 0.25in;
+      }
+      .colophon p {
+        margin: 0 0 0.16in;
+      }
+
+      .toc ol {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .toc li {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.25in;
+        padding: 0.04in 0;
+        border-bottom: 1px dotted #bbb;
+      }
+      .toc .toc-date {
+        color: #666;
+        white-space: nowrap;
+        font-size: 10pt;
+      }
+
+      /* One chapter per post */
+      .chapter {
+        break-before: page;
+      }
+      .chapter > header {
+        margin-bottom: 0.2in;
+        border-bottom: 2px solid #111;
+        padding-bottom: 0.08in;
+      }
+      .chapter h2 {
+        font-size: 19pt;
+        margin: 0 0 0.05in;
+        line-height: 1.15;
+      }
+      .chapter .chapter-date {
+        color: #555;
+        font-size: 10pt;
+      }
+
+      /* Post hero image */
+      .hero-image {
+        margin: 0.2in 0 0.25in;
+        text-align: center;
+        break-inside: avoid;
+      }
+      .hero-image img {
+        display: block;
+        margin: 0 auto;
+        width: auto;
+        height: auto;
+        /* Absolute caps: content width is 6in - 2x0.625in = 4.75in. Cap a touch
+           under that, and limit height so a hero never dominates a page. */
+        max-width: 4.6in;
+        max-height: 4in;
+        border-radius: 4px;
+      }
+      .hero-image figcaption {
+        margin-top: 0.06in;
+        font-size: 9.5pt;
+        font-style: italic;
+        color: #555;
+      }
+
+      /* Keep headings with following content; avoid orphaned media */
+      h1,
+      h2,
+      h3,
+      h4 {
+        break-after: avoid;
+      }
+      figure,
+      img,
+      pre,
+      table {
+        break-inside: avoid;
+      }
+      img {
+        max-width: 100%;
+        /* Cap height so tall portrait photos never bleed past the printable
+           area (6x9in page minus 0.75in top/bottom margins = ~7.5in). */
+        max-height: 7in;
+        height: auto;
+        object-fit: contain;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 9pt;
+        background: #f4f4f4;
+        padding: 0.1in;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      /* Preserve external link destinations in print (the live site may be gone).
+         Scoped to post bodies so cover/colophon/TOC links stay clean.
+         :not(.url-in-text) skips links whose visible text already IS the URL —
+         the build script tags those so the destination isn't printed twice. */
+      .chapter a[href^="http"]:not(.url-in-text)::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #1a4d8f;
+        word-break: break-all;
+      }
+      /* Fallback rendered in place of non-printable embeds by the build script */
+      .print-embed-fallback {
+        border: 1px solid #999;
+        padding: 0.12in;
+        margin: 0.15in 0;
+        font-size: 10pt;
+        color: #333;
+      }
+      .print-embed-fallback .url {
+        word-break: break-all;
+        color: #1a4d8f;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="cover">
+      <h1>{SITE.author}<br />Collected Writing</h1>
+      <div class="range">{firstYear}–{lastYear}</div>
+      <div class="site">{SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
+    </section>
+
+    <section class="colophon">
+      <h2>About this book</h2>
+      <p>
+        This is a complete archive of the writing published at {SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "")},
+        current as of {currentAsOf}. It contains {posts.length} pieces written between
+        {firstYear} and {lastYear}, arranged in the order they were written, oldest first.
+      </p>
+      <p>
+        Nothing else is needed to read it. This single file is self-contained:
+        the words and images are all here. You do not need the website, any
+        account, or any special software beyond whatever you are already using to
+        view this page.
+      </p>
+      <p>
+        It was made so that the writing would remain readable on its own, apart
+        from any website that may or may not still exist when you find this.
+      </p>
+      <p>
+        Written by {SITE.author}. Where a piece links to a video or other online
+        material that cannot be printed, the web address is shown in its place so
+        the reference is preserved.
+      </p>
+    </section>
+
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        {
+          chapters.map(({ post }, i) => (
+            <li>
+              <a class="toc-title" href={`#chapter-${i}`}>
+                {i + 1}. {post.data.title}
+              </a>
+              <span class="toc-date">{fmtDate(post.data.pubDate)}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    {
+      chapters.map(({ post, Content }, i) => (
+        <article class="chapter" id={`chapter-${i}`}>
+          <header>
+            <h2>{post.data.title}</h2>
+            <div class="chapter-date">{fmtDate(post.data.pubDate)}</div>
+          </header>
+          {
+            post.data.image && (
+              <figure class="hero-image">
+                <Image
+                  src={post.data.image}
+                  alt={post.data.alt || "Post hero image"}
+                  width={1200}
+                  height={600}
+                  quality={85}
+                  format="webp"
+                  fit="cover"
+                  position={post.data.imagePosition || "center"}
+                  loading="eager"
+                  decoding="sync"
+                />
+                {post.data.caption && (
+                  <figcaption>{post.data.caption}</figcaption>
+                )}
+              </figure>
+            )
+          }
+          <Content />
+        </article>
+      ))
+    }
+  </body>
+</html>

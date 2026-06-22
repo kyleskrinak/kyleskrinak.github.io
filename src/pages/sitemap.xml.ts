@@ -43,7 +43,6 @@ export const GET: APIRoute = async ({ site }) => {
   const presentationFiles = [
     "presentations/2019-Feb-SLG.html",
     "presentations/2019-drupalcon-drupal-8-multisite.html",
-    "presentations/bundle-test.html",
     "presentations/drupal-intro.html",
     "presentations/drupal-multisite-on-a-dime.html",
     "presentations/tts-profile-mgmt.html",
@@ -52,7 +51,12 @@ export const GET: APIRoute = async ({ site }) => {
     "presentations/2026-02-22-squarespace-to-astro.html",
   ];
 
-  const urls = [...staticPages, ...postPages, ...presentationFiles];
+  // Downloadable archive artifact (the complete-archive PDF book). Indexable so
+  // the preservation copy is discoverable/crawlable. The /archive-book/ HTML page
+  // that generates it is noindex and intentionally NOT listed here.
+  const archiveFiles = ["blog-archive.pdf", "presentations-archive.pdf"];
+
+  const urls = [...staticPages, ...postPages, ...presentationFiles, ...archiveFiles];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
