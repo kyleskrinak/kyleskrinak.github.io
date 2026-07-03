@@ -1,0 +1,122 @@
+/* Resume page styling */
+
+.resume-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.resume-content {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.resume-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.resume-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.resume-content p {
+  margin: 0.5rem 0;
+}
+
+.resume-content ul {
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+}
+
+.resume-content li {
+  margin: 0.25rem 0;
+}
+
+/* Print stylesheet */
+@media print {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #000;
+  }
+
+  .resume-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0.5in;
+    width: 8.5in;
+    height: 11in;
+  }
+
+  .resume-content {
+    overflow: hidden;
+    page-break-after: avoid;
+  }
+
+  .resume-content h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    margin-bottom: 0.3rem;
+    border-bottom: 1px solid #000;
+    padding-bottom: 0.2rem;
+    page-break-after: avoid;
+  }
+
+  .resume-content h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    page-break-after: avoid;
+  }
+
+  .resume-content p {
+    margin: 0.2rem 0;
+    page-break-inside: avoid;
+  }
+
+  .resume-content ul {
+    margin: 0.2rem 0;
+    padding-left: 1.2rem;
+  }
+
+  .resume-content li {
+    margin: 0.1rem 0;
+    page-break-inside: avoid;
+  }
+
+  /* Hide non-print elements */
+  header,
+  footer,
+  nav,
+  .breadcrumb {
+    display: none;
+  }
+
+  /* Force page layout */
+  html,
+  body {
+    width: 8.5in;
+    height: 11in;
+    margin: 0;
+    padding: 0;
+  }
+}
