@@ -31,3 +31,13 @@ Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sit
 - Cut Azure hosting run-rate 24.5% (~$22.5K/month) through legacy infrastructure retirement, right-sizing, and reserved-capacity planning.
 - Maintained ~99.99% platform availability, averaging under five minutes of monthly downtime across ~200 production websites.
 - Consolidated hosting by decommissioning a 9-site legacy environment and migrating the non-CMS application estate from EC2 to containerized AWS ECS/Fargate.
+
+### Senior Manager, IT
+
+**Duke University, Office of Information Technology** — Durham, NC | July 2013 – June 2022
+
+Led a web technology team supporting 150+ university department, program, and administrative websites for Trinity College of Arts & Sciences. Managed developers and IT analysts across Drupal, PHP, DevOps, endpoint management, VM-based infrastructure, and package management. Oversaw development of a custom Drupal 8 theme and distribution used to support a major platform migration. Led cross-campus technology events and promoted reusable development patterns across distributed web teams.
+
+- Modernized website delivery, standardizing accessibility, responsive design, and automated deployment, cutting site launch timelines from months to hours.
+- Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms.
+- Maintained zero team turnover across a full 9-year tenure through consistent one-on-ones and clear delivery expectations.
