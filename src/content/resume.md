@@ -41,3 +41,44 @@ Led a web technology team supporting 150+ university department, program, and ad
 - Modernized website delivery, standardizing accessibility, responsive design, and automated deployment, cutting site launch timelines from months to hours.
 - Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms.
 - Maintained zero team turnover across a full 9-year tenure through consistent one-on-ones and clear delivery expectations.
+
+### Co-Owner and Technologist
+
+**Skrinak Creative, Inc.** — Apex, NC | January 2001 – July 2013
+
+Skrinak Creative (SCI) is a two-person, print- and web-media-based creative agency serving primarily B2B clients who outsource their creative services, with annual revenue of $150K-$200K and an average of 15 clients. Handled UI, jQuery, and theme development in LAMP and .NET stacks using designer-supplied source art, and designed, implemented, and maintained LAMP and .NET servers, including cloud-based SSL certificates and IMAP services.
+
+- Cut typical project delivery time from 3-6 months to 4-6 weeks by adopting Drupal and WordPress for client builds.
+- Implemented a rigorous QA process that cut validation errors on acquired sites from 200+ per page to below ten.
+
+### Manager, Pre-press Department
+
+**Litho Industries** — Durham, NC | June 1994 – January 2001
+
+Managed the Pre-press department for a $26M/year commercial printer, with duties including design and oversight of web services.
+
+- Led the conversion from film-based to digital plate imaging, cutting production material costs by half while reducing staff through attrition.
+
+### Desktop Publishing Manager
+
+**Hachette-Filipacchi Media** — New York, NY | September 1988 – June 1994
+
+- Led the $1.5M conversion of magazine workflows to a unified system, coordinating over 450 editors, art directors, and support staff across Elle, Car and Driver, and Road & Track.
+
+### Supervisor
+
+**The Stat Store** — New York, NY | September 1984 – September 1988
+
+Supervised a small, 30-person graphic arts shop
+
+## Education
+
+### M.S. I.T.
+
+**Rochester Institute of Technology** — Rochester, NY | 1998 – 2001
+
+With highest honors
+
+### B.F.A, Illustration
+
+**University of the Arts** — Philadelphia, PA | 1980 – 1984
