@@ -26,8 +26,7 @@ async function printResumePDF(outputPath, baseUrl) {
     console.log(`Printing ${resumeUrl} to ${outputPath}...`);
 
     browser = await chromium.launch();
-    const context = await browser.createContext();
-    const page = await context.newPage();
+    const page = await browser.newPage();
 
     // Navigate to resume page
     await page.goto(resumeUrl, { waitUntil: "networkidle" });
@@ -51,7 +50,7 @@ async function printResumePDF(outputPath, baseUrl) {
 
     console.log(`✓ PDF generated: ${outputPath}`);
 
-    await context.close();
+    await page.close();
   } finally {
     if (browser) {
       await browser.close();

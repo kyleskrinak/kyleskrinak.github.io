@@ -1,9 +1,9 @@
 ---
 title: Kyle Skrinak — Resume
-contact:
-  email: kyle.skrinak@gmail.com
-  website: https://kyle.skrinak.com
-  linkedin: https://www.linkedin.com/in/kyleskrinak/
+contactEmail: kyle.skrinak@gmail.com
+contactWebsite: https://kyle.skrinak.com
+contactLinkedin: https://www.linkedin.com/in/kyleskrinak/
+contactAddress: "309 Sir Brennan Court, Apex, NC 27523"
 current_role:
   title: Senior IT Systems Engineering Manager, Digital Experience
   employer: Gilead Sciences
@@ -19,8 +19,6 @@ changelog:
   - date: 2026-07-03
     entry: Initial migration from Google Doc snapshot
 ---
-
-## Professional Experience
 
 ### Senior IT Systems Engineering Manager, Digital Experience
 
@@ -70,8 +68,6 @@ Managed the Pre-press department for a $26M/year commercial printer, with duties
 **The Stat Store** — New York, NY | September 1984 – September 1988
 
 Supervised a small, 30-person graphic arts shop
-
-## Education
 
 ### M.S. I.T.
 

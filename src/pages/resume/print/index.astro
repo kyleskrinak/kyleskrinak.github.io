@@ -1,9 +1,6 @@
 ---
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import { SITE } from "@/config";
 import "@/styles/resume.css";
 
@@ -11,20 +8,20 @@ const page = await getEntry("pages", "resume");
 if (!page) throw new Error("Resume page not found");
 
 const { Content } = await render(page);
-const { title, description, contactEmail, contactWebsite, contactLinkedin } = page.data;
+const { title, description, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
 ---
 
 <Layout
   title={`${title} | ${SITE.title}`}
   description={description}
+  noindex={true}
 >
-  <Header />
-  <Breadcrumb />
   <main id="main-content" class="app-layout pb-12">
     <div class="resume-header">
       <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
       <div class="contact-info">
         {contactEmail && <span>{contactEmail}</span>}
+        {contactAddress && <span>{contactAddress}</span>}
         {contactWebsite && (
           <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
         )}
@@ -37,5 +34,4 @@ const { title, description, contactEmail, contactWebsite, contactLinkedin } = pa
       <Content />
     </article>
   </main>
-  <Footer />
 </Layout>

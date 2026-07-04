@@ -1,45 +1,86 @@
 /* Resume page styling */
 
-.resume-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
+.resume-header h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contact-info a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s;
+}
+
+.contact-info a:hover {
+  opacity: 0.8;
 }
 
 .resume-content {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333;
+  font-family: var(--font-app);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--foreground);
 }
 
 .resume-content h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid #ddd;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 0.5rem;
 }
 
+.resume-content h2:first-child {
+  margin-top: 0;
+}
+
 .resume-content h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   margin-bottom: 0.25rem;
+  color: var(--foreground);
 }
 
 .resume-content p {
   margin: 0.5rem 0;
 }
 
+.resume-content strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
 .resume-content ul {
-  margin: 0.5rem 0;
-  padding-left: 2rem;
+  margin: 0.5rem 0 0.5rem 0;
+  padding-left: 1.5rem;
 }
 
 .resume-content li {
-  margin: 0.25rem 0;
+  margin: 0.35rem 0;
+  list-style-type: disc;
+}
+
+.resume-content li::marker {
+  color: var(--accent);
 }
 
 /* Print stylesheet */
@@ -51,55 +92,86 @@
   }
 
   body {
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 11px;
-    line-height: 1.4;
+    font-family: var(--font-app);
+    font-size: 10px;
+    line-height: 1.35;
     color: #000;
   }
 
-  .resume-container {
+  main {
     max-width: 100%;
     margin: 0;
-    padding: 0.5in;
+    padding: 0.4in;
     width: 8.5in;
     height: 11in;
   }
 
+  .resume-header {
+    margin-bottom: 0.6rem;
+    text-align: center;
+  }
+
+  .resume-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 0.3rem 0;
+  }
+
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .contact-info a {
+    text-decoration: none;
+    color: #000;
+  }
+
   .resume-content {
     overflow: hidden;
-    page-break-after: avoid;
   }
 
   .resume-content h2 {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 0.3rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.25rem;
     border-bottom: 1px solid #000;
-    padding-bottom: 0.2rem;
+    padding-bottom: 0.15rem;
     page-break-after: avoid;
   }
 
+  .resume-content h2:first-of-type {
+    margin-top: 0;
+  }
+
   .resume-content h3 {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin-top: 0.3rem;
+    margin-top: 0.25rem;
     margin-bottom: 0;
     page-break-after: avoid;
   }
 
   .resume-content p {
-    margin: 0.2rem 0;
+    margin: 0.15rem 0;
     page-break-inside: avoid;
   }
 
+  .resume-content strong {
+    font-weight: 700;
+  }
+
   .resume-content ul {
-    margin: 0.2rem 0;
-    padding-left: 1.2rem;
+    margin: 0.15rem 0;
+    padding-left: 1rem;
   }
 
   .resume-content li {
-    margin: 0.1rem 0;
+    margin: 0.08rem 0;
     page-break-inside: avoid;
   }
 
