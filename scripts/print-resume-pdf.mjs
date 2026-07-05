@@ -22,12 +22,12 @@
  *   node scripts/print-resume-pdf.mjs --output ./resume.pdf --base-url http://localhost:4321
  */
 
-import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { parseFlags, startPreview, stopPreview, waitForServer } from "./lib/pdf-helpers.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
@@ -49,28 +49,10 @@ const ANALYTICS_HOSTS = [
   "cloudflareinsights.com",
 ];
 
-function parseArgs(argv) {
-  const args = { output: "resume.pdf", baseUrl: null };
-  // Guard flags that take a value: a missing value (end of argv) or another flag
-  // in its place is a usage error, not a silent `undefined` that fails later.
-  const needValue = (flag, value) => {
-    if (value === undefined || value.startsWith("--")) {
-      console.error(`Missing value for ${flag}`);
-      process.exit(2);
-    }
-    return value;
-  };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === "--output") args.output = needValue("--output", argv[++i]);
-    else if (a === "--base-url") args.baseUrl = needValue("--base-url", argv[++i]);
-    else {
-      console.error(`Unknown argument: ${a}`);
-      process.exit(2);
-    }
-  }
-  return args;
-}
+const FLAGS = {
+  "--output": { key: "output", value: true },
+  "--base-url": { key: "baseUrl", value: true },
+};
 
 // Normalize the typographic transformations Astro's markdown pipeline
 // (smartypants) applies, so raw-source expectations compare cleanly against
@@ -154,31 +136,8 @@ function countPdfPages(buffer) {
   return m ? Number(m[1]) : null;
 }
 
-async function waitForServer(url, preview, timeoutMs = 60000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    // If the spawned server already died (e.g. port in use), fail fast and
-    // loud rather than polling a port some other process may be serving.
-    if (preview && preview.exitCode !== null) {
-      throw new Error(
-        `astro preview exited with code ${preview.exitCode} before becoming ready ` +
-          `(is port ${PORT} already in use?)`
-      );
-    }
-    try {
-      // Per-request timeout so one hung connection can't blow past the deadline.
-      const res = await fetch(url, { method: "GET", signal: AbortSignal.timeout(5000) });
-      if (res.ok || res.status === 404) return; // server is up and answering
-    } catch {
-      // not ready yet
-    }
-    await new Promise(r => setTimeout(r, 500));
-  }
-  throw new Error(`Preview server did not become ready at ${url} within ${timeoutMs}ms`);
-}
-
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseFlags(process.argv.slice(2), FLAGS, { output: "resume.pdf", baseUrl: null });
   const outputPath = path.resolve(ROOT, args.output);
 
   let preview = null;
@@ -194,12 +153,8 @@ async function main() {
       }
       baseUrl = `http://localhost:${PORT}`;
       console.log(`→ Starting astro preview on :${PORT}…`);
-      preview = spawn("npx", ["astro", "preview", "--port", String(PORT)], {
-        stdio: ["ignore", "ignore", "inherit"], // surface astro errors (e.g. port in use)
-        cwd: ROOT,
-        detached: true, // own process group so we can kill the whole tree
-      });
-      await waitForServer(baseUrl + "/", preview);
+      preview = startPreview(PORT, { cwd: ROOT });
+      await waitForServer(baseUrl + "/", { child: preview });
     }
 
     const pageUrl = `${baseUrl.replace(/\/$/, "")}/resume/print/`;
@@ -257,16 +212,7 @@ async function main() {
         /* never let a close failure skip the preview teardown below */
       }
     }
-    if (preview && preview.pid) {
-      try {
-        // POSIX-only: negative PID signals the whole process group (macOS/ubuntu
-        // CI runners). Windows has no process groups; this path would need a
-        // different teardown there, but the build pipeline never runs on Windows.
-        process.kill(-preview.pid, "SIGTERM"); // kill the group, not just npx
-      } catch {
-        /* already exited */
-      }
-    }
+    stopPreview(preview);
   }
 }
 
