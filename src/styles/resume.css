@@ -95,12 +95,13 @@
   }
 
   /* Traditional proportional face for print — the site's monospace
-     --font-app is a web-only aesthetic and wastes print space */
+     --font-app is a web-only aesthetic and wastes print space. Times
+     matches the original GDoc/PDF resume face. */
   body,
   .resume-content,
   .resume-header h1,
   .contact-info {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Times New Roman", Times, Georgia, serif;
   }
 
   body {
