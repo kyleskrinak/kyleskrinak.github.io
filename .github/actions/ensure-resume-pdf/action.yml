@@ -1,0 +1,97 @@
+name: Ensure resume PDF
+description: >-
+  Make the resume PDF (resume/kyle-skrinak-resume.pdf) present in dist/ AFTER
+  the site build, using a GitHub Release as an untracked backing store.
+  Regenerates the PDF only when the rendering inputs have changed (detected by
+  hashing them); otherwise downloads the existing asset. Requires a prior
+  `npm run build` step — the regen path renders the built dist/ via the print
+  script's own `astro preview`.
+
+inputs:
+  tag:
+    description: Release tag used as the backing store for the resume PDF.
+    required: false
+    default: resume-pdf
+  token:
+    description: GitHub token with contents:write to read/write the release.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Compute content hash
+      id: hash
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Deterministic file list (sorted) over the inputs that affect the PDF:
+        # the resume content, the print route it renders, the stylesheet that
+        # owns the print geometry, and the rendering script itself. sha256sum
+        # prints "<hash>  <path>", so the digest captures both file contents
+        # AND paths — a rename or move counts as a content change.
+        files=$(find \
+          src/content/pages/resume \
+          src/pages/resume/print/index.astro \
+          src/styles/resume.css \
+          scripts/print-resume-pdf.mjs \
+          -type f | LC_ALL=C sort)
+        if [ -z "$files" ]; then
+          echo "::error::No resume rendering inputs found (src/content/pages/resume)." >&2
+          exit 1
+        fi
+        hash=$(printf '%s\n' "$files" \
+          | while IFS= read -r f; do sha256sum "$f"; done \
+          | sha256sum | cut -d' ' -f1)
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        echo "Content hash: $hash"
+
+    - name: Resolve resume PDF (regenerate on change, else download)
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        TAG: ${{ inputs.tag }}
+        HASH: ${{ steps.hash.outputs.hash }}
+      run: |
+        set -euo pipefail
+        mkdir -p dist/resume
+
+        # Read the hash stored alongside the release (its body holds the last
+        # generated content hash). Bootstrap the release if it does not exist yet.
+        stored=""
+        if gh release view "$TAG" >/dev/null 2>&1; then
+          stored=$(gh release view "$TAG" --json body --jq '.body' | tr -d '[:space:]')
+        else
+          echo "Release '$TAG' missing — bootstrapping (non-latest/prerelease)."
+          gh release create "$TAG" \
+            --title "Resume PDF (automation backing store)" \
+            --notes "$HASH" \
+            --latest=false \
+            --prerelease
+        fi
+
+        regen=0
+        if [ "$stored" != "$HASH" ]; then
+          echo "Content hash changed (stored='$stored' current='$HASH') — regenerating."
+          regen=1
+        elif ! gh release download "$TAG" --pattern kyle-skrinak-resume.pdf --dir dist/resume --clobber 2>/dev/null; then
+          echo "Hash matched but the PDF asset is missing — regenerating."
+          regen=1
+        else
+          echo "Content unchanged — downloaded existing PDF from release '$TAG'."
+        fi
+
+        if [ "$regen" = "1" ]; then
+          npx playwright install --with-deps chromium
+          # Renders /resume/print/ from the already-built dist/ — the script
+          # starts (and tears down) its own astro preview server.
+          node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf
+          gh release upload "$TAG" \
+            dist/resume/kyle-skrinak-resume.pdf \
+            --clobber
+          # Persist the new content hash so the next deploy can compare against it.
+          gh release edit "$TAG" --notes "$HASH"
+        fi
+
+        # Fail loudly if, after all paths, the PDF is not present in the deployable.
+        test -f dist/resume/kyle-skrinak-resume.pdf || { echo "::error::kyle-skrinak-resume.pdf missing after ensure step." >&2; exit 1; }
+        echo "Resume PDF ready in dist/resume/."

@@ -63,6 +63,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Same post-build pattern as the archive PDFs: renders the resume PDF
+      # from the built dist/ (hash-gated) and writes it into dist/resume/ so
+      # the S3 sync picks it up. Production uses the default release tag
+      # (resume-pdf) as its backing store.
+      - name: Ensure resume PDF
+        uses: ./.github/actions/ensure-resume-pdf
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:

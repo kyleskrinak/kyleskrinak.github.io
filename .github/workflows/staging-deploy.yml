@@ -63,6 +63,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: archive-pdfs-staging
 
+      # Same post-build pattern as the archive PDFs: renders the resume PDF
+      # from the built dist/ (hash-gated) and writes it into dist/resume/ so
+      # it ships in the deployed artifact. Staging uses its own release tag so
+      # it never shares prod's backing store (no cross-env race).
+      - name: Ensure resume PDF
+        uses: ./.github/actions/ensure-resume-pdf
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: resume-pdf-staging
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

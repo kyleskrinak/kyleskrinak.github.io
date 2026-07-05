@@ -180,7 +180,8 @@
   header,
   footer,
   nav,
-  .breadcrumb {
+  .breadcrumb,
+  .resume-download {
     display: none;
   }
 }
