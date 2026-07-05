@@ -4,7 +4,6 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import { SITE } from "@/config";
 import { linkWithBase } from "@/utils/linkWithBase";
 import "@/styles/resume.css";
 
@@ -15,8 +14,10 @@ const { Content } = await render(page);
 const { title, description, contactEmail, contactWebsite, contactLinkedin } = page.data;
 ---
 
+{/* Content title already carries the site owner's name — no SITE.title
+    suffix, which would render "Kyle Skrinak — Resume | Kyle Skrinak" */}
 <Layout
-  title={`${title} | ${SITE.title}`}
+  title={title}
   description={description}
 >
   <Header />
@@ -25,7 +26,9 @@ const { title, description, contactEmail, contactWebsite, contactLinkedin } = pa
     <div class="resume-header">
       <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
       <div class="contact-info">
-        {contactEmail && <span>{contactEmail}</span>}
+        {contactEmail && (
+          <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
+        )}
         {contactWebsite && (
           <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
         )}

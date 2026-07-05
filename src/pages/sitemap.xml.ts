@@ -55,7 +55,13 @@ export const GET: APIRoute = async ({ site }) => {
   // Downloadable archive artifact (the complete-archive PDF book). Indexable so
   // the preservation copy is discoverable/crawlable. The /archive-book/ HTML page
   // that generates it is noindex and intentionally NOT listed here.
-  const archiveFiles = ["blog-archive.pdf", "presentations-archive.pdf"];
+  const archiveFiles = [
+    "blog-archive.pdf",
+    "presentations-archive.pdf",
+    // Same pattern: built by the ensure-resume-pdf action. The /resume/print/
+    // HTML page that generates it is noindex and intentionally NOT listed.
+    "resume/kyle-skrinak-resume.pdf",
+  ];
 
   const urls = [...staticPages, ...postPages, ...presentationFiles, ...archiveFiles];
 

@@ -26,14 +26,21 @@ runs:
         set -euo pipefail
         # Deterministic file list (sorted) over the inputs that affect the PDF:
         # the resume content, the print route it renders, the stylesheet that
-        # owns the print geometry, and the rendering script itself. sha256sum
-        # prints "<hash>  <path>", so the digest captures both file contents
-        # AND paths — a rename or move counts as a content change.
+        # owns the print geometry, the rendering script itself, and the shared
+        # rendering inputs the print route renders through (Layout, global CSS,
+        # site config, content schema) — a change to any of these alters the
+        # printed page and must bust the cache. sha256sum prints
+        # "<hash>  <path>", so the digest captures both file contents AND
+        # paths — a rename or move counts as a content change.
         files=$(find \
           src/content/pages/resume \
           src/pages/resume/print/index.astro \
           src/styles/resume.css \
           scripts/print-resume-pdf.mjs \
+          src/layouts/Layout.astro \
+          src/styles/global.css \
+          src/config \
+          src/content.config.ts \
           -type f | LC_ALL=C sort)
         if [ -z "$files" ]; then
           echo "::error::No resume rendering inputs found (src/content/pages/resume)." >&2

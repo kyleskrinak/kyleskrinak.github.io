@@ -1,5 +1,6 @@
 ---
 title: Kyle Skrinak — Resume
+description: "Resume of Kyle Skrinak — Senior IT Systems Engineering Manager with three decades across pharmaceutical platform operations, higher-ed web technology, and publishing."
 contactEmail: kyle.skrinak@gmail.com
 contactWebsite: https://kyle.skrinak.com
 contactLinkedin: https://www.linkedin.com/in/kyleskrinak/

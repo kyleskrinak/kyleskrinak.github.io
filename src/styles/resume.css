@@ -215,9 +215,12 @@
   }
 
   /* Override the web theme colors (accent markers, --foreground text,
-     which is light gray in dark mode) — print is black on white */
+     which is light gray in dark mode) — print is black on white.
+     .resume-content itself must be listed: its screen color is a direct
+     declaration, which beats the inherited print body color. */
   .resume-header h1,
   .contact-info,
+  .resume-content,
   .resume-content h2,
   .resume-content strong,
   .resume-content li::marker {

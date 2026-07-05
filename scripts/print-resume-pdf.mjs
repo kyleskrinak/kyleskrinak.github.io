@@ -12,20 +12,42 @@
  * Without it, serves the existing dist/ via `astro preview` (requires a prior
  * `astro build` — this script never builds), renders, and tears the server down.
  *
+ * Before writing anything to disk the render is verified: the page must
+ * contain every expectation derived from the resume source (title, contact
+ * email/address when present, all section headings, all employers), and the
+ * PDF must be exactly one page. A failure exits non-zero with no file written.
+ *
  * Examples:
- *   node scripts/print-resume-pdf.mjs --output dist/resume.pdf
+ *   node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf
  *   node scripts/print-resume-pdf.mjs --output ./resume.pdf --base-url http://localhost:4321
  */
 
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { stat, writeFile } from "node:fs/promises";
+import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
+
 const PORT = Number(process.env.RESUME_PREVIEW_PORT || 4321);
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  console.error(
+    `Invalid RESUME_PREVIEW_PORT '${process.env.RESUME_PREVIEW_PORT}' — must be an integer 1-65535.`
+  );
+  process.exit(2);
+}
+
+// Analytics endpoints the print route's full Layout would otherwise hit in
+// production builds: aborted so CI regeneration never registers pageviews
+// (and their in-flight requests never delay rendering).
+const ANALYTICS_HOSTS = [
+  "googletagmanager.com",
+  "google-analytics.com",
+  "cloudflareinsights.com",
+];
 
 function parseArgs(argv) {
   const args = { output: "resume.pdf", baseUrl: null };
@@ -50,29 +72,45 @@ function parseArgs(argv) {
   return args;
 }
 
-const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
+// Normalize the typographic transformations Astro's markdown pipeline
+// (smartypants) applies, so raw-source expectations compare cleanly against
+// rendered DOM text. Applied to BOTH sides of every comparison.
+function normalizeTypography(s) {
+  return s
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—]/g, "-")
+    .replace(/…/g, "...")
+    .replace(/\s+/g, " ");
+}
 
 // Content expectations derived from the resume's single source of truth.
 // The rendered DOM is exactly what Chromium prints, so verifying these
 // against the page before rendering guarantees the PDF carries the real
 // resume content, not a blank/partial/stale render.
 function readExpectedContent() {
-  const raw = readFileSync(RESUME_SOURCE, "utf8");
+  // Normalize line endings up front — CRLF checkouts must parse identically.
+  const raw = readFileSync(RESUME_SOURCE, "utf8").replace(/\r\n/g, "\n");
   const fm = /^---\n([\s\S]*?)\n---/.exec(raw);
   if (!fm) throw new Error(`No frontmatter found in ${RESUME_SOURCE}`);
+  // Contact fields are optional in the content schema; the check mirrors
+  // that — verify them when present, never require what the schema doesn't.
   const field = name => {
     const m = new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, "m").exec(fm[1]);
-    if (!m) throw new Error(`Frontmatter field '${name}' missing in ${RESUME_SOURCE}`);
-    return m[1].trim();
+    return m ? m[1].trim() : null;
   };
   const body = raw.slice(fm[0].length);
   const headings = [...body.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
-  const employers = [...body.matchAll(/^\*\*(.+?)\*\*/gm)].map(m => m[1].trim());
+  // Employer lines follow the "**Employer** — location | dates" convention;
+  // anchoring on the separator avoids matching arbitrary bold-led paragraphs.
+  const employers = [...body.matchAll(/^\*\*(.+?)\*\* — /gm)].map(m => m[1].trim());
   if (headings.length === 0 || employers.length === 0) {
     throw new Error(`No section headings/employers parsed from ${RESUME_SOURCE}`);
   }
+  const title = field("title");
+  if (!title) throw new Error(`Frontmatter field 'title' missing in ${RESUME_SOURCE}`);
   return {
-    title: field("title"),
+    title,
     email: field("contactEmail"),
     address: field("contactAddress"),
     headings,
@@ -83,23 +121,27 @@ function readExpectedContent() {
 async function verifyRenderedContent(page) {
   const expected = readExpectedContent();
   const rendered = await page.evaluate(() => document.body.innerText);
-  // Collapse whitespace: markdown wraps lines that the DOM renders inline.
-  const haystack = rendered.replace(/\s+/g, " ");
+  const haystack = normalizeTypography(rendered);
   const missing = [
     ["title", expected.title],
     ["email", expected.email],
     ["address", expected.address],
     ...expected.headings.map(h => ["heading", h]),
     ...expected.employers.map(e => ["employer", e]),
-  ].filter(([, text]) => !haystack.includes(text.replace(/\s+/g, " ")));
+  ]
+    .filter(([, text]) => text != null)
+    .filter(([, text]) => !haystack.includes(normalizeTypography(text)));
   if (missing.length > 0) {
     const list = missing.map(([kind, text]) => `  - ${kind}: ${text}`).join("\n");
     throw new Error(
       `Rendered page is missing expected resume content — PDF not written:\n${list}`
     );
   }
+  const optional = [expected.email && "email", expected.address && "address"]
+    .filter(Boolean)
+    .join(", ");
   console.log(
-    `✓ Content verified against source: title, email, address, ` +
+    `✓ Content verified against source: title${optional ? `, ${optional}` : ""}, ` +
       `${expected.headings.length} headings, ${expected.employers.length} employers`
   );
 }
@@ -112,11 +154,20 @@ function countPdfPages(buffer) {
   return m ? Number(m[1]) : null;
 }
 
-async function waitForServer(url, timeoutMs = 60000) {
+async function waitForServer(url, preview, timeoutMs = 60000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    // If the spawned server already died (e.g. port in use), fail fast and
+    // loud rather than polling a port some other process may be serving.
+    if (preview && preview.exitCode !== null) {
+      throw new Error(
+        `astro preview exited with code ${preview.exitCode} before becoming ready ` +
+          `(is port ${PORT} already in use?)`
+      );
+    }
     try {
-      const res = await fetch(url, { method: "GET" });
+      // Per-request timeout so one hung connection can't blow past the deadline.
+      const res = await fetch(url, { method: "GET", signal: AbortSignal.timeout(5000) });
       if (res.ok || res.status === 404) return; // server is up and answering
     } catch {
       // not ready yet
@@ -130,34 +181,48 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const outputPath = path.resolve(ROOT, args.output);
 
-  // Start a preview server over dist/ unless an external one was supplied.
   let preview = null;
-  let baseUrl = args.baseUrl;
-  if (!baseUrl) {
-    if (!existsSync(path.join(ROOT, "dist"))) {
-      throw new Error("dist/ not found — run `astro build` first or pass --base-url.");
-    }
-    baseUrl = `http://localhost:${PORT}`;
-    console.log(`→ Starting astro preview on :${PORT}…`);
-    preview = spawn("npx", ["astro", "preview", "--port", String(PORT)], {
-      stdio: ["ignore", "ignore", "inherit"], // surface astro errors (e.g. port in use)
-      cwd: ROOT,
-      detached: true, // own process group so we can kill the whole tree
-    });
-    await waitForServer(baseUrl + "/");
-  }
-
-  const pageUrl = `${baseUrl.replace(/\/$/, "")}/resume/print/`;
   let browser = null;
   try {
+    // Start a preview server over dist/ unless an external one was supplied.
+    // Spawned inside the try so any failure past this point (including
+    // waitForServer) still reaches the finally-block teardown.
+    let baseUrl = args.baseUrl;
+    if (!baseUrl) {
+      if (!existsSync(path.join(ROOT, "dist"))) {
+        throw new Error("dist/ not found — run `astro build` first or pass --base-url.");
+      }
+      baseUrl = `http://localhost:${PORT}`;
+      console.log(`→ Starting astro preview on :${PORT}…`);
+      preview = spawn("npx", ["astro", "preview", "--port", String(PORT)], {
+        stdio: ["ignore", "ignore", "inherit"], // surface astro errors (e.g. port in use)
+        cwd: ROOT,
+        detached: true, // own process group so we can kill the whole tree
+      });
+      await waitForServer(baseUrl + "/", preview);
+    }
+
+    const pageUrl = `${baseUrl.replace(/\/$/, "")}/resume/print/`;
     console.log(`→ Rendering ${pageUrl} → ${args.output}`);
     browser = await chromium.launch();
     const page = await browser.newPage();
-    const resp = await page.goto(pageUrl, { waitUntil: "networkidle", timeout: 120000 });
+    await page.route("**/*", route => {
+      const host = new URL(route.request().url()).hostname;
+      if (ANALYTICS_HOSTS.some(h => host === h || host.endsWith(`.${h}`))) {
+        return route.abort();
+      }
+      return route.continue();
+    });
+    // "load", not "networkidle" — consistent with build-archive-pdf.mjs;
+    // readiness is guaranteed by the selector wait and content verification.
+    const resp = await page.goto(pageUrl, { waitUntil: "load", timeout: 120000 });
     if (!resp || !resp.ok()) {
       throw new Error(`Failed to load ${pageUrl} (status ${resp ? resp.status() : "none"})`);
     }
     await page.waitForSelector(".resume-content");
+    // Fonts must be applied, not just fetched, before measuring a page that
+    // is tuned to exactly one page.
+    await page.evaluate(() => document.fonts.ready);
     await verifyRenderedContent(page);
 
     // Page size and margins come from the stylesheet's @page rule (via
@@ -180,11 +245,18 @@ async function main() {
       );
     }
 
+    await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, pdf);
     const { size } = await stat(outputPath);
     console.log(`✅ Wrote ${args.output} (${(size / 1024).toFixed(0)} KB, ${pages} page)`);
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+      try {
+        await browser.close();
+      } catch {
+        /* never let a close failure skip the preview teardown below */
+      }
+    }
     if (preview && preview.pid) {
       try {
         // POSIX-only: negative PID signals the whole process group (macOS/ubuntu

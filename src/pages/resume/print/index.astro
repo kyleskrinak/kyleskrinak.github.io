@@ -1,7 +1,6 @@
 ---
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
-import { SITE } from "@/config";
 import "@/styles/resume.css";
 
 const page = await getEntry("pages", "resume");
@@ -11,16 +10,22 @@ const { Content } = await render(page);
 const { title, description, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
 ---
 
+{/* Canonical points at the public /resume/ page: this route is a noindex
+    PDF-rendering source and must not declare itself canonical. Title drops
+    the SITE.title suffix — the content title already carries the name. */}
 <Layout
-  title={`${title} | ${SITE.title}`}
+  title={title}
   description={description}
   noindex={true}
+  canonicalURL={new URL("/resume/", Astro.site).href}
 >
   <main id="main-content" class="app-layout pb-12">
     <div class="resume-header">
       <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
       <div class="contact-info">
-        {contactEmail && <span>{contactEmail}</span>}
+        {contactEmail && (
+          <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
+        )}
         {contactAddress && <span>{contactAddress}</span>}
         {contactWebsite && (
           <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
