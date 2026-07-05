@@ -26,7 +26,7 @@ const { title, description, contactEmail, contactWebsite, contactLinkedin, conta
           <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
         )}
         {contactLinkedin && (
-          <span><a href={contactLinkedin}>LinkedIn</a></span>
+          <span><a href={contactLinkedin}>{contactLinkedin.replace(/^https?:\/\//, "")}</a></span>
         )}
       </div>
     </div>

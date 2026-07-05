@@ -89,9 +89,10 @@
   }
 
   /* All print sizes below are rem-based, so scaling the root scales the
-     whole rendering. 12px root ≈ 9pt body text — dense but readable. */
+     whole rendering. 14px root ≈ 10.5pt body text. Measured one-page
+     ceiling is ≈14.34px (10.75pt) at 1.22 leading — keep below it. */
   html {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   /* Traditional proportional face for print — the site's monospace
@@ -105,12 +106,12 @@
   }
 
   body {
-    line-height: 1.35;
+    line-height: 1.22;
     color: #000;
   }
 
   .resume-content {
-    line-height: 1.35;
+    line-height: 1.22;
   }
 
   main {
@@ -135,7 +136,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.8rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 
   .contact-info a {
@@ -146,16 +147,50 @@
   /* No overflow clipping: content exceeding one page must spill visibly
      to page 2 so the one-page constraint fails loudly, not silently */
 
-  .resume-content h2 {
-    font-size: 0.9rem;
+  /* Entry header lines are sans-serif against the Times body, at body
+     size. The h2 + p selector covers the employer segment that runs in
+     on the same line as the h2 role; its weights are left alone (bold
+     employer name, regular location/dates). */
+  .resume-content h2,
+  .resume-content h3,
+  .resume-content h4 {
     font-weight: 600;
-    margin-top: 0.25rem;
-    margin-bottom: 0;
-    page-break-after: avoid;
   }
 
-  .resume-content h2:first-of-type {
+  .resume-content h2,
+  .resume-content h3,
+  .resume-content h4,
+  .resume-content h2 + p {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* 10pt on paper — 0.5pt below the 10.5pt body */
+    font-size: 0.952rem;
+  }
+
+  /* Run each entry header as a single wrapping line (GDoc style): the h2
+     role and the employer paragraph that follows it flow together. The
+     block ::before forces the line break ahead of the entry and carries
+     the inter-entry spacing an inline h2 can no longer provide. */
+  .resume-content h2 {
+    display: inline;
+  }
+
+  .resume-content h2::before {
+    content: "";
+    display: block;
+    /* Paragraph-sized gap between sections */
+    margin-top: 0.75rem;
+  }
+
+  .resume-content h2:first-of-type::before {
     margin-top: 0;
+  }
+
+  .resume-content h2::after {
+    content: ", ";
+  }
+
+  .resume-content h2 + p {
+    display: inline;
   }
 
   .resume-content p {
@@ -169,12 +204,24 @@
 
   .resume-content ul {
     margin: 0.15rem 0;
-    padding-left: 1rem;
+    /* Wide enough for outside disc markers — 1rem clipped them at the
+       content edge */
+    padding-left: 1.4rem;
   }
 
   .resume-content li {
     margin: 0.08rem 0;
     page-break-inside: avoid;
+  }
+
+  /* Override the web theme colors (accent markers, --foreground text,
+     which is light gray in dark mode) — print is black on white */
+  .resume-header h1,
+  .contact-info,
+  .resume-content h2,
+  .resume-content strong,
+  .resume-content li::marker {
+    color: #000;
   }
 
   /* Hide non-print elements */
