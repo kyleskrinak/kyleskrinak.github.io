@@ -18,8 +18,8 @@
  */
 
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import { stat } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
@@ -48,6 +48,68 @@ function parseArgs(argv) {
     }
   }
   return args;
+}
+
+const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
+
+// Content expectations derived from the resume's single source of truth.
+// The rendered DOM is exactly what Chromium prints, so verifying these
+// against the page before rendering guarantees the PDF carries the real
+// resume content, not a blank/partial/stale render.
+function readExpectedContent() {
+  const raw = readFileSync(RESUME_SOURCE, "utf8");
+  const fm = /^---\n([\s\S]*?)\n---/.exec(raw);
+  if (!fm) throw new Error(`No frontmatter found in ${RESUME_SOURCE}`);
+  const field = name => {
+    const m = new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, "m").exec(fm[1]);
+    if (!m) throw new Error(`Frontmatter field '${name}' missing in ${RESUME_SOURCE}`);
+    return m[1].trim();
+  };
+  const body = raw.slice(fm[0].length);
+  const headings = [...body.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+  const employers = [...body.matchAll(/^\*\*(.+?)\*\*/gm)].map(m => m[1].trim());
+  if (headings.length === 0 || employers.length === 0) {
+    throw new Error(`No section headings/employers parsed from ${RESUME_SOURCE}`);
+  }
+  return {
+    title: field("title"),
+    email: field("contactEmail"),
+    address: field("contactAddress"),
+    headings,
+    employers,
+  };
+}
+
+async function verifyRenderedContent(page) {
+  const expected = readExpectedContent();
+  const rendered = await page.evaluate(() => document.body.innerText);
+  // Collapse whitespace: markdown wraps lines that the DOM renders inline.
+  const haystack = rendered.replace(/\s+/g, " ");
+  const missing = [
+    ["title", expected.title],
+    ["email", expected.email],
+    ["address", expected.address],
+    ...expected.headings.map(h => ["heading", h]),
+    ...expected.employers.map(e => ["employer", e]),
+  ].filter(([, text]) => !haystack.includes(text.replace(/\s+/g, " ")));
+  if (missing.length > 0) {
+    const list = missing.map(([kind, text]) => `  - ${kind}: ${text}`).join("\n");
+    throw new Error(
+      `Rendered page is missing expected resume content — PDF not written:\n${list}`
+    );
+  }
+  console.log(
+    `✓ Content verified against source: title, email, address, ` +
+      `${expected.headings.length} headings, ${expected.employers.length} employers`
+  );
+}
+
+// Page count from the PDF's page-tree root (/Type /Pages ... /Count N).
+// Chromium writes this dictionary uncompressed, so a regex over the raw
+// bytes is reliable for its own output; returns null if not found.
+function countPdfPages(buffer) {
+  const m = /\/Type\s*\/Pages[^>]*?\/Count\s+(\d+)/.exec(buffer.toString("latin1"));
+  return m ? Number(m[1]) : null;
 }
 
 async function waitForServer(url, timeoutMs = 60000) {
@@ -96,19 +158,31 @@ async function main() {
       throw new Error(`Failed to load ${pageUrl} (status ${resp ? resp.status() : "none"})`);
     }
     await page.waitForSelector(".resume-content");
+    await verifyRenderedContent(page);
 
     // Page size and margins come from the stylesheet's @page rule (via
     // preferCSSPageSize); script margins stay zero so the two don't stack.
-    await page.pdf({
-      path: outputPath,
+    // Render to a buffer first: the one-page check below must pass before
+    // anything lands on disk, so a failing render can't ship a bad PDF.
+    const pdf = await page.pdf({
       format: "Letter",
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
       printBackground: true,
       preferCSSPageSize: true,
     });
 
+    const pages = countPdfPages(pdf);
+    if (pages !== 1) {
+      throw new Error(
+        `Resume PDF is ${pages ?? "an unknown number of"} page(s) — must be exactly 1. ` +
+          `Content has outgrown the one-page constraint; trim content ` +
+          `(weakest bullets first) rather than shrinking type. No file written.`
+      );
+    }
+
+    await writeFile(outputPath, pdf);
     const { size } = await stat(outputPath);
-    console.log(`✅ Wrote ${args.output} (${(size / 1024).toFixed(0)} KB)`);
+    console.log(`✅ Wrote ${args.output} (${(size / 1024).toFixed(0)} KB, ${pages} page)`);
   } finally {
     if (browser) await browser.close();
     if (preview && preview.pid) {
