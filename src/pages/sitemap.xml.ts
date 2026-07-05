@@ -58,7 +58,7 @@ export const GET: APIRoute = async ({ site }) => {
   const archiveFiles = [
     "blog-archive.pdf",
     "presentations-archive.pdf",
-    // Same pattern: built by the ensure-resume-pdf action. The /resume/print/
+    // Same pattern: built by the ensure-release-pdfs action. The /resume/print/
     // HTML page that generates it is noindex and intentionally NOT listed.
     "resume/kyle-skrinak-resume.pdf",
   ];
