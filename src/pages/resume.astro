@@ -4,6 +4,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
+import ResumeHeader from "@/components/ResumeHeader.astro";
 import { linkWithBase } from "@/utils/linkWithBase";
 import "@/styles/resume.css";
 
@@ -23,24 +24,19 @@ const { title, description, contactEmail, contactWebsite, contactLinkedin } = pa
   <Header />
   <Breadcrumb />
   <main id="main-content" class="app-layout pb-12">
-    <div class="resume-header">
-      <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
-      <div class="contact-info">
-        {contactEmail && (
-          <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
-        )}
-        {contactWebsite && (
-          <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
-        )}
-        {contactLinkedin && (
-          <span><a href={contactLinkedin}>LinkedIn</a></span>
-        )}
-      </div>
+    {/* No contactAddress here: the address is print-only and must never
+        ship in the public page's markup */}
+    <ResumeHeader
+      title={title}
+      contactEmail={contactEmail}
+      contactWebsite={contactWebsite}
+      contactLinkedin={contactLinkedin}
+    >
       <p class="resume-download mt-4">
         <a href={linkWithBase("/resume/kyle-skrinak-resume.pdf")}>Download PDF</a>
         — a one-page, print-formatted copy of this resume.
       </p>
-    </div>
+    </ResumeHeader>
     <article class="resume-content mt-8">
       <Content />
     </article>

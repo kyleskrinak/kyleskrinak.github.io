@@ -1,6 +1,7 @@
 ---
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
+import ResumeHeader from "@/components/ResumeHeader.astro";
 import "@/styles/resume.css";
 
 const page = await getEntry("pages", "resume");
@@ -20,21 +21,14 @@ const { title, description, contactEmail, contactWebsite, contactLinkedin, conta
   canonicalURL={new URL("/resume/", Astro.site).href}
 >
   <main id="main-content" class="app-layout pb-12">
-    <div class="resume-header">
-      <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
-      <div class="contact-info">
-        {contactEmail && (
-          <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
-        )}
-        {contactAddress && <span>{contactAddress}</span>}
-        {contactWebsite && (
-          <span><a href={contactWebsite}>{contactWebsite.replace(/^https?:\/\//, "")}</a></span>
-        )}
-        {contactLinkedin && (
-          <span><a href={contactLinkedin}>{contactLinkedin.replace(/^https?:\/\//, "")}</a></span>
-        )}
-      </div>
-    </div>
+    <ResumeHeader
+      title={title}
+      contactEmail={contactEmail}
+      contactWebsite={contactWebsite}
+      contactLinkedin={contactLinkedin}
+      contactAddress={contactAddress}
+      linkedinAsUrl={true}
+    />
     <article class="resume-content mt-8">
       <Content />
     </article>
