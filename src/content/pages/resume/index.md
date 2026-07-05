@@ -1,6 +1,6 @@
 ---
 title: Kyle Skrinak — Resume
-description: "Resume of Kyle Skrinak — Senior IT Systems Engineering Manager with three decades across pharmaceutical platform operations, higher-ed web technology, and publishing."
+description: "Senior IT Systems Engineering Manager. Platform operations, web technology leadership, and team management from Gilead Sciences to Duke University."
 contactEmail: kyle.skrinak@gmail.com
 contactWebsite: https://kyle.skrinak.com
 contactLinkedin: https://www.linkedin.com/in/kyleskrinak/
