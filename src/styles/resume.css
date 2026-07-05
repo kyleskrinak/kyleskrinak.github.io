@@ -38,26 +38,18 @@
   color: var(--foreground);
 }
 
+/* Entry titles (jobs, degrees) are h2 — direct children of the page h1,
+   no intermediate section headings */
 .resume-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1.75rem;
-  margin-bottom: 0.75rem;
-  color: var(--foreground);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
-}
-
-.resume-content h2:first-child {
-  margin-top: 0;
-}
-
-.resume-content h3 {
   font-size: 1rem;
   font-weight: 600;
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
   color: var(--foreground);
+}
+
+.resume-content h2:first-child {
+  margin-top: 0;
 }
 
 .resume-content p {
@@ -84,6 +76,11 @@
 }
 
 /* Print stylesheet */
+@page {
+  size: letter;
+  margin: 0.4in;
+}
+
 @media print {
   * {
     margin: 0;
@@ -91,19 +88,34 @@
     box-sizing: border-box;
   }
 
+  /* All print sizes below are rem-based, so scaling the root scales the
+     whole rendering. 12px root ≈ 9pt body text — dense but readable. */
+  html {
+    font-size: 12px;
+  }
+
+  /* Traditional proportional face for print — the site's monospace
+     --font-app is a web-only aesthetic and wastes print space */
+  body,
+  .resume-content,
+  .resume-header h1,
+  .contact-info {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
   body {
-    font-family: var(--font-app);
-    font-size: 10px;
     line-height: 1.35;
     color: #000;
+  }
+
+  .resume-content {
+    line-height: 1.35;
   }
 
   main {
     max-width: 100%;
     margin: 0;
-    padding: 0.4in;
-    width: 8.5in;
-    height: 11in;
+    padding: 0;
   }
 
   .resume-header {
@@ -130,30 +142,19 @@
     color: #000;
   }
 
-  .resume-content {
-    overflow: hidden;
-  }
+  /* No overflow clipping: content exceeding one page must spill visibly
+     to page 2 so the one-page constraint fails loudly, not silently */
 
   .resume-content h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-top: 0.4rem;
-    margin-bottom: 0.25rem;
-    border-bottom: 1px solid #000;
-    padding-bottom: 0.15rem;
-    page-break-after: avoid;
-  }
-
-  .resume-content h2:first-of-type {
-    margin-top: 0;
-  }
-
-  .resume-content h3 {
     font-size: 0.9rem;
     font-weight: 600;
     margin-top: 0.25rem;
     margin-bottom: 0;
     page-break-after: avoid;
+  }
+
+  .resume-content h2:first-of-type {
+    margin-top: 0;
   }
 
   .resume-content p {
@@ -181,14 +182,5 @@
   nav,
   .breadcrumb {
     display: none;
-  }
-
-  /* Force page layout */
-  html,
-  body {
-    width: 8.5in;
-    height: 11in;
-    margin: 0;
-    padding: 0;
   }
 }

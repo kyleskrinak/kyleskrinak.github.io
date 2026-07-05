@@ -8,7 +8,7 @@ import { SITE } from "@/config";
  *
  * Pages included:
  * - Home page
- * - Static content pages (about, archives, lchf)
+ * - Static content pages (about, archives, lchf, resume)
  * - Individual blog posts
  * - Individual presentation HTML files
  *
@@ -28,6 +28,7 @@ export const GET: APIRoute = async ({ site }) => {
     "",           // Home page
     "about/",     // About page
     "lchf/",      // LCHF content page
+    "resume/",    // Resume page (/resume/print/ is noindex and intentionally NOT listed)
   ];
 
   // Conditionally add archives if enabled

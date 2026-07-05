@@ -20,7 +20,7 @@ changelog:
     entry: Initial migration from Google Doc snapshot
 ---
 
-### Senior IT Systems Engineering Manager, Digital Experience
+## Senior IT Systems Engineering Manager, Digital Experience
 
 **Gilead Sciences** — Raleigh, NC | June 2022 – Present
 
@@ -30,7 +30,7 @@ Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sit
 - Maintained ~99.99% platform availability, averaging under five minutes of monthly downtime across ~200 production websites.
 - Consolidated hosting by decommissioning a 9-site legacy environment and migrating the non-CMS application estate from EC2 to containerized AWS ECS/Fargate.
 
-### Senior Manager, IT
+## Senior Manager, IT
 
 **Duke University, Office of Information Technology** — Durham, NC | July 2013 – June 2022
 
@@ -40,7 +40,7 @@ Led a web technology team supporting 150+ university department, program, and ad
 - Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms.
 - Maintained zero team turnover across a full 9-year tenure through consistent one-on-ones and clear delivery expectations.
 
-### Co-Owner and Technologist
+## Co-Owner and Technologist
 
 **Skrinak Creative, Inc.** — Apex, NC | January 2001 – July 2013
 
@@ -49,7 +49,7 @@ Skrinak Creative (SCI) is a two-person, print- and web-media-based creative agen
 - Cut typical project delivery time from 3-6 months to 4-6 weeks by adopting Drupal and WordPress for client builds.
 - Implemented a rigorous QA process that cut validation errors on acquired sites from 200+ per page to below ten.
 
-### Manager, Pre-press Department
+## Manager, Pre-press Department
 
 **Litho Industries** — Durham, NC | June 1994 – January 2001
 
@@ -57,24 +57,24 @@ Managed the Pre-press department for a $26M/year commercial printer, with duties
 
 - Led the conversion from film-based to digital plate imaging, cutting production material costs by half while reducing staff through attrition.
 
-### Desktop Publishing Manager
+## Desktop Publishing Manager
 
 **Hachette-Filipacchi Media** — New York, NY | September 1988 – June 1994
 
 - Led the $1.5M conversion of magazine workflows to a unified system, coordinating over 450 editors, art directors, and support staff across Elle, Car and Driver, and Road & Track.
 
-### Supervisor
+## Supervisor
 
 **The Stat Store** — New York, NY | September 1984 – September 1988
 
 Supervised a small, 30-person graphic arts shop
 
-### M.S. I.T.
+## M.S. I.T.
 
 **Rochester Institute of Technology** — Rochester, NY | 1998 – 2001
 
 With highest honors
 
-### B.F.A, Illustration
+## B.F.A, Illustration
 
 **University of the Arts** — Philadelphia, PA | 1980 – 1984

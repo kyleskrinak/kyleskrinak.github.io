@@ -20,7 +20,7 @@ async function printResumePDF(outputPath, baseUrl) {
 
   try {
     // Default to localhost dev server if no URL provided
-    const url = baseUrl || "http://localhost:3000";
+    const url = baseUrl || "http://localhost:4321";
     const resumeUrl = new URL("/resume/", url).toString();
 
     console.log(`Printing ${resumeUrl} to ${outputPath}...`);
@@ -34,15 +34,17 @@ async function printResumePDF(outputPath, baseUrl) {
     // Wait for content to render
     await page.waitForSelector(".resume-content");
 
-    // Print to PDF
+    // Print to PDF. Page size and margins come from the stylesheet's
+    // @page rule (via preferCSSPageSize); script margins stay zero so
+    // the two don't stack.
     await page.pdf({
       path: outputPath,
       format: "Letter",
       margin: {
-        top: "0.5in",
-        right: "0.5in",
-        bottom: "0.5in",
-        left: "0.5in",
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
       },
       printBackground: true,
       preferCSSPageSize: true,
