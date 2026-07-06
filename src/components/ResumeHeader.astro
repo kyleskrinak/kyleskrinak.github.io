@@ -31,7 +31,7 @@ const {
   linkedinAsUrl = false,
 } = Astro.props;
 
-const stripScheme = (url: string) => url.replace(/^https?:\/\//, "");
+const stripScheme = (url: string) => url.replace(/^https?:\/\//i, "");
 ---
 
 <div class="resume-header">
