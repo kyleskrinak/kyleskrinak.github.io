@@ -27,6 +27,7 @@ import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { parse as parseYaml } from "yaml";
 import { parseFlags, startPreview, stopPreview, waitForServer } from "./lib/pdf-helpers.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -91,12 +92,15 @@ function readExpectedContent() {
   }
   const title = field("title");
   if (!title) throw new Error(`Frontmatter field 'title' missing in ${RESUME_SOURCE}`);
+  const parsedFm = parseYaml(fm[1]);
+  const skillsCategoryNames = parsedFm?.skills_inventory?.categories?.map(c => c.name) ?? [];
   return {
     title,
     email: field("contactEmail"),
     address: field("contactAddress"),
     headings,
     employers,
+    skillsCategoryNames,
   };
 }
 
@@ -110,6 +114,7 @@ async function verifyRenderedContent(page) {
     ["address", expected.address],
     ...expected.headings.map(h => ["heading", h]),
     ...expected.employers.map(e => ["employer", e]),
+    ...(expected.skillsCategoryNames ?? []).map(n => ["skills-category", n]),
   ]
     .filter(([, text]) => text != null)
     .filter(([, text]) => !haystack.includes(normalizeTypography(text)));
@@ -122,9 +127,12 @@ async function verifyRenderedContent(page) {
   const optional = [expected.email && "email", expected.address && "address"]
     .filter(Boolean)
     .join(", ");
+  const skillsSuffix = expected.skillsCategoryNames?.length
+    ? `, ${expected.skillsCategoryNames.length} skills categories`
+    : "";
   console.log(
     `✓ Content verified against source: title${optional ? `, ${optional}` : ""}, ` +
-      `${expected.headings.length} headings, ${expected.employers.length} employers`
+      `${expected.headings.length} headings, ${expected.employers.length} employers${skillsSuffix}`
   );
 }
 

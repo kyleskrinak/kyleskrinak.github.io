@@ -10,12 +10,121 @@ current_role:
   employer: Gilead Sciences
   start_date: 2022-06-01
 skills_inventory:
-  last_reviewed: 2026-07-03
-  categories: []
+  last_reviewed: 2026-07-06
+  categories:
+    - name: Leadership & Team Development
+      id: leadership
+      skills:
+        - Technical Leadership
+        - Team Management
+        - Vendor Management
+        - Contractor Leadership
+        - Delegation Frameworks
+        - Cross-Functional Alignment
+        - Stakeholder Management
+        - Mentoring
+    - name: Platform Operations
+      id: platform-ops
+      skills:
+        - Site Reliability
+        - Incident Management
+        - Production Operations
+        - Change Management
+        - Release Management
+        - Service Delivery
+        - Operational Governance
+        - Runbook Development
+    - name: Cloud & Infrastructure
+      id: cloud-infrastructure
+      skills:
+        - Microsoft Azure
+        - Amazon Web Services (AWS)
+        - AKS
+        - ECS
+        - Cloud Architecture
+        - Infrastructure Modernization
+        - SSL Certificate Management
+        - DNS Management
+    - name: DevOps & Automation
+      id: devops-automation
+      skills:
+        - Azure DevOps
+        - CI/CD
+        - Git
+        - Infrastructure as Code
+        - Terraform
+        - Automation Design
+        - Workflow Optimization
+        - Deployment Engineering
+    - name: Cost Optimization & FinOps
+      id: cost-optimization
+      skills:
+        - FinOps
+        - Azure Cost Management
+        - Reserved Instances
+        - Resource Optimization
+        - Cloud Financial Governance
+        - Capacity Planning
+        - Cost Reporting
+    - name: Search & Content Platforms
+      id: search-content-platforms
+      skills:
+        - Sitecore
+        - Solr
+        - SolrCloud
+        - Content Delivery Platforms
+        - Search Architecture
+        - CMS Operations
+    - name: Security & Compliance
+      id: security-compliance
+      skills:
+        - Security Reviews
+        - Risk Assessment
+        - Compliance Governance
+        - Crown Jewels Assessments
+        - Privacy Controls
+        - Audit Support
+        - Certificate Governance
+    - name: Documentation & Process Excellence
+      id: documentation-process
+      skills:
+        - Technical Documentation
+        - SOP Development
+        - Knowledge Management
+        - Process Improvement
+        - Governance Frameworks
+        - Operational Standards
+    - name: AI & Productivity Enablement
+      id: ai-productivity
+      skills:
+        - Microsoft Copilot
+        - AI Adoption
+        - Prompt Engineering
+        - AIOps
+        - Process Automation
+        - Productivity Engineering
 certifications:
-  items: []
+  items:
+    - name: AIOps Foundation
+      issuer: PeopleCert
+      issued: 2026-01-01
+      render: true
+    - name: "Microsoft Certified: Azure Administrator Associate (AZ-104)"
+      issuer: Microsoft
+      render: true
 education:
-  items: []
+  items:
+    - degree: Master of Science, Information Technology
+      institution: Rochester Institute of Technology
+      location: Rochester, NY
+      years: "1998 – 2001"
+      honors: With highest honors
+      render: true
+    - degree: Bachelor of Fine Arts, Illustration
+      institution: University of the Arts
+      location: Philadelphia, PA
+      years: "1980 – 1984"
+      render: true
 changelog:
   - date: 2026-07-03
     entry: Initial migration from Google Doc snapshot
@@ -25,6 +134,8 @@ changelog:
       page (/resume/), the print route (/resume/print/), and the
       build-generated PDF all render from it; the Google Doc is retired as a
       source and is no longer maintained.
+  - date: 2026-07-06
+    entry: Populated skills inventory (9 categories), certifications, and education metadata
 ---
 
 ## Senior IT Systems Engineering Manager, Digital Experience
@@ -75,6 +186,8 @@ Managed the Pre-press department for a $26M/year commercial printer, with duties
 **The Stat Store** — New York, NY | September 1984 – September 1988
 
 Supervised a small, 30-person graphic arts shop
+
+<!-- skills -->
 
 ## M.S. I.T.
 

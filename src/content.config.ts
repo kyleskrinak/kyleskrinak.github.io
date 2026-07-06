@@ -77,16 +77,32 @@ const pages = defineCollection({
 			employer: z.string().trim().min(1),
 			start_date: z.coerce.date(),
 		}).optional(),
-		// Scaffolded structures — item shape is unsettled until populated (separate future work)
 		skills_inventory: z.object({
 			last_reviewed: z.coerce.date(),
-			categories: z.array(z.unknown()),
+			categories: z.array(z.object({
+				name: z.string().trim().min(1),
+				id: z.string().trim().regex(/^[a-z0-9-]+$/),
+				skills: z.array(z.string().trim().min(1)).min(1),
+			})),
 		}).optional(),
 		certifications: z.object({
-			items: z.array(z.unknown()),
+			items: z.array(z.object({
+				name: z.string().trim().min(1),
+				issuer: z.string().trim().min(1).optional(),
+				issued: z.coerce.date().optional(),
+				expires: z.coerce.date().optional(),
+				render: z.boolean().default(true),
+			})),
 		}).optional(),
 		education: z.object({
-			items: z.array(z.unknown()),
+			items: z.array(z.object({
+				degree: z.string().trim().min(1),
+				institution: z.string().trim().min(1),
+				location: z.string().trim().min(1).optional(),
+				years: z.string().trim().min(1).optional(),
+				honors: z.string().trim().min(1).optional(),
+				render: z.boolean().default(false),
+			})),
 		}).optional(),
 		changelog: z.array(z.object({
 			date: z.coerce.date(),
