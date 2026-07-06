@@ -19,6 +19,12 @@ education:
 changelog:
   - date: 2026-07-03
     entry: Initial migration from Google Doc snapshot
+  - date: 2026-07-06
+    entry: >-
+      Migration complete — this file is the canonical resume source. The web
+      page (/resume/), the print route (/resume/print/), and the
+      build-generated PDF all render from it; the Google Doc is retired as a
+      source and is no longer maintained.
 ---
 
 ## Senior IT Systems Engineering Manager, Digital Experience
