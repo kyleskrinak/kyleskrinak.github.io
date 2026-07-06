@@ -7,9 +7,11 @@ export const BLOG_PATH = 'src/content/blog';
 // URL AND carry http(s) — z.string().url() alone accepts any parseable
 // scheme, javascript: included. Requiring a scheme is correct for these
 // always-absolute fields; the blocklist-over-allowlist rule applies to
-// fields that may hold relative URLs, which these never do.
+// fields that may hold relative URLs, which these never do. The protocol
+// check runs on the parsed URL, so scheme casing (HTTPS://) is handled per
+// RFC 3986; .url() has already guaranteed new URL() won't throw.
 const httpUrl = z.string().trim().url().refine(
-	(v) => /^https?:\/\//.test(v),
+	(v) => ['http:', 'https:'].includes(new URL(v).protocol),
 	{ message: 'Must be an absolute http(s) URL' },
 );
 
