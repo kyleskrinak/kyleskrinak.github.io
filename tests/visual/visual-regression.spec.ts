@@ -160,6 +160,15 @@ test.describe('Visual Regression - Standalone Pages', () => {
       maxDiffPixelRatio: 0.1,
     });
   });
+
+  test('resume page should match baseline', async ({ page }) => {
+    await page.goto('/resume/');
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveScreenshot('resume-desktop.png', {
+      fullPage: true,
+      maxDiffPixelRatio: 0.1,
+    });
+  });
 });
 
 test.describe('Visual Regression - Image Rendering', () => {

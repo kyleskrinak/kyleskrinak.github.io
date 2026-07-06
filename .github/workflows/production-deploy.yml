@@ -17,7 +17,7 @@ jobs:
       name: production
       url: https://kyle.skrinak.com
     permissions:
-      contents: write  # ensure-archive-pdfs reads/writes the release backing store
+      contents: write  # ensure-release-pdfs reads/writes the release backing stores
       id-token: write  # needed for OIDC -> AWS
     steps:
       - name: Checkout
@@ -56,12 +56,57 @@ jobs:
           PUBLIC_GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
 
       # Runs AFTER the build: renders the PDFs from the built dist/ and writes
-      # them into dist/ so the S3 sync picks them up. Production uses the default
-      # release tag (archive-pdfs) as its backing store.
+      # them into dist/ so the S3 sync picks them up. Production uses the
+      # archive-pdfs / resume-pdf release tags as its backing stores.
+      # bundle-test.html is excluded from the presentations PDF (it's a build
+      # test artifact, not a deck), so it must not feed the hash either.
       - name: Ensure archive PDFs
-        uses: ./.github/actions/ensure-archive-pdfs
+        uses: ./.github/actions/ensure-release-pdfs
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          tag: archive-pdfs
+          title: Archive PDFs (automation backing store)
+          hash-paths: |
+            src/content/blog
+            public/presentations
+            src/pages/archive-book.astro
+            src/utils/getBlogPosts.ts
+            src/utils/postFilter.ts
+            src/content.config.ts
+            scripts/build-archive-pdf.mjs
+            scripts/build-presentations-pdf.mjs
+            src/config
+          hash-exclude-names: |
+            bundle-test.html
+          assets: |
+            blog-archive.pdf dist
+            presentations-archive.pdf dist
+          regen-command: |
+            npm run archive:pdf -- --skip-build --output dist/blog-archive.pdf
+            npm run archive:presentations -- --output dist/presentations-archive.pdf
+
+      # The resume hash list includes the shared rendering inputs the print
+      # route renders through (Layout, global CSS, site config, content
+      # schema) — a change to any of these alters the printed page.
+      - name: Ensure resume PDF
+        uses: ./.github/actions/ensure-release-pdfs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: resume-pdf
+          title: Resume PDF (automation backing store)
+          hash-paths: |
+            src/content/pages/resume
+            src/pages/resume/print/index.astro
+            src/styles/resume.css
+            scripts/print-resume-pdf.mjs
+            src/layouts/Layout.astro
+            src/styles/global.css
+            src/config
+            src/content.config.ts
+          assets: |
+            kyle-skrinak-resume.pdf dist/resume
+          regen-command: |
+            node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

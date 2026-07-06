@@ -25,6 +25,7 @@ import { createServer } from "node:http";
 import { readFile, readdir, mkdir, stat } from "node:fs/promises";
 import { dirname, resolve, join, extname, basename, sep } from "node:path";
 import { chromium } from "@playwright/test";
+import { parseFlags } from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
 const PUBLIC_DIR = join(ROOT, "public");
@@ -47,26 +48,7 @@ const MIME = {
   ".ico": "image/x-icon",
 };
 
-function parseArgs(argv) {
-  const args = { output: "public/presentations-archive.pdf" };
-  // Guard flags that take a value: a missing value (end of argv) or another flag
-  // in its place is a usage error, not a silent `undefined` that fails later.
-  const needValue = (flag, value) => {
-    if (value === undefined || value.startsWith("--")) {
-      console.error(`Missing value for ${flag}`);
-      process.exit(2);
-    }
-    return value;
-  };
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--output") args.output = needValue("--output", argv[++i]);
-    else {
-      console.error(`Unknown argument: ${argv[i]}`);
-      process.exit(2);
-    }
-  }
-  return args;
-}
+const FLAGS = { "--output": { key: "output", value: true } };
 
 function escapeHtml(s) {
   return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -160,7 +142,9 @@ const PRINT_OVERRIDES = `
 `;
 
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseFlags(process.argv.slice(2), FLAGS, {
+    output: "public/presentations-archive.pdf",
+  });
   const outputPath = resolve(ROOT, args.output);
 
   // Exclude bundle-test.html — a build test artifact, not a real deck.

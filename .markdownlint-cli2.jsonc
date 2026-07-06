@@ -1,0 +1,43 @@
+{
+  // Markdownlint gate policy (decided 2026-07-04): existing content is
+  // never reformatted to satisfy the linter — prose-hostile and pure
+  // style-consistency rules are disabled so the current tree passes
+  // untouched. Structural rules (reversed/empty links, missing image alt
+  // text, malformed emphasis/code spans, table column counts, link
+  // fragments) stay active to catch real breakage in future edits.
+  "globs": ["**/*.md"],
+  "ignores": [
+    "node_modules/**",
+    "dist/**",
+    ".astro/**",
+    "coverage/**",
+    "vendor/**"
+  ],
+  "config": {
+    "MD001": false, // heading-increment — content skips levels intentionally
+    "MD004": false, // ul-style — mixed marker styles in existing content
+    "MD007": false, // ul-indent
+    "MD009": false, // no-trailing-spaces
+    "MD010": false, // no-hard-tabs
+    "MD012": false, // no-multiple-blanks
+    "MD013": false, // line-length — prose is not line-wrapped
+    "MD022": false, // blanks-around-headings
+    "MD024": false, // no-duplicate-heading — CHANGELOG repeats section names
+    "MD025": false, // single-title
+    "MD026": { "punctuation": ",;!" }, // allow '.' and ':' in headings (e.g. "M.S. I.T.")
+    "MD030": false, // list-marker-space
+    "MD031": false, // blanks-around-fences
+    "MD032": false, // blanks-around-lists
+    "MD033": false, // no-inline-html — HTML is valid in Astro markdown
+    "MD034": false, // no-bare-urls — GFM autolinks these
+    "MD036": false, // no-emphasis-as-heading
+    "MD039": false, // no-space-in-links
+    "MD040": false, // fenced-code-language
+    "MD041": false, // first-line-heading — frontmatter/partial files
+    "MD047": false, // single-trailing-newline
+    "MD049": false, // emphasis-style
+    "MD058": false, // blanks-around-tables
+    "MD059": false, // descriptive-link-text
+    "MD060": false  // table-column-style
+  }
+}

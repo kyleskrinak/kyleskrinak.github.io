@@ -31,3 +31,10 @@ export const SITE = {
   lang: "en", // html lang code. Set this empty and default will be "en"
   timezone: "America/New_York", // Default global timezone (IANA format)
 } as const;
+
+// Root-relative path of the build-generated resume PDF. Single source for the
+// site code (download link, sitemap). The CI workflow stanzas
+// (.github/workflows/*-deploy.yml "Ensure resume PDF" steps) repeat this
+// literal because workflows cannot import TS — keep them in sync when
+// changing it.
+export const RESUME_PDF_PATH = "/resume/kyle-skrinak-resume.pdf";

@@ -1,0 +1,165 @@
+name: Ensure release-backed PDFs
+description: >-
+  Generic hash-gated PDF artifact step. Makes the given PDF assets present in
+  the deployable AFTER the site build, using a GitHub Release as an untracked
+  backing store. Regenerates only when the hashed rendering inputs change;
+  otherwise downloads the existing assets. Requires a prior `npm run build`
+  step — regen commands render from the built dist/. Callers declare their
+  hash inputs, assets, and regen command; the release-gate protocol lives
+  only here.
+
+inputs:
+  tag:
+    description: Release tag used as the backing store for these assets.
+    required: true
+  token:
+    description: GitHub token with contents:write to read/write the release.
+    required: true
+  title:
+    description: Release title used when bootstrapping the backing store.
+    required: false
+    default: PDF assets (automation backing store)
+  hash-paths:
+    description: >-
+      Newline-separated files/directories whose contents drive regeneration.
+      Every input that shapes the rendered PDFs belongs here.
+    required: true
+  hash-exclude-names:
+    description: Newline-separated file names to exclude from hashing (find ! -name).
+    required: false
+    default: ""
+  assets:
+    description: >-
+      Newline-separated "<asset-filename> <dest-dir>" pairs. Each asset is
+      downloaded to (or must be produced in) its dest dir.
+    required: true
+  regen-command:
+    description: >-
+      Shell script run when regeneration is needed. Must write every declared
+      asset to its dest dir. Runs with bash -euo pipefail.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Compute content hash
+      id: hash
+      shell: bash
+      env:
+        HASH_PATHS: ${{ inputs.hash-paths }}
+        EXCLUDE_NAMES: ${{ inputs.hash-exclude-names }}
+      run: |
+        set -euo pipefail
+        shopt -s inherit_errexit
+        # Deterministic file list (sorted) over the declared inputs. sha256sum
+        # prints "<hash>  <path>", so the digest captures both file contents
+        # AND paths — a rename or move counts as a content change.
+        paths=()
+        while IFS= read -r p; do [ -n "$p" ] && paths+=("$p"); done <<< "$HASH_PATHS"
+        excludes=()
+        while IFS= read -r n; do [ -n "$n" ] && excludes+=(! -name "$n"); done <<< "$EXCLUDE_NAMES"
+        mapfile -t files < <(find "${paths[@]}" -type f ${excludes[@]+"${excludes[@]}"} | LC_ALL=C sort)
+        if [ "${#files[@]}" -eq 0 ]; then
+          echo "::error::No content inputs found under the declared hash-paths."
+          exit 1
+        fi
+        # Single sha256sum invocation over the whole list: any unreadable file
+        # fails the step instead of being silently skipped by a loop.
+        hash=$(sha256sum "${files[@]}" | sha256sum | cut -d' ' -f1)
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        echo "Content hash: $hash (${#files[@]} files)"
+
+    - name: Resolve assets (regenerate on change, else download)
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        TAG: ${{ inputs.tag }}
+        TITLE: ${{ inputs.title }}
+        HASH: ${{ steps.hash.outputs.hash }}
+        ASSETS: ${{ inputs.assets }}
+        REGEN_COMMAND: ${{ inputs.regen-command }}
+      run: |
+        set -euo pipefail
+        shopt -s inherit_errexit
+
+        names=()
+        dirs=()
+        while read -r name dir; do
+          [ -n "$name" ] || continue
+          if [ -z "$dir" ]; then
+            echo "::error::Malformed assets entry '$name' — expected '<filename> <dest-dir>'."
+            exit 1
+          fi
+          names+=("$name")
+          dirs+=("$dir")
+          mkdir -p "$dir"
+        done <<< "$ASSETS"
+        if [ "${#names[@]}" -eq 0 ]; then
+          echo "::error::No assets declared."
+          exit 1
+        fi
+
+        # Read the hash stored alongside the release (its body holds the last
+        # generated content hash) in one call. Bootstrap the release if it
+        # does not exist yet; the placeholder note never matches a real hash,
+        # so the asset either regenerates or the missing-asset fallback fires.
+        if body=$(gh release view "$TAG" --json body --jq '.body' 2>/dev/null); then
+          stored=$(tr -d '[:space:]' <<< "$body")
+        else
+          echo "Release '$TAG' missing — bootstrapping (non-latest/prerelease)."
+          gh release create "$TAG" \
+            --title "$TITLE" \
+            --notes "bootstrap" \
+            --latest=false \
+            --prerelease
+          stored=""
+        fi
+
+        regen=0
+        if [ "$stored" != "$HASH" ]; then
+          echo "Content hash changed (stored='$stored' current='$HASH') — regenerating."
+          regen=1
+        else
+          for i in "${!names[@]}"; do
+            if ! gh release download "$TAG" --pattern "${names[$i]}" --dir "${dirs[$i]}" --clobber 2>/dev/null; then
+              echo "Hash matched but asset '${names[$i]}' is missing — regenerating."
+              regen=1
+              break
+            fi
+          done
+          if [ "$regen" = "0" ]; then
+            echo "Content unchanged — downloaded existing assets from release '$TAG'."
+          fi
+        fi
+
+        if [ "$regen" = "1" ]; then
+          # Browser install is job-scoped: a marker in RUNNER_TEMP lets a
+          # second ensure step in the same job skip the apt-get/dep work.
+          marker="${RUNNER_TEMP:-/tmp}/.playwright-chromium-with-deps"
+          if [ ! -f "$marker" ]; then
+            npx playwright install --with-deps chromium
+            touch "$marker"
+          else
+            echo "Playwright chromium already installed earlier in this job — skipping."
+          fi
+
+          bash -euo pipefail -c "$REGEN_COMMAND"
+
+          upload_paths=()
+          for i in "${!names[@]}"; do
+            upload_paths+=("${dirs[$i]}/${names[$i]}")
+          done
+          gh release upload "$TAG" "${upload_paths[@]}" --clobber
+          # Persist the new content hash so the next deploy can compare against it.
+          gh release edit "$TAG" --notes "$HASH"
+        fi
+
+        # Fail loudly if, after all paths, any asset is not present in the
+        # deployable. (Workflow commands are parsed from stdout, not stderr.)
+        for i in "${!names[@]}"; do
+          if [ ! -f "${dirs[$i]}/${names[$i]}" ]; then
+            echo "::error::${names[$i]} missing after ensure step."
+            exit 1
+          fi
+        done
+        echo "All assets ready."
