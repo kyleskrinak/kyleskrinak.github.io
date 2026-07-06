@@ -48,22 +48,5 @@ export function remarkFacets() {
       para.data.hProperties["data-facets"] = facets.join(" ");
     });
 
-    // 3) Skills placeholder: top-level html node `<!-- skills -->`, replaced with MDAST nodes
-    //    (never a raw-HTML string — raw HTML headings get no id; verified). Guarded so the
-    //    plugin no-ops on blog posts.
-    const fm = file.data?.astro?.frontmatter;
-    if (!fm?.skills_inventory?.categories?.length) return;
-    const idx = tree.children.findIndex(n => n.type === "html" && /^<!--\s*skills\s*-->$/.test(n.value.trim()));
-    if (idx === -1) return;
-    const heading = { type: "heading", depth: 2, data: { hProperties: { class: "skills-heading" } },
-      children: [{ type: "text", value: "Skills" }] };
-    const list = { type: "list", ordered: false, children: fm.skills_inventory.categories.map(cat => ({
-      type: "listItem", data: { hProperties: { "data-skill-category": cat.id } },
-      children: [{ type: "paragraph", children: [
-        { type: "strong", children: [{ type: "text", value: `${cat.name}:` }] },
-        { type: "text", value: ` ${cat.skills.join(", ")}` },
-      ]}],
-    })) };
-    tree.children.splice(idx, 1, heading, list);
   };
 }

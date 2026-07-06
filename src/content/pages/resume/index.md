@@ -192,8 +192,6 @@ Managed the Pre-press department for a $26M/year commercial printer, with duties
 
 Supervised a small, 30-person graphic arts shop <!-- f: creative, leadership -->
 
-<!-- skills -->
-
 ## M.S. I.T.
 
 **Rochester Institute of Technology** — Rochester, NY | 1998 – 2001

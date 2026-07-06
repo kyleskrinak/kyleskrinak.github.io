@@ -77,11 +77,6 @@
   color: var(--accent);
 }
 
-.resume-content li[data-skill-category] {
-  list-style: none;
-  padding-left: 0;
-}
-
 /* Print stylesheet */
 @page {
   size: letter;
@@ -178,36 +173,28 @@
   /* Run each entry header as a single wrapping line (GDoc style): the h2
      role and the employer paragraph that follows it flow together. The
      block ::before forces the line break ahead of the entry and carries
-     the inter-entry spacing an inline h2 can no longer provide.
-     .skills-heading is exempted: it heads a ul, not a p, so it stays
-     block. Its margins are set explicitly below. */
-  .resume-content h2:not(.skills-heading) {
+     the inter-entry spacing an inline h2 can no longer provide. */
+  .resume-content h2 {
     display: inline;
   }
 
-  .resume-content h2:not(.skills-heading)::before {
+  .resume-content h2::before {
     content: "";
     display: block;
     /* Paragraph-sized gap between sections */
     margin-top: 0.75rem;
   }
 
-  .resume-content h2:first-of-type:not(.skills-heading)::before {
+  .resume-content h2:first-of-type::before {
     margin-top: 0;
   }
 
-  .resume-content h2:not(.skills-heading)::after {
+  .resume-content h2::after {
     content: ", ";
   }
 
   .resume-content h2 + p {
     display: inline;
-  }
-
-  /* Skills heading: block, compact sans spacing matching section rhythm */
-  .resume-content .skills-heading {
-    margin-top: 0.75rem;
-    margin-bottom: 0;
   }
 
   .resume-content p {
