@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getBlogPosts } from "@/utils/getBlogPosts";
-import { SITE } from "@/config";
+import { RESUME_PDF_PATH, SITE } from "@/config";
 
 /**
  * Generates sitemap.xml containing only indexable pages.
@@ -60,7 +60,7 @@ export const GET: APIRoute = async ({ site }) => {
     "presentations-archive.pdf",
     // Same pattern: built by the ensure-release-pdfs action. The /resume/print/
     // HTML page that generates it is noindex and intentionally NOT listed.
-    "resume/kyle-skrinak-resume.pdf",
+    RESUME_PDF_PATH,
   ];
 
   const urls = [...staticPages, ...postPages, ...presentationFiles, ...archiveFiles];
