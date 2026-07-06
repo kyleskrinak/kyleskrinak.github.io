@@ -82,10 +82,12 @@
 }
 
 @media print {
-  * {
+  /* Bare-element defaults only; every styled element re-declares its own
+     print spacing below (a universal reset has zero specificity and loses
+     to the class-scoped screen rules anyway) */
+  body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
   }
 
   /* All print sizes below are rem-based, so scaling the root scales the
@@ -120,9 +122,10 @@
     padding: 0;
   }
 
+  /* Centering comes from the screen rules (h1 and .contact-info center
+     themselves); print only tightens the gap below the header */
   .resume-header {
     margin-bottom: 0.6rem;
-    text-align: center;
   }
 
   .resume-header h1 {
@@ -131,10 +134,9 @@
     margin: 0 0 0.3rem 0;
   }
 
+  /* Flex layout comes from the screen rule; print only overrides the gap
+     (tighter) and font-size (body-sized per Kyle) */
   .contact-info {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     gap: 0.8rem;
     font-size: 1rem;
   }
