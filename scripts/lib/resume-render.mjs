@@ -128,6 +128,24 @@ export async function renderResumePdf({
 
   let preview = null;
   let browser = null;
+
+  // A Ctrl-C / SIGTERM mid-render bypasses the finally block below, which would
+  // otherwise leak the detached `astro preview` process group (spawned with
+  // detached:true, it outlives this process). Tear it down on a signal, then exit.
+  const cleanupAndExit = code => {
+    try {
+      stopPreview(preview);
+    } catch {
+      /* best effort — the port matters more than a clean message */
+    }
+    if (browser) browser.close().catch(() => {});
+    process.exit(code);
+  };
+  const onSigint = () => cleanupAndExit(130);
+  const onSigterm = () => cleanupAndExit(143);
+  process.once("SIGINT", onSigint);
+  process.once("SIGTERM", onSigterm);
+
   try {
     // Start a preview server over dist/ unless an external one was supplied.
     // Spawned inside the try so any failure past this point (including
@@ -196,6 +214,8 @@ export async function renderResumePdf({
     const { size } = await stat(outputPath);
     console.log(`✅ Wrote ${output} (${(size / 1024).toFixed(0)} KB, ${pages} page)`);
   } finally {
+    process.off("SIGINT", onSigint);
+    process.off("SIGTERM", onSigterm);
     if (browser) {
       try {
         await browser.close();

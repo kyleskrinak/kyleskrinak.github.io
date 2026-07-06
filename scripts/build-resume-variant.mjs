@@ -21,30 +21,36 @@ import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import GithubSlugger from "github-slugger";
 import { parseFlags } from "./lib/pdf-helpers.mjs";
 import { renderResumePdf } from "./lib/resume-render.mjs";
+// Single source of truth for the facet vocabulary — shared with the remark
+// plugin that emits the data-facets attributes this script filters on.
+import { FACETS } from "../src/lib/remark-facets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
 
-// Must match the FACETS set in src/lib/remark-facets.mjs exactly.
-const KNOWN_FACETS = new Set([
-  "leadership", "platform-ops", "security", "web-dev", "creative", "cost", "delivery",
-]);
+// Valid bullet_order entry keys are the resume's rendered h2 ids. Derive them
+// from the source headings with the same slugger Astro uses (github-slugger),
+// so adding or renaming a section can never leave a hardcoded list silently
+// stale. One slugger instance in document order matches Astro's dedup exactly.
+function deriveEntryIds() {
+  const raw = readFileSync(RESUME_SOURCE, "utf8").replace(/\r\n/g, "\n");
+  const body = raw.replace(/^---\n[\s\S]*?\n---/, ""); // drop frontmatter
+  const slugger = new GithubSlugger();
+  const ids = new Set();
+  for (const m of body.matchAll(/^## (.+)$/gm)) ids.add(slugger.slug(m[1].trim()));
+  if (ids.size === 0) throw new Error(`No section headings found in ${RESUME_SOURCE}`);
+  return ids;
+}
+const KNOWN_ENTRY_IDS = deriveEntryIds();
 
-// Built page's h2 ids verified against the /resume/print/ DOM per plan.
-// "M.S. I.T." slugs to "ms-it"; "B.F.A, Illustration" slugs to "bfa-illustration".
-const KNOWN_ENTRY_IDS = new Set([
-  "senior-it-systems-engineering-manager-digital-experience",
-  "senior-manager-it",
-  "co-owner-and-technologist",
-  "manager-pre-press-department",
-  "desktop-publishing-manager",
-  "supervisor",
-  "ms-it",
-  "bfa-illustration",
-]);
-
-const PORT = Number(process.env.RESUME_PREVIEW_PORT || 4322);
+// Default 4323 sidesteps the common local collisions: astro dev (4321),
+// print-resume-pdf.mjs (4321), and the Playwright test server (4322). Override
+// with RESUME_PREVIEW_PORT. renderResumePdf also tears the preview down on
+// SIGINT/SIGTERM, so an interrupted run won't strand a server on this port.
+const PORT = Number(process.env.RESUME_PREVIEW_PORT || 4323);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   console.error(
     `Invalid RESUME_PREVIEW_PORT '${process.env.RESUME_PREVIEW_PORT}' — must be an integer 1-65535.`
@@ -62,10 +68,12 @@ function resolveConfigPath(nameOrPath) {
   if (path.isAbsolute(nameOrPath) || nameOrPath.includes("/") || nameOrPath.includes("\\")) {
     return path.resolve(nameOrPath);
   }
+  // Bare name: append .json unless the caller already did (avoids name.json.json).
+  const file = nameOrPath.endsWith(".json") ? nameOrPath : `${nameOrPath}.json`;
   if (process.env.RESUME_VARIANTS_DIR) {
-    return path.join(process.env.RESUME_VARIANTS_DIR, `${nameOrPath}.json`);
+    return path.join(process.env.RESUME_VARIANTS_DIR, file);
   }
-  return path.join(os.homedir(), "Claude", "Projects", "KDS Resume", "variants", `${nameOrPath}.json`);
+  return path.join(os.homedir(), "Claude", "Projects", "KDS Resume", "variants", file);
 }
 
 function validateConfig(cfg, configPath) {
@@ -81,7 +89,7 @@ function validateConfig(cfg, configPath) {
         errors.push(`${field}: must be an array`);
       } else {
         // Intersection check: each facet must exist in the known vocabulary.
-        const unknown = cfg[field].filter(f => !KNOWN_FACETS.has(f));
+        const unknown = cfg[field].filter(f => !FACETS.has(f));
         if (unknown.length) errors.push(`${field}: unknown facet(s): ${unknown.join(", ")}`);
       }
     }
@@ -126,7 +134,9 @@ function validateConfig(cfg, configPath) {
 
 function buildTransform(config) {
   return async (page) => {
-    await page.evaluate((cfg) => {
+    const emptied = await page.evaluate((cfg) => {
+      const emptiedEntries = [];
+
       function bulletPasses(li, incl, excl) {
         const raw = li.getAttribute("data-facets");
         if (!raw) return true; // untagged bullets always render
@@ -188,10 +198,8 @@ function buildTransform(config) {
           allBullets.forEach(li => li.remove());
           kept.forEach(li => ul.appendChild(li));
 
-          if (kept.length === 0) {
-            // Heading + employer + scope are always kept even when bullets are emptied.
-            console.warn(`[variant] "${entryId}" has no bullets after filtering`);
-          }
+          // Heading + employer + scope are always kept even when bullets are emptied.
+          if (kept.length === 0) emptiedEntries.push(entryId);
         }
 
         i = j;
@@ -202,7 +210,15 @@ function buildTransform(config) {
         const h1 = document.querySelector("h1");
         if (h1) h1.textContent = cfg.title;
       }
+
+      return emptiedEntries;
     }, config);
+
+    // Surface emptied entries in the terminal — a page-context console.warn
+    // would land only in the browser console, never here. Heading + scope kept.
+    for (const id of emptied) {
+      console.warn(`⚠ [variant] entry "${id}" left with no bullets after filtering — heading and scope kept.`);
+    }
   };
 }
 
@@ -239,11 +255,12 @@ async function main() {
     process.exit(2);
   }
 
-  const variantName =
-    path.isAbsolute(args.variant) || args.variant.includes("/") || args.variant.includes("\\")
-      ? path.basename(args.variant, ".json")
-      : args.variant;
-  const output = args.output || `${variantName}.pdf`;
+  // basename(..., ".json") strips the extension for a bare "name", a "name.json",
+  // and a full path alike — a stable variant name for the default output.
+  const variantName = path.basename(args.variant, ".json");
+  // Default output next to the config (outside the repo) so a private variant
+  // PDF never lands in the working tree where it could be committed by accident.
+  const output = args.output || path.join(path.dirname(configPath), `${variantName}.pdf`);
 
   console.log(`→ Variant config: ${configPath}`);
 
