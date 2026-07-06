@@ -1,0 +1,54 @@
+---
+/**
+ * Shared resume header (name + contact block) for the public /resume/ page
+ * and the print-only /resume/print/ route — one markup source so the PDF
+ * rendering and the public page cannot silently drift.
+ *
+ * Variants are explicit props:
+ * - `contactAddress` renders only when passed; the public page never passes
+ *   it (the address is print-only by design and must not ship in public
+ *   markup).
+ * - `linkedinAsUrl` renders the LinkedIn link's visible text as the full URL
+ *   for print, where a "LinkedIn" label would be useless on paper.
+ *
+ * The slot carries page-specific extras (the public page's download link).
+ */
+type Props = {
+  title: string;
+  contactEmail?: string;
+  contactWebsite?: string;
+  contactLinkedin?: string;
+  contactAddress?: string;
+  linkedinAsUrl?: boolean;
+};
+
+const {
+  title,
+  contactEmail,
+  contactWebsite,
+  contactLinkedin,
+  contactAddress,
+  linkedinAsUrl = false,
+} = Astro.props;
+
+const stripScheme = (url: string) => url.replace(/^https?:\/\//, "");
+---
+
+<div class="resume-header">
+  <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
+  <div class="contact-info">
+    {contactEmail && (
+      <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
+    )}
+    {contactAddress && <span>{contactAddress}</span>}
+    {contactWebsite && (
+      <span><a href={contactWebsite}>{stripScheme(contactWebsite)}</a></span>
+    )}
+    {contactLinkedin && (
+      <span>
+        <a href={contactLinkedin}>{linkedinAsUrl ? stripScheme(contactLinkedin) : "LinkedIn"}</a>
+      </span>
+    )}
+  </div>
+  <slot />
+</div>

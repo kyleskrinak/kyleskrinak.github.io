@@ -1,0 +1,240 @@
+/* Resume page styling */
+
+.resume-header h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contact-info a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s;
+}
+
+.contact-info a:hover {
+  opacity: 0.8;
+}
+
+.resume-content {
+  font-family: var(--font-app);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+/* Entry titles (jobs, degrees) are h2 — direct children of the page h1,
+   no intermediate section headings */
+.resume-content h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: var(--foreground);
+}
+
+.resume-content h2:first-child {
+  margin-top: 0;
+}
+
+.resume-content p {
+  margin: 0.5rem 0;
+}
+
+.resume-content strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.resume-content ul {
+  margin: 0.5rem 0 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.resume-content li {
+  margin: 0.35rem 0;
+  list-style-type: disc;
+}
+
+.resume-content li::marker {
+  color: var(--accent);
+}
+
+/* Print stylesheet */
+@page {
+  size: letter;
+  margin: 0.4in;
+}
+
+@media print {
+  /* Bare-element defaults only; every styled element re-declares its own
+     print spacing below (a universal reset has zero specificity and loses
+     to the class-scoped screen rules anyway) */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* All print sizes below are rem-based, so scaling the root scales the
+     whole rendering. 14px root ≈ 10.5pt body text. Measured one-page
+     ceiling is ≈14.34px (10.75pt) at 1.22 leading — keep below it. */
+  html {
+    font-size: 14px;
+  }
+
+  /* Traditional proportional face for print — the site's monospace
+     --font-app is a web-only aesthetic and wastes print space. Times
+     matches the original GDoc/PDF resume face. */
+  body,
+  .resume-content,
+  .resume-header h1,
+  .contact-info {
+    font-family: "Times New Roman", Times, Georgia, serif;
+  }
+
+  body {
+    line-height: 1.22;
+    color: #000;
+  }
+
+  .resume-content {
+    line-height: 1.22;
+  }
+
+  main {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Centering comes from the screen rules (h1 and .contact-info center
+     themselves); print only tightens the gap below the header */
+  .resume-header {
+    margin-bottom: 0.6rem;
+  }
+
+  .resume-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 0.3rem 0;
+  }
+
+  /* Flex layout comes from the screen rule; print only overrides the gap
+     (tighter) and font-size (body-sized per Kyle) */
+  .contact-info {
+    gap: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .contact-info a {
+    text-decoration: none;
+    color: #000;
+  }
+
+  /* No overflow clipping: content exceeding one page must spill visibly
+     to page 2 so the one-page constraint fails loudly, not silently */
+
+  /* Entry header lines are sans-serif against the Times body, at body
+     size. The h2 + p selector covers the employer segment that runs in
+     on the same line as the h2 role; its weights are left alone (bold
+     employer name, regular location/dates). */
+  .resume-content h2,
+  .resume-content h3,
+  .resume-content h4 {
+    font-weight: 600;
+  }
+
+  .resume-content h2,
+  .resume-content h3,
+  .resume-content h4,
+  .resume-content h2 + p {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* 10pt on paper — 0.5pt below the 10.5pt body */
+    font-size: 0.952rem;
+  }
+
+  /* Run each entry header as a single wrapping line (GDoc style): the h2
+     role and the employer paragraph that follows it flow together. The
+     block ::before forces the line break ahead of the entry and carries
+     the inter-entry spacing an inline h2 can no longer provide. */
+  .resume-content h2 {
+    display: inline;
+  }
+
+  .resume-content h2::before {
+    content: "";
+    display: block;
+    /* Paragraph-sized gap between sections */
+    margin-top: 0.75rem;
+  }
+
+  .resume-content h2:first-of-type::before {
+    margin-top: 0;
+  }
+
+  .resume-content h2::after {
+    content: ", ";
+  }
+
+  .resume-content h2 + p {
+    display: inline;
+  }
+
+  .resume-content p {
+    margin: 0.15rem 0;
+    page-break-inside: avoid;
+  }
+
+  .resume-content strong {
+    font-weight: 700;
+  }
+
+  .resume-content ul {
+    margin: 0.15rem 0;
+    /* Wide enough for outside disc markers — 1rem clipped them at the
+       content edge */
+    padding-left: 1.4rem;
+  }
+
+  .resume-content li {
+    margin: 0.08rem 0;
+    page-break-inside: avoid;
+  }
+
+  /* Override the web theme colors (accent markers, --foreground text,
+     which is light gray in dark mode) — print is black on white.
+     .resume-content itself must be listed: its screen color is a direct
+     declaration, which beats the inherited print body color. */
+  .resume-header h1,
+  .contact-info,
+  .resume-content,
+  .resume-content h2,
+  .resume-content strong,
+  .resume-content li::marker {
+    color: #000;
+  }
+
+  /* Hide non-print elements */
+  header,
+  footer,
+  nav,
+  .breadcrumb,
+  .resume-download {
+    display: none;
+  }
+}

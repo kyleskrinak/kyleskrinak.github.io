@@ -1,0 +1,46 @@
+---
+import { getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import ResumeHeader from "@/components/ResumeHeader.astro";
+import { RESUME_PDF_PATH } from "@/config";
+import { linkWithBase } from "@/utils/linkWithBase";
+import "@/styles/resume.css";
+
+const page = await getEntry("pages", "resume");
+if (!page) throw new Error("Resume page not found");
+
+const { Content } = await render(page);
+const { title, description, contactEmail, contactWebsite, contactLinkedin } = page.data;
+---
+
+{/* Content title already carries the site owner's name — no SITE.title
+    suffix, which would render "Kyle Skrinak — Resume | Kyle Skrinak" */}
+<Layout
+  title={title}
+  description={description}
+>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content" class="app-layout pb-12">
+    {/* No contactAddress here: the address is print-only and must never
+        ship in the public page's markup */}
+    <ResumeHeader
+      title={title}
+      contactEmail={contactEmail}
+      contactWebsite={contactWebsite}
+      contactLinkedin={contactLinkedin}
+    >
+      <p class="resume-download mt-4">
+        <a href={linkWithBase(RESUME_PDF_PATH)}>Download PDF</a>
+        — a one-page, print-formatted copy of this resume.
+      </p>
+    </ResumeHeader>
+    <article class="resume-content mt-8">
+      <Content />
+    </article>
+  </main>
+  <Footer />
+</Layout>

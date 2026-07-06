@@ -20,55 +20,28 @@
  *   - Non-printable <iframe> embeds are replaced with a visible caption + the URL,
  *     so references survive without pulling third-party frames into the file.
  */
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { chromium } from "@playwright/test";
+import { parseFlags, startPreview, stopPreview, waitForServer } from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
 
-function parseArgs(argv) {
-  const args = { output: "public/blog-archive.pdf", skipBuild: false, baseUrl: null };
-  // Guard flags that take a value: a missing value (end of argv) or another flag
-  // in its place is a usage error, not a silent `undefined` that fails later.
-  const needValue = (flag, value) => {
-    if (value === undefined || value.startsWith("--")) {
-      console.error(`Missing value for ${flag}`);
-      process.exit(2);
-    }
-    return value;
-  };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === "--output") args.output = needValue("--output", argv[++i]);
-    else if (a === "--skip-build") args.skipBuild = true;
-    else if (a === "--base-url") args.baseUrl = needValue("--base-url", argv[++i]);
-    else {
-      console.error(`Unknown argument: ${a}`);
-      process.exit(2);
-    }
-  }
-  return args;
-}
+const FLAGS = {
+  "--output": { key: "output", value: true },
+  "--skip-build": { key: "skipBuild" },
+  "--base-url": { key: "baseUrl", value: true },
+};
 
 const PORT = Number(process.env.ARCHIVE_PREVIEW_PORT || 4321);
 
-async function waitForServer(url, timeoutMs = 60000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { method: "GET" });
-      if (res.ok || res.status === 404) return; // server is up and answering
-    } catch {
-      // not ready yet
-    }
-    await new Promise(r => setTimeout(r, 500));
-  }
-  throw new Error(`Preview server did not become ready at ${url} within ${timeoutMs}ms`);
-}
-
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseFlags(process.argv.slice(2), FLAGS, {
+    output: "public/blog-archive.pdf",
+    skipBuild: false,
+    baseUrl: null,
+  });
   const outputPath = resolve(ROOT, args.output);
 
   // 1. Build (unless reusing an existing dist or an external server).
@@ -87,12 +60,8 @@ async function main() {
   if (!baseUrl) {
     baseUrl = `http://localhost:${PORT}`;
     console.log(`→ Starting astro preview on :${PORT}…`);
-    preview = spawn("npx", ["astro", "preview", "--port", String(PORT)], {
-      stdio: ["ignore", "ignore", "inherit"], // surface astro errors (e.g. port in use)
-      cwd: ROOT,
-      detached: true, // own process group so we can kill the whole tree
-    });
-    await waitForServer(baseUrl + "/");
+    preview = startPreview(PORT, { cwd: ROOT });
+    await waitForServer(baseUrl + "/", { child: preview });
   }
 
   const pageUrl = `${baseUrl.replace(/\/$/, "")}/archive-book/`;
@@ -197,16 +166,7 @@ async function main() {
     console.log(`✅ Wrote ${args.output} (${(size / 1024 / 1024).toFixed(2)} MB)`);
   } finally {
     if (browser) await browser.close();
-    if (preview && preview.pid) {
-      try {
-        // POSIX-only: negative PID signals the whole process group (macOS/ubuntu
-        // CI runners). Windows has no process groups; this path would need a
-        // different teardown there, but the build pipeline never runs on Windows.
-        process.kill(-preview.pid, "SIGTERM"); // kill the group, not just npx
-      } catch {
-        /* already exited */
-      }
-    }
+    stopPreview(preview);
   }
 }
 

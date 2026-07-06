@@ -54,6 +54,30 @@ const pages = defineCollection({
 		toc: z.boolean().optional(),
 		image: image().optional(),
 		alt: z.string().trim().min(1).optional(),
+		contactEmail: z.string().trim().min(1).optional(),
+		contactWebsite: z.string().trim().min(1).optional(),
+		contactLinkedin: z.string().trim().min(1).optional(),
+		contactAddress: z.string().trim().min(1).optional(),
+		current_role: z.object({
+			title: z.string().trim().min(1),
+			employer: z.string().trim().min(1),
+			start_date: z.coerce.date(),
+		}).optional(),
+		// Scaffolded structures — item shape is unsettled until populated (separate future work)
+		skills_inventory: z.object({
+			last_reviewed: z.coerce.date(),
+			categories: z.array(z.unknown()),
+		}).optional(),
+		certifications: z.object({
+			items: z.array(z.unknown()),
+		}).optional(),
+		education: z.object({
+			items: z.array(z.unknown()),
+		}).optional(),
+		changelog: z.array(z.object({
+			date: z.coerce.date(),
+			entry: z.string().trim().min(1),
+		})).optional(),
 	}),
 });
 

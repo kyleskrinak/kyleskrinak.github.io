@@ -99,7 +99,7 @@ const isActive = (path: string) => {
             <summary
               class:list={[
                 "cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1",
-                { "active-nav": isActive("/about") || isActive("/stack") || isActive("/lchf") },
+                { "active-nav": isActive("/about") || isActive("/stack") || isActive("/lchf") || isActive("/resume") },
               ]}
             >
               About
@@ -113,6 +113,7 @@ const isActive = (path: string) => {
               <li><a href={linkWithBase("/about/")} class:list={{ "text-accent": isActive("/about") }}>Me</a></li>
               <li><a href={linkWithBase("/stack/")} class:list={{ "text-accent": isActive("/stack") }}>Blog Stack</a></li>
               <li><a href={linkWithBase("/lchf/")} class:list={{ "text-accent": isActive("/lchf") }}>Low-carb</a></li>
+              <li><a href={linkWithBase("/resume/")} class:list={{ "text-accent": isActive("/resume") }}>Resume</a></li>
             </ul>
           </details>
         </li>
@@ -130,6 +131,11 @@ const isActive = (path: string) => {
         <li class="col-span-2 sm:hidden">
           <a href={linkWithBase("/lchf/")} class:list={{ "active-nav": isActive("/lchf") }}>
             Low-carb
+          </a>
+        </li>
+        <li class="col-span-2 sm:hidden">
+          <a href={linkWithBase("/resume/")} class:list={{ "active-nav": isActive("/resume") }}>
+            Resume
           </a>
         </li>
         <li class="col-span-2">

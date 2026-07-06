@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getBlogPosts } from "@/utils/getBlogPosts";
-import { SITE } from "@/config";
+import { RESUME_PDF_PATH, SITE } from "@/config";
 
 /**
  * Generates sitemap.xml containing only indexable pages.
@@ -8,7 +8,7 @@ import { SITE } from "@/config";
  *
  * Pages included:
  * - Home page
- * - Static content pages (about, archives, lchf)
+ * - Static content pages (about, archives, lchf, resume)
  * - Individual blog posts
  * - Individual presentation HTML files
  *
@@ -28,6 +28,7 @@ export const GET: APIRoute = async ({ site }) => {
     "",           // Home page
     "about/",     // About page
     "lchf/",      // LCHF content page
+    "resume/",    // Resume page (/resume/print/ is noindex and intentionally NOT listed)
   ];
 
   // Conditionally add archives if enabled
@@ -54,7 +55,13 @@ export const GET: APIRoute = async ({ site }) => {
   // Downloadable archive artifact (the complete-archive PDF book). Indexable so
   // the preservation copy is discoverable/crawlable. The /archive-book/ HTML page
   // that generates it is noindex and intentionally NOT listed here.
-  const archiveFiles = ["blog-archive.pdf", "presentations-archive.pdf"];
+  const archiveFiles = [
+    "blog-archive.pdf",
+    "presentations-archive.pdf",
+    // Same pattern: built by the ensure-release-pdfs action. The /resume/print/
+    // HTML page that generates it is noindex and intentionally NOT listed.
+    RESUME_PDF_PATH,
+  ];
 
   const urls = [...staticPages, ...postPages, ...presentationFiles, ...archiveFiles];
 

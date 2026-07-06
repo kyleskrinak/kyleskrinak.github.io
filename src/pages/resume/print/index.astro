@@ -1,0 +1,36 @@
+---
+import { getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import ResumeHeader from "@/components/ResumeHeader.astro";
+import "@/styles/resume.css";
+
+const page = await getEntry("pages", "resume");
+if (!page) throw new Error("Resume page not found");
+
+const { Content } = await render(page);
+const { title, description, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+---
+
+{/* Canonical points at the public /resume/ page: this route is a noindex
+    PDF-rendering source and must not declare itself canonical. Title drops
+    the SITE.title suffix — the content title already carries the name. */}
+<Layout
+  title={title}
+  description={description}
+  noindex={true}
+  canonicalURL={new URL("/resume/", Astro.site).href}
+>
+  <main id="main-content" class="app-layout pb-12">
+    <ResumeHeader
+      title={title}
+      contactEmail={contactEmail}
+      contactWebsite={contactWebsite}
+      contactLinkedin={contactLinkedin}
+      contactAddress={contactAddress}
+      linkedinAsUrl={true}
+    />
+    <article class="resume-content mt-8">
+      <Content />
+    </article>
+  </main>
+</Layout>

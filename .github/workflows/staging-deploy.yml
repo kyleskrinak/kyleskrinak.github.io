@@ -19,7 +19,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # ensure-archive-pdfs reads/writes the release backing store
+      contents: write  # ensure-release-pdfs reads/writes the release backing stores
     steps:
       - name: Checkout code
         # Pinned to SHA (v4) — consistent supply-chain posture across all workflows.
@@ -56,12 +56,56 @@ jobs:
 
       # Runs AFTER the build (renders from the built dist/) but BEFORE the artifact
       # upload so the PDFs ship in the deployed artifact. Staging uses its own
-      # release tag so it never shares prod's backing store (no cross-env race).
+      # release tags so it never shares prod's backing stores (no cross-env race).
+      # bundle-test.html is excluded from the presentations PDF (it's a build
+      # test artifact, not a deck), so it must not feed the hash either.
       - name: Ensure archive PDFs
-        uses: ./.github/actions/ensure-archive-pdfs
+        uses: ./.github/actions/ensure-release-pdfs
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: archive-pdfs-staging
+          title: Archive PDFs (automation backing store)
+          hash-paths: |
+            src/content/blog
+            public/presentations
+            src/pages/archive-book.astro
+            src/utils/getBlogPosts.ts
+            src/utils/postFilter.ts
+            src/content.config.ts
+            scripts/build-archive-pdf.mjs
+            scripts/build-presentations-pdf.mjs
+            src/config
+          hash-exclude-names: |
+            bundle-test.html
+          assets: |
+            blog-archive.pdf dist
+            presentations-archive.pdf dist
+          regen-command: |
+            npm run archive:pdf -- --skip-build --output dist/blog-archive.pdf
+            npm run archive:presentations -- --output dist/presentations-archive.pdf
+
+      # The resume hash list includes the shared rendering inputs the print
+      # route renders through (Layout, global CSS, site config, content
+      # schema) — a change to any of these alters the printed page.
+      - name: Ensure resume PDF
+        uses: ./.github/actions/ensure-release-pdfs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: resume-pdf-staging
+          title: Resume PDF (automation backing store)
+          hash-paths: |
+            src/content/pages/resume
+            src/pages/resume/print/index.astro
+            src/styles/resume.css
+            scripts/print-resume-pdf.mjs
+            src/layouts/Layout.astro
+            src/styles/global.css
+            src/config
+            src/content.config.ts
+          assets: |
+            kyle-skrinak-resume.pdf dist/resume
+          regen-command: |
+            node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
