@@ -19,7 +19,8 @@
   text-align: center;
 }
 
-.contact-info a {
+.contact-info a,
+.resume-download a {
   color: var(--accent);
   text-decoration-line: underline;
   text-decoration-style: dashed;
@@ -27,7 +28,8 @@
   transition: opacity 0.2s;
 }
 
-.contact-info a:hover {
+.contact-info a:hover,
+.resume-download a:hover {
   opacity: 0.8;
 }
 
