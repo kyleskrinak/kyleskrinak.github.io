@@ -6,8 +6,7 @@ Use this workflow when you need a tailored one-page resume for a specific job ro
 
 ## How do I restructure my resume for a specific job role?
 
-1. Read the job description and identify the strongest fit themes.
-2. Map those themes to resume facets:
+Start by reading the job description and identifying the strongest fit themes. Map those themes to resume facets:
 
 | Theme | Facet |
 |---|---|
@@ -19,12 +18,14 @@ Use this workflow when you need a tailored one-page resume for a specific job ro
 | Cost reduction, FinOps, right-sizing | `cost` |
 | Delivery, launches, project execution | `delivery` |
 
-3. Create a variant JSON file outside the repo, usually in your private resume variants folder.
-4. Set `include_facets` to emphasize the role's themes. Add `exclude_facets` only when a theme is clearly distracting.
-5. Use `max_bullets_per_entry` to keep the PDF to one page. Trim weakest job bullets first.
-6. Use `bullet_order` only when the best bullet for a role is not already first after filtering.
-7. Add `include_certs` when certifications strengthen the role match.
-8. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly.
+Then restructure the resume with this workflow:
+
+1. Create a variant JSON file outside the repo, usually in your private resume variants folder.
+2. Set `include_facets` to emphasize the role's themes. Add `exclude_facets` only when a theme is clearly distracting.
+3. Use `max_bullets_per_entry` to keep the PDF to one page. Trim weakest job bullets first.
+4. Use `bullet_order` only when the best bullet for a role is not already first after filtering.
+5. Add `include_certs` when certifications strengthen the role match.
+6. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly.
 
 ## Variant config example
 

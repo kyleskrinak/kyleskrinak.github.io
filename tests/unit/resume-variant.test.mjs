@@ -4,6 +4,7 @@ import { parseHTML } from 'linkedom';
 import {
 	validateIncludeCertsShape,
 	validateConfig,
+	validateBulletOrderRange,
 	validateCertificationsData,
 	resolveCerts,
 	injectCerts,
@@ -80,6 +81,30 @@ describe('validateConfig', () => {
 		assert.throws(
 			() => validateConfig({ anchor_before_id: 'missing-entry' }, 'variant.json', knownCertIds),
 			/anchor_before_id: unknown entry key "missing-entry"/,
+		);
+	});
+
+	it('rejects empty and whitespace-only title overrides', () => {
+		assert.throws(
+			() => validateConfig({ title: '' }, 'variant.json', knownCertIds),
+			/title: must be a non-empty string/,
+		);
+		assert.throws(
+			() => validateConfig({ title: '   ' }, 'variant.json', knownCertIds),
+			/title: must be a non-empty string/,
+		);
+	});
+
+	it('accepts title overrides with surrounding whitespace so rendering can trim them', () => {
+		assert.doesNotThrow(() => validateConfig({ title: '  Platform Leader  ' }, 'variant.json', knownCertIds));
+	});
+});
+
+describe('validateBulletOrderRange', () => {
+	it('rejects out-of-range indices after facet filtering determines kept bullet count', () => {
+		assert.throws(
+			() => validateBulletOrderRange('senior-it-systems-engineering-manager-digital-experience', [0, 2], 2),
+			/bullet_order\.senior-it-systems-engineering-manager-digital-experience: index 2 out of range for 2 kept bullet\(s\) after filtering/,
 		);
 	});
 });

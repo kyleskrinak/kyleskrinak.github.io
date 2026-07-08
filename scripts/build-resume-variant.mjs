@@ -131,8 +131,12 @@ export function validateConfig(cfg, configPath, knownCertIds) {
     throwValidationError(`Invalid variant config ${configPath}`, ["config: must be an object"]);
   }
 
-  if (cfg.title !== undefined && typeof cfg.title !== "string") {
-    errors.push("title: must be a string");
+  if (cfg.title !== undefined) {
+    if (typeof cfg.title !== "string") {
+      errors.push("title: must be a string");
+    } else if (cfg.title.trim().length === 0) {
+      errors.push("title: must be a non-empty string");
+    }
   }
 
   for (const field of ["include_facets", "exclude_facets"]) {
@@ -194,6 +198,15 @@ export function validateConfig(cfg, configPath, knownCertIds) {
   if (unknownKeys.length) errors.push(`unknown config key(s): ${unknownKeys.join(", ")}`);
 
   throwValidationError(`Invalid variant config ${configPath}`, errors);
+}
+
+export function validateBulletOrderRange(entryId, orderSpec, keptCount) {
+  const invalid = orderSpec.filter(idx => idx >= keptCount);
+  if (invalid.length) {
+    throw new Error(
+      `bullet_order.${entryId}: index ${invalid.join(", ")} out of range for ${keptCount} kept bullet(s) after filtering`
+    );
+  }
 }
 
 export function validateCertificationsData(data, sourcePath, knownEntryIds) {
@@ -432,10 +445,12 @@ function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
           // 2. Reorder by post-filter indices
           const orderSpec = entryOrders[entryId];
           if (orderSpec && orderSpec.length) {
+            validateBulletOrderRange(entryId, orderSpec, kept.length);
             const reordered = [];
             const used = new Set();
             for (const idx of orderSpec) {
-              if (idx < kept.length) { reordered.push(kept[idx]); used.add(idx); }
+              reordered.push(kept[idx]);
+              used.add(idx);
             }
             // Append kept bullets not in the order spec
             kept.forEach((li, idx) => { if (!used.has(idx)) reordered.push(li); });
@@ -459,7 +474,7 @@ function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
       // Swap h1 text when title override is set.
       if (cfg.title) {
         const h1 = document.querySelector("h1");
-        if (h1) h1.textContent = cfg.title;
+        if (h1) h1.textContent = cfg.title.trim();
       }
 
       if (payload.certsRequested) {
@@ -545,7 +560,7 @@ async function main() {
   // Title and injected cert names are the only fields that change verification
   // expectations; headings and employers are never removed by the transform.
   const expectedOverrides = {
-    ...(config.title ? { title: config.title } : {}),
+    ...(config.title ? { title: config.title.trim() } : {}),
     ...(resolvedCerts.length ? { requireText: resolvedCerts.map(cert => cert.name) } : {}),
   };
 
