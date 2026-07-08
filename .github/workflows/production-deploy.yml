@@ -88,6 +88,7 @@ jobs:
       # The resume hash list includes the shared rendering inputs the print
       # route renders through (Layout, global CSS, site config, content
       # schema) — a change to any of these alters the printed page.
+      # astro.config.ts churns ~monthly → ~one spurious regen/month; accepted tradeoff.
       - name: Ensure resume PDF
         uses: ./.github/actions/ensure-release-pdfs
         with:
@@ -99,10 +100,15 @@ jobs:
             src/pages/resume/print/index.astro
             src/styles/resume.css
             scripts/print-resume-pdf.mjs
+            scripts/lib/resume-render.mjs
+            scripts/lib/pdf-helpers.mjs
+            src/lib/remark-facets.mjs
+            src/components/ResumeHeader.astro
             src/layouts/Layout.astro
             src/styles/global.css
             src/config
             src/content.config.ts
+            astro.config.ts
           assets: |
             kyle-skrinak-resume.pdf dist/resume
           regen-command: |

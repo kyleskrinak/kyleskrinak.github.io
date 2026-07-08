@@ -1,10 +1,12 @@
 import { defineConfig, envField, fontProviders } from "astro/config";
+import { unified } from "@astrojs/markdown-remark";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 // Removed: using custom sitemap endpoint instead
 // import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import { remarkFacets } from "./src/lib/remark-facets.mjs";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -43,8 +45,10 @@ export default defineConfig({
     },
   ],
   markdown: {
-    remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],
-    rehypePlugins: [rehypeImageOptimization],
+    processor: unified({
+      remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }], remarkFacets],
+      rehypePlugins: [rehypeImageOptimization],
+    }),
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },

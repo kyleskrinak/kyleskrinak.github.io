@@ -1,0 +1,16 @@
+{
+  "anchor_before_id": "ms-it",
+  "certifications": [
+    {
+      "id": "aiops-foundation",
+      "name": "AIOps Foundation",
+      "issuer": "PeopleCert",
+      "issued": "2026-01"
+    },
+    {
+      "id": "az-104",
+      "name": "Microsoft Certified: Azure Administrator Associate (AZ-104)",
+      "issuer": "Microsoft"
+    }
+  ]
+}

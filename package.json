@@ -13,6 +13,7 @@
     "build:presentations": "node scripts/build-presentations.js",
     "check:images": "node scripts/check-image-conventions.mjs --all",
     "new-post": "node scripts/new-post.mjs",
+    "resume:variant": "node scripts/build-resume-variant.mjs",
     "archive:pdf": "node scripts/build-archive-pdf.mjs",
     "archive:presentations": "node scripts/build-presentations-pdf.mjs",
     "preview": "astro preview",
@@ -43,6 +44,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.0",
     "@astrojs/mdx": "^6.0.0",
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
@@ -56,7 +58,8 @@
     "satori": "^0.26.0",
     "sharp": "^0.35.0",
     "slugify": "^1.6.6",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
@@ -69,8 +72,10 @@
     "cross-env": "^10.1.0",
     "eslint": "^10.4.0",
     "eslint-plugin-astro": "^1.7.0",
+    "github-slugger": "^2.0.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
+    "linkedom": "^0.18.13",
     "markdown-it": "^14.2.0",
     "markdownlint-cli2": "^0.23.0",
     "pagefind": "^1.5.2",
