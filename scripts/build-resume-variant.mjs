@@ -368,7 +368,7 @@ export function injectCerts(content, certs, anchorId) {
   return { heading, list };
 }
 
-function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
+export function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
   return async (page) => {
     const certsRequested = resolvedCerts.length > 0;
     if (certsRequested) {
@@ -411,6 +411,15 @@ function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
         return true;
       }
 
+      function validateBulletOrderRangeInPage(entryId, orderSpec, keptCount) {
+        const invalid = orderSpec.filter(idx => idx >= keptCount);
+        if (invalid.length) {
+          throw new Error(
+            `bullet_order.${entryId}: index ${invalid.join(", ")} out of range for ${keptCount} kept bullet(s) after filtering`
+          );
+        }
+      }
+
       const incl = cfg.include_facets || [];
       const excl = cfg.exclude_facets || [];
       const maxBullets = cfg.max_bullets_per_entry;
@@ -445,7 +454,7 @@ function buildTransform(config, resolvedCerts = [], anchorBeforeId = null) {
           // 2. Reorder by post-filter indices
           const orderSpec = entryOrders[entryId];
           if (orderSpec && orderSpec.length) {
-            validateBulletOrderRange(entryId, orderSpec, kept.length);
+            validateBulletOrderRangeInPage(entryId, orderSpec, kept.length);
             const reordered = [];
             const used = new Set();
             for (const idx of orderSpec) {

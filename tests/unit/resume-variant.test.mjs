@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { Script, createContext } from 'node:vm';
 import { parseHTML } from 'linkedom';
 import {
 	validateIncludeCertsShape,
@@ -9,6 +10,7 @@ import {
 	resolveCerts,
 	injectCerts,
 	parseResumePreviewPort,
+	buildTransform,
 } from '../../scripts/build-resume-variant.mjs';
 
 const knownCertIds = new Set(['aiops-foundation', 'az-104']);
@@ -33,6 +35,34 @@ const certData = {
 		},
 	],
 };
+
+async function runSerializedTransform(config) {
+	const { document, window } = parseHTML(`
+		<html>
+			<head></head>
+			<body>
+				<article class="resume-content">
+					<h2 id="entry-one">Entry One</h2>
+					<p><strong>Employer</strong> — Location | Dates</p>
+					<ul>
+						<li data-facets="leadership">First bullet</li>
+						<li data-facets="platform-ops">Second bullet</li>
+					</ul>
+				</article>
+			</body>
+		</html>
+	`);
+	const page = {
+		async evaluate(fn, payload) {
+			return new Script(`(${fn.toString()})(payload)`).runInContext(
+				createContext({ document, window, payload, console }),
+			);
+		},
+	};
+
+	await buildTransform(config)(page);
+	return document;
+}
 
 describe('validateIncludeCertsShape', () => {
 	it('accepts omitted, empty, and "all" include_certs values', () => {
@@ -105,6 +135,26 @@ describe('validateBulletOrderRange', () => {
 		assert.throws(
 			() => validateBulletOrderRange('senior-it-systems-engineering-manager-digital-experience', [0, 2], 2),
 			/bullet_order\.senior-it-systems-engineering-manager-digital-experience: index 2 out of range for 2 kept bullet\(s\) after filtering/,
+		);
+	});
+});
+
+describe('buildTransform bullet_order', () => {
+	it('applies non-empty bullet_order inside the serialized page context', async () => {
+		const document = await runSerializedTransform({
+			bullet_order: { 'entry-one': [1, 0] },
+		});
+
+		assert.deepEqual(
+			Array.from(document.querySelectorAll('.resume-content li')).map(li => li.textContent),
+			['Second bullet', 'First bullet'],
+		);
+	});
+
+	it('rejects out-of-range bullet_order inside the serialized page context', async () => {
+		await assert.rejects(
+			() => runSerializedTransform({ bullet_order: { 'entry-one': [2] } }),
+			/bullet_order\.entry-one: index 2 out of range for 2 kept bullet\(s\) after filtering/,
 		);
 	});
 });
