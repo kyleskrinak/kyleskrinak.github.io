@@ -8,8 +8,9 @@
  *   - port: preview port (default 4321); ignored when baseUrl is provided
  *   - transform(page): async fn run against the live Playwright page BEFORE
  *     content verification — variant scripts use this to apply DOM mutations
- *   - expectedOverrides: { title? } — override individual verification expectations
- *     (e.g. variant title)
+ *   - expectedOverrides: { title?, requireText? } — override individual
+ *     verification expectations (e.g. variant title) and require extra text
+ *     injected by a transform (e.g. variant certifications)
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -91,6 +92,7 @@ async function verifyRenderedContent(page, expectedOverrides = {}) {
     ["address", expected.address],
     ...expected.headings.map(h => ["heading", h]),
     ...expected.employers.map(e => ["employer", e]),
+    ...(expectedOverrides.requireText ?? []).map(t => ["cert", t]),
   ]
     .filter(([, text]) => text != null)
     .filter(([, text]) => !haystack.includes(normalizeTypography(text)));
@@ -202,10 +204,13 @@ export async function renderResumePdf({
 
     const pages = countPdfPages(pdf);
     if (pages !== 1) {
+      const certHint = expectedOverrides?.requireText?.length
+        ? " If certifications caused the overflow, reduce include_certs."
+        : "";
       throw new Error(
         `Resume PDF is ${pages ?? "an unknown number of"} page(s) — must be exactly 1. ` +
           `Content has outgrown the one-page constraint; trim content ` +
-          `(weakest bullets first) rather than shrinking type. No file written.`
+          `(weakest bullets first) rather than shrinking type.${certHint} No file written.`
       );
     }
 
