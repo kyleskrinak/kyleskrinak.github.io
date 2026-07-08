@@ -35,10 +35,10 @@ const ANALYTICS_HOSTS = [
 // Normalize the typographic transformations Astro's markdown pipeline
 // (smartypants) applies, so raw-source expectations compare cleanly against
 // rendered DOM text. Applied to BOTH sides of every comparison.
-function normalizeTypography(s) {
+export function normalizeTypography(s) {
   return s
-    .replace(/['']/g, "'")
-    .replace(/[""]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
     .replace(/[–—]/g, "-")
     .replace(/…/g, "...")
     .replace(/\s+/g, " ");

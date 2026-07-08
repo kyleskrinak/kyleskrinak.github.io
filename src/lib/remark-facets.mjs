@@ -1,7 +1,7 @@
-import { visit } from "unist-util-visit"; // transitive dep; if unresolvable, walk children manually
+import { visit } from "unist-util-visit";
 // Facet vocabulary — single source of truth, also imported by
 // scripts/build-resume-variant.mjs to validate variant configs.
-export const FACETS = new Set(["leadership", "platform-ops", "security", "web-dev", "creative", "cost", "delivery"]); // Kyle confirms
+export const FACETS = new Set(["leadership", "platform-ops", "security", "web-dev", "creative", "cost", "delivery"]);
 const TAG_RE = /^<!--\s*f:\s*([a-z0-9,\s-]+?)\s*-->$/;
 const FACET_TAG_PREFIX_RE = /^<!--\s*f\s*:/;
 
