@@ -26,6 +26,7 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     <section id="hero" class:list={["pt-8 pb-6", "border-b border-border"]}>
       <a
         target="_blank"
+        rel="noopener noreferrer"
         href={linkWithBase("/rss.xml")}
         class="inline-block"
         aria-label="rss feed"

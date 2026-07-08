@@ -42,6 +42,7 @@ All project documentation is organized in the `/docs` directory. Start here:
 - [Deployment Guide](./docs/operations/deployment.md) - How to deploy
 - [Supply-Chain Security](./docs/operations/supply-chain.md) - Dependency hardening, audit tooling, and pin policy
 - [Special Features](./docs/features/special-implementations.md) - Custom implementations
+- [Resume Variants](./docs/features/resume-variants.md) - Tailor a one-page resume PDF for a specific job role
 - [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch)
 
 ## 🚀 Quick Start

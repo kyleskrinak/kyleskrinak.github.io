@@ -22,6 +22,7 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 **Understanding project capabilities:**
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
+- [Resume Variants](./features/resume-variants.md) - Tailor a one-page resume PDF for a specific job role
 - [Architecture Overview](./features/architecture.md) - How it all fits together
 
 ## 📚 Migration History
@@ -56,7 +57,8 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 1. [Local Setup](./getting-started/)
 2. [File Structure](./getting-started/file-structure.md)
 3. [Special Features](./features/special-implementations.md)
-4. [Testing](./testing/)
+4. [Resume Variants](./features/resume-variants.md)
+5. [Testing](./testing/)
 
 ### 🚀 DevOps/Deployment
 1. [Deployment Guide](./operations/deployment.md)
@@ -98,6 +100,7 @@ docs/
 ├── features/                          # Understanding capabilities
 │   ├── index.md
 │   ├── architecture.md
+│   ├── resume-variants.md
 │   └── special-implementations.md
 │
 ├── testing/                           # QA and validation
@@ -110,5 +113,5 @@ docs/
 
 ---
 
-**Last Updated**: March 15, 2026
-**Status**: Documentation updated - visual regression testing in production, link checking two-tier system
+**Last Updated**: July 8, 2026
+**Status**: Documentation updated - resume variants, visual regression testing in production, link checking two-tier system
