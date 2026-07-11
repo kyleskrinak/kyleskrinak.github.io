@@ -329,6 +329,7 @@ const testEnvVars = new Set([
   'WAYLAND_DISPLAY',                // Wayland display (scripts/lib/browser-mode.js)
   'ARCHIVE_PREVIEW_PORT',           // scripts/build-archive-pdf.mjs (preview port override)
   'RESUME_PREVIEW_PORT',            // scripts/print-resume-pdf.mjs (preview port override)
+  'RESUME_VARIANTS_DIR',            // scripts/build-resume-variant.mjs (variants dir override)
 ]);
 
 // Scan all TypeScript/JavaScript files in src/ and scripts/
