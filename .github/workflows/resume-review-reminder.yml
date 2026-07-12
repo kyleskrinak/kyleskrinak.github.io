@@ -1,0 +1,106 @@
+name: Quarterly resume review reminder
+
+on:
+  schedule:
+    # Fires on days 1–7 of January, April, July, and October at 09:00 UTC
+    # (up to 7 runs per quarter-start month). GitHub cron cannot express
+    # "first Monday" natively — the workflow skips non-Mondays internally.
+    - cron: '0 9 1-7 1,4,7,10 *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: resume-review-reminder
+  cancel-in-progress: false
+
+jobs:
+  open-issue:
+    name: Open quarterly review issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Compute quarter metadata
+        id: meta
+        env:
+          GH_EVENT: ${{ github.event_name }}
+        run: |
+          DOW=$(date +%u)
+          if [ "$GH_EVENT" = "schedule" ] && [ "$DOW" != "1" ]; then
+            echo "Not Monday (day-of-week=$DOW) — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          MONTH=$(date +%-m)
+          YEAR=$(date +%Y)
+          # workflow_dispatch: map any month to its current quarter so manual
+          # runs outside the scheduled months still produce a meaningful title.
+          case $MONTH in
+            1|2|3)    Q=1 ;;
+            4|5|6)    Q=2 ;;
+            7|8|9)    Q=3 ;;
+            10|11|12) Q=4 ;;
+            *)        echo "Unexpected month: $MONTH" >&2; exit 1 ;;
+          esac
+          echo "year=$YEAR"    >> "$GITHUB_OUTPUT"
+          echo "quarter=$Q"    >> "$GITHUB_OUTPUT"
+          echo "title=Quarterly resume review — $YEAR Q$Q" >> "$GITHUB_OUTPUT"
+
+      - name: Check for duplicate open issue
+        if: steps.meta.outputs.skip != 'true'
+        id: duplicate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_TITLE: ${{ steps.meta.outputs.title }}
+        run: |
+          COUNT=$(gh issue list \
+            --state open \
+            --search "Quarterly resume review in:title" \
+            --limit 20 \
+            --json title \
+            | jq --arg t "$ISSUE_TITLE" 'map(select(.title == $t)) | length')
+          if [ "$COUNT" -gt 0 ]; then
+            echo "Issue '$ISSUE_TITLE' already open — skipping."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure labels exist
+        if: steps.meta.outputs.skip != 'true' && steps.duplicate.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "resume" \
+            --color "0075ca" \
+            --description "Resume-related tasks" \
+            || true
+          gh label create "recurring" \
+            --color "e4e669" \
+            --description "Scheduled recurring tasks" \
+            || true
+
+      - name: Open issue
+        if: steps.meta.outputs.skip != 'true' && steps.duplicate.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_TITLE: ${{ steps.meta.outputs.title }}
+          ISSUE_YEAR: ${{ steps.meta.outputs.year }}
+          ISSUE_QUARTER: ${{ steps.meta.outputs.quarter }}
+        run: |
+          printf '%s\n' \
+            "## ${ISSUE_YEAR} Q${ISSUE_QUARTER} resume review" \
+            "" \
+            "- [ ] Update achievements and metrics from the past quarter" \
+            "- [ ] Review skills inventory and last-reviewed date" \
+            "- [ ] Check certifications for expiry" \
+            "- [ ] Verify the change log entry" \
+            "- [ ] Confirm web and print renders match after edits" \
+            > /tmp/issue-body.md
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --label "resume,recurring" \
+            --body-file /tmp/issue-body.md
