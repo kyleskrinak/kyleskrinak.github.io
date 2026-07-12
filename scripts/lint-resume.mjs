@@ -24,8 +24,8 @@ const RESUME_SOURCE = join(ROOT, 'src/content/pages/resume/index.md');
 // Matches a trailing <!-- f: ... --> facet comment (the remark-facets format).
 const FACET_TAG_RE = /\s*<!--\s*f:[^>]*-->\s*$/;
 
-// Employer line: bold-wrapped company name (always the first bold line after the heading).
-const EMPLOYER_LINE_RE = /^\*\*.+\*\*/;
+// Employer line: bold name followed by em-dash separator (** Name ** — location | dates).
+const EMPLOYER_LINE_RE = /^\*\*.+\*\*\s+—/;
 
 // Bullet line
 const BULLET_RE = /^- /;
