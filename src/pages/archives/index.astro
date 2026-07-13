@@ -44,7 +44,7 @@ const months = [
         .map(([year, yearGroup]) => (
           <div>
             <span class="text-2xl font-bold">{year}</span>
-            <span class="ml-2 inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">{yearGroup.length}</span>
+            <span class="ml-2 inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent" aria-label={`${yearGroup.length} posts`}>{yearGroup.length}</span>
             {Object.entries(
               getPostsByGroupCondition(
                 yearGroup,
@@ -56,7 +56,7 @@ const months = [
                 <div class="flex flex-col sm:flex-row">
                   <div class="mt-6 min-w-36 text-lg sm:my-6">
                     <span class="font-bold">{months[Number(month) - 1]}</span>
-                    <span class="ml-1.5 inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">{monthGroup.length}</span>
+                    <span class="ml-1.5 inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent" aria-label={`${monthGroup.length} posts`}>{monthGroup.length}</span>
                   </div>
                   <ul>
                     {monthGroup
