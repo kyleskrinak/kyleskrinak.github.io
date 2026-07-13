@@ -23,7 +23,7 @@ Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sit
 
 Led a web technology team supporting 150+ university department, program, and administrative websites for Trinity College of Arts & Sciences. Managed developers and IT analysts across Drupal, PHP, DevOps, endpoint management, VM-based infrastructure, and package management. Oversaw development of a custom Drupal 8 theme and distribution used to support a major platform migration. Led cross-campus technology events and promoted reusable development patterns across distributed web teams. <!-- f: leadership, web-dev -->
 
-- Modernized website delivery, standardizing accessibility, responsive design, and automated deployment, cutting site launch timelines from months to hours. <!-- f: web-dev, delivery -->
+- Modernized website delivery, standardizing accessibility, responsive design, and automated deployment, cutting site launch timelines from 4 months to 1 week. <!-- f: web-dev, delivery -->
 - Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms. <!-- f: leadership, delivery -->
 - Maintained zero team turnover across a full 9-year tenure through consistent one-on-ones and clear delivery expectations. <!-- f: leadership -->
 
@@ -42,7 +42,7 @@ Skrinak Creative (SCI) is a two-person, print- and web-media-based creative agen
 
 Managed the Pre-press department for a $26M/year commercial printer, with duties including design and oversight of web services. <!-- f: creative, leadership -->
 
-- Led the conversion from film-based to digital plate imaging, cutting production material costs by half while reducing staff through attrition. <!-- f: cost, creative -->
+- Led the conversion from film-based to digital plate imaging, cutting production material costs ~50% while reducing staff through attrition. <!-- f: cost, creative -->
 
 ## Desktop Publishing Manager
 

@@ -8,8 +8,9 @@
   "packageManager": "npm@11.17.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
-    "build:ci": "node scripts/check-image-conventions.mjs --all && astro build && pagefind --site dist",
+    "lint:resume": "node scripts/lint-resume.mjs",
+    "build": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
+    "build:ci": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && astro build && pagefind --site dist",
     "build:presentations": "node scripts/build-presentations.js",
     "check:images": "node scripts/check-image-conventions.mjs --all",
     "new-post": "node scripts/new-post.mjs",
