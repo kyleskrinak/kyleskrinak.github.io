@@ -32,13 +32,8 @@ const BULLET_RE = /^- /;
 
 const BANNED_PHRASES = [
 	'leverage',
-	'leveraged',
-	'leveraging',
 	'utilize',
-	'utilized',
-	'utilizing',
 	'synergy',
-	'synergistic',
 	'spearheaded',
 	'impactful',
 	'value-add',
@@ -50,7 +45,6 @@ const BANNED_PHRASES = [
 	'game-changer',
 	'thought leader',
 	'proactive',
-	'proactively',
 	'innovative',
 	'best practice',
 ];
