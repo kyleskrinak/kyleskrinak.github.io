@@ -4,7 +4,7 @@
  *
  * Checks four Manager Tools rubric items:
  *   1. Measurable claims  — every bullet must contain at least one digit
- *   2. Active voice       — no was/were + past-participle constructions
+ *   2. Active voice       — flags was/were + regular -ed constructions
  *   3. Banned phrases     — resume jargon blocklist (leverage, synergy, …)
  *   4. Pronouns           — collective "we" hides individual contribution
  *
