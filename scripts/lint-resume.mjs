@@ -22,10 +22,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const RESUME_SOURCE = join(ROOT, 'src/content/pages/resume/index.md');
 
 // Matches a trailing <!-- f: ... --> facet comment (the remark-facets format).
-const FACET_TAG_RE = /\s*<!--\s*f:[^>]*-->\s*$/;
+const FACET_TAG_RE = /\s*<!--\s*f:[\s\S]*?-->\s*$/;
 
-// Employer line: bold name followed by em-dash separator (** Name ** — location | dates).
-const EMPLOYER_LINE_RE = /^\*\*.+\*\*\s+—/;
+// Employer line: bold name followed by em-dash, location pipe, and year digits.
+const EMPLOYER_LINE_RE = /^\*\*.+\*\*\s+—.*\|.*\d/;
 
 // Bullet line
 const BULLET_RE = /^- /;
@@ -55,11 +55,12 @@ const BANNED_PHRASES = [
 	'best practice',
 ];
 
-// Pre-build word-boundary regex for each phrase. Multi-word phrases that
-// contain a space or hyphen need the boundary anchored at the outer edges only.
+// Pre-build regex for each phrase. The leading \b anchors at a word boundary;
+// no trailing \b so suffixed/pluralized forms (value-added, thought leaders) are caught.
+// All regex metacharacters are escaped before the hyphen-to-class substitution.
 const BANNED_RES = BANNED_PHRASES.map(p => ({
 	phrase: p,
-	re: new RegExp(`\\b${p.replace(/[-]/g, '[-]')}\\b`, 'i'),
+	re: new RegExp(`\\b${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/-/g, '[-]')}`, 'i'),
 }));
 
 export function stripFacetTag(text) {
@@ -122,7 +123,9 @@ export function checkMeasurableClaims(bullets, heading) {
  * Returns Array<{ bullet, heading }>.
  */
 export function checkActiveVoice(bullets, heading) {
-	const PASSIVE_RE = /\b(was|were)\s+[a-z]+(?:ed|en)\b/i;
+	// Match was/were + past-participle -ed only; -en forms (open, golden, broken) cause
+	// false positives on common adjectives and are excluded from this check.
+	const PASSIVE_RE = /\b(was|were)\s+[a-z]+ed\b/i;
 	return bullets
 		.filter(b => PASSIVE_RE.test(b))
 		.map(bullet => ({ bullet, heading }));
@@ -152,6 +155,11 @@ function main() {
 	const raw = readFileSync(RESUME_SOURCE, 'utf8').replace(/\r\n/g, '\n');
 	const body = raw.replace(/^---\n[\s\S]*?\n---/, '');
 	const sections = parseSections(body);
+
+	if (sections.length === 0) {
+		process.stderr.write(`lint-resume: no ## sections found in ${RESUME_SOURCE} — wrong file or empty resume.\n`);
+		process.exit(1);
+	}
 
 	const violations = [];
 

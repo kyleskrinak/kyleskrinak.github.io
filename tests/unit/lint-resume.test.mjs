@@ -27,6 +27,13 @@ describe('stripFacetTag', () => {
 			'Led the team',
 		);
 	});
+
+	it('strips a facet comment that contains ">" inside the body', () => {
+		assert.equal(
+			stripFacetTag('Cut costs <!-- f: cost > infra -->'),
+			'Cut costs',
+		);
+	});
 });
 
 describe('parseSections', () => {
@@ -70,10 +77,16 @@ With honors
 	});
 
 	it('captures scope text for a section with no bullets', () => {
-		const noListSource = `## Supervisor\n\n**Shop** — City\n\nSupervised staff. <!-- f: leadership -->`;
+		const noListSource = `## Supervisor\n\n**Shop** — City | 2010–2015\n\nSupervised staff. <!-- f: leadership -->`;
 		const [section] = parseSections(noListSource);
 		assert.equal(section.bullets.length, 0);
 		assert.equal(section.scopeText, 'Supervised staff.');
+	});
+
+	it('includes bold-led prose lines that lack the location|year pattern', () => {
+		const src = `## Role\n\n**Employer** — City | 2020–2023\n\n**Key outcome** — reduced costs by 40%.`;
+		const [section] = parseSections(src);
+		assert.ok(section.scopeText.includes('Key outcome'));
 	});
 });
 
@@ -113,6 +126,14 @@ describe('checkActiveVoice', () => {
 	it('does not flag "was" when not followed by a word ending in ed/en', () => {
 		assert.deepEqual(checkActiveVoice(['Output was clean and reliable.'], 'Role'), []);
 	});
+
+	it('does not flag "was open" — adjective, not passive participle', () => {
+		assert.deepEqual(checkActiveVoice(['Was open to cross-functional feedback across 5+ teams.'], 'Role'), []);
+	});
+
+	it('does not flag "were golden" — adjective, not passive participle', () => {
+		assert.deepEqual(checkActiveVoice(['Results were golden for the department.'], 'Role'), []);
+	});
 });
 
 describe('checkBannedPhrases', () => {
@@ -141,6 +162,24 @@ describe('checkBannedPhrases', () => {
 	it('is case-insensitive', () => {
 		const result = checkBannedPhrases('Used LEVERAGE to achieve goals.', 'Role');
 		assert.equal(result.length, 1);
+	});
+
+	it('flags a multi-word banned phrase', () => {
+		const result = checkBannedPhrases('Became a thought leader in the space.', 'Role');
+		assert.equal(result.length, 1);
+		assert.equal(result[0].phrase, 'thought leader');
+	});
+
+	it('flags the pluralized form of a multi-word banned phrase', () => {
+		const result = checkBannedPhrases('Recognized as one of the top thought leaders.', 'Role');
+		assert.equal(result.length, 1);
+		assert.equal(result[0].phrase, 'thought leader');
+	});
+
+	it('flags the suffixed form of a hyphenated banned phrase', () => {
+		const result = checkBannedPhrases('Delivered value-added services to clients.', 'Role');
+		assert.equal(result.length, 1);
+		assert.equal(result[0].phrase, 'value-add');
 	});
 });
 
