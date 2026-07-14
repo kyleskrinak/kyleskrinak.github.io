@@ -257,7 +257,8 @@ const nextPost =
       heading.classList.add("group");
       const link = document.createElement("a");
       link.className =
-        "heading-link ms-2 no-underline opacity-0 group-hover:opacity-100 focus:opacity-100";
+        "heading-link ms-2 no-underline opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus:opacity-100 focus:pointer-events-auto";
+      link.setAttribute("aria-label", "Permalink");
       link.href = "#" + heading.id;
 
       const span = document.createElement("span");
