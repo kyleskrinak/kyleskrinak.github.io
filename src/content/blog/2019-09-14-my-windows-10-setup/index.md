@@ -1,7 +1,7 @@
 ---
 title: My Windows 10 Setup
 pubDate: 2019-09-14T00:00:00.000Z
-updatedDate: 2026-05-09T00:00:00.000Z
+updatedDate: 2026-07-16T00:00:00.000Z
 categories: []
 description: Why Windows and how I like my default Windows 10 configured
 image: ./punch_card.webp
@@ -21,7 +21,9 @@ Meanwhile, I liked what recent and unprecedented changes Microsoft was offering.
 
 After all that, I acknowledge that a remaining problem with Windows is its progressively sluggish performance over time. This degradation is a shared problem across platforms, but decidedly so on Windows. To address this, here are my steps to re-image a Windows device.
 
-All of which reminds me: time to update my vimrc configuration file. Or should I switch to [Neovim](https://neovim.io/?) [Visual Studio Code](https://code.visualstudio.com/?) or [GNU Emacs.](https://www.gnu.org/software/emacs/?)
+All of which reminds me: time to update my vimrc configuration file. Or should I switch to [Neovim](https://neovim.io/?) [Visual Studio Code](https://code.visualstudio.com/?) or [GNU Emacs.](https://www.gnu.org/software/emacs/)
+
+*Revised 2026-07-16: fixed malformed GNU Emacs link URL.*
 
 ## My Windows Configuration
 
