@@ -1,6 +1,7 @@
 ---
 title: 2019 DrupalCon Higher Ed Summit
 pubDate: 2019-05-22T00:00:00.000Z
+updatedDate: 2026-07-16T00:00:00.000Z
 categories: []
 tags:
   - Drupalcon Seattle 2019
@@ -33,10 +34,12 @@ _Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissi
 
 ## Opening session
 
-* [Paul Grotevant](https://sites.utexas.edu/drupal/author/pfg/ "Paul Grotevant's blog at U.T. Austin") presents on new summit format
+* Paul Grotevant presents on new summit format
 * “Braindates” continue the conversation afterwards
   *  Connection opportunities.
 * The Solution problem
+
+*Revised 2026-07-16: removed dead link to Paul Grotevant's UT Austin blog.*
 
 ## Keynote: Web Accessibility
 
