@@ -14,6 +14,12 @@ IgnoreURLs:
   - "claude.ai"  # Connection reset in htmltest, works in browser
   - "drupal.org/u/grasmash"  # Intermittent timeouts, works in real browsers
   - "linkedin.com"  # Bot detection (999/404 to crawlers), works in real browsers
+  - "hhs.gov"  # Bot detection (403 to crawlers), works in real browsers
+  - "autohotkey.com"  # Bot detection (403 to crawlers), works in real browsers
+  - "substack.com"  # Bot detection (403 to crawlers), works in real browsers
+  - "medium.com"  # Bot detection (403 to crawlers), works in real browsers
+  - "ahajournals.org"  # Bot detection (403 to crawlers), works in real browsers
+  - "manager-tools.com"  # Bot detection (403 to crawlers), works in real browsers
 IgnoreInternalURLs:
   # These PDFs are .gitignored and absent from a plain `npm run build`; the
   # deploy pipeline guarantees them via the ensure-release-pdfs action's
