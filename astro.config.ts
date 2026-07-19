@@ -6,7 +6,9 @@ import mdx from "@astrojs/mdx";
 // import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import remarkDirective from "remark-directive";
 import { remarkFacets } from "./src/lib/remark-facets.mjs";
+import { remarkCards } from "./src/lib/remark-cards.mjs";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -46,7 +48,13 @@ export default defineConfig({
   ],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }], remarkFacets],
+      remarkPlugins: [
+        remarkDirective,
+        remarkCards, // before remarkToc so card titles don't pollute TOCs
+        remarkToc,
+        [remarkCollapse, { test: "Table of contents" }],
+        remarkFacets,
+      ],
       rehypePlugins: [rehypeImageOptimization],
     }),
     shikiConfig: {
