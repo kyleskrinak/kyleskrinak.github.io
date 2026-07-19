@@ -91,8 +91,12 @@ html[data-theme="dark"] {
   border: 0; /* .app-prose img has a border; not wanted inside a bordered card */
   border-radius: 0.25rem;
 }
-.card-row .card :is(h3, p, ul, ol) {
+.card-row .card :is(h3, p, ul, ol, blockquote) {
   margin-block: 0.375rem;
+}
+.card-row .card blockquote {
+  border-inline-start: none;
+  opacity: 1;
 }
 .card-row .card > :first-child {
   margin-top: 0;

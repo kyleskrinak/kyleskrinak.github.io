@@ -131,6 +131,25 @@ describe('remarkCards', () => {
 		assert.equal(only.data, undefined);
 	});
 
+	it('handles the full testimonial shape: image + blockquote + emphasis footer', () => {
+		const blockquote = { type: 'blockquote', children: [paragraph(text('Great product!'))] };
+		const directive = cardsDirective({ class: 'testimonials' }, [
+			imageParagraph('/images/portrait.webp', 'Portrait of a person'),
+			blockquote,
+			emphasisParagraph('Artist, Title, 1659'),
+		]);
+		runPlugin({ type: 'root', children: [directive] });
+
+		const card = directive.children[0];
+		assert.equal(card.data.hName, 'figure');
+		assert.equal(card.children[0].type, 'image');
+		assert.deepEqual(card.children[0].data.hProperties.className, ['card-media']);
+		assert.equal(card.children[1].type, 'blockquote');
+		const footer = card.children.at(-1);
+		assert.equal(footer.data.hName, 'figcaption');
+		assert.deepEqual(footer.data.hProperties.className, ['card-footer']);
+	});
+
 	it('leaves container directives with other names untouched', () => {
 		const other = { type: 'containerDirective', name: 'note', attributes: {}, children: [paragraph(text('x'))] };
 		runPlugin({ type: 'root', children: [other] });

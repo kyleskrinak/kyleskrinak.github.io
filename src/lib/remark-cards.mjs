@@ -12,7 +12,9 @@ import { visit } from "unist-util-visit";
 //   - Footer: a trailing emphasis-only paragraph → <figcaption class="card-footer">.
 //             A card consisting ONLY of one emphasized line stays body text.
 // A card with a media or footer slot renders as <figure class="card">,
-// otherwise <div class="card">.
+// otherwise <div class="card">. A card with only a media slot (no footer)
+// renders as <figure> without <figcaption>; the img alt text provides the
+// accessible name in that case, which is valid per HTML5.
 //
 // `loading`/`decoding` img attributes are intentionally NOT set here —
 // rehypeImageOptimization (src/lib/rehype-components.ts) adds them.

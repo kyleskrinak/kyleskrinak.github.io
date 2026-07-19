@@ -45,7 +45,7 @@ See the exciting [RCT showing an 89 percent improvement in fun](https://www.yout
 Testimonials are already coming in.
 
 :::cards{.testimonials}
-![Girl with a Pearl Earring, face crop](/images/funmaxxing/vermeer-pearl-earring-crop.webp)
+![Girl with a Pearl Earring by Vermeer — close-up portrait](/images/funmaxxing/vermeer-pearl-earring-crop.webp)
 
 > I used to scroll for hours and feel nothing. Then I tried funmaxxing. Now I laugh, actually laugh, several times a week.
 
@@ -53,7 +53,7 @@ Testimonials are already coming in.
 
 ---
 
-![Rembrandt self-portrait, face crop](/images/funmaxxing/rembrandt-self-portrait-crop.webp)
+![Rembrandt Self-Portrait, 1659 — close-up of face](/images/funmaxxing/rembrandt-self-portrait-crop.webp)
 
 > I was skeptical. Doing what you love sounded too simple. Three days in, I caught myself smiling for no reason.
 
@@ -61,7 +61,7 @@ Testimonials are already coming in.
 
 ---
 
-![Adam from the Creation of Adam, face crop](/images/funmaxxing/michelangelo-adam-crop.webp)
+![Adam from Michelangelo's Creation of Adam — close-up portrait](/images/funmaxxing/michelangelo-adam-crop.webp)
 
 > My friends noticed the change before I did. They said, you seem lighter. I said, I'm funmaxxing.
 
@@ -90,5 +90,5 @@ From the dollar store.
 
 Want the complete system? Enroll in my [twelve-week fun-maxxing mastery course](https://kyle.skrinak.com). Payment plans available. Spots are limited. Offer ends soon.
 
-Take the thirty-day fun-maxxing challenge. Track your metrics daily. Post your results.
+Take the thirty-day funmaxxing challenge. Track your metrics daily. Post your results.
 
