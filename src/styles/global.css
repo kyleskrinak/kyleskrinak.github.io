@@ -82,7 +82,6 @@ html[data-theme="dark"] {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 1rem;
-  background-color: var(--background);
 }
 .card-row .card > img {
   width: 100%;

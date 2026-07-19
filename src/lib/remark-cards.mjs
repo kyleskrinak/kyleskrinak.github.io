@@ -16,6 +16,9 @@ import { visit } from "unist-util-visit";
 //
 // `loading`/`decoding` img attributes are intentionally NOT set here —
 // rehypeImageOptimization (src/lib/rehype-components.ts) adds them.
+// `width`/`height` are also intentionally omitted — card images are public-path
+// references (not imported assets), so Sharp metadata is unavailable at remark
+// time. CLS is mitigated by `aspect-ratio: 1; width: 100%` in the card CSS.
 
 const isImageParagraph = n =>
   n.type === "paragraph" && n.children.length === 1 && n.children[0].type === "image";

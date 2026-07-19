@@ -76,7 +76,7 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
 | `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
 | `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` or `heroImage` is set. |
-| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image |
+| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image. Accepts inline HTML (e.g. `<em>Title</em>`). |
 | `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
 | `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
