@@ -5,16 +5,13 @@ description: "A board-certified guide to achieving maximum fun: the two paths, t
 tags:
   - personal
   - humor
-published: false
+published: true
+image: ./snap-the-whip.jpg
+imagePosition: south
+alt: "Snap the Whip by Winslow Homer, 1872 — boys playing the chain-whipping game in a rural schoolyard"
+caption: "Winslow Homer, <em>Snap the Whip</em>, 1872. Butler Institute of American Art."
 ---
 
-<!-- BUILD NOTES (do not publish until resolved):
-  - Images do not exist yet: produce square crops at /images/funmaxxing/*.jpg
-    (public/images/funmaxxing/) and the QR code.
-  - QR code for the course enrollment resolves to the same rickroll URL as the RCT link.
-  - Testimonial images: tight face crops of the three portraits, captioned artist/title/year, played straight.
-  - Verify the Rembrandt self-portrait date (1659) before publishing.
--->
 
 Hi, I'm Kyle, PhD, board-certified in applied joy, professeur at l'Académie de l'Amusement. Through exhaustive study, I've uncovered a new form of maxxing.
 
@@ -24,18 +21,31 @@ Achieve maximum fun. Most people never unlock this. You might think it sounds to
 
 There are two paths to funmaxxing. Soft funmaxxing: a walk with a friend. Hard funmaxxing: a game of Uno with friends. Both require nothing more than showing up.
 
-The protocol is simple. Step one, put the phone away. Step two, go outside. Step three, identify what you love. Step four, do it, even on days you don't feel like it. If you're worried that funmaxxing requires a hammer, it might. If you love building birdhouses, bring one.
+The protocol is simple.
+
+1. Put the phone down.
+2. Go outside.
+3. Identify what you love.
+4. Do it, even on days you don't feel like it.
+
+If you're worried that funmaxxing requires a hammer, it might. If you love building birdhouses, bring one.
 
 Results may vary. Consult your doctor before attempting hard funmaxxing.
 
-To track your progress, measure three key metrics. Chuckles per minute. Minutes spent doing something with no measurable outcome. Degree to which the activity resisted optimization. Compare your scores against friends. Compete and unlock badges and other prizes.
+To track your progress, measure three key metrics.
+
+1. Chuckles per minute.
+2. Minutes spent doing something with no measurable outcome.
+3. Degree to which the activity resisted optimization.
+
+Compare your scores against friends. Compete and unlock badges and other prizes.
 
 See the exciting [RCT showing an 89 percent improvement in fun](https://www.youtube.com/watch?v=dQw4w9WgXcQ) using these proven methods.
 
 Testimonials are already coming in.
 
 :::cards{.testimonials}
-![Girl with a Pearl Earring, face crop](/images/funmaxxing/vermeer-pearl-earring-crop.jpg)
+![Girl with a Pearl Earring, face crop](/images/funmaxxing/vermeer-pearl-earring-crop.webp)
 
 > I used to scroll for hours and feel nothing. Then I tried funmaxxing. Now I laugh, actually laugh, several times a week.
 
@@ -43,7 +53,7 @@ Testimonials are already coming in.
 
 ---
 
-![Rembrandt self-portrait, face crop](/images/funmaxxing/rembrandt-self-portrait-crop.jpg)
+![Rembrandt self-portrait, face crop](/images/funmaxxing/rembrandt-self-portrait-crop.webp)
 
 > I was skeptical. Doing what you love sounded too simple. Three days in, I caught myself smiling for no reason.
 
@@ -51,7 +61,7 @@ Testimonials are already coming in.
 
 ---
 
-![Adam from the Creation of Adam, face crop](/images/funmaxxing/michelangelo-adam-crop.jpg)
+![Adam from the Creation of Adam, face crop](/images/funmaxxing/michelangelo-adam-crop.webp)
 
 > My friends noticed the change before I did. They said, you seem lighter. I said, I'm funmaxxing.
 
@@ -78,8 +88,7 @@ From a nearby gas station.
 From the dollar store.
 :::
 
-Want the complete system? Enroll in my twelve-week fun-maxxing mastery course. Scan the barcode below. Payment plans available. Spots are limited. Offer ends soon.
+Want the complete system? Enroll in my [twelve-week fun-maxxing mastery course](https://kyle.skrinak.com). Payment plans available. Spots are limited. Offer ends soon.
 
 Take the thirty-day fun-maxxing challenge. Track your metrics daily. Post your results.
 
-Once you've identified what you love and done it, you've mastered funmaxxing.

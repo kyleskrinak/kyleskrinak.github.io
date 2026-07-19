@@ -144,7 +144,7 @@ const nextPost =
         />
         {caption && (
           <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
-            {caption}
+            <span set:html={caption} />
           </figcaption>
         )}
       </figure>
