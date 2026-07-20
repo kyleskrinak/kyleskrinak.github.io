@@ -99,13 +99,13 @@ html[data-theme="dark"] {
   opacity: 1;
 }
 .card-row .card > :first-child {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 .card-row .card > :last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 .card-row .card figcaption {
-  margin-top: 0.5rem;
+  margin-block-start: 0.5rem;
   font-size: 0.875em;
   opacity: 0.75; /* matches .app-prose figcaption treatment */
 }

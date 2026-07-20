@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Feat
 
+- add `:::cards` directive for responsive card grids (`remark-cards`, `remark-directive`)
 - add automated visual regression testing to PR workflow (#67)
 - consolidate link checking into single two-tier script (#67)
 

@@ -161,7 +161,7 @@ Use the `:::cards` directive to render a responsive grid of cards. Cards are sep
 
 A card with a media or footer slot renders as `<figure>`; otherwise `<div>`. A card consisting *only* of a single emphasized line stays body text (not promoted to footer).
 
-**Variants:** pass a CSS class via `{.variant}` (e.g. `:::cards{.testimonials}`, `:::cards{.supplements}`). The class is added to the outer `div.card-row` for targeted styling.
+**Variants:** pass a CSS class via `{.variant}` (e.g. `:::cards{.testimonials}`, `:::cards{.supplements}`). The class is added to the outer `div.card-row` for targeted styling. No built-in styles are provided for variant classes — add your own CSS targeting `.card-row.testimonials` or `.card-row.supplements` as needed.
 
 ## Adding Images
 

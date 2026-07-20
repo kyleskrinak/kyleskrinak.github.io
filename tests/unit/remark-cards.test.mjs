@@ -150,6 +150,15 @@ describe('remarkCards', () => {
 		assert.deepEqual(footer.data.hProperties.className, ['card-footer']);
 	});
 
+	it('renders image-only card as figure without figcaption', () => {
+		const directive = cardsDirective({}, [imageParagraph('/x.webp', 'Portrait alt text')]);
+		runPlugin({ type: 'root', children: [directive] });
+
+		const card = directive.children[0];
+		assert.equal(card.data.hName, 'figure');
+		assert.ok(card.children.every(c => c.data?.hName !== 'figcaption'));
+	});
+
 	it('leaves container directives with other names untouched', () => {
 		const other = { type: 'containerDirective', name: 'note', attributes: {}, children: [paragraph(text('x'))] };
 		runPlugin({ type: 'root', children: [other] });

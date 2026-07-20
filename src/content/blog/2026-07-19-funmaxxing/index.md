@@ -88,7 +88,7 @@ From a nearby gas station.
 From the dollar store.
 :::
 
-Want the complete system? Enroll in my [twelve-week fun-maxxing mastery course](https://kyle.skrinak.com). Payment plans available. Spots are limited. Offer ends soon.
+Want the complete system? Enroll in my [twelve-week funmaxxing mastery course](https://kyle.skrinak.com). Payment plans available. Spots are limited. Offer ends soon.
 
 Take the thirty-day funmaxxing challenge. Track your metrics daily. Post your results.
 
