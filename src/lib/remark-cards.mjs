@@ -78,10 +78,11 @@ export function remarkCards() {
         else groups[groups.length - 1].push(child);
       }
 
-      const variant = (node.attributes?.class ?? "").split(/\s+/).filter(Boolean);
+      const { class: cls, ...rest } = node.attributes ?? {};
+      const variant = (cls ?? "").split(/\s+/).filter(Boolean);
       node.data ??= {};
       node.data.hName = "div";
-      node.data.hProperties = { className: ["card-row", ...variant] };
+      node.data.hProperties = { ...rest, className: ["card-row", ...variant] };
       node.children = groups.filter(g => g.length).map(buildCard);
     });
   };
