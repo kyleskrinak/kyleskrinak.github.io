@@ -194,6 +194,31 @@ test.describe('Visual Regression - Image Rendering', () => {
   });
 });
 
+test.describe('Visual Regression - Card Layout', () => {
+  test('funmaxxing post card grid renders correctly at desktop', async ({ page }) => {
+    await page.goto('/posts/2026-07-19-funmaxxing/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('.card-row').first().waitFor({ state: 'visible' });
+    await page.waitForTimeout(2000);
+    await expect(page).toHaveScreenshot('funmaxxing-desktop.png', {
+      fullPage: true,
+      maxDiffPixelRatio: 0.1,
+    });
+  });
+
+  test('funmaxxing post card grid renders correctly at mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/posts/2026-07-19-funmaxxing/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('.card-row').first().waitFor({ state: 'visible' });
+    await page.waitForTimeout(2000);
+    await expect(page).toHaveScreenshot('funmaxxing-mobile.png', {
+      fullPage: true,
+      maxDiffPixelRatio: 0.1,
+    });
+  });
+});
+
 test.describe('Visual Regression - Responsive Design', () => {
   const viewports = [
     { name: 'mobile-small', width: 320, height: 568 },    // iPhone SE

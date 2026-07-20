@@ -76,7 +76,7 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
 | `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
 | `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` or `heroImage` is set. |
-| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image |
+| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image. Accepts inline HTML (e.g. `<em>Title</em>`). |
 | `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
 | `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
@@ -127,6 +127,41 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 ![Image alt](./example.webp)
 ```
+
+## Card Grids
+
+Use the `:::cards` directive to render a responsive grid of cards. Cards are separated by `---` inside the block.
+
+```markdown
+:::cards{.testimonials}
+![Alt text](/images/portrait.webp)
+
+> Quote body text goes here.
+
+*Footer text — rendered as figcaption*
+
+---
+
+![Alt text](/images/portrait2.webp)
+
+> Another quote.
+
+*Second footer*
+:::
+```
+
+**Per-card slots** (all optional):
+
+| Slot | Syntax | Output |
+|------|--------|--------|
+| Media | Leading image-only paragraph | `<img class="card-media">` hoisted as direct card child |
+| Title | `###` heading | `<h3 class="card-title">` (hidden from TOC) |
+| Body | Any other content | Passed through as-is |
+| Footer | Trailing lone-emphasis paragraph (`*text*`) | `<figcaption class="card-footer">` |
+
+A card with a media or footer slot renders as `<figure>`; otherwise `<div>`. A card consisting *only* of a single emphasized line stays body text (not promoted to footer).
+
+**Variants:** pass a CSS class via `{.variant}` (e.g. `:::cards{.testimonials}`, `:::cards{.supplements}`). The class is added to the outer `div.card-row` for targeted styling. No built-in styles are provided for variant classes — add your own CSS targeting `.card-row.testimonials` or `.card-row.supplements` as needed.
 
 ## Adding Images
 

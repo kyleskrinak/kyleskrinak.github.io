@@ -144,7 +144,8 @@ const nextPost =
         />
         {caption && (
           <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
-            {caption}
+            {/* caption is author-controlled frontmatter, not user input — set:html is safe here */}
+            <span set:html={caption} />
           </figcaption>
         )}
       </figure>
