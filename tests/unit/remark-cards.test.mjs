@@ -180,4 +180,46 @@ describe('remarkCards', () => {
 
 		assert.deepEqual(directive.data.hProperties.className, ['card-row', 'testimonials', 'wide']);
 	});
+
+	it('strips dangerous attributes (event handlers, style, arbitrary keys) from the directive', () => {
+		const directive = cardsDirective(
+			{
+				onclick: 'alert(1)',
+				onerror: 'alert(1)',
+				style: 'background: url(javascript:alert(1))',
+				href: 'javascript:alert(1)',
+				src: 'x',
+				foo: 'bar',
+			},
+			[paragraph(text('one'))]
+		);
+		runPlugin({ type: 'root', children: [directive] });
+
+		const { hProperties } = directive.data;
+		for (const dangerous of ['onclick', 'onerror', 'style', 'href', 'src', 'foo']) {
+			assert.ok(!(dangerous in hProperties), `expected "${dangerous}" to be stripped`);
+		}
+	});
+
+	it('passes id, data-*, and aria-* attributes through unchanged', () => {
+		const directive = cardsDirective(
+			{ id: 'featured', 'data-testid': 'cards-row', 'aria-label': 'Featured items' },
+			[paragraph(text('one'))]
+		);
+		runPlugin({ type: 'root', children: [directive] });
+
+		const { hProperties } = directive.data;
+		assert.equal(hProperties.id, 'featured');
+		assert.equal(hProperties['data-testid'], 'cards-row');
+		assert.equal(hProperties['aria-label'], 'Featured items');
+	});
+
+	it('does not let a dangerous key named "class" override the variant/className handling', () => {
+		const directive = cardsDirective({ class: 'wide', onmouseover: 'alert(1)' }, [paragraph(text('one'))]);
+		runPlugin({ type: 'root', children: [directive] });
+
+		const { hProperties } = directive.data;
+		assert.ok(!('onmouseover' in hProperties));
+		assert.deepEqual(hProperties.className, ['card-row', 'wide']);
+	});
 });
