@@ -189,13 +189,14 @@ describe('remarkCards', () => {
 				style: 'background: url(javascript:alert(1))',
 				href: 'javascript:alert(1)',
 				src: 'x',
+				foo: 'bar',
 			},
 			[paragraph(text('one'))]
 		);
 		runPlugin({ type: 'root', children: [directive] });
 
 		const { hProperties } = directive.data;
-		for (const dangerous of ['onclick', 'onerror', 'style', 'href', 'src']) {
+		for (const dangerous of ['onclick', 'onerror', 'style', 'href', 'src', 'foo']) {
 			assert.ok(!(dangerous in hProperties), `expected "${dangerous}" to be stripped`);
 		}
 	});
