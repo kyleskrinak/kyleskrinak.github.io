@@ -70,10 +70,10 @@
     "@shikijs/transformers": "^4.1.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/parser": "^8.61.0",
     "cross-env": "^10.1.0",
     "eslint": "^10.4.0",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.0.0",
     "github-slugger": "^2.0.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
@@ -92,10 +92,10 @@
   "overrides": {
     "devalue": "5.8.1",
     "fast-uri": "4.1.0",
-    "fast-xml-builder": "1.2.0",
-    "fast-xml-parser": "5.9.3",
+    "fast-xml-builder": "1.3.0",
+    "fast-xml-parser": "5.10.0",
     "flatted": "3.4.2",
     "brace-expansion": "5.0.7",
-    "postcss": "8.5.16"
+    "postcss": "8.5.19"
   }
 }
