@@ -81,7 +81,7 @@ Schema fields (defined in `src/content.config.ts`):
 | `heroImage` | Alternate hero slot. Same `image()` resolution. |
 | `ogImage` | Social-only override (e.g., 1200×630 raster of an SVG hero). |
 | `alt` | Required when `image` or `heroImage` is set (accessibility). |
-| `caption` | Optional caption text below the hero image. |
+| `caption` | Optional caption below the hero image. Accepts inline HTML (e.g. `<em>`, `<a>`). Author-controlled only — do not put user-supplied content here. |
 | `imagePosition` | Optional crop hint (`top`, `center`, `entropy`, etc.). |
 
 ### Markdown body
