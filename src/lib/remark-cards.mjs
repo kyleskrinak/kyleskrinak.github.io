@@ -79,11 +79,17 @@ export function remarkCards() {
         else groups[groups.length - 1].push(child);
       }
 
-      const { class: cls, ...rest } = node.attributes ?? {};
-      const variant = (cls ?? "").split(/\s+/).filter(Boolean);
+      const attrs = node.attributes ?? {};
+      const variant = (attrs.class ?? "").split(/\s+/).filter(Boolean);
+      // Allowlist safe passthrough attributes; block event handlers, style, etc.
+      const safeAttrs = Object.fromEntries(
+        Object.entries(attrs).filter(([k]) =>
+          k === "id" || k.startsWith("data-") || k.startsWith("aria-")
+        )
+      );
       node.data ??= {};
       node.data.hName = "div";
-      node.data.hProperties = { ...rest, className: ["card-row", ...variant] };
+      node.data.hProperties = { ...safeAttrs, className: ["card-row", ...variant] };
       node.children = groups.filter(g => g.length).map(buildCard);
     });
   };

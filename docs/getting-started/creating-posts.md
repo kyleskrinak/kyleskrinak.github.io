@@ -76,7 +76,7 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
 | `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
 | `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` or `heroImage` is set. |
-| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image. Accepts inline HTML (e.g. `<em>Title</em>`). |
+| `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image. Accepts inline HTML (e.g. `<em>Title</em>`). Author-controlled only — do not put user-supplied content here. |
 | `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
 | `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
@@ -130,7 +130,7 @@ This is a paragraph. You can use **bold**, *italic*, or `code`.
 
 ## Card Grids
 
-Use the `:::cards` directive to render a responsive grid of cards. Cards are separated by `---` inside the block.
+Use the `:::cards` directive to render a responsive grid of cards. Cards are separated by `---` inside the block. Note: any `---` inside a card body is also treated as a card separator — thematic breaks cannot appear within card content.
 
 ```markdown
 :::cards{.testimonials}
