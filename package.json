@@ -73,7 +73,7 @@
     "@typescript-eslint/parser": "^8.59.4",
     "cross-env": "^10.1.0",
     "eslint": "^10.4.0",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.0.0",
     "github-slugger": "^2.0.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
