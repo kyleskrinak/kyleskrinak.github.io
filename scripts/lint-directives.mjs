@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Detects digit:digit patterns in markdown/MDX content that remark-directive
- * would silently consume as inline directives, causing text to disappear.
+ * Detects unescaped ':' immediately followed by an alphanumeric — remark-directive
+ * parses these as inline directives and silently deletes the text.
  *
  * Skips: fenced code blocks, indented code, blockquote-indented code,
  * frontmatter, inline code spans, URLs, already-escaped colons.
@@ -37,6 +37,7 @@ export function checkContent(raw) {
   let frontmatterDone = lines[0]?.trimEnd() !== '---';
   let inFencedCode = false;
   let fencePattern = null;
+  let inStyleBlock = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -50,11 +51,27 @@ export function checkContent(raw) {
     }
     if (!frontmatterDone) continue;
 
-    // Fenced code blocks
-    const fenceMatch = line.match(/^(`{3,}|~{3,})/);
+    // Raw <style> HTML blocks — CommonMark treats these as unparsed HTML,
+    // so CSS pseudo-classes like `a:hover` never reach remark-directive.
+    if (inStyleBlock) {
+      if (/<\/style\s*>/.test(line)) inStyleBlock = false;
+      continue;
+    }
+    if (/^\s*<style(\s[^>]*)?>/.test(line)) {
+      if (!/<\/style\s*>/.test(line)) inStyleBlock = true;
+      continue;
+    }
+
+    // MDX import declarations — compiled as JS, not parsed by remark-directive
+    if (/^import\s.+\sfrom\s+['"][^'"]+['"];?\s*$/.test(line)) continue;
+
+    // Fenced code blocks (fences may be indented 0-3 spaces and/or sit
+    // inside a blockquote)
+    const fenceLine = line.replace(/^(?:\s{0,3}>\s?)+/, '');
+    const fenceMatch = fenceLine.match(/^ {0,3}(`{3,}|~{3,})/);
     if (fenceMatch) {
       if (!inFencedCode) { inFencedCode = true; fencePattern = fenceMatch[1]; }
-      else if (line.startsWith(fencePattern)) { inFencedCode = false; fencePattern = null; }
+      else if (fenceLine.trimStart().startsWith(fencePattern)) { inFencedCode = false; fencePattern = null; }
       continue;
     }
     if (inFencedCode) continue;
@@ -68,15 +85,27 @@ export function checkContent(raw) {
     // Strip URLs so colons inside them don't trigger false positives
     let stripped = line.replace(/https?:\/\/\S+/g, 'URL');
 
+    // Strip markdown link destinations: [text](dest "title") → [text](URL)
+    stripped = stripped.replace(/\]\([^)]*\)/g, '](URL)');
+
     // Strip inline code spans (doesn't handle double-backtick spans)
     stripped = stripped.replace(/`[^`]*`/g, '');
 
-    // Find digit:digit not already escaped
-    const matches = [...stripped.matchAll(/\d:\d/g)];
-    for (const m of matches) {
+    // Strip raw HTML tags so attribute values (style="margin: 0") don't trigger
+    stripped = stripped.replace(/<[^>]+>/g, '');
+
+    // Skip directive fence lines (:::cards etc.)
+    if (/^\s*::/.test(stripped)) continue;
+
+    // Any colon immediately followed by an alphanumeric becomes an inline
+    // directive and eats text — unless escaped (\:) or part of :: syntax.
+    if (/(?<![\\:]):(?=[A-Za-z0-9])/.test(stripped)) {
       hits.push({ line: lineNum, text: line.trim().substring(0, 100) });
-      break; // one hit per line is enough
     }
+  }
+
+  if (inFrontmatter) {
+    hits.push({ line: 1, text: 'unclosed frontmatter block — file was not linted' });
   }
 
   return hits;
@@ -99,7 +128,7 @@ function main() {
   }
 
   if (totalHits === 0) {
-    console.log('✓ No unescaped digit:digit colon patterns found.');
+    console.log('✓ No unescaped directive-like colon patterns found.');
   } else {
     console.log(`\n${totalHits} line(s) need \`\\:\` escaping.`);
     process.exit(1);

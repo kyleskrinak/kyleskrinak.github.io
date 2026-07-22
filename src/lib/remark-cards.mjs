@@ -38,9 +38,6 @@ function buildCard(group) {
     img.data ??= {};
     img.data.hProperties ??= {};
     img.data.hProperties.className = ["card-media"];
-    img.data.hProperties.tabindex = "0";
-    img.data.hProperties.role = "button";
-    img.data.hProperties["aria-label"] = `Enlarge image: ${img.alt || "untitled"}`;
     children[0] = img;
     hasMedia = true;
   }
