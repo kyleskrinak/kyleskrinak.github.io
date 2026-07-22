@@ -207,7 +207,7 @@ const nextPost =
     <form method="dialog">
       <button type="submit" aria-label="Close lightbox">✕</button>
     </form>
-    <img src="" alt="" />
+    <img alt="" />
   </dialog>
   <Footer />
 </Layout>
@@ -333,16 +333,29 @@ const nextPost =
     if (!dialog) return;
     const lightboxImg = dialog.querySelector("img");
 
+    function openLightbox(cardImg) {
+      lightboxImg.src = cardImg.src;
+      lightboxImg.alt = cardImg.alt;
+      dialog.showModal();
+    }
+
     document.querySelectorAll(".card-media").forEach(cardImg => {
-      cardImg.addEventListener("click", () => {
-        lightboxImg.src = cardImg.src;
-        lightboxImg.alt = cardImg.alt;
-        dialog.showModal();
+      cardImg.addEventListener("click", () => openLightbox(cardImg));
+      cardImg.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openLightbox(cardImg);
+        }
       });
     });
 
     dialog.addEventListener("click", e => {
       if (e.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener("close", () => {
+      lightboxImg.src = "";
+      lightboxImg.alt = "";
     });
   }
   initCardLightbox();
