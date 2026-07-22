@@ -86,7 +86,7 @@ function main() {
   for (const file of files.sort()) {
     const hits = checkContent(readFileSync(file, 'utf8'), { mdx: file.endsWith('.mdx') });
     if (hits.length) {
-      const rel = file.replace(CONTENT_DIR + '/', '');
+      const rel = file.slice(CONTENT_DIR.length + 1);
       console.log(`\n${rel}`);
       for (const h of hits) {
         console.log(`  L${h.line}: ${h.text}`);
