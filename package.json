@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "lint:resume": "node scripts/lint-resume.mjs",
+    "lint:directives": "node scripts/lint-directives.mjs",
     "build": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
     "build:ci": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && astro build && pagefind --site dist",
     "build:presentations": "node scripts/build-presentations.js",

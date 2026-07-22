@@ -203,6 +203,12 @@ const nextPost =
       }
     </div>
   </main>
+  <dialog id="card-lightbox" aria-label="Image lightbox">
+    <form method="dialog">
+      <button type="submit" aria-label="Close lightbox">✕</button>
+    </form>
+    <img src="" alt="" />
+  </dialog>
   <Footer />
 </Layout>
 
@@ -321,6 +327,25 @@ const nextPost =
     }
   }
   attachCopyButtons();
+
+  function initCardLightbox() {
+    const dialog = document.getElementById("card-lightbox");
+    if (!dialog) return;
+    const lightboxImg = dialog.querySelector("img");
+
+    document.querySelectorAll(".card-media").forEach(cardImg => {
+      cardImg.addEventListener("click", () => {
+        lightboxImg.src = cardImg.src;
+        lightboxImg.alt = cardImg.alt;
+        dialog.showModal();
+      });
+    });
+
+    dialog.addEventListener("click", e => {
+      if (e.target === dialog) dialog.close();
+    });
+  }
+  initCardLightbox();
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
