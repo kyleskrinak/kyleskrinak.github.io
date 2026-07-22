@@ -109,12 +109,11 @@ if (existsSync('src/components/GoogleAnalytics.astro')) {
 
 // Comprehensive workflow validation
 // WORKFLOW_TO_ENV_MAP includes only workflows that run 'npm run build:ci'.
-// Excluded workflows (linkwatch.yml, pr-visual-comment.yml, secrets-check.yml)
+// Excluded workflows (linkwatch.yml, secrets-check.yml, etc.)
 // are intentionally skipped because they don't perform builds.
 const WORKFLOW_TO_ENV_MAP = {
   'staging-deploy.yml': 'staging-gh',
-  'production-deploy.yml': 'main-aws',
-  'pr-visual-check.yml': 'pr-visual-check'
+  'production-deploy.yml': 'main-aws'
 };
 
 // Extracts env vars from the step that runs 'npm run build:ci'.

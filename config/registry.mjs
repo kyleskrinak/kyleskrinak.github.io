@@ -102,18 +102,6 @@ export const ConfigRegistry = {
       PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no analytics tracking needed for preview builds' },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no search engine verification needed for deindexed preview builds' }
     },
-    'pr-visual-check': {
-      // PR visual checks build with production settings to generate accurate baseline screenshots.
-      // Analytics secrets are required because Layout.astro/GoogleAnalytics.astro render conditionally
-      // on these values, affecting visual output. Using production URL and deploy env ensures
-      // screenshots match what will be deployed after merge.
-      BUILD_ENV: { value: 'production', source: 'workflow', required: true },
-      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
-      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
-      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true }
-    },
     'main-aws': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
@@ -130,7 +118,6 @@ export const ConfigRegistry = {
     'import.meta.env.PROD': {
       'local-develop': false,    // astro dev: always false
       'staging-gh': true,        // astro build: always true
-      'pr-visual-check': true,   // astro build: always true
       'main-aws': true           // astro build: always true
     }
   },
@@ -178,11 +165,5 @@ export const ConfigRegistry = {
         AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' }
       }
     },
-    'pr-visual-check': {
-      platform: 'Local (no deployment)',
-      mechanism: 'Build artifacts only',
-      location: '.github/workflows/pr-visual-check.yml',
-      variables: {}
-    }
   }
 };

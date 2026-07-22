@@ -36,9 +36,8 @@ For specific troubleshooting scenarios, see:
 
 **Solutions**:
 ```bash
-# Visual regression - download official baseline to snapshots directory
-RUN_ID=$(gh run list --workflow=production-deploy.yml --branch=main --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
-gh run download $RUN_ID --name visual-baseline-main --dir tests/visual/visual-regression.spec.ts-snapshots/
+# Visual regression - regenerate local baseline
+npm run test:visual:baseline
 
 # Link validation - check htmltest is installed
 htmltest --version

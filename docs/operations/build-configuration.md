@@ -236,7 +236,6 @@ Centralizes Node.js setup across all workflows to ensure consistency.
 **Used by**:
 - `production-deploy.yml`
 - `staging-deploy.yml`
-- `pr-visual-check.yml`
 - `linkwatch.yml`
 
 **Benefits**:

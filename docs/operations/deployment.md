@@ -253,25 +253,7 @@ PRs to staging and main branches run automated visual regression testing. Additi
 
 ### Visual Regression Testing
 
-**What happens:**
-1. PR opened/updated → `pr-visual-check.yml` triggered
-2. Downloads baseline from latest main deployment
-3. Builds PR code with production settings
-4. Compares screenshots to baseline
-5. Posts results to PR (`pr-visual-comment.yml`)
-
-**PR Comment Indicators:**
-- ⚠️ **Visual Regression Detected** - PR comment posted with link to diff artifacts
-- ✅ **Tests passed** - No comment posted
-- **No baseline found** - Warning in workflow logs only (no PR comment), tests skipped, safe to merge
-
-**Viewing Diffs:**
-Click artifact link in PR comment to download:
-- Diff images (expected vs actual)
-- Playwright HTML report
-
-**Updating Baselines:**
-Baselines auto-update when PR merges to main and production deploys successfully.
+Visual regression tests exist (`tests/visual/`) but CI automation was removed July 2026. Run locally with `npm run test:visual`; update baselines with `npm run test:visual:baseline`.
 
 ### Link Validation
 

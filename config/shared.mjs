@@ -129,9 +129,5 @@ ${Object.entries(ConfigRegistry.deployment['main-aws'].variables)
   .map(([name, config]) => `  - \`${name}\`: ${config.source} (used in ${config.location})`)
   .join('\n')}
 
-### PR Visual Check
-- Platform: ${ConfigRegistry.deployment['pr-visual-check'].platform}
-- Mechanism: ${ConfigRegistry.deployment['pr-visual-check'].mechanism}
-- Variables: None (build artifacts only, no deployment)
 `;
 }

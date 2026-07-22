@@ -5,14 +5,14 @@
 
 ## Environment Variable Matrix
 
-| Variable | local-develop | staging-gh | pr-visual-check | main-aws |
-|----------|----------|----------|----------|----------|
-| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
-| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `staging` ✓ | `production` ✓ | `production` ✓ |
-| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_ANALYTICS_ID` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ | `required` ✓ |
+| Variable | local-develop | staging-gh | main-aws |
+|----------|----------|----------|----------|
+| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ |
+| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `staging` ✓ | `production` ✓ |
+| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | `required` ✓ |
+| `PUBLIC_GOOGLE_ANALYTICS_ID` | (omitted) | (omitted) | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ |
 
 ✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
 
@@ -20,9 +20,9 @@
 
 Astro build flags set automatically by the framework (not configurable via workflow env vars):
 
-| Flag | local-develop | staging-gh | pr-visual-check | main-aws |
-|------|----------|----------|----------|----------|
-| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
+| Flag | local-develop | staging-gh | main-aws |
+|------|----------|----------|----------|
+| `import.meta.env.PROD` | `false` | `true` | `true` |
 
 ## Astro Configuration
 
@@ -76,7 +76,3 @@ Astro build flags set automatically by the framework (not configurable via workf
   - `AWS_S3_BUCKET`: github-var (used in .github/workflows/production-deploy.yml)
   - `AWS_CLOUDFRONT_DISTRIBUTION_ID`: github-var (used in .github/workflows/production-deploy.yml)
 
-### PR Visual Check
-- Platform: Local (no deployment)
-- Mechanism: Build artifacts only
-- Variables: None (build artifacts only, no deployment)
