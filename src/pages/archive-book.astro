@@ -309,7 +309,7 @@ const title = `${SITE.author} — Collected Writing`;
                   decoding="sync"
                 />
                 {post.data.caption && (
-                  <figcaption>{post.data.caption}</figcaption>
+                  <figcaption set:html={post.data.caption} />
                 )}
               </figure>
             )

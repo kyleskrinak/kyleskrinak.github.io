@@ -18,7 +18,7 @@ You can find all the virtual directory for all the Higher Education Summit Sessi
 
 <div style="padding: 1rem; margin-bottom: 1.5rem; border-left: 4px solid #3498db; background-color: #d5edf7; border-radius: 0 3px 3px 0;"><strong>Note:</strong> these agenda items are not hard-and-fast discussion items. Depending on session attendees and details I cannot anticipate, these discussions tend to grow a life of their own. I find that nearly always, the actual discussion turns out far better than I anticipate. <em>Caveat lector.</em></div>
 
-## Session 1; 11:20 AM &ndash; 12:20 PM
+## Session 1; 11\:20 AM &ndash; 12\:20 PM
 ### Continuous Integration / Continuous Development Strategies
 
 #### Agenda
@@ -47,14 +47,14 @@ How would you like to extend your CI/CD adoption?
     * (1) [CI/CD session](https://www.youtube.com/watch?v=DysbTwsl5SA) from last year's Dublin conference.
     * (2) [DrupalCon Vienna 2017: Automatic Drupal Updates using Visual Regression & Continuous Integration](https://youtu.be/vSkOeYO7Ycw)
 
-## Session 2; 1:30 AM &ndash; 2:30 PM
+## Session 2; 1\:30 AM &ndash; 2\:30 PM
 ### Web Accessibility, led by Joel Crawford-Smith
 
 Led by my fellow Dukie, [Joel,](https://joelcrawfordsmith.com/) with whom we collaborate frequently. Looking forward to his session.
 
 You can find his session notes [here](https://docs.google.com/document/d/1xOq9NTtG8qaSjdmymFplZR0RCtQ4usgELM5MvHUYgjQ/edit?usp=sharing)
 
-## Session 3; 2:30 AM &ndash; 3:30 PM
+## Session 3; 2\:30 AM &ndash; 3\:30 PM
 ### Holistic DevOps &amp; Drupal Security
 
 * **Spread out and speak up**

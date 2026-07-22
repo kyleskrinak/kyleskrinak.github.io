@@ -6,7 +6,7 @@ tags:
   - personal
   - humor
 published: true
-image: ./snap-the-whip.jpg
+image: ./snap-the-whip.webp
 imagePosition: south
 alt: "Snap the Whip by Winslow Homer, 1872 — boys playing the chain-whipping game in a rural schoolyard"
 caption: "Winslow Homer, <em>Snap the Whip</em>, 1872. Butler Institute of American Art."
