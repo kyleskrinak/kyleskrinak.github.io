@@ -361,16 +361,19 @@ const nextPost =
       });
     });
 
-    dialog.addEventListener("click", e => {
-      if (e.target === dialog) dialog.close();
-    });
+    if (!dialog.dataset.listenersBound) {
+      dialog.dataset.listenersBound = "1";
+      dialog.addEventListener("click", e => {
+        if (e.target === dialog) dialog.close();
+      });
 
-    dialog.addEventListener("close", () => {
-      lightboxImg.removeAttribute("src");
-      lightboxImg.alt = "";
-      openerEl?.focus();
-      openerEl = null;
-    });
+      dialog.addEventListener("close", () => {
+        lightboxImg.removeAttribute("src");
+        lightboxImg.alt = "";
+        openerEl?.focus();
+        openerEl = null;
+      });
+    }
   }
   initCardLightbox();
 
