@@ -360,7 +360,7 @@ const nextPost =
     });
 
     dialog.addEventListener("close", () => {
-      lightboxImg.src = "";
+      lightboxImg.removeAttribute("src");
       lightboxImg.alt = "";
     });
   }

@@ -11,7 +11,7 @@
  * is the `cards` container), and any containerDirective not in the allowlist.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fromMarkdown } from 'mdast-util-from-markdown';
@@ -21,6 +21,8 @@ import { mdxjs } from 'micromark-extension-mdxjs';
 import { mdxFromMarkdown } from 'mdast-util-mdx';
 import { gfm } from 'micromark-extension-gfm';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
+import { frontmatter } from 'micromark-extension-frontmatter';
+import { frontmatterFromMarkdown } from 'mdast-util-frontmatter';
 import { visit } from 'unist-util-visit';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,53 +31,35 @@ const CONTENT_DIR = join(ROOT, 'src/content');
 const ALLOWED_CONTAINER_DIRECTIVES = new Set(['cards']);
 
 function walkDir(dir) {
-  const entries = readdirSync(dir);
   const files = [];
-  for (const entry of entries) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) files.push(...walkDir(full));
-    else if (entry.endsWith('.md') || entry.endsWith('.mdx')) files.push(full);
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...walkDir(full));
+    else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) files.push(full);
   }
   return files;
 }
 
-// Split off YAML frontmatter (no frontmatter micromark extension is installed;
-// the build strips it before markdown parsing too). Returns the body to parse
-// and the number of lines removed, so reported line numbers match the file.
-function stripFrontmatter(raw) {
-  const lines = raw.split('\n');
-  if (lines[0]?.trimEnd() !== '---') return { body: raw, offset: 0 };
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trimEnd() === '---') {
-      return { body: lines.slice(i + 1).join('\n'), offset: i + 1 };
-    }
-  }
-  return { body: null, offset: 0 }; // unclosed frontmatter
-}
-
 export function checkContent(raw, { mdx = false } = {}) {
-  const { body, offset } = stripFrontmatter(raw);
-  if (body === null) {
-    return [{ line: 1, text: 'unclosed frontmatter block — file was not linted' }];
-  }
-
   let tree;
   try {
     // gfm() matches the build's remark-gfm default — without it, autolink
     // literals aren't recognized and a colon in a bare URL path would be
     // misreported as a directive.
-    tree = fromMarkdown(body, {
-      extensions: mdx ? [directive(), gfm(), mdxjs()] : [directive(), gfm()],
+    tree = fromMarkdown(raw, {
+      extensions: mdx
+        ? [frontmatter(['yaml']), directive(), gfm(), mdxjs()]
+        : [frontmatter(['yaml']), directive(), gfm()],
       mdastExtensions: mdx
-        ? [directiveFromMarkdown(), gfmFromMarkdown(), mdxFromMarkdown()]
-        : [directiveFromMarkdown(), gfmFromMarkdown()],
+        ? [frontmatterFromMarkdown(['yaml']), directiveFromMarkdown(), gfmFromMarkdown(), mdxFromMarkdown()]
+        : [frontmatterFromMarkdown(['yaml']), directiveFromMarkdown(), gfmFromMarkdown()],
     });
   } catch (err) {
-    const parseLine = (err.place?.line ?? err.line ?? 1) + offset;
+    const parseLine = err.place?.line ?? err.line ?? 1;
     return [{ line: parseLine, text: `parse error — ${err.reason ?? err.message}` }];
   }
 
-  const bodyLines = body.split('\n');
+  const rawLines = raw.split('\n');
   const hits = [];
   visit(tree, node => {
     const isBadDirective =
@@ -84,10 +68,10 @@ export function checkContent(raw, { mdx = false } = {}) {
       (node.type === 'containerDirective' && !ALLOWED_CONTAINER_DIRECTIVES.has(node.name));
     if (!isBadDirective) return;
 
-    const bodyLine = node.position?.start.line ?? 1;
+    const line = node.position?.start.line ?? 1;
     hits.push({
-      line: bodyLine + offset,
-      text: (bodyLines[bodyLine - 1] ?? '').trim().substring(0, 100),
+      line,
+      text: (rawLines[line - 1] ?? '').trim().substring(0, 100),
     });
   });
 

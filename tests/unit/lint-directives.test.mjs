@@ -135,10 +135,16 @@ describe('checkContent', () => {
     assert.deepEqual(checkContent(withFrontmatter('  ```\n  start: 12:30\n  ```')), []);
   });
 
-  it('reports unclosed frontmatter instead of silently skipping the file', () => {
+  it('lints the content of an unclosed frontmatter block instead of skipping the file', () => {
     const hits = checkContent('---\ntitle: Test\nno closing delimiter, 12:30 here');
+    assert.ok(hits.length >= 1);
+    assert.ok(hits.some(h => h.line === 3));
+  });
+
+  it('flags a directive-like colon in a file with no frontmatter starting with a thematic break', () => {
+    const hits = checkContent('---\n\nThe bus leaves at 12:30 sharp.');
     assert.equal(hits.length, 1);
-    assert.match(hits[0].text, /unclosed frontmatter/);
+    assert.equal(hits[0].line, 3);
   });
 
   describe('mdx', () => {
