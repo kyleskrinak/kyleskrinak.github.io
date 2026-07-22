@@ -203,6 +203,12 @@ const nextPost =
       }
     </div>
   </main>
+  <dialog id="card-lightbox" aria-label="Image lightbox">
+    <form method="dialog">
+      <button type="submit" aria-label="Close lightbox">✕</button>
+    </form>
+    <img alt="" />
+  </dialog>
   <Footer />
 </Layout>
 
@@ -321,6 +327,50 @@ const nextPost =
     }
   }
   attachCopyButtons();
+
+  function initCardLightbox() {
+    const dialog = document.getElementById("card-lightbox");
+    if (!dialog) return;
+    const lightboxImg = dialog.querySelector("img");
+    if (!lightboxImg) return;
+
+    let openerEl = null;
+
+    function openLightbox(cardImg) {
+      openerEl = cardImg;
+      lightboxImg.src = cardImg.currentSrc || cardImg.src;
+      lightboxImg.alt = cardImg.alt;
+      dialog.showModal();
+    }
+
+    document.querySelectorAll(".card-media").forEach(cardImg => {
+      cardImg.setAttribute("tabindex", "0");
+      cardImg.setAttribute("role", "button");
+      cardImg.setAttribute(
+        "aria-label",
+        cardImg.alt ? `Enlarge image: ${cardImg.alt}` : "Enlarge image"
+      );
+      cardImg.addEventListener("click", () => openLightbox(cardImg));
+      cardImg.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openLightbox(cardImg);
+        }
+      });
+    });
+
+    dialog.addEventListener("click", e => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener("close", () => {
+      lightboxImg.removeAttribute("src");
+      lightboxImg.alt = "";
+      openerEl?.focus();
+      openerEl = null;
+    });
+  }
+  initCardLightbox();
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>

@@ -69,8 +69,8 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
       * Further zsh customizations
         * plugins = git, ssh-agent and vi-mode
         * add zstyle configurations for ssh-agent:
-        * zstyle :omz:plugins:ssh-agent agent-forwarding on
-        * zstyle :omz:plugins:ssh-agent identities key1 key2
+        * zstyle \:omz\:plugins\:ssh-agent agent-forwarding on
+        * zstyle \:omz\:plugins\:ssh-agent identities key1 key2
         * You must add `export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH` to the beginning of your .zshrc file.
   1. Install vimfiles
       * GitHub - kyleskrinak/vim-files-2.0: My vim configuration files
@@ -80,7 +80,7 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
         * New repo: [GitHub - kyleskrinak/neovim: My neovim configuration files](https://github.com/kyleskrinak/neovim)
 	* Neovim conf files go here: `%USERPROFILE%\AppData\Local\nvim`
   1. Load [AutoHotkey](https://www.autohotkey.com/) autoscripts
-      * At shell:startup
+      * At shell\:startup
   1. Use Windows Hello for device authentication
      1. Enable fingerprint scanner
          * [Enable fingerprint and PIN for Windows 10](https://www.addictivetips.com/windows-tips/enable-fingerprint-and-pin-login-windows-10-1803/)

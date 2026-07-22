@@ -115,7 +115,7 @@ _Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissi
 1. Case Studies
 1. Attend conferences
 
-## 10:45 AM &mdash; My Presentation
+## 10\:45 AM &mdash; My Presentation
 
 You can find my slide-deck [here](/presentations/2019-drupalcon-drupal-8-multisite.html).
 
@@ -133,16 +133,16 @@ Lunch was delicious and fully-compatible with my low-carb way of eating. Better 
 
 [2018 BADCamp Configuration Management Drupal Multi-Site and Distributions](https://2018.badcamp.org/session/config-management-drupal-multi-site-and-distributions) 
 
-## 1:00 PM &mdash; Solutions session
+## 1\:00 PM &mdash; Solutions session
 
 As we filtered into the room, Paul handed each attendee a table number. This assured randomized seating so that we couldn’t sit with our “normal” crowd. The rules for engagement were simple. Write down your greatest pain points. In round-robin fashion, share them with the table. Next, each person leads with their problem and we collaborate towards a possible solution.
 
 My problem was around how to cultivate new talent, especially from underrepresented communities. This led to a fascinating discussion and back and forth on how to do so. One of the possible suggestions was to seek out the growing use of bootcamp-style training that has been growing nationally.Seek connections with these groups, and possibly offer mentoring.
 
-## 2:00 Lightning Rounds
+## 2\:00 Lightning Rounds
 
 I’ll have to dig into my notes for this
 
 ### DevOps for a small team
 
-## 4:00 PM &mdash; closer and mixer
+## 4\:00 PM &mdash; closer and mixer
