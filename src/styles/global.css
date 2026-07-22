@@ -129,7 +129,7 @@ html[data-theme="dark"] {
 .card-row.media-top-right .card-media {
   object-position: top right;
 }
-.card-media {
+.card-media[data-lightbox-bound] {
   cursor: zoom-in;
 }
 #card-lightbox {

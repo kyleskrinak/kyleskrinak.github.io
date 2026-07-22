@@ -309,7 +309,6 @@ const title = `${SITE.author} — Collected Writing`;
                   decoding="sync"
                 />
                 {post.data.caption && (
-                  // caption is author-controlled frontmatter, not user input — set:html is safe here
                   <figcaption set:html={post.data.caption} />
                 )}
               </figure>
