@@ -172,6 +172,7 @@ html[data-theme="dark"] {
   cursor: pointer;
   line-height: 1;
 }
-#card-lightbox form button:hover {
+#card-lightbox form button:hover,
+#card-lightbox form button:focus-visible {
   background: oklch(0 0 0 / 0.85);
 }

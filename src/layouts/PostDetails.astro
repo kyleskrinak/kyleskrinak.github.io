@@ -337,6 +337,7 @@ const nextPost =
     let openerEl = null;
 
     function openLightbox(cardImg) {
+      if (dialog.open) return;
       openerEl = cardImg;
       lightboxImg.src = cardImg.currentSrc || cardImg.src;
       lightboxImg.alt = cardImg.alt;
