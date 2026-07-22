@@ -343,7 +343,8 @@ const nextPost =
       dialog.showModal();
     }
 
-    document.querySelectorAll(".card-media").forEach(cardImg => {
+    document.querySelectorAll(".card-media:not([data-lightbox-bound])").forEach(cardImg => {
+      cardImg.dataset.lightboxBound = "1";
       cardImg.setAttribute("tabindex", "0");
       cardImg.setAttribute("role", "button");
       cardImg.setAttribute(
