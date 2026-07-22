@@ -34,7 +34,7 @@ Dejectedly, I spun up the old (current) environment blog environment. I see Ruby
 
 Here are the stats as I update this page:
 
->      Regenerating: 1 file(s) changed at 2021-01-16 11:59:14
+>      Regenerating: 1 file(s) changed at 2021-01-16 11\:59\:14
 >                    _posts/2021-01-16-jekyll-hugo-and-me.md
 >       Jekyll Feed: Generating feed for posts
 >                    ...done in 0.7113945 seconds.
