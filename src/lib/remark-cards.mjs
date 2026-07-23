@@ -19,9 +19,18 @@ import { visit } from "unist-util-visit";
 //
 // `loading`/`decoding` img attributes are intentionally NOT set here —
 // rehypeImageOptimization (src/lib/rehype-components.ts) adds them.
-// `width`/`height` are also intentionally omitted — card images are public-path
-// references (not imported assets), so Sharp metadata is unavailable at remark
-// time. CLS is mitigated by `aspect-ratio: 1; width: 100%` in the card CSS.
+// `width`/`height` are also intentionally omitted — rehypeImageOptimization
+// does not add them for card images either. CLS is mitigated instead by
+// `aspect-ratio: 1; width: 100%` in the card CSS.
+
+// Restricted safe subset of id syntax (not full HTML id validation — HTML
+// ids don't actually require a leading letter). Non-empty, no whitespace,
+// starts with a letter, and excludes values like "body" or "location" that
+// would otherwise shadow global DOM-named properties (DOM clobbering).
+const isSafeId = v =>
+  typeof v === "string" &&
+  /^[A-Za-z][\w-]*$/.test(v) &&
+  !["body", "location", "documentElement", "head"].includes(v);
 
 const isImageParagraph = n =>
   n.type === "paragraph" && n.children.length === 1 && n.children[0].type === "image";
@@ -83,8 +92,8 @@ export function remarkCards() {
       const variant = (attrs.class ?? "").split(/\s+/).filter(Boolean);
       // Allowlist safe passthrough attributes; block event handlers, style, etc.
       const safeAttrs = Object.fromEntries(
-        Object.entries(attrs).filter(([k]) =>
-          k === "id" || k.startsWith("data-") || k.startsWith("aria-")
+        Object.entries(attrs).filter(([k, v]) =>
+          (k === "id" && isSafeId(v)) || k.startsWith("data-") || k.startsWith("aria-")
         )
       );
       node.data ??= {};

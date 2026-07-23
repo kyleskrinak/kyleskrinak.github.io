@@ -6,9 +6,9 @@ Playwright-based visual regression tests to catch unintended changes in layout, 
 
 ### 1. Create Baseline Screenshots (First Time)
 ```bash
-npm run test:visual:baseline
+npm run test:visual:baseline:docker
 ```
-This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/`. **Note**: This directory is gitignored; baselines are managed via CI artifacts (see baseline workflow below).
+This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/` inside a Docker container matched to `pr-visual-check.yml`'s CI runner (Ubuntu, same Playwright version). **Use this command, not the bare `npm run test:visual:baseline`, whenever the result will be committed** — macOS and Ubuntu render page height differently (font metrics), so macOS-generated baselines fail CI's height comparison even with no real visual change. See [Baseline Management](#baseline-management) below.
 
 ### 2. Run Tests Against Local Dev
 ```bash
@@ -34,7 +34,13 @@ Tests against production URL. Should match staging and baselines.
 # Local dev (auto-starts dev server)
 npm run test:visual
 
-# Create/update baselines from local
+# Create/update baselines matching CI's Ubuntu font rendering (use this to commit)
+npm run test:visual:baseline:docker
+
+# Run against a container matching CI, without updating baselines
+npm run test:visual:docker
+
+# Create/update baselines from local macOS rendering (fast iteration only — do not commit the result)
 npm run test:visual:baseline
 
 # Test against staging (GitHub Pages)
@@ -50,7 +56,9 @@ npm run test:visual:report
 ./scripts/visual-test.sh local              # Local dev
 ./scripts/visual-test.sh staging            # Staging
 ./scripts/visual-test.sh production         # Production
-./scripts/visual-test.sh baseline           # Create baselines
+./scripts/visual-test.sh baseline           # Create baselines (macOS rendering — fast iteration only)
+./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
+./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container (use for commits)
 ./scripts/visual-test.sh compare            # View report
 ```
 
@@ -83,8 +91,8 @@ npm run test:visual:report
 
 ### 48 Hours Before Launch
 ```bash
-# 1. Generate baselines from local dev
-npm run test:visual:baseline
+# 1. Generate baselines matching CI (Ubuntu, via Docker)
+npm run test:visual:baseline:docker
 
 # 2. Verify all local tests pass
 npm run test:visual
@@ -142,7 +150,7 @@ All screenshots match baselines within tolerance (0.1% diff allowed for antialia
 ### Failing Tests ✗
 Visual differences detected. Options:
 1. If unintended: Debug and fix the regression
-2. If intentional: Update baselines with `npm run test:visual:baseline`
+2. If intentional: Update baselines with `npm run test:visual:baseline:docker` (use the Docker variant for anything you'll commit — see [Baseline Management](#baseline-management))
 
 ### HTML Report
 After tests run, view detailed results:
@@ -172,9 +180,9 @@ Opens Playwright Inspector for interactive debugging.
 
 ### Update if Intentional
 ```bash
-npm run test:visual:baseline
+npm run test:visual:baseline:docker
 ```
-Re-generates screenshots as new baselines (after code changes).
+Re-generates screenshots as new baselines (after code changes), rendered on Ubuntu to match CI.
 
 ## Environment-Specific Testing
 
@@ -187,26 +195,29 @@ This means **all environments render identically**. Staging (GitHub Pages) deplo
 
 ### Baseline Management
 
-All environments use the same baseline set (managed via CI artifacts):
+Baselines are committed to the repo. `snapshotPathTemplate` in `playwright.config.ts` omits the OS suffix but keeps `{-projectName}`, so each Playwright project (`visual-desktop`, `visual-mobile`) still resolves its own baseline file — only the platform-specific part is dropped, and that isn't the same as matching pixels. macOS and Ubuntu render text with different font metrics, so a page's total height (and therefore every `visual-desktop`/Chromium `fullPage` screenshot) differs by a near-constant offset between the two. `pr-visual-check.yml` runs on `ubuntu-latest`, so baselines must be **generated on Ubuntu** (via the `docker`/`docker-baseline` modes below) to compare cleanly against CI — a bare macOS-generated baseline will fail CI's height comparison even with zero real visual change. (WebKit/`visual-mobile` baselines have not shown this drift in practice, but generating them the same way keeps both projects consistent.)
 
 ```
-tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitignored)
-  ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
-  ├── blog-archive-desktop-visual-desktop-{os}.png
-  ├── home-page-desktop-visual-desktop-{os}.png
-  └── ... (36 baseline images: 18 screenshots × 2 projects)
+tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
+  ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
+  ├── blog-archive-desktop-visual-desktop.png
+  ├── home-page-desktop-visual-desktop.png
+  └── ... (42 baseline images: 21 screenshots × 2 projects)
 ```
 
 **Baseline Workflow:**
-- **Production deploys** (main branch) automatically upload baselines as `visual-baseline-main` artifact
-- **PR visual checks** download baselines from latest main deployment
-- **Local testing** generates baselines with `npm run test:visual:baseline` (gitignored, not committed)
+- **`pr-visual-check.yml`** gates PRs to `staging` by comparing against committed baselines
+- **Updating baselines for commit**: run `npm run test:visual:baseline:docker` (runs the official `mcr.microsoft.com/playwright:v<version>-noble` image, version-matched to the installed `@playwright/test`, matching CI's Ubuntu font stack), then commit the updated PNGs
+- **Quick local iteration** (not for commit): `npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift
 
 **Test commands:**
 
 ```bash
-# Generate baselines from local dev (base = "/")
-npm run test:visual:baseline
+# Generate baselines matching CI (Ubuntu, via Docker) — use this before committing
+npm run test:visual:baseline:docker
+
+# Verify against those baselines in the same Ubuntu container, without updating them
+npm run test:visual:docker
 
 # Test staging against baselines (also base = "/")
 npm run test:staging -- --project=visual-*
@@ -246,22 +257,9 @@ await page.goto('/?lang=es'); // Spanish
 await page.goto('/?lang=fr'); // French
 ```
 
-## CI/CD Integration (Post-Launch)
+## CI/CD Integration
 
-Add to GitHub Actions workflow to run on every push:
-
-```yaml
-- name: Run visual regression tests
-  run: npm run test:visual
-
-- name: Upload report
-  if: always()
-  uses: actions/upload-artifact@v3
-  with:
-    name: playwright-report
-    path: playwright-report/
-    retention-days: 30
-```
+Visual regression runs automatically via `.github/workflows/pr-visual-check.yml` on every PR targeting `staging`. The workflow builds the site with production settings, installs Chromium and WebKit, runs `npm run test:visual` against committed baselines, and uploads diff artifacts on failure.
 
 ## Troubleshooting
 
@@ -281,7 +279,7 @@ timeout: 60000 // 60 seconds
 - Retry on CI: Set `retries: 2` in config
 
 ### Different rendering on Mac vs Linux
-This is normal for Playwright (different OS rendering). Use `--update-snapshots` if needed.
+`snapshotPathTemplate` removes the OS suffix, so committed baselines *resolve* on any platform — but macOS and Ubuntu font metrics differ enough that `maxDiffPixelRatio: 0.1` doesn't absorb it; expect the height-diff failures described in [Baseline Management](#baseline-management). Regenerate baselines with `npm run test:visual:baseline:docker` rather than raising the tolerance — a looser tolerance would also mask real regressions.
 
 ## File Structure
 
@@ -290,18 +288,18 @@ tests/
 ├── visual/
 │   ├── README.md (this file)
 │   ├── visual-regression.spec.ts (test definitions)
-│   └── visual-regression.spec.ts-snapshots/ (generated baselines)
-│       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
-│       ├── blog-archive-desktop-visual-desktop-{os}.png
-│       ├── home-page-desktop-visual-desktop-{os}.png
-│       └── ... (36 snapshots: 18 screenshots × 2 projects, OS varies by environment)
+│   └── visual-regression.spec.ts-snapshots/ (committed baselines)
+│       ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
+│       ├── blog-archive-desktop-visual-desktop.png
+│       ├── home-page-desktop-visual-desktop.png
+│       └── ... (42 snapshots: 21 screenshots × 2 projects)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```
 
 ## Tips for Success
 
-1. **Baselines managed via CI** - Production deploys upload baselines as artifacts; PRs download and compare
+1. **Baselines committed to repo** — update with `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering) and commit the PNGs; `pr-visual-check.yml` gates PRs to staging against them
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
 4. **Test all environments** before launch (local → staging → production)

@@ -29,6 +29,8 @@
     "test:unit": "node --test tests/unit/*.test.mjs",
     "test:visual": "playwright test --project=visual-*",
     "test:visual:baseline": "playwright test --project=visual-* --update-snapshots",
+    "test:visual:docker": "bash scripts/visual-test.sh docker",
+    "test:visual:baseline:docker": "bash scripts/visual-test.sh docker-baseline",
     "test:visual:report": "playwright show-report",
     "test:seo": "playwright test --project=seo",
     "test:analytics": "playwright test --project=analytics",

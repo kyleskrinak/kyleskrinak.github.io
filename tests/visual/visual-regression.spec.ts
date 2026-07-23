@@ -1,4 +1,36 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
+
+// Native `loading="lazy"` images only decode once near the viewport, and a
+// fullPage screenshot doesn't scroll first — so scroll each card image into
+// view before polling, and scope the poll to this row (not the whole
+// document) to avoid hanging on unrelated offscreen `.card-media` elements.
+//
+// Polls `img.complete` (not `naturalWidth > 0`) so a failed/errored image
+// still resolves the wait instead of hanging forever — the browser sets
+// `complete` on error too, whereas a `load` listener would never fire.
+// `page.waitForFunction`'s `timeout` bounds the wait explicitly rather than
+// relying solely on the outer test timeout.
+async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs = 10000) {
+  const cardImages = cardRow.locator('img.card-media');
+  const count = await cardImages.count();
+  for (let i = 0; i < count; i++) {
+    await cardImages.nth(i).scrollIntoViewIfNeeded();
+  }
+  const rowHandle = await cardRow.elementHandle();
+  if (!rowHandle) {
+    throw new Error('Could not resolve an element handle for the card row locator');
+  }
+  try {
+    await page.waitForFunction(
+      (row: HTMLElement | SVGElement) =>
+        Array.from(row.querySelectorAll<HTMLImageElement>('img.card-media')).every(img => img.complete),
+      rowHandle,
+      { timeout: timeoutMs }
+    );
+  } finally {
+    await rowHandle.dispose();
+  }
+}
 
 /**
  * Visual Regression Tests for Astro Blog
@@ -198,8 +230,9 @@ test.describe('Visual Regression - Card Layout', () => {
   test('funmaxxing post card grid renders correctly at desktop', async ({ page }) => {
     await page.goto('/posts/2026-07-19-funmaxxing/');
     await page.waitForLoadState('networkidle');
-    await page.locator('.card-row').first().waitFor({ state: 'visible' });
-    await page.waitForTimeout(2000);
+    const cardRow = page.locator('.card-row').first();
+    await cardRow.waitFor({ state: 'visible' });
+    await waitForCardImagesLoaded(page, cardRow);
     await expect(page).toHaveScreenshot('funmaxxing-desktop.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
@@ -210,8 +243,9 @@ test.describe('Visual Regression - Card Layout', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/posts/2026-07-19-funmaxxing/');
     await page.waitForLoadState('networkidle');
-    await page.locator('.card-row').first().waitFor({ state: 'visible' });
-    await page.waitForTimeout(2000);
+    const cardRow = page.locator('.card-row').first();
+    await cardRow.waitFor({ state: 'visible' });
+    await waitForCardImagesLoaded(page, cardRow);
     await expect(page).toHaveScreenshot('funmaxxing-mobile.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,

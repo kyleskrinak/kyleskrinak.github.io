@@ -249,29 +249,13 @@ Monitor in GitHub Actions logs.
 
 ## Automated Quality Gates
 
-PRs to staging and main branches run automated visual regression testing. Additional quality checks run on scheduled intervals:
+PRs to `staging` run visual regression tests as a gate. Additional quality checks run on scheduled intervals:
 
 ### Visual Regression Testing
 
-**What happens:**
-1. PR opened/updated → `pr-visual-check.yml` triggered
-2. Downloads baseline from latest main deployment
-3. Builds PR code with production settings
-4. Compares screenshots to baseline
-5. Posts results to PR (`pr-visual-comment.yml`)
-
-**PR Comment Indicators:**
-- ⚠️ **Visual Regression Detected** - PR comment posted with link to diff artifacts
-- ✅ **Tests passed** - No comment posted
-- **No baseline found** - Warning in workflow logs only (no PR comment), tests skipped, safe to merge
-
-**Viewing Diffs:**
-Click artifact link in PR comment to download:
-- Diff images (expected vs actual)
-- Playwright HTML report
-
-**Updating Baselines:**
-Baselines auto-update when PR merges to main and production deploys successfully.
+**Workflow**: `pr-visual-check.yml` — runs on PRs targeting `staging`.
+Compares against committed baselines in `tests/visual/visual-regression.spec.ts-snapshots/`.
+On failure, diff artifacts are uploaded. To update baselines after an intentional visual change, run `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering — a bare macOS baseline will fail this gate on font-height drift alone) and commit the updated snapshots.
 
 ### Link Validation
 
