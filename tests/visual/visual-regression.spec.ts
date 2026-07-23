@@ -199,7 +199,9 @@ test.describe('Visual Regression - Card Layout', () => {
     await page.goto('/posts/2026-07-19-funmaxxing/');
     await page.waitForLoadState('networkidle');
     await page.locator('.card-row').first().waitFor({ state: 'visible' });
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() =>
+      Array.from(document.querySelectorAll('.card-media')).every(img => img.complete && img.naturalWidth > 0)
+    );
     await expect(page).toHaveScreenshot('funmaxxing-desktop.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
@@ -211,7 +213,9 @@ test.describe('Visual Regression - Card Layout', () => {
     await page.goto('/posts/2026-07-19-funmaxxing/');
     await page.waitForLoadState('networkidle');
     await page.locator('.card-row').first().waitFor({ state: 'visible' });
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() =>
+      Array.from(document.querySelectorAll('.card-media')).every(img => img.complete && img.naturalWidth > 0)
+    );
     await expect(page).toHaveScreenshot('funmaxxing-mobile.png', {
       fullPage: true,
       maxDiffPixelRatio: 0.1,
