@@ -102,6 +102,17 @@ export const ConfigRegistry = {
       PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no analytics tracking needed for preview builds' },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no search engine verification needed for deindexed preview builds' }
     },
+    'pr-visual-staging': {
+      // Builds with production settings to match committed baselines (generated locally without
+      // analytics tokens). Analytics tokens are deliberately omitted: the scripts load async and
+      // don't affect rendered visual output, and local baseline generation runs without them.
+      BUILD_ENV: { value: 'production', source: 'workflow', required: true },
+      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
+      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
+      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: null, source: 'omitted', required: false },
+      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
+    },
     'main-aws': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
@@ -117,8 +128,9 @@ export const ConfigRegistry = {
   buildFlags: {
     'import.meta.env.PROD': {
       'local-develop': false,    // astro dev: always false
-      'staging-gh': true,        // astro build: always true
-      'main-aws': true           // astro build: always true
+      'staging-gh': true,          // astro build: always true
+      'pr-visual-staging': true,   // astro build: always true
+      'main-aws': true             // astro build: always true
     }
   },
 

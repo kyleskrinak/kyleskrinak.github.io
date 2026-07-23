@@ -113,7 +113,8 @@ if (existsSync('src/components/GoogleAnalytics.astro')) {
 // are intentionally skipped because they don't perform builds.
 const WORKFLOW_TO_ENV_MAP = {
   'staging-deploy.yml': 'staging-gh',
-  'production-deploy.yml': 'main-aws'
+  'production-deploy.yml': 'main-aws',
+  'pr-visual-check.yml': 'pr-visual-staging'
 };
 
 // Extracts env vars from the step that runs 'npm run build:ci'.
