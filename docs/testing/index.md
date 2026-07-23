@@ -5,9 +5,9 @@ This section covers testing strategies, test runs, and quality validation for th
 ## Testing Types
 
 ### Visual Regression Testing
-- **[Visual Regression Guide](./visual-regression.md)** - Automated PR testing with Playwright
-- Run with: `npm run test:visual` (local) or automatic on PRs to staging/main
-- Status: ✅ **Production** (March 2026) - automated CI/CD baseline comparison
+- **[Visual Regression Guide](./visual-regression.md)** - Playwright visual tests with committed baselines
+- Run with: `npm run test:visual` (local) or automatic on PRs to `staging` (`pr-visual-check.yml`)
+- Status: ✅ **Active** (July 2026) - committed baselines, CI gate on staging PRs
 - Tests 8+ key pages across multiple viewports (mobile, tablet, desktop) to catch unexpected visual changes
 
 ### Console Error Testing

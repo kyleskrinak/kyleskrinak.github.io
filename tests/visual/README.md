@@ -8,7 +8,7 @@ Playwright-based visual regression tests to catch unintended changes in layout, 
 ```bash
 npm run test:visual:baseline
 ```
-This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/`. **Note**: This directory is gitignored; baselines are managed via CI artifacts (see baseline workflow below).
+This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/`. Baselines are committed to the repo (OS-agnostic names via `snapshotPathTemplate`).
 
 ### 2. Run Tests Against Local Dev
 ```bash
@@ -187,20 +187,19 @@ This means **all environments render identically**. Staging (GitHub Pages) deplo
 
 ### Baseline Management
 
-All environments use the same baseline set (managed via CI artifacts):
+Baselines are committed to the repo. `snapshotPathTemplate` in `playwright.config.ts` omits the OS suffix so macOS-generated baselines work on Linux CI without regeneration.
 
 ```
-tests/visual/visual-regression.spec.ts-snapshots/  # Downloaded from CI (gitignored)
-  ├── about-desktop-visual-desktop-{os}.png       # OS suffix varies (darwin/linux/win32)
-  ├── blog-archive-desktop-visual-desktop-{os}.png
-  ├── home-page-desktop-visual-desktop-{os}.png
-  └── ... (36 baseline images: 18 screenshots × 2 projects)
+tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
+  ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
+  ├── blog-archive-desktop-visual-desktop.png
+  ├── home-page-desktop-visual-desktop.png
+  └── ... (42 baseline images: 21 screenshots × 2 projects)
 ```
 
 **Baseline Workflow:**
-- **Production deploys** (main branch) automatically upload baselines as `visual-baseline-main` artifact
-- **PR visual checks** download baselines from latest main deployment
-- **Local testing** generates baselines with `npm run test:visual:baseline` (gitignored, not committed)
+- **`pr-visual-check.yml`** gates PRs to `staging` by comparing against committed baselines
+- **Updating baselines**: run `npm run test:visual:baseline` locally, then commit the updated PNGs
 
 **Test commands:**
 
@@ -246,22 +245,9 @@ await page.goto('/?lang=es'); // Spanish
 await page.goto('/?lang=fr'); // French
 ```
 
-## CI/CD Integration (Post-Launch)
+## CI/CD Integration
 
-Add to GitHub Actions workflow to run on every push:
-
-```yaml
-- name: Run visual regression tests
-  run: npm run test:visual
-
-- name: Upload report
-  if: always()
-  uses: actions/upload-artifact@v3
-  with:
-    name: playwright-report
-    path: playwright-report/
-    retention-days: 30
-```
+Visual regression runs automatically via `.github/workflows/pr-visual-check.yml` on every PR targeting `staging`. The workflow builds the site with production settings, installs Chromium and WebKit, runs `npm run test:visual` against committed baselines, and uploads diff artifacts on failure.
 
 ## Troubleshooting
 
@@ -281,7 +267,7 @@ timeout: 60000 // 60 seconds
 - Retry on CI: Set `retries: 2` in config
 
 ### Different rendering on Mac vs Linux
-This is normal for Playwright (different OS rendering). Use `--update-snapshots` if needed.
+`snapshotPathTemplate` removes the OS suffix, so committed baselines resolve on any platform. If you see rendering differences despite this, the tolerance (`maxDiffPixelRatio: 0.1`) should absorb minor anti-aliasing variations; increase it if needed.
 
 ## File Structure
 
@@ -290,18 +276,18 @@ tests/
 ├── visual/
 │   ├── README.md (this file)
 │   ├── visual-regression.spec.ts (test definitions)
-│   └── visual-regression.spec.ts-snapshots/ (generated baselines)
-│       ├── about-desktop-visual-desktop-{os}.png       # Playwright appends -{project}-{os}
-│       ├── blog-archive-desktop-visual-desktop-{os}.png
-│       ├── home-page-desktop-visual-desktop-{os}.png
-│       └── ... (36 snapshots: 18 screenshots × 2 projects, OS varies by environment)
+│   └── visual-regression.spec.ts-snapshots/ (committed baselines)
+│       ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
+│       ├── blog-archive-desktop-visual-desktop.png
+│       ├── home-page-desktop-visual-desktop.png
+│       └── ... (42 snapshots: 21 screenshots × 2 projects)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```
 
 ## Tips for Success
 
-1. **Baselines managed via CI** - Production deploys upload baselines as artifacts; PRs download and compare
+1. **Baselines committed to repo** — update with `npm run test:visual:baseline` and commit the PNGs; `pr-visual-check.yml` gates PRs to staging against them
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
 4. **Test all environments** before launch (local → staging → production)
