@@ -334,11 +334,9 @@ const nextPost =
     const lightboxImg = dialog.querySelector("img");
     if (!lightboxImg) return;
 
-    let openerEl = null;
-
     function openLightbox(cardImg) {
       if (dialog.open) return;
-      openerEl = cardImg;
+      dialog._openerEl = cardImg;
       lightboxImg.src = cardImg.currentSrc || cardImg.src;
       lightboxImg.alt = cardImg.alt;
       dialog.showModal();
@@ -370,8 +368,8 @@ const nextPost =
       dialog.addEventListener("close", () => {
         lightboxImg.removeAttribute("src");
         lightboxImg.alt = "";
-        openerEl?.focus();
-        openerEl = null;
+        dialog._openerEl?.focus();
+        dialog._openerEl = null;
       });
     }
   }

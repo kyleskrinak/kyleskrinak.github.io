@@ -48,7 +48,7 @@ I love this way of eating and despise all the misinformation that has messed up 
 
 I came for weight loss and found a healthier way of living.
 
-*Last updated: 2026-02-16*
+*Last updated: 2026-07-23*
 
 ## Resources
 
@@ -58,6 +58,8 @@ I came for weight loss and found a healthier way of living.
 * **Dr. Westman’s** [Facebook group](https://www.facebook.com/groups/DukeLowCarbSupportGroup "Dr. Westman’s facebook group page") page.
 * [**Adapt Your Life**](https://www.adaptyourlifeacademy.com "Adapt Your Life weblink") shares LCHF information with the public, working with Dr. Westman and others in the medical or scientific community who are leading on various related topics. They also maintain an active [YouTube channel](https://www.youtube.com/channel/UCni9TCw0YPwTdu7BYF3j0Eg "Ask Adapt YouTube video channel.").
 * **Amy Berger**, [Tuit Nutrition](https://www.tuitnutrition.com "Amy Berger's website"), a Certified Nutrition Specialist, focuses on “Keto without the Crazy,” and the crazy is getting worse at an increasingly crazy rate. Not everyone who studies or promotes low-carb eating follows a protocol that overlaps with theirs, but my experience is that she and Dr. Westman’s protocols overlap quite well.
+
+*Revised 2026-07-23: updated Adapt Your Life link to adaptyourlifeacademy.com.*
 
 ### Podcasts
 

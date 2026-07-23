@@ -28,7 +28,6 @@ Thumbs.db
 playwright-report/
 test-results/
 .playwright/
-tests/visual/visual-regression.spec.ts-snapshots/
 
 # Artifacts & reports
 lighthouse-reports/

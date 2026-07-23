@@ -87,36 +87,25 @@ npm run build:presentations
 
 ---
 
-#### 3. **CI/CD Visual Regression Testing**
+#### 3. **Visual Regression Testing**
 
 **The Implementation**:
-- Automated Playwright visual regression on PRs to staging/main
-- Artifact-based baseline system (no cloud service dependency)
-- Secure two-workflow pattern (pr-visual-check + pr-visual-comment)
+- Playwright visual regression tests for key pages
+- Baselines committed to `tests/visual/visual-regression.spec.ts-snapshots/`
+- Run locally during development, and enforced as a CI gate on PRs targeting `staging` (`.github/workflows/pr-visual-check.yml`)
 
 **Why This is Custom**:
-Most projects use Percy.io, Chromatic, or other cloud services. This project uses:
-- GitHub Actions artifacts for baseline storage (90-day retention)
-- Custom secure workflow pattern to prevent PR comment injection attacks
-- Two-workflow separation: untrusted PR execution + secure commenting
-
-**Production Since**: March 2026
+Most projects use Percy.io, Chromatic, or other cloud services. This project maintains baselines in the repo and enforces them via a GitHub Actions gate instead of a third-party visual diffing service.
 
 **Files**:
-- `.github/workflows/pr-visual-check.yml` - Test execution (read-only PR context)
-- `.github/workflows/pr-visual-comment.yml` - PR commenting (secure workflow_run)
-- `.github/workflows/production-deploy.yml` - Baseline generation
 - `tests/visual/visual-regression.spec.ts` - Test suite
+- `.github/workflows/pr-visual-check.yml` - CI gate on PRs to `staging`
 
 **Trade-offs**:
 - ✅ No cloud service cost
 - ✅ Full control over baseline storage
-- ✅ Secure workflow pattern (prevents injection attacks)
-- ⚠️ 90-day artifact retention (baselines expire, regenerate from main deploy)
-- ⚠️ No visual diff UI in PR (must download artifacts to view)
-
-**Reusability**:
-The workflow pattern is reusable for other projects needing PR visual regression without cloud dependencies.
+- ✅ Automated PR regression check against committed baselines
+- ⚠️ No visual diff UI in PR (diffs uploaded as a workflow artifact on failure)
 
 ---
 
