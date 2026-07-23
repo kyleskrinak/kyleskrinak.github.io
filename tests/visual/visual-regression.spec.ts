@@ -11,7 +11,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 // `page.waitForFunction`'s `timeout` bounds the wait explicitly rather than
 // relying solely on the outer test timeout.
 async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs = 10000) {
-  const cardImages = cardRow.locator('.card-media');
+  const cardImages = cardRow.locator('img.card-media');
   const count = await cardImages.count();
   for (let i = 0; i < count; i++) {
     await cardImages.nth(i).scrollIntoViewIfNeeded();
