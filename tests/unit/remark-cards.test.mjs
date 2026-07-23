@@ -214,6 +214,16 @@ describe('remarkCards', () => {
 		assert.equal(hProperties['aria-label'], 'Featured items');
 	});
 
+	it('rejects unsafe id values to prevent DOM clobbering', () => {
+		for (const unsafeId of ['body', 'location', 'documentElement', 'head', '1id', 'has space', '']) {
+			const directive = cardsDirective({ id: unsafeId }, [paragraph(text('one'))]);
+			runPlugin({ type: 'root', children: [directive] });
+
+			const { hProperties } = directive.data;
+			assert.ok(!('id' in hProperties), `expected id "${unsafeId}" to be stripped`);
+		}
+	});
+
 	it('does not let a dangerous key named "class" override the variant/className handling', () => {
 		const directive = cardsDirective({ class: 'wide', onmouseover: 'alert(1)' }, [paragraph(text('one'))]);
 		runPlugin({ type: 'root', children: [directive] });

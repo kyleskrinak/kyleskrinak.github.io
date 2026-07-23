@@ -91,20 +91,21 @@ npm run build:presentations
 
 **The Implementation**:
 - Playwright visual regression tests for key pages
-- Baselines stored locally in `tests/visual/visual-regression.spec.ts-snapshots/`
-- Run locally; CI automation was removed July 2026
+- Baselines committed to `tests/visual/visual-regression.spec.ts-snapshots/`
+- Run locally during development, and enforced as a CI gate on PRs targeting `staging` (`.github/workflows/pr-visual-check.yml`)
 
 **Why This is Custom**:
-Most projects use Percy.io, Chromatic, or other cloud services. This project maintains baselines locally and runs tests during development.
+Most projects use Percy.io, Chromatic, or other cloud services. This project maintains baselines in the repo and enforces them via a GitHub Actions gate instead of a third-party visual diffing service.
 
 **Files**:
 - `tests/visual/visual-regression.spec.ts` - Test suite
+- `.github/workflows/pr-visual-check.yml` - CI gate on PRs to `staging`
 
 **Trade-offs**:
 - ✅ No cloud service cost
 - ✅ Full control over baseline storage
-- ⚠️ No automated PR regression check (manual discipline required)
-- ⚠️ No visual diff UI in PR
+- ✅ Automated PR regression check against committed baselines
+- ⚠️ No visual diff UI in PR (diffs uploaded as a workflow artifact on failure)
 
 ---
 

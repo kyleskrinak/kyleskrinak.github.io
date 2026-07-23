@@ -17,7 +17,7 @@ jobs:
     name: Visual regression test
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Skip fork PRs: secrets unavailable, causing visual divergence from committed baselines.
+    # Skip fork PRs: untrusted code shouldn't run in a workflow with repo checkout access.
     if: github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
