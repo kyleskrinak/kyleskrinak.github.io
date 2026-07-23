@@ -17,12 +17,19 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
     await cardImages.nth(i).scrollIntoViewIfNeeded();
   }
   const rowHandle = await cardRow.elementHandle();
-  await page.waitForFunction(
-    (row: HTMLElement | SVGElement) =>
-      Array.from(row.querySelectorAll<HTMLImageElement>('img.card-media')).every(img => img.complete),
-    rowHandle!,
-    { timeout: timeoutMs }
-  );
+  if (!rowHandle) {
+    throw new Error('Could not resolve an element handle for the card row locator');
+  }
+  try {
+    await page.waitForFunction(
+      (row: HTMLElement | SVGElement) =>
+        Array.from(row.querySelectorAll<HTMLImageElement>('img.card-media')).every(img => img.complete),
+      rowHandle,
+      { timeout: timeoutMs }
+    );
+  } finally {
+    await rowHandle.dispose();
+  }
 }
 
 /**

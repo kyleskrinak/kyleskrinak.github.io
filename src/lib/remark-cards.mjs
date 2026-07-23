@@ -27,7 +27,10 @@ import { visit } from "unist-util-visit";
 // ids don't actually require a leading letter). Non-empty, no whitespace,
 // starts with a letter, and excludes values like "body" or "location" that
 // would otherwise shadow global DOM-named properties (DOM clobbering).
-const isSafeId = v => /^[A-Za-z][\w-]*$/.test(v) && !["body", "location", "documentElement", "head"].includes(v);
+const isSafeId = v =>
+  typeof v === "string" &&
+  /^[A-Za-z][\w-]*$/.test(v) &&
+  !["body", "location", "documentElement", "head"].includes(v);
 
 const isImageParagraph = n =>
   n.type === "paragraph" && n.children.length === 1 && n.children[0].type === "image";
