@@ -23,9 +23,10 @@ import { visit } from "unist-util-visit";
 // does not add them for card images either. CLS is mitigated instead by
 // `aspect-ratio: 1; width: 100%` in the card CSS.
 
-// Valid HTML id: non-empty, no whitespace, starts with a letter. Rejecting
-// anything else also blocks values like "body" or "location" that would
-// otherwise shadow global DOM-named properties (DOM clobbering).
+// Restricted safe subset of id syntax (not full HTML id validation — HTML
+// ids don't actually require a leading letter). Non-empty, no whitespace,
+// starts with a letter, and excludes values like "body" or "location" that
+// would otherwise shadow global DOM-named properties (DOM clobbering).
 const isSafeId = v => /^[A-Za-z][\w-]*$/.test(v) && !["body", "location", "documentElement", "head"].includes(v);
 
 const isImageParagraph = n =>

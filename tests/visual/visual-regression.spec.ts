@@ -4,20 +4,24 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 // fullPage screenshot doesn't scroll first — so scroll each card image into
 // view before polling, and scope the poll to this row (not the whole
 // document) to avoid hanging on unrelated offscreen `.card-media` elements.
-async function waitForCardImagesLoaded(page: Page, cardRow: Locator) {
+//
+// Polls `img.complete` (not `naturalWidth > 0`) so a failed/errored image
+// still resolves the wait instead of hanging forever — the browser sets
+// `complete` on error too, whereas a `load` listener would never fire.
+// `page.waitForFunction`'s `timeout` bounds the wait explicitly rather than
+// relying solely on the outer test timeout.
+async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs = 10000) {
   const cardImages = cardRow.locator('.card-media');
   const count = await cardImages.count();
   for (let i = 0; i < count; i++) {
     await cardImages.nth(i).scrollIntoViewIfNeeded();
   }
-  await cardRow.evaluate(row =>
-    Promise.all(
-      Array.from(row.querySelectorAll('img.card-media')).map(img =>
-        img.complete && img.naturalWidth > 0
-          ? Promise.resolve()
-          : new Promise(resolve => img.addEventListener('load', resolve, { once: true }))
-      )
-    )
+  const rowHandle = await cardRow.elementHandle();
+  await page.waitForFunction(
+    (row: HTMLElement | SVGElement) =>
+      Array.from(row.querySelectorAll<HTMLImageElement>('img.card-media')).every(img => img.complete),
+    rowHandle!,
+    { timeout: timeoutMs }
   );
 }
 
