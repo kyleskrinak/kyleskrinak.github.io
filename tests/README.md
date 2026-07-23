@@ -102,10 +102,10 @@ npm run test:visual
 
 ### Updating Baselines
 
-When you intentionally change the UI, update the baseline snapshots:
+When you intentionally change the UI, update the baseline snapshots to match CI's Ubuntu font rendering (a bare macOS-generated baseline will fail CI's height comparison — see `tests/visual/README.md#baseline-management`):
 
 ```bash
-npm run test:visual:baseline
+npm run test:visual:baseline:docker
 ```
 
 ### Running Against Staging

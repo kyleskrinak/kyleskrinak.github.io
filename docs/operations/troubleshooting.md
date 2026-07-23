@@ -36,8 +36,8 @@ For specific troubleshooting scenarios, see:
 
 **Solutions**:
 ```bash
-# Visual regression - regenerate local baseline
-npm run test:visual:baseline
+# Visual regression - regenerate baseline matching CI's Ubuntu font rendering (use before committing)
+npm run test:visual:baseline:docker
 
 # Link validation - check htmltest is installed
 htmltest --version

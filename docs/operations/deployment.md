@@ -255,7 +255,7 @@ PRs to `staging` run visual regression tests as a gate. Additional quality check
 
 **Workflow**: `pr-visual-check.yml` — runs on PRs targeting `staging`.
 Compares against committed baselines in `tests/visual/visual-regression.spec.ts-snapshots/`.
-On failure, diff artifacts are uploaded. To update baselines after an intentional visual change, run `npm run test:visual:baseline` locally and commit the updated snapshots.
+On failure, diff artifacts are uploaded. To update baselines after an intentional visual change, run `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering — a bare macOS baseline will fail this gate on font-height drift alone) and commit the updated snapshots.
 
 ### Link Validation
 
