@@ -1,19 +1,36 @@
 ---
 import { SOCIALS } from "@/config/constants";
 import LinkButton from "./LinkButton.astro";
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
 ---
 
-<div class="flex flex-wrap items-center gap-1">
-  {
-    SOCIALS.map(social => (
-      <LinkButton
-        href={social.href}
-        class="p-2 hover:rotate-6 sm:p-1"
-        title={social.linkTitle}
+{
+  SOCIALS.length > 0 && (
+    <div class:list={[label && "flex max-sm:flex-col sm:items-center"]}>
+      {label && <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">{label}</div>}
+      <div
+        class="flex flex-wrap items-center gap-1"
+        aria-label={label ?? "Social links"}
       >
-        <social.icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
-        <span class="sr-only">{social.linkTitle}</span>
-      </LinkButton>
-    ))
-  }
-</div>
+        {
+          SOCIALS.map(social => (
+            <LinkButton
+              href={social.href}
+              rel={social.rel}
+              class="p-2 hover:rotate-6 sm:p-1"
+              title={social.linkTitle}
+            >
+              <social.icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
+              <span class="sr-only">{social.linkTitle}</span>
+            </LinkButton>
+          ))
+        }
+      </div>
+    </div>
+  )
+}

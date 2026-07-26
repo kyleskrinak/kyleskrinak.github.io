@@ -11,7 +11,6 @@ import { linkWithBase } from "@/utils/linkWithBase";
 import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
-import { SOCIALS } from "@/config/constants";
 
 const posts = await getBlogPosts();
 
@@ -43,15 +42,9 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
       <p>
         Hello and welcome to my personal blog. It’s about whatever I feel like opining about. It’s usually about all things web technology or low-carb nutrition. Since it’s my blog, I’m at liberty to step outside those boundaries. I am also an auto-didact, and I use this blog to share what I’ve learned. I hope that what I learn may help others, or others may want to share their point of view. If you’re curious about my professional background, my <a href={linkWithBase("/resume/")} class="underline decoration-dashed underline-offset-4 hover:text-accent">resume</a> is here too.
       </p>
-      {
-        // only display if at least one social link is enabled
-        SOCIALS.length > 0 && (
-          <div class="mt-4 flex max-sm:flex-col sm:items-center">
-            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">Social Links:</div>
-            <Socials />
-          </div>
-        )
-      }
+      <div class="mt-4">
+        <Socials label="Social Links:" />
+      </div>
     </section>
 
     {
