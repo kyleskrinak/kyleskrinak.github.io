@@ -8,7 +8,7 @@ Playwright-based visual regression tests to catch unintended changes in layout, 
 ```bash
 npm run test:visual:baseline:docker
 ```
-This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/` inside a Docker container matched to `pr-visual-check.yml`'s CI runner (Ubuntu, same Playwright version). **Use this command, not the bare `npm run test:visual:baseline`, whenever the result will be committed** — the site uses a system font stack, so macOS and Ubuntu resolve entirely different fonts (different glyphs and metrics), and macOS-generated baselines fail CI even with no real visual change. See [Baseline Management](#baseline-management) below.
+This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/` inside a Docker container matched to `pr-visual-check.yml`'s CI runner (Ubuntu, same Playwright version). **Use this command, not the bare `npm run test:visual:baseline`, whenever the result will be committed** — the site uses a system font stack, so macOS and Ubuntu resolve entirely different fonts (different glyphs and metrics), and baselines generated on a host that doesn't match CI's Ubuntu runner (e.g., macOS) fail CI even with no real visual change. See [Baseline Management](#baseline-management) below.
 
 ### 2. Run Tests Against Local Dev
 ```bash
