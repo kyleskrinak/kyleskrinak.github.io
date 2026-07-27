@@ -216,9 +216,9 @@ function main() {
   const entries = [{ url: "/index.html", bytes: Buffer.byteLength(html) }];
 
   const assetUrls = collectAssetUrls(html);
-  const hasExternalCss = assetUrls.some((u) => u.split(/[?#]/)[0].endsWith(".css"));
+  const hasLinkedCss = assetUrls.some((u) => u.split(/[?#]/)[0].endsWith(".css"));
   const hasInlineStyle = /<style\b[^>]*>[\s\S]*?\S[\s\S]*?<\/style>/i.test(html);
-  if (!hasExternalCss && !hasInlineStyle) {
+  if (!hasLinkedCss && !hasInlineStyle) {
     fail("No stylesheet (external or inline) found in index.html — scanner may be broken");
   }
 
