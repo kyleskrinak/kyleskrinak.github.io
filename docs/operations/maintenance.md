@@ -24,6 +24,7 @@ For now, refer to the following existing documentation:
 npm run build          # Verify build succeeds
 npm run test:visual    # Check for visual regressions
 npm run check:links    # Validate all links
+npm run check:size     # Homepage weight gate (fails over 150 KiB uncompressed)
 ```
 
 **Deployment Verification**:

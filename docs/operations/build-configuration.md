@@ -21,8 +21,10 @@ npm run build
 ### `npm run build:ci` - CI/Production Build
 **Purpose**: Minimal build for CI pipelines (production deployment)
 **Includes**:
-- Astro compilation only
+- Image convention, resume, and directive lint checks
+- Astro compilation
 - Pagefind search index generation
+- Homepage weight gate (`scripts/check-size.mjs`, 150 KiB budget)
 - ⚠️ **No asset copying** (handled separately in deployment)
 
 **Command**:
