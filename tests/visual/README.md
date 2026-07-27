@@ -8,7 +8,7 @@ Playwright-based visual regression tests to catch unintended changes in layout, 
 ```bash
 npm run test:visual:baseline:docker
 ```
-This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/` inside a Docker container matched to `pr-visual-check.yml`'s CI runner (Ubuntu, same Playwright version). **Use this command, not the bare `npm run test:visual:baseline`, whenever the result will be committed** — macOS and Ubuntu render page height differently (font metrics), so macOS-generated baselines fail CI's height comparison even with no real visual change. See [Baseline Management](#baseline-management) below.
+This generates reference screenshots in `tests/visual/visual-regression.spec.ts-snapshots/` inside a Docker container matched to `pr-visual-check.yml`'s CI runner (Ubuntu, same Playwright version). **Use this command, not the bare `npm run test:visual:baseline`, whenever the result will be committed** — the site uses a system font stack, so macOS and Ubuntu resolve entirely different fonts (different glyphs and metrics), and baselines generated on a host that doesn't match CI's Ubuntu runner (e.g., macOS) fail CI even with no real visual change. See [Baseline Management](#baseline-management) below.
 
 ### 2. Run Tests Against Local Dev
 ```bash
@@ -195,7 +195,7 @@ This means **all environments render identically**. Staging (GitHub Pages) deplo
 
 ### Baseline Management
 
-Baselines are committed to the repo. `snapshotPathTemplate` in `playwright.config.ts` omits the OS suffix but keeps `{-projectName}`, so each Playwright project (`visual-desktop`, `visual-mobile`) still resolves its own baseline file — only the platform-specific part is dropped, and that isn't the same as matching pixels. macOS and Ubuntu render text with different font metrics, so a page's total height (and therefore every `visual-desktop`/Chromium `fullPage` screenshot) differs by a near-constant offset between the two. `pr-visual-check.yml` runs on `ubuntu-latest`, so baselines must be **generated on Ubuntu** (via the `docker`/`docker-baseline` modes below) to compare cleanly against CI — a bare macOS-generated baseline will fail CI's height comparison even with zero real visual change. (WebKit/`visual-mobile` baselines have not shown this drift in practice, but generating them the same way keeps both projects consistent.)
+Baselines are committed to the repo. `snapshotPathTemplate` in `playwright.config.ts` omits the OS suffix but keeps `{-projectName}`, so each Playwright project (`visual-desktop`, `visual-mobile`) still resolves its own baseline file — only the platform-specific part is dropped, and that isn't the same as matching pixels. The site uses a system font stack (no web fonts), so macOS and Ubuntu resolve entirely different fonts — SF Mono vs Liberation/DejaVu Mono — with different glyph shapes and metrics; a page's total height (and therefore every `visual-desktop`/Chromium `fullPage` screenshot) differs between the two. `pr-visual-check.yml` runs on `ubuntu-latest`, so baselines must be **generated on Ubuntu** (via the `docker`/`docker-baseline` modes below) to compare cleanly against CI — a bare macOS-generated baseline will fail CI's height comparison even with zero real visual change. (WebKit/`visual-mobile` baselines have not shown this drift in practice, but generating them the same way keeps both projects consistent.)
 
 ```
 tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
