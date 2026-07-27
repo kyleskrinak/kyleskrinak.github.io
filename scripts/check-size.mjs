@@ -56,7 +56,7 @@ function parseBudget(argv) {
   if (!arg) return DEFAULT_BUDGET_BYTES;
   const raw = arg.slice("--budget=".length);
   const value = /^\d+$/.test(raw) ? Number(raw) : NaN;
-  if (!Number.isInteger(value) || value <= 0) {
+  if (!Number.isSafeInteger(value) || value <= 0) {
     fail(`Invalid --budget value: ${raw} (expected a positive integer of bytes)`);
   }
   return value;
