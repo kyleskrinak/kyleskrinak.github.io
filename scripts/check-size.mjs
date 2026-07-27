@@ -44,7 +44,9 @@ function distPathFor(url) {
 
 function fileBytes(url) {
   const p = distPathFor(url);
-  return existsSync(p) ? statSync(p).size : null;
+  if (!existsSync(p)) return null;
+  const stat = statSync(p);
+  return stat.isFile() ? stat.size : null;
 }
 
 function parseBudget(argv) {
@@ -74,7 +76,7 @@ function isLocalAbsolute(u) {
 }
 
 function isExternalOrData(u) {
-  return u.startsWith("http") || u.startsWith("//") || u.startsWith("data:");
+  return /^(?:https?:)?\/\//i.test(u) || u.startsWith("data:");
 }
 
 // Browser fetches exactly one srcset candidate; count the largest as worst case.
@@ -138,6 +140,15 @@ function collectAssetUrls(html) {
     if (srcset) addLargestSrcsetCandidate(urls, srcset, skippedRelative);
   }
 
+  // Inline <style> blocks (Astro inlineStylesheets) — same url() scan as CSS files.
+  for (const block of html.match(/<style\b[^>]*>[\s\S]*?<\/style>/gi) ?? []) {
+    for (const match of block.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+      const ref = match[1];
+      if (isLocalAbsolute(ref)) urls.add(ref);
+      else if (!isExternalOrData(ref)) skippedRelative.push(ref);
+    }
+  }
+
   // Browsers request /favicon.ico regardless of markup.
   urls.add("/favicon.ico");
 
@@ -190,7 +201,15 @@ function main() {
     fail("No stylesheet found in index.html — scanner may be broken");
   }
 
-  for (const url of assetUrls) {
+  const seen = new Set();
+  const uniqueUrls = assetUrls.filter((u) => {
+    const key = u.split(/[?#]/)[0];
+    if (key === "/index.html" || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  for (const url of uniqueUrls) {
     const bytes = fileBytes(url);
     if (bytes === null) {
       fail(`Asset required for homepage load is missing from dist/: ${url}`);
