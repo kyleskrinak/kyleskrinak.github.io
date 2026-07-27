@@ -4,18 +4,29 @@ import LinkButton from "./LinkButton.astro";
 
 interface Props {
   label?: string;
+  class?: string;
 }
 
-const { label } = Astro.props;
+const { label, class: className } = Astro.props;
+const hasLabel = Boolean(label?.trim());
 ---
 
 {
   SOCIALS.length > 0 && (
-    <div class:list={[label && "flex max-sm:flex-col sm:items-center"]}>
-      {label && <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">{label}</div>}
-      <div
+    <div
+      class:list={[
+        className,
+        hasLabel && "flex max-sm:flex-col sm:items-center",
+      ]}
+    >
+      {hasLabel && (
+        <div aria-hidden="true" class="me-2 mb-1 whitespace-nowrap sm:mb-0">
+          {label}
+        </div>
+      )}
+      <nav
         class="flex flex-wrap items-center gap-1"
-        aria-label={label ?? "Social links"}
+        aria-label={hasLabel ? label : "Social links"}
       >
         {
           SOCIALS.map(social => (
@@ -30,7 +41,7 @@ const { label } = Astro.props;
             </LinkButton>
           ))
         }
-      </div>
+      </nav>
     </div>
   )
 }
