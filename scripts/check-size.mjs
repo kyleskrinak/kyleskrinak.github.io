@@ -9,13 +9,16 @@
  * /favicon.ico request) and fails when the total exceeds the budget. Mirrors
  * how 512kb.club / GTmetrix measure page weight; apple-touch-icon links are
  * excluded because desktop browsers do not fetch them on page load. CSS is
- * scanned one level deep only — @import chains are not followed.
+ * scanned one level deep only — @import chains are not followed. All icon
+ * `rel` variants and site.webmanifest are counted even though a real browser
+ * only fetches one icon and doesn't fetch the manifest on a normal page load —
+ * this is deliberate worst-case accounting, not a bug.
  *
  * Usage:
  *   node scripts/check-size.mjs [--budget=<bytes>]
  *
  * Requires a current build (npm run build). Exit codes:
- *   0 = within budget, 1 = over budget, 2 = usage/environment error.
+ *   0 = within budget, 1 = over budget, 2 = usage/environment/missing-asset error.
  */
 
 import { readFileSync, statSync, existsSync } from "node:fs";
@@ -31,7 +34,12 @@ function fail(message) {
 }
 
 function distPathFor(url) {
-  return join(DIST_DIR, url.split(/[?#]/)[0]);
+  const pathname = url.split(/[?#]/)[0];
+  try {
+    return join(DIST_DIR, decodeURIComponent(pathname));
+  } catch {
+    fail(`Malformed URL encoding in asset path: ${pathname}`);
+  }
 }
 
 function fileBytes(url) {
@@ -58,13 +66,27 @@ function formatKiB(bytes) {
  * Regex-based on purpose: the input is our own Astro build output, not
  * arbitrary HTML.
  */
+// A candidate is local (in-budget) if it's an absolute path; skip external
+// URLs and data: URIs outright, and flag anything else (bare relative paths)
+// as a potential undercount for the caller to warn about.
+function isLocalAbsolute(u) {
+  return u.startsWith("/") && !u.startsWith("//");
+}
+
+function isExternalOrData(u) {
+  return u.startsWith("http") || u.startsWith("//") || u.startsWith("data:");
+}
+
 // Browser fetches exactly one srcset candidate; count the largest as worst case.
-function addLargestSrcsetCandidate(urls, srcset) {
-  const candidates = srcset
+function addLargestSrcsetCandidate(urls, srcset, skippedRelative) {
+  const allCandidates = srcset
     .split(",")
     .map((c) => c.trim().split(/\s+/)[0])
-    .filter(Boolean)
-    .filter((c) => c.startsWith("/") && !c.startsWith("//"));
+    .filter(Boolean);
+  const candidates = allCandidates.filter(isLocalAbsolute);
+  for (const c of allCandidates) {
+    if (!isLocalAbsolute(c) && !isExternalOrData(c)) skippedRelative.push(c);
+  }
 
   let largest = null;
   let largestBytes = -1;
@@ -83,6 +105,7 @@ function addLargestSrcsetCandidate(urls, srcset) {
 
 function collectAssetUrls(html) {
   const urls = new Set();
+  const skippedRelative = [];
 
   // <link> tags: stylesheets, favicons, preload/modulepreload, manifest;
   // skip apple-touch-icon and non-fetch rels.
@@ -104,22 +127,25 @@ function collectAssetUrls(html) {
     const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
     if (src) urls.add(src);
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
-    if (srcset) addLargestSrcsetCandidate(urls, srcset);
+    if (srcset) addLargestSrcsetCandidate(urls, srcset, skippedRelative);
   }
 
-  // <picture><source src|srcset>
+  // <source src|srcset> (picture/video)
   for (const tag of html.match(/<source\b[^>]*>/gi) ?? []) {
     const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
     if (src) urls.add(src);
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
-    if (srcset) addLargestSrcsetCandidate(urls, srcset);
+    if (srcset) addLargestSrcsetCandidate(urls, srcset, skippedRelative);
   }
 
   // Browsers request /favicon.ico regardless of markup.
   urls.add("/favicon.ico");
 
   // Local files only — external URLs aren't part of this site's budget.
-  const localUrls = [...urls].filter((u) => u.startsWith("/") && !u.startsWith("//"));
+  for (const u of urls) {
+    if (!isLocalAbsolute(u) && !isExternalOrData(u)) skippedRelative.push(u);
+  }
+  const localUrls = [...urls].filter(isLocalAbsolute);
 
   // CSS sub-resources (one level deep, no @import chasing).
   for (const url of [...localUrls]) {
@@ -129,11 +155,20 @@ function collectAssetUrls(html) {
     const css = readFileSync(cssPath, "utf8");
     for (const match of css.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
       const ref = match[1];
-      if (ref.startsWith("/") && !ref.startsWith("//") && !ref.startsWith("data:")) {
+      if (isLocalAbsolute(ref)) {
         urls.add(ref);
         localUrls.push(ref);
+      } else if (!isExternalOrData(ref)) {
+        skippedRelative.push(ref);
       }
     }
+  }
+
+  // Astro's default base ('/') always emits absolute paths, so this should
+  // never fire today — it's a tripwire for a future base-path change or
+  // hand-written relative markup that would otherwise undercount silently.
+  if (skippedRelative.length > 0) {
+    console.warn(`⚠️  Skipped ${skippedRelative.length} non-absolute URL(s) not counted toward budget: ${[...new Set(skippedRelative)].join(", ")}`);
   }
 
   return [...new Set(localUrls)];
