@@ -8,7 +8,9 @@
  * sources, and CSS url() sub-resources one level deep, plus the implicit
  * /favicon.ico request) and fails when the total exceeds the budget. Mirrors
  * how 512kb.club / GTmetrix measure page weight; apple-touch-icon links are
- * excluded because desktop browsers do not fetch them on page load. CSS is
+ * excluded because desktop browsers do not fetch them on page load.
+ * External (cross-origin) resources are excluded from the budget but
+ * reported with a warning so third-party weight growth stays visible. CSS is
  * scanned one level deep only — @import chains are not followed. All icon
  * `rel` variants and site.webmanifest are counted even though a real browser
  * only fetches one icon and doesn't fetch the manifest on a normal page load —
@@ -52,9 +54,10 @@ function fileBytes(url) {
 function parseBudget(argv) {
   const arg = argv.find((a) => a.startsWith("--budget="));
   if (!arg) return DEFAULT_BUDGET_BYTES;
-  const value = Number(arg.slice("--budget=".length));
+  const raw = arg.slice("--budget=".length);
+  const value = /^\d+$/.test(raw) ? Number(raw) : NaN;
   if (!Number.isInteger(value) || value <= 0) {
-    fail(`Invalid --budget value: ${arg.slice("--budget=".length)} (expected a positive integer of bytes)`);
+    fail(`Invalid --budget value: ${raw} (expected a positive integer of bytes)`);
   }
   return value;
 }
@@ -108,6 +111,7 @@ function addLargestSrcsetCandidate(urls, srcset, skippedRelative) {
 function collectAssetUrls(html) {
   const urls = new Set();
   const skippedRelative = [];
+  const external = new Set();
 
   // <link> tags: stylesheets, favicons, preload/modulepreload, manifest;
   // skip apple-touch-icon and non-fetch rels.
@@ -124,20 +128,27 @@ function collectAssetUrls(html) {
     urls.add(tag.match(/\bsrc="([^"]*)"/i)[1]);
   }
 
-  // <img src> and the largest srcset candidate.
+  // <img>: browser fetches exactly one candidate, so only count srcset when
+  // present; otherwise fall back to src.
   for (const tag of html.match(/<img\b[^>]*>/gi) ?? []) {
-    const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
-    if (src) urls.add(src);
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
-    if (srcset) addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+    if (srcset) {
+      addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+    } else {
+      const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
+      if (src) urls.add(src);
+    }
   }
 
-  // <source src|srcset> (picture/video)
+  // <source src|srcset> (picture/video) — same one-candidate rule as <img>.
   for (const tag of html.match(/<source\b[^>]*>/gi) ?? []) {
-    const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
-    if (src) urls.add(src);
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
-    if (srcset) addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+    if (srcset) {
+      addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+    } else {
+      const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
+      if (src) urls.add(src);
+    }
   }
 
   // Inline <style> blocks (Astro inlineStylesheets) — same url() scan as CSS files.
@@ -152,9 +163,14 @@ function collectAssetUrls(html) {
   // Browsers request /favicon.ico regardless of markup.
   urls.add("/favicon.ico");
 
-  // Local files only — external URLs aren't part of this site's budget.
+  // Local files only — external URLs aren't part of this site's budget,
+  // but are reported (not silently dropped) so third-party weight is visible.
   for (const u of urls) {
-    if (!isLocalAbsolute(u) && !isExternalOrData(u)) skippedRelative.push(u);
+    if (isExternalOrData(u)) {
+      if (!u.startsWith("data:")) external.add(u);
+    } else if (!isLocalAbsolute(u)) {
+      skippedRelative.push(u);
+    }
   }
   const localUrls = [...urls].filter(isLocalAbsolute);
 
@@ -181,6 +197,9 @@ function collectAssetUrls(html) {
   if (skippedRelative.length > 0) {
     console.warn(`⚠️  Skipped ${skippedRelative.length} non-absolute URL(s) not counted toward budget: ${[...new Set(skippedRelative)].join(", ")}`);
   }
+  if (external.size > 0) {
+    console.warn(`⚠️  ${external.size} external URL(s) not counted toward budget: ${[...external].join(", ")}`);
+  }
 
   return [...new Set(localUrls)];
 }
@@ -197,8 +216,10 @@ function main() {
   const entries = [{ url: "/index.html", bytes: Buffer.byteLength(html) }];
 
   const assetUrls = collectAssetUrls(html);
-  if (!assetUrls.some((u) => u.split(/[?#]/)[0].endsWith(".css"))) {
-    fail("No stylesheet found in index.html — scanner may be broken");
+  const hasExternalCss = assetUrls.some((u) => u.split(/[?#]/)[0].endsWith(".css"));
+  const hasInlineStyle = /<style\b[^>]*>[\s\S]*?\S[\s\S]*?<\/style>/i.test(html);
+  if (!hasExternalCss && !hasInlineStyle) {
+    fail("No stylesheet (external or inline) found in index.html — scanner may be broken");
   }
 
   const seen = new Set();
