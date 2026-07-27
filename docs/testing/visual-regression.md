@@ -17,7 +17,7 @@ npm run test:visual:baseline:docker  # Generate baseline snapshots matching CI (
 npm run test:visual:report           # View HTML report
 ```
 
-The site uses a system font stack (no web fonts), so macOS and CI's Ubuntu runner resolve entirely different fonts (SF Mono vs Liberation/DejaVu Mono) with different glyphs and metrics — baselines generated with the bare `test:visual:baseline` are strictly macOS-specific and will fail CI even with no real visual change. All baseline regeneration intended for commit must go through the `:docker` variant. See `tests/visual/README.md#baseline-management` for details.
+The site uses a system font stack (no web fonts), so macOS and CI's Ubuntu runner resolve entirely different fonts (SF Mono vs Liberation/DejaVu Mono) with different glyphs and metrics — baselines generated with the bare `test:visual:baseline` reflect the host OS's font rendering and will fail CI whenever the host doesn't match CI's Ubuntu runner (e.g., macOS), even with no real visual change. All baseline regeneration intended for commit must go through the `:docker` variant. See `tests/visual/README.md#baseline-management` for details.
 
 ## Test Coverage
 - 8+ key pages tested
