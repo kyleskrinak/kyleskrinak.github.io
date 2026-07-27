@@ -83,14 +83,19 @@ function isExternalOrData(u) {
 }
 
 // Browser fetches exactly one srcset candidate; count the largest as worst case.
-function addLargestSrcsetCandidate(urls, srcset, skippedRelative) {
+function addLargestSrcsetCandidate(urls, srcset, skippedRelative, external) {
   const allCandidates = srcset
     .split(",")
     .map((c) => c.trim().split(/\s+/)[0])
     .filter(Boolean);
   const candidates = allCandidates.filter(isLocalAbsolute);
   for (const c of allCandidates) {
-    if (!isLocalAbsolute(c) && !isExternalOrData(c)) skippedRelative.push(c);
+    if (isLocalAbsolute(c)) continue;
+    if (isExternalOrData(c)) {
+      if (!c.startsWith("data:")) external.add(c);
+    } else {
+      skippedRelative.push(c);
+    }
   }
 
   let largest = null;
@@ -133,7 +138,7 @@ function collectAssetUrls(html) {
   for (const tag of html.match(/<img\b[^>]*>/gi) ?? []) {
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
     if (srcset) {
-      addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+      addLargestSrcsetCandidate(urls, srcset, skippedRelative, external);
     } else {
       const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
       if (src) urls.add(src);
@@ -144,7 +149,7 @@ function collectAssetUrls(html) {
   for (const tag of html.match(/<source\b[^>]*>/gi) ?? []) {
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
     if (srcset) {
-      addLargestSrcsetCandidate(urls, srcset, skippedRelative);
+      addLargestSrcsetCandidate(urls, srcset, skippedRelative, external);
     } else {
       const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
       if (src) urls.add(src);
@@ -155,8 +160,13 @@ function collectAssetUrls(html) {
   for (const block of html.match(/<style\b[^>]*>[\s\S]*?<\/style>/gi) ?? []) {
     for (const match of block.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
       const ref = match[1];
-      if (isLocalAbsolute(ref)) urls.add(ref);
-      else if (!isExternalOrData(ref)) skippedRelative.push(ref);
+      if (isLocalAbsolute(ref)) {
+        urls.add(ref);
+      } else if (isExternalOrData(ref)) {
+        if (!ref.startsWith("data:")) external.add(ref);
+      } else {
+        skippedRelative.push(ref);
+      }
     }
   }
 
@@ -185,7 +195,9 @@ function collectAssetUrls(html) {
       if (isLocalAbsolute(ref)) {
         urls.add(ref);
         localUrls.push(ref);
-      } else if (!isExternalOrData(ref)) {
+      } else if (isExternalOrData(ref)) {
+        if (!ref.startsWith("data:")) external.add(ref);
+      } else {
         skippedRelative.push(ref);
       }
     }
