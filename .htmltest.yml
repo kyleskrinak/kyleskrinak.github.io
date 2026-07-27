@@ -20,6 +20,7 @@ IgnoreURLs:
   - "medium.com"  # Bot detection (403 to crawlers), works in real browsers
   - "ahajournals.org"  # Bot detection (403 to crawlers), works in real browsers
   - "manager-tools.com"  # Bot detection (403 to crawlers), works in real browsers
+  - "tuitnutrition.com"  # Bot detection — hangs Playwright (Chromium and WebKit, up to 60s), 0.4s in curl/real browsers
 IgnoreInternalURLs:
   # These PDFs are .gitignored and absent from a plain `npm run build`; the
   # deploy pipeline guarantees them via the ensure-release-pdfs action's
