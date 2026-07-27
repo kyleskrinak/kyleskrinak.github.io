@@ -11,7 +11,7 @@
     "lint:resume": "node scripts/lint-resume.mjs",
     "lint:directives": "node scripts/lint-directives.mjs",
     "build": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && node scripts/lint-directives.mjs && astro build && pagefind --site dist && cp -r dist/_pagefind public/",
-    "build:ci": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && node scripts/lint-directives.mjs && astro build && pagefind --site dist",
+    "build:ci": "node scripts/check-image-conventions.mjs --all && node scripts/lint-resume.mjs && node scripts/lint-directives.mjs && astro build && pagefind --site dist && node scripts/check-size.mjs",
     "build:presentations": "node scripts/build-presentations.js",
     "check:images": "node scripts/check-image-conventions.mjs --all",
     "check:size": "node scripts/check-size.mjs",

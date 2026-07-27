@@ -4,10 +4,12 @@
  *
  * Sums the uncompressed bytes a browser fetches on a cold load of the built
  * homepage (dist/index.html plus every local asset it references: stylesheets,
- * scripts, icons, images, and the implicit /favicon.ico request) and fails when
- * the total exceeds the budget. Mirrors how 512kb.club / GTmetrix measure page
- * weight; apple-touch-icon links are excluded because desktop browsers do not
- * fetch them on page load.
+ * scripts, icons, images, preload/modulepreload/manifest links, <picture>
+ * sources, and CSS url() sub-resources one level deep, plus the implicit
+ * /favicon.ico request) and fails when the total exceeds the budget. Mirrors
+ * how 512kb.club / GTmetrix measure page weight; apple-touch-icon links are
+ * excluded because desktop browsers do not fetch them on page load. CSS is
+ * scanned one level deep only — @import chains are not followed.
  *
  * Usage:
  *   node scripts/check-size.mjs [--budget=<bytes>]
@@ -26,6 +28,15 @@ const DEFAULT_BUDGET_BYTES = 150 * 1024; // 150 KiB — current homepage is ~135
 function fail(message) {
   console.error(`❌ ${message}`);
   process.exit(2);
+}
+
+function distPathFor(url) {
+  return join(DIST_DIR, url.split(/[?#]/)[0]);
+}
+
+function fileBytes(url) {
+  const p = distPathFor(url);
+  return existsSync(p) ? statSync(p).size : null;
 }
 
 function parseBudget(argv) {
@@ -47,13 +58,38 @@ function formatKiB(bytes) {
  * Regex-based on purpose: the input is our own Astro build output, not
  * arbitrary HTML.
  */
+// Browser fetches exactly one srcset candidate; count the largest as worst case.
+function addLargestSrcsetCandidate(urls, srcset) {
+  const candidates = srcset
+    .split(",")
+    .map((c) => c.trim().split(/\s+/)[0])
+    .filter(Boolean)
+    .filter((c) => c.startsWith("/") && !c.startsWith("//"));
+
+  let largest = null;
+  let largestBytes = -1;
+  for (const c of candidates) {
+    const bytes = fileBytes(c);
+    if (bytes === null) {
+      fail(`Asset required for homepage load is missing from dist/: ${c}`);
+    }
+    if (bytes > largestBytes) {
+      largest = c;
+      largestBytes = bytes;
+    }
+  }
+  if (largest) urls.add(largest);
+}
+
 function collectAssetUrls(html) {
   const urls = new Set();
 
-  // <link> tags: stylesheets and favicons; skip apple-touch-icon and non-fetch rels.
+  // <link> tags: stylesheets, favicons, preload/modulepreload, manifest;
+  // skip apple-touch-icon and non-fetch rels.
   for (const tag of html.match(/<link\b[^>]*>/gi) ?? []) {
     const rel = tag.match(/\brel="([^"]*)"/i)?.[1]?.toLowerCase() ?? "";
-    if (!/\b(stylesheet|icon)\b/.test(rel) || rel.includes("apple-touch-icon")) continue;
+    if (!/\b(stylesheet|icon|preload|modulepreload|manifest)\b/.test(rel) || rel.includes("apple-touch-icon"))
+      continue;
     const href = tag.match(/\bhref="([^"]*)"/i)?.[1];
     if (href) urls.add(href);
   }
@@ -63,26 +99,44 @@ function collectAssetUrls(html) {
     urls.add(tag.match(/\bsrc="([^"]*)"/i)[1]);
   }
 
-  // <img src> and every srcset candidate (worst case: browser picks any one;
-  // counting all overstates, so count src plus the largest srcset entry).
+  // <img src> and the largest srcset candidate.
   for (const tag of html.match(/<img\b[^>]*>/gi) ?? []) {
     const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
     if (src) urls.add(src);
     const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
-    if (srcset) {
-      const candidates = srcset
-        .split(",")
-        .map((c) => c.trim().split(/\s+/)[0])
-        .filter(Boolean);
-      for (const c of candidates) urls.add(c);
-    }
+    if (srcset) addLargestSrcsetCandidate(urls, srcset);
+  }
+
+  // <picture><source src|srcset>
+  for (const tag of html.match(/<source\b[^>]*>/gi) ?? []) {
+    const src = tag.match(/\bsrc="([^"]*)"/i)?.[1];
+    if (src) urls.add(src);
+    const srcset = tag.match(/\bsrcset="([^"]*)"/i)?.[1];
+    if (srcset) addLargestSrcsetCandidate(urls, srcset);
   }
 
   // Browsers request /favicon.ico regardless of markup.
   urls.add("/favicon.ico");
 
   // Local files only — external URLs aren't part of this site's budget.
-  return [...urls].filter((u) => u.startsWith("/") && !u.startsWith("//"));
+  const localUrls = [...urls].filter((u) => u.startsWith("/") && !u.startsWith("//"));
+
+  // CSS sub-resources (one level deep, no @import chasing).
+  for (const url of [...localUrls]) {
+    if (!url.split(/[?#]/)[0].endsWith(".css")) continue;
+    const cssPath = distPathFor(url);
+    if (!existsSync(cssPath)) continue;
+    const css = readFileSync(cssPath, "utf8");
+    for (const match of css.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+      const ref = match[1];
+      if (ref.startsWith("/") && !ref.startsWith("//") && !ref.startsWith("data:")) {
+        urls.add(ref);
+        localUrls.push(ref);
+      }
+    }
+  }
+
+  return [...new Set(localUrls)];
 }
 
 function main() {
@@ -96,12 +150,17 @@ function main() {
   const html = readFileSync(indexPath, "utf8");
   const entries = [{ url: "/index.html", bytes: Buffer.byteLength(html) }];
 
-  for (const url of collectAssetUrls(html)) {
-    const filePath = join(DIST_DIR, url.split(/[?#]/)[0]);
-    if (!existsSync(filePath)) {
-      fail(`Asset referenced by index.html is missing from dist/: ${url}`);
+  const assetUrls = collectAssetUrls(html);
+  if (!assetUrls.some((u) => u.split(/[?#]/)[0].endsWith(".css"))) {
+    fail("No stylesheet found in index.html — scanner may be broken");
+  }
+
+  for (const url of assetUrls) {
+    const bytes = fileBytes(url);
+    if (bytes === null) {
+      fail(`Asset required for homepage load is missing from dist/: ${url}`);
     }
-    entries.push({ url, bytes: statSync(filePath).size });
+    entries.push({ url, bytes });
   }
 
   entries.sort((a, b) => b.bytes - a.bytes);
