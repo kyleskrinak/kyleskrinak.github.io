@@ -73,6 +73,20 @@ export const SOCIALS: readonly SocialLink[] = [
   },
 ] as const;
 
+type WebringLink = {
+  prevHref: string;
+  nextHref: string;
+  ringHref: string;
+  ringLabel: string;
+};
+
+export const WEBRING: WebringLink | null = {
+  prevHref: "https://xn--sr8hvo.ws/previous",
+  nextHref: "https://xn--sr8hvo.ws/next",
+  ringHref: "https://xn--sr8hvo.ws",
+  ringLabel: "IndieWeb Webring",
+};
+
 export const SHARE_LINKS: readonly ShareLink[] = [
   {
     name: "Share",
