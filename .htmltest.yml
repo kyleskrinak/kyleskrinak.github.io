@@ -21,6 +21,7 @@ IgnoreURLs:
   - "ahajournals.org"  # Bot detection (403 to crawlers), works in real browsers
   - "manager-tools.com"  # Bot detection (403 to crawlers), works in real browsers
   - "tuitnutrition.com"  # Bot detection — hangs Playwright (Chromium and WebKit, up to 60s), 0.4s in curl/real browsers
+  - "xn--sr8hvo.ws"  # Webring prev/next 302 to random member sites; dead members would fail CI nondeterministically
 IgnoreInternalURLs:
   # These PDFs are .gitignored and absent from a plain `npm run build`; the
   # deploy pipeline guarantees them via the ensure-release-pdfs action's
