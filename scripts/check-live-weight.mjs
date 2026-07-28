@@ -72,6 +72,7 @@ async function collectRequests(url) {
   const requestMeta = new Map(); // requestId -> { url, type }
   const decodedBytesByRequestId = new Map();
   const transferBytesByRequestId = new Map();
+  const finishedRequestIds = new Set();
 
   try {
     const page = await browser.newPage();
@@ -85,11 +86,15 @@ async function collectRequests(url) {
       });
     });
     client.on('Network.dataReceived', event => {
-      const prev = decodedBytesByRequestId.get(event.requestId) ?? 0;
-      decodedBytesByRequestId.set(event.requestId, prev + (event.dataLength ?? 0));
+      const prevDecoded = decodedBytesByRequestId.get(event.requestId) ?? 0;
+      decodedBytesByRequestId.set(event.requestId, prevDecoded + (event.dataLength ?? 0));
+      const prevTransfer = transferBytesByRequestId.get(event.requestId) ?? 0;
+      transferBytesByRequestId.set(event.requestId, prevTransfer + (event.encodedDataLength ?? 0));
     });
     client.on('Network.loadingFinished', event => {
+      // Final authoritative total, overwriting the running dataReceived accumulation.
       transferBytesByRequestId.set(event.requestId, event.encodedDataLength ?? 0);
+      finishedRequestIds.add(event.requestId);
     });
 
     await page.goto(url, { waitUntil: 'load', timeout: 30_000 });
@@ -102,7 +107,7 @@ async function collectRequests(url) {
   const entries = [];
   for (const [requestId, meta] of requestMeta) {
     const bytes = decodedBytesByRequestId.get(requestId) ?? 0;
-    const finished = transferBytesByRequestId.has(requestId);
+    const finished = finishedRequestIds.has(requestId);
     // Count partial bytes of requests still in flight (or failed) at
     // measurement end; skip only requests that received no data at all.
     if (!finished && bytes === 0) continue;
