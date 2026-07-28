@@ -24,7 +24,6 @@ npm run build
 - Image convention, resume, and directive lint checks
 - Astro compilation
 - Pagefind search index generation
-- Homepage weight gate (`scripts/check-size.mjs`, 150 KiB budget)
 - ⚠️ **No asset copying** (handled separately in deployment)
 
 **Command**:

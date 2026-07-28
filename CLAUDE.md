@@ -90,7 +90,7 @@ After any code change:
 
 1. **Search ALL instances** — `grep -rn "pattern" src/ scripts/ tests/ public/ config/` before and after; must reach zero results.
 2. **Check docs and interacting systems** — read implementation first, not docs. Verify docs match code. Changed code → check docs/tests/configs; removed tool → grep all files.
-3. **Quality gates before push** — `npm run build && npm run check:links && npm run check:size && npm run test:visual` (all must pass). `check:size` fails when the built homepage exceeds 150 KiB uncompressed (budget in `scripts/check-size.mjs`). New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits.
+3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual` (all must pass). New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits. Page weight is monitored nightly against production (real uncompressed bytes, 512KB Club methodology, including third-party trackers; transfer bytes also reported) via `weightwatch.yml` — not a push gate; see `scripts/check-live-weight.mjs`.
 4. Before committing, report a one-line summary of what you searched and what you fixed.
 
 ## Coding Rules
