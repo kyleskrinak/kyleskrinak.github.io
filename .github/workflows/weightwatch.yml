@@ -1,9 +1,9 @@
-name: Linkwatch (two-tier link checking)
+name: Weightwatch (live page weight monitor)
 
 on:
   schedule:
     # Nightly UTC; adjust if you prefer a different time.
-    - cron: "23 6 * * *"
+    - cron: "47 6 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -11,14 +11,14 @@ permissions:
   issues: write
 
 concurrency:
-  group: linkwatch
+  group: weightwatch
   cancel-in-progress: true
 
 jobs:
-  linkwatch:
-    name: Build site + two-tier link check (htmltest + Playwright)
+  weightwatch:
+    name: Check live page weight against production
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -31,58 +31,50 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site
-        run: npm run build
-
-      - name: Install htmltest
-        env:
-          HTMLTEST_VERSION: "0.17.0"
-        run: |
-          curl -fsSL -o htmltest.tar.gz "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_${HTMLTEST_VERSION}_linux_amd64.tar.gz"
-          tar -xzf htmltest.tar.gz
-          sudo mv htmltest /usr/local/bin/
-          htmltest --version
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run two-tier link check (htmltest + Playwright)
-        id: check-links
-        env:
-          PLAYWRIGHT_HEADED: false
+      - name: Run live page weight check
+        id: check-weight
         run: |
           set +e
-          npm run check:links > link-report.txt 2>&1
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
-          cat link-report.txt
+          npm run check:live-weight > weight-report.txt 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          cat weight-report.txt
+          if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then
+            exit "$code"
+          fi
           exit 0
 
-      # If the link check step fails, create/update a single tracking issue.
-      - name: Create or update link rot report issue
-        if: steps.check-links.outputs.exit_code != '0'
+      # If the weight check step found the site over budget, create/update
+      # a single tracking issue.
+      - name: Create or update page weight report issue
+        if: steps.check-weight.outputs.exit_code == '1'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fs = require('fs');
-            let report = fs.readFileSync('link-report.txt', 'utf8');
+            let report = fs.readFileSync('weight-report.txt', 'utf8');
             report = report.replace(/`/g, "'");
             if (report.length > 60000) {
               report = report.slice(0, 60000) + '\n... (truncated)';
             }
-            const title = "Link check failure report";
+            const title = "Live page weight report";
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
             const body =
-              `Two-tier link check detected broken links (verified with real browser).\n\n` +
+              `Nightly live page weight check found the production homepage over budget.\n\n` +
               `- Workflow run: ${runUrl}\n` +
               `- Branch/ref: ${context.ref}\n` +
               `- Commit: ${context.sha}\n\n` +
               `Report:\n\`\`\`\n${report}\n\`\`\`\n\n` +
-              `Links shown above failed both htmltest AND browser verification. ` +
-              `Review the job logs for details. Links that work in browser (403s, bot-detected) ` +
-              `are automatically filtered out and not reported here.`;
+              `This measures uncompressed bytes (512KB Club methodology) of a cold load of ` +
+              `https://kyle.skrinak.com/, including third-party trackers (Google Tag Manager, ` +
+              `Cloudflare Insights, etc.) that don't exist in the local build output; transfer ` +
+              `bytes are also reported. It is informational only — it does not block deploys.`;
 
             // Find an existing open issue with the exact title.
             const issues = await github.paginate(github.rest.issues.listForRepo, {

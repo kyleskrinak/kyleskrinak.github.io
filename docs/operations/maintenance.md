@@ -24,7 +24,11 @@ For now, refer to the following existing documentation:
 npm run build          # Verify build succeeds
 npm run test:visual    # Check for visual regressions
 npm run check:links    # Validate all links
-npm run check:size     # Homepage weight gate (fails over 150 KiB uncompressed)
+```
+
+**Live Page Weight** (nightly, non-blocking — see `weightwatch.yml`):
+```bash
+npm run check:live-weight   # Real uncompressed-bytes check against production, 512 KiB budget (512KB Club methodology; transfer bytes also reported)
 ```
 
 **Deployment Verification**:
