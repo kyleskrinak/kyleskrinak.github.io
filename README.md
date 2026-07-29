@@ -125,8 +125,7 @@ Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [
 │   └── config/             # Configuration
 ├── public/
 │   ├── favicon.ico         # Favicon variants
-│   ├── apple-touch-icon.png
-│   └── site.webmanifest    # PWA manifest
+│   └── apple-touch-icon.png
 ├── tests/                  # Test suites
 └── package.json
 ```

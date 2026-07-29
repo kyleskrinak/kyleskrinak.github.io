@@ -1,7 +1,7 @@
 import satori from "satori";
 // import { html } from "satori-html";
 import { SITE } from "@/config";
-import loadGoogleFonts from "../loadGoogleFont";
+import loadFonts from "../loadFonts";
 
 // const markup = html`<div
 //       style={{
@@ -19,7 +19,7 @@ import loadGoogleFonts from "../loadGoogleFont";
 //           top: "-1px",
 //           right: "-1px",
 //           border: "4px solid #000",
-//           background: "#ecebeb",
+//           background: "#F0DCA0",
 //           opacity: "0.9",
 //           borderRadius: "4px",
 //           display: "flex",
@@ -115,7 +115,7 @@ export default async post => {
                 top: "-1px",
                 right: "-1px",
                 border: "4px solid #000",
-                background: "#ecebeb",
+                background: "#F0DCA0",
                 opacity: "0.9",
                 borderRadius: "4px",
                 display: "flex",
@@ -221,9 +221,7 @@ export default async post => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: await loadGoogleFonts(
-        post.data.title + post.data.author + SITE.title + "by"
-      ),
+      fonts: await loadFonts(),
     }
   );
 };

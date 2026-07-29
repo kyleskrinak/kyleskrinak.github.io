@@ -7,13 +7,18 @@
 // config/registry.mjs by config/validate.mjs to prevent drift.
 const siteUrl = process.env.SITE_URL;
 const website = siteUrl || "https://kyle.skrinak.com/";
+const title = "Screenack";
 
 export const SITE = {
   website,
   author: "Kyle Skrinak",
   profile: "https://github.com/kyleskrinak",
-  desc: "Senior Manager, Digital Experience Platform for Gilead Sciences",
-  title: "Kyle Skrinak",
+  desc: "Won't you join my musings on all things web, better living through low-carb, and whatever else tickles my fancy. Your muse's experience may vary.",
+  title,
+  shortName: title, // manifest short_name — derived so it can't drift from the brand name
+  themeColor: "#0096ff",
+  backgroundColor: "#ffffff",
+  display: "standalone",
   lightAndDarkMode: true,
   postPerIndex: 5,
   postPerPage: 5,
