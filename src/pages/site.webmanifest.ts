@@ -1,13 +1,13 @@
 import type { APIRoute } from "astro";
+import { SITE } from "@/config";
 
 export const GET: APIRoute = () => {
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const manifest = {
-    name: "Kyle Skrinak",
-    short_name: "Kyle",
-    description:
-      "Senior Manager, Digital Experience Platform for Gilead Sciences",
+    name: SITE.title,
+    short_name: SITE.shortName,
+    description: SITE.desc,
     icons: [
       {
         src: `${baseUrl}favicon-96x96.png`,
@@ -39,9 +39,9 @@ export const GET: APIRoute = () => {
         purpose: "maskable",
       },
     ],
-    theme_color: "#0096ff",
-    background_color: "#ffffff",
-    display: "standalone",
+    theme_color: SITE.themeColor,
+    background_color: SITE.backgroundColor,
+    display: SITE.display,
     scope: baseUrl,
     start_url: baseUrl,
   };
