@@ -23,6 +23,7 @@ IgnoreURLs:
   - "tuitnutrition.com"  # Bot detection — hangs Playwright (Chromium and WebKit, up to 60s), 0.4s in curl/real browsers
   - "xn--sr8hvo.ws/previous"  # Webring: 302s to random member sites; dead members would fail CI nondeterministically
   - "xn--sr8hvo.ws/next"  # Webring: 302s to random member sites; dead members would fail CI nondeterministically
+  - "webmention.io"  # Unclaimed until IndieAuth signup; also a POST-only receiver, so link-checker GET/HEAD requests will 4xx even once correctly configured
 IgnoreInternalURLs:
   # These PDFs are .gitignored and absent from a plain `npm run build`; the
   # deploy pipeline guarantees them via the ensure-release-pdfs action's
