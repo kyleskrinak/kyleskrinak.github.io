@@ -1,0 +1,180 @@
+<div id="webmentions"></div>
+
+<script>
+  interface WebmentionAuthor {
+    name?: string;
+    url?: string;
+    photo?: string;
+  }
+
+  interface WebmentionEntry {
+    type: string;
+    author?: WebmentionAuthor;
+    url: string;
+    published?: string;
+    "wm-received"?: string;
+    "wm-id"?: number;
+    content?: { text?: string; html?: string };
+    "wm-property"?: string;
+  }
+
+  interface WebmentionFeed {
+    type: string;
+    name: string;
+    children: WebmentionEntry[];
+  }
+
+  const LIKE_TYPES = new Set(["like-of", "repost-of", "bookmark-of"]);
+
+  const VERB_BY_TYPE: Record<string, string> = {
+    "like-of": "liked this",
+    "repost-of": "reposted this",
+    "bookmark-of": "bookmarked this",
+  };
+
+  // Some entries only populate content.html, not content.text. DOMParser's
+  // output is never inserted into the live document — only .textContent is
+  // read from it — so this safely extracts plain text without risking the
+  // untrusted markup executing or being rendered.
+  function extractSnippet(content: { text?: string; html?: string } | undefined): string | undefined {
+    const text = content?.text?.trim();
+    if (text) return text;
+    const html = content?.html?.trim();
+    if (!html) return undefined;
+    const parsed = new DOMParser().parseFromString(html, "text/html").body.textContent?.trim();
+    return parsed || undefined;
+  }
+
+  // Webmention payloads are submitted by third parties — never trust a URL
+  // field enough to assign it directly to href/src (javascript:/data: schemes).
+  // `base` resolves relative/scheme-relative URLs (e.g. a sender's h-card
+  // photo given relative to their own page) against that source page,
+  // rather than rejecting anything that isn't already absolute; the
+  // protocol check still runs on the resolved result, so an explicitly
+  // absolute "javascript:" URL is rejected regardless of base.
+  function safeHttpUrl(url: string | undefined, base?: string): string | undefined {
+    if (!url) return undefined;
+    try {
+      const parsed = new URL(url, base);
+      return parsed.protocol === "http:" || parsed.protocol === "https:"
+        ? parsed.href
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  function createAvatar(
+    author: WebmentionAuthor | undefined,
+    base: string
+  ): HTMLImageElement | null {
+    const safePhoto = safeHttpUrl(author?.photo, base);
+    if (!safePhoto) return null;
+    const img = document.createElement("img");
+    img.src = safePhoto;
+    img.alt = "";
+    img.width = 24;
+    img.height = 24;
+    img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
+    img.className = "size-6 flex-none rounded-full";
+    return img;
+  }
+
+  function createNameLink(author: WebmentionAuthor | undefined, base: string): HTMLElement {
+    const name = author?.name?.trim() || "Someone";
+    const safeUrl = safeHttpUrl(author?.url, base);
+    if (safeUrl) {
+      const link = document.createElement("a");
+      link.href = safeUrl;
+      link.className = "text-accent hover:underline";
+      link.textContent = name;
+      return link;
+    }
+    const span = document.createElement("span");
+    span.textContent = name;
+    return span;
+  }
+
+  function createEntryItem(entry: WebmentionEntry): HTMLLIElement {
+    const li = document.createElement("li");
+    li.className = "flex items-start gap-2 text-sm opacity-80";
+
+    const avatar = createAvatar(entry.author, entry.url);
+    if (avatar) li.appendChild(avatar);
+
+    const body = document.createElement("div");
+
+    const nameLink = createNameLink(entry.author, entry.url);
+    const wmProperty = entry["wm-property"];
+
+    if (wmProperty && LIKE_TYPES.has(wmProperty)) {
+      // Two sibling elements (name link + verb link), not nested anchors.
+      const line = document.createElement("p");
+      line.appendChild(nameLink);
+      const verb = VERB_BY_TYPE[wmProperty];
+      const safeEntryUrl = safeHttpUrl(entry.url);
+      line.append(" ");
+      if (safeEntryUrl) {
+        const verbLink = document.createElement("a");
+        verbLink.href = safeEntryUrl;
+        verbLink.className = "hover:underline";
+        verbLink.textContent = verb;
+        line.appendChild(verbLink);
+      } else {
+        line.append(verb);
+      }
+      body.appendChild(line);
+    } else {
+      body.appendChild(nameLink);
+      const snippet = extractSnippet(entry.content);
+      if (snippet) {
+        const p = document.createElement("p");
+        p.className = "mt-0.5";
+        p.textContent = snippet.length > 200 ? `${snippet.slice(0, 200)}…` : snippet;
+        body.appendChild(p);
+      }
+    }
+
+    li.appendChild(body);
+    return li;
+  }
+
+  async function initWebmentions() {
+    const container = document.getElementById("webmentions");
+    if (!container) return;
+    if (container.dataset.initialized === "true") return;
+    container.dataset.initialized = "true";
+
+    try {
+      // Strip query string/hash — webmention.io matches on the canonical page
+      // URL, and heading permalinks (#some-heading) would otherwise mismatch it.
+      const target = `${window.location.origin}${window.location.pathname}`;
+      const response = await fetch(
+        `https://webmention.io/api/mentions.jf2?target=${encodeURIComponent(target)}`
+      );
+      if (!response.ok) return;
+
+      const feed = (await response.json()) as WebmentionFeed;
+      if (!feed.children || feed.children.length === 0) return;
+
+      const heading = document.createElement("span");
+      heading.className = "italic";
+      heading.textContent = "Mentions";
+
+      const list = document.createElement("ul");
+      list.className = "mt-2 flex flex-col gap-3";
+      for (const entry of feed.children) {
+        list.appendChild(createEntryItem(entry));
+      }
+
+      container.appendChild(heading);
+      container.appendChild(list);
+    } catch {
+      // Network/CORS failure — treat identically to "no mentions" (silent no-op).
+    }
+  }
+
+  document.addEventListener("astro:page-load", initWebmentions);
+  initWebmentions();
+</script>
