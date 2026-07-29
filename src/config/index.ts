@@ -13,7 +13,7 @@ export const SITE = {
   author: "Kyle Skrinak",
   profile: "https://github.com/kyleskrinak",
   desc: "Won't you join my musings on all things web, better living through low-carb, and whatever else tickles my fancy. Your muse's experience may vary.",
-  title: "Kyle Skrinak",
+  title: "Screenack",
   shortName: "Kyle",
   themeColor: "#0096ff",
   backgroundColor: "#ffffff",
