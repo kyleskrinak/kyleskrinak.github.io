@@ -142,7 +142,7 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="#0096ff" />
+    <meta name="theme-color" content={SITE.themeColor} />
 
     {
       // Gated on production builds (import.meta.env.PROD) and env var presence to
