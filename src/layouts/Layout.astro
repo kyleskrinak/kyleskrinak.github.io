@@ -46,6 +46,7 @@ const {
 // ogImage must be root-relative (e.g. /og.png) or absolute — new URL() resolves
 // root-relative paths against the origin, ignoring the current page path.
 const socialImageURL = new URL(ogImage, Astro.url);
+const webmentionHostname = new URL(SITE.website).hostname;
 
 const deployEnv = PUBLIC_DEPLOY_ENV ?? "production";
 const isStaging = deployEnv === "staging";
@@ -86,6 +87,9 @@ const structuredData = {
     {/* Canonical link: tells search engines and tools where the "true" content lives.
         Can point to this page or to an external canonical URL via the canonicalURL prop. */}
     <link rel="canonical" href={canonicalURL} />
+    {import.meta.env.PROD && !isStaging && (
+      <link rel="webmention" href={`https://webmention.io/${webmentionHostname}/webmention`} />
+    )}
     <meta name="generator" content={Astro.generator} />
 
     <!-- General Meta Tags -->
