@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { Font } from "satori";
 
 // Read from the source tree via process.cwd() rather than import.meta.url:
 // the bundled chunk that runs this at build time does not preserve the
@@ -7,13 +8,14 @@ import { join } from "node:path";
 // does not resolve to the original asset location.
 const fontsDir = join(process.cwd(), "src/assets/fonts");
 
-async function loadFonts(): Promise<
-  Array<{ name: string; data: ArrayBuffer; weight: number; style: string }>
-> {
-  const fontsConfig = [
-    { file: "ibm-plex-mono-400.ttf", weight: 400, style: "normal" },
-    { file: "ibm-plex-mono-700.ttf", weight: 700, style: "bold" },
-  ];
+async function loadFonts(): Promise<Font[]> {
+  // `style` is font-style (normal/italic), not boldness — weight alone
+  // differentiates these two files, both of which are upright.
+  const fontsConfig: Array<Pick<Font, "weight" | "style"> & { file: string }> =
+    [
+      { file: "ibm-plex-mono-400.ttf", weight: 400, style: "normal" },
+      { file: "ibm-plex-mono-700.ttf", weight: 700, style: "normal" },
+    ];
 
   const fonts = await Promise.all(
     fontsConfig.map(async ({ file, weight, style }) => {
