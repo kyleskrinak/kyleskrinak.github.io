@@ -1,13 +1,19 @@
 import satori from "satori";
 import { SITE } from "@/config";
 import loadFonts from "../loadFonts";
+import loadFaviconBadge from "../loadFaviconBadge";
+
+const FAVICON_BADGE_SIZE = 200;
 
 export default async () => {
+  const faviconDataUri = await loadFaviconBadge(FAVICON_BADGE_SIZE);
+
   return satori(
     {
       type: "div",
       props: {
         style: {
+          position: "relative",
           background: "#fefbfb",
           width: "100%",
           height: "100%",
@@ -24,7 +30,7 @@ export default async () => {
                 top: "-1px",
                 right: "-1px",
                 border: "4px solid #000",
-                background: "#ecebeb",
+                background: "#F0DCA0",
                 opacity: "0.9",
                 borderRadius: "4px",
                 display: "flex",
@@ -52,6 +58,7 @@ export default async () => {
                 type: "div",
                 props: {
                   style: {
+                    position: "relative",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
@@ -112,6 +119,19 @@ export default async () => {
                     },
                   ],
                 },
+              },
+            },
+          },
+          {
+            type: "img",
+            props: {
+              src: faviconDataUri,
+              width: FAVICON_BADGE_SIZE,
+              height: FAVICON_BADGE_SIZE,
+              style: {
+                position: "absolute",
+                top: "34px",
+                left: "67px",
               },
             },
           },
