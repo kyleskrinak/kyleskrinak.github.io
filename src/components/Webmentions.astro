@@ -1,0 +1,130 @@
+<div id="webmentions"></div>
+
+<script>
+  interface WebmentionAuthor {
+    name?: string;
+    url?: string;
+    photo?: string;
+  }
+
+  interface WebmentionEntry {
+    type: string;
+    author?: WebmentionAuthor;
+    url: string;
+    published?: string;
+    "wm-received"?: string;
+    "wm-id"?: number;
+    content?: { text?: string; html?: string };
+    "wm-property"?: string;
+  }
+
+  interface WebmentionFeed {
+    type: string;
+    name: string;
+    children: WebmentionEntry[];
+  }
+
+  const LIKE_TYPES = new Set(["like-of", "repost-of", "bookmark-of"]);
+
+  const VERB_BY_TYPE: Record<string, string> = {
+    "like-of": "liked this",
+    "repost-of": "reposted this",
+    "bookmark-of": "bookmarked this",
+  };
+
+  function createAvatar(author: WebmentionAuthor | undefined): HTMLImageElement | null {
+    if (!author?.photo) return null;
+    const img = document.createElement("img");
+    img.src = author.photo;
+    img.alt = "";
+    img.width = 24;
+    img.height = 24;
+    img.loading = "lazy";
+    img.className = "size-6 flex-none rounded-full";
+    return img;
+  }
+
+  function createNameLink(author: WebmentionAuthor | undefined): HTMLElement {
+    const name = author?.name?.trim() || "Someone";
+    if (author?.url) {
+      const link = document.createElement("a");
+      link.href = author.url;
+      link.className = "text-accent hover:underline";
+      link.textContent = name;
+      return link;
+    }
+    const span = document.createElement("span");
+    span.textContent = name;
+    return span;
+  }
+
+  function createEntryItem(entry: WebmentionEntry): HTMLLIElement {
+    const li = document.createElement("li");
+    li.className = "flex items-start gap-2 text-sm opacity-80";
+
+    const avatar = createAvatar(entry.author);
+    if (avatar) li.appendChild(avatar);
+
+    const body = document.createElement("div");
+
+    const nameLink = createNameLink(entry.author);
+    const wmProperty = entry["wm-property"];
+
+    if (wmProperty && LIKE_TYPES.has(wmProperty)) {
+      const line = document.createElement("a");
+      line.href = entry.url;
+      line.className = "hover:underline";
+      line.appendChild(nameLink.cloneNode(true));
+      line.append(` ${VERB_BY_TYPE[wmProperty]}`);
+      body.appendChild(line);
+    } else {
+      body.appendChild(nameLink);
+      const snippet = entry.content?.text?.trim();
+      if (snippet) {
+        const p = document.createElement("p");
+        p.className = "mt-0.5";
+        p.textContent = snippet.length > 200 ? `${snippet.slice(0, 200)}…` : snippet;
+        body.appendChild(p);
+      }
+    }
+
+    li.appendChild(body);
+    return li;
+  }
+
+  async function initWebmentions() {
+    const container = document.getElementById("webmentions");
+    if (!container) return;
+    if (container.dataset.initialized === "true") return;
+    container.dataset.initialized = "true";
+
+    try {
+      const target = window.location.href;
+      const response = await fetch(
+        `https://webmention.io/api/mentions.jf2?target=${encodeURIComponent(target)}`
+      );
+      if (!response.ok) return;
+
+      const feed = (await response.json()) as WebmentionFeed;
+      if (!feed.children || feed.children.length === 0) return;
+
+      const heading = document.createElement("span");
+      heading.className = "italic";
+      heading.textContent = "Mentions";
+
+      const list = document.createElement("ul");
+      list.className = "mt-2 flex flex-col gap-3";
+      for (const entry of feed.children) {
+        list.appendChild(createEntryItem(entry));
+      }
+
+      container.appendChild(heading);
+      container.appendChild(list);
+    } catch {
+      // Network/CORS failure — treat identically to "no mentions" (silent no-op).
+    }
+  }
+
+  document.addEventListener("astro:page-load", initWebmentions);
+  initWebmentions();
+</script>
