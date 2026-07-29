@@ -8,7 +8,13 @@ import type { Font } from "satori";
 // does not resolve to the original asset location.
 const fontsDir = join(process.cwd(), "src/assets/fonts");
 
+// Cached across calls — loadFonts() is invoked once per OG image (the site
+// card plus one per post), and the font data never changes within a build.
+let cachedFonts: Font[] | null = null;
+
 async function loadFonts(): Promise<Font[]> {
+  if (cachedFonts) return cachedFonts;
+
   // `style` is font-style (normal/italic), not boldness — weight alone
   // differentiates these two files, both of which are upright.
   const fontsConfig: Array<Pick<Font, "weight" | "style"> & { file: string }> =
@@ -17,9 +23,9 @@ async function loadFonts(): Promise<Font[]> {
       { file: "ibm-plex-mono-700.ttf", weight: 700, style: "normal" },
     ];
 
-  const fonts = await Promise.all(
+  cachedFonts = await Promise.all(
     fontsConfig.map(async ({ file, weight, style }) => {
-      const buffer = await readFile(`${fontsDir}/${file}`);
+      const buffer = await readFile(join(fontsDir, file));
       const data = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
@@ -28,7 +34,7 @@ async function loadFonts(): Promise<Font[]> {
     })
   );
 
-  return fonts;
+  return cachedFonts;
 }
 
 export default loadFonts;
