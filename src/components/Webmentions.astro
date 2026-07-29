@@ -32,20 +32,43 @@
     "bookmark-of": "bookmarked this",
   };
 
+  // Some entries only populate content.html, not content.text. DOMParser's
+  // output is never inserted into the live document — only .textContent is
+  // read from it — so this safely extracts plain text without risking the
+  // untrusted markup executing or being rendered.
+  function extractSnippet(content: { text?: string; html?: string } | undefined): string | undefined {
+    const text = content?.text?.trim();
+    if (text) return text;
+    const html = content?.html?.trim();
+    if (!html) return undefined;
+    const parsed = new DOMParser().parseFromString(html, "text/html").body.textContent?.trim();
+    return parsed || undefined;
+  }
+
   // Webmention payloads are submitted by third parties — never trust a URL
   // field enough to assign it directly to href/src (javascript:/data: schemes).
-  function safeHttpUrl(url: string | undefined): string | undefined {
+  // `base` resolves relative/scheme-relative URLs (e.g. a sender's h-card
+  // photo given relative to their own page) against that source page,
+  // rather than rejecting anything that isn't already absolute; the
+  // protocol check still runs on the resolved result, so an explicitly
+  // absolute "javascript:" URL is rejected regardless of base.
+  function safeHttpUrl(url: string | undefined, base?: string): string | undefined {
     if (!url) return undefined;
     try {
-      const parsed = new URL(url);
-      return parsed.protocol === "http:" || parsed.protocol === "https:" ? url : undefined;
+      const parsed = new URL(url, base);
+      return parsed.protocol === "http:" || parsed.protocol === "https:"
+        ? parsed.href
+        : undefined;
     } catch {
       return undefined;
     }
   }
 
-  function createAvatar(author: WebmentionAuthor | undefined): HTMLImageElement | null {
-    const safePhoto = safeHttpUrl(author?.photo);
+  function createAvatar(
+    author: WebmentionAuthor | undefined,
+    base: string
+  ): HTMLImageElement | null {
+    const safePhoto = safeHttpUrl(author?.photo, base);
     if (!safePhoto) return null;
     const img = document.createElement("img");
     img.src = safePhoto;
@@ -53,13 +76,14 @@
     img.width = 24;
     img.height = 24;
     img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
     img.className = "size-6 flex-none rounded-full";
     return img;
   }
 
-  function createNameLink(author: WebmentionAuthor | undefined): HTMLElement {
+  function createNameLink(author: WebmentionAuthor | undefined, base: string): HTMLElement {
     const name = author?.name?.trim() || "Someone";
-    const safeUrl = safeHttpUrl(author?.url);
+    const safeUrl = safeHttpUrl(author?.url, base);
     if (safeUrl) {
       const link = document.createElement("a");
       link.href = safeUrl;
@@ -76,12 +100,12 @@
     const li = document.createElement("li");
     li.className = "flex items-start gap-2 text-sm opacity-80";
 
-    const avatar = createAvatar(entry.author);
+    const avatar = createAvatar(entry.author, entry.url);
     if (avatar) li.appendChild(avatar);
 
     const body = document.createElement("div");
 
-    const nameLink = createNameLink(entry.author);
+    const nameLink = createNameLink(entry.author, entry.url);
     const wmProperty = entry["wm-property"];
 
     if (wmProperty && LIKE_TYPES.has(wmProperty)) {
@@ -103,7 +127,7 @@
       body.appendChild(line);
     } else {
       body.appendChild(nameLink);
-      const snippet = entry.content?.text?.trim();
+      const snippet = extractSnippet(entry.content);
       if (snippet) {
         const p = document.createElement("p");
         p.className = "mt-0.5";
