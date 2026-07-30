@@ -149,9 +149,6 @@ The production workflow sets up intelligent caching:
 Create a `.env.local` file (not committed to git) with:
 
 ```env
-# Google Analytics (optional, used in GoogleAnalytics component)
-PUBLIC_GA_ID=G-XXXXX
-
 # Cloudflare Web Analytics (production)
 PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_cloudflare_token
 ```

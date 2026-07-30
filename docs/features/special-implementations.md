@@ -164,7 +164,7 @@ Indexes all 48 pages (blog posts + static pages) with 4,688 words.
 ### Analytics
 
 ✅ **Files**:
-- `src/components/GoogleAnalytics.astro` - GA4 ready (needs ID)
+- `src/layouts/Layout.astro` - Cloudflare Web Analytics beacon (gated on `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`, production builds only)
 
 ✅ **Standard**: Yes - standard integration
 

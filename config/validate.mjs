@@ -98,15 +98,6 @@ if (existsSync('src/layouts/Layout.astro')) {
   }
 }
 
-if (existsSync('src/components/GoogleAnalytics.astro')) {
-  const ga = readFileSync('src/components/GoogleAnalytics.astro', 'utf-8');
-  const gaWithoutComments = stripComments(ga);
-  const expectedGating = ConfigRegistry.analytics.googleAnalytics.gating;
-  if (!normalizeWhitespace(gaWithoutComments).includes(normalizeWhitespace(expectedGating))) {
-    issues.push(`GA analytics gating mismatch: expected "${expectedGating}" in GoogleAnalytics.astro`);
-  }
-}
-
 // Comprehensive workflow validation
 // WORKFLOW_TO_ENV_MAP includes only workflows that run 'npm run build:ci'.
 // Excluded workflows (linkwatch.yml, secrets-check.yml, etc.)
@@ -371,8 +362,7 @@ for (const filePath of allFiles) {
 // Tier 1: Critical files must use astro:env imports (strict validation)
 const criticalAstroEnvFiles = [
   'src/pages/robots.txt.ts',
-  'src/layouts/Layout.astro',
-  'src/components/GoogleAnalytics.astro'
+  'src/layouts/Layout.astro'
 ];
 for (const file of criticalAstroEnvFiles) {
   if (!existsSync(file)) continue;
