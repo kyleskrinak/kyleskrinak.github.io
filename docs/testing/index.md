@@ -25,9 +25,7 @@ This section covers testing strategies, test runs, and quality validation for th
 - Verifies structural parity across content-listing pages (posts, tags)
 
 ### Analytics Privacy Testing
-- **Test suites**:
-  - `tests/analytics/analytics-privacy.spec.ts` - Cloudflare Analytics privacy compliance
-  - `tests/analytics/analytics-privacy-ga.spec.ts` - Google Analytics privacy (if enabled)
+- **Test suite**: `tests/analytics/analytics-privacy.spec.ts` - Cloudflare Analytics privacy compliance
 - Validates respect for Do Not Track (DNT) signals
 - Ensures Global Privacy Control (GPC) compliance
 - Confirms analytics load only in production builds when a token is configured (staging token optional)
