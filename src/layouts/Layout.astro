@@ -8,7 +8,6 @@ import {
 import { SITE } from "@/config";
 import { canonicalizePathname } from "@/utils/canonicalizePathname";
 import { linkWithBase } from "@/utils/linkWithBase";
-import GoogleAnalytics from "@/components/GoogleAnalytics.astro";
 import "@/styles/global.css";
 
 type Props = {
@@ -171,8 +170,6 @@ const structuredData = {
     {!isStaging && noindex && (
       <meta name="robots" content="noindex,follow" />
     )}
-
-    <GoogleAnalytics />
 
     <ClientRouter />
 

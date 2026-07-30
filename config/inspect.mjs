@@ -41,7 +41,6 @@ Object.entries(ConfigRegistry.buildFlags).forEach(([flag, values]) => {
 console.log('\n📊 ANALYTICS');
 console.log('─'.repeat(60));
 console.log(`\nCloudflare: ${ConfigRegistry.analytics.cloudflare.gating}`);
-console.log(`GA: ${ConfigRegistry.analytics.googleAnalytics.gating}`);
 console.log(`GSV: ${ConfigRegistry.analytics.googleSiteVerification.gating}`);
 
 console.log('\n🔧 CURRENT PROCESS ENV');
