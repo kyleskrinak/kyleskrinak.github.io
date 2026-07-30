@@ -17,8 +17,8 @@
  *   These are referenced as `vars.VARIABLE_NAME` in workflow `with:` blocks,
  *   not in `env:` blocks — a different YAML namespace than environment vars.
  *   Secrets (source: 'secret') are referenced as `secrets.NAME` in workflows;
- *   their Astro-side name may differ (e.g., GOOGLE_ANALYTICS_ID secret →
- *   PUBLIC_GOOGLE_ANALYTICS_ID env var).
+ *   their Astro-side name may differ (e.g., CLOUDFLARE_TOKEN_PROD secret →
+ *   PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN env var).
  * - buildFlags: Astro framework flags set automatically at build time; these
  *   are NOT workflow env vars and cannot be overridden via `env:` blocks.
  *
@@ -81,12 +81,6 @@ export const ConfigRegistry = {
         required: false,
         notes: 'Gated on import.meta.env.PROD — never loads in local dev builds.'
       },
-      PUBLIC_GOOGLE_ANALYTICS_ID: {
-        value: null,
-        source: 'omitted',
-        required: false,
-        notes: 'Gated on import.meta.env.PROD — never loads in local dev builds.'
-      },
       PUBLIC_GOOGLE_SITE_VERIFICATION: {
         value: null,
         source: 'omitted',
@@ -99,7 +93,6 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyleskrinak.github.io/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no analytics tracking needed for preview builds' },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no search engine verification needed for deindexed preview builds' }
     },
     'pr-visual-staging': {
@@ -110,7 +103,6 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: null, source: 'omitted', required: false },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: null, source: 'omitted', required: false },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
     },
     'main-aws': {
@@ -118,8 +110,7 @@ export const ConfigRegistry = {
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
       PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_ANALYTICS_ID: { value: 'required', source: 'secret', required: true }
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true }
     }
   },
 
@@ -138,12 +129,6 @@ export const ConfigRegistry = {
     cloudflare: {
       gating: 'import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN',
       location: 'src/layouts/Layout.astro',
-      testPolicy: 'Skip on local URLs to avoid prod-build setup',
-      testLocation: 'tests/test-utils.ts (isLocalUrl)'
-    },
-    googleAnalytics: {
-      gating: 'import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID',
-      location: 'src/components/GoogleAnalytics.astro',
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
       testLocation: 'tests/test-utils.ts (isLocalUrl)'
     },
