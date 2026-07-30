@@ -24,13 +24,15 @@
     children: WebmentionEntry[];
   }
 
-  const LIKE_TYPES = new Set(["like-of", "repost-of", "bookmark-of"]);
-
   const VERB_BY_TYPE: Record<string, string> = {
     "like-of": "liked this",
     "repost-of": "reposted this",
     "bookmark-of": "bookmarked this",
   };
+
+  // Derived from VERB_BY_TYPE's own keys rather than a separately maintained
+  // list, so the two can't drift out of sync.
+  const LIKE_TYPES = new Set(Object.keys(VERB_BY_TYPE));
 
   // Some entries only populate content.html, not content.text. DOMParser's
   // output is never inserted into the live document — only .textContent is
@@ -87,6 +89,7 @@
     if (safeUrl) {
       const link = document.createElement("a");
       link.href = safeUrl;
+      link.rel = "nofollow ugc";
       link.className = "text-accent hover:underline";
       link.textContent = name;
       return link;
@@ -118,6 +121,7 @@
       if (safeEntryUrl) {
         const verbLink = document.createElement("a");
         verbLink.href = safeEntryUrl;
+        verbLink.rel = "nofollow ugc";
         verbLink.className = "hover:underline";
         verbLink.textContent = verb;
         line.appendChild(verbLink);
