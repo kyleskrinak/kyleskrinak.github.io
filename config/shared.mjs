@@ -102,11 +102,6 @@ ${ConfigRegistry.astro.trailingSlash.impact.map(i => `  - ${i}`).join('\n')}
 - Location: ${ConfigRegistry.analytics.cloudflare.location}
 - Test policy: ${ConfigRegistry.analytics.cloudflare.testPolicy}
 
-### Google Analytics
-- Gating: \`${ConfigRegistry.analytics.googleAnalytics.gating}\`
-- Location: ${ConfigRegistry.analytics.googleAnalytics.location}
-- Test policy: ${ConfigRegistry.analytics.googleAnalytics.testPolicy}
-
 ### Google Site Verification
 - Gating: \`${ConfigRegistry.analytics.googleSiteVerification.gating}\`
 - Location: ${ConfigRegistry.analytics.googleSiteVerification.location}

@@ -11,7 +11,6 @@
 | `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
 | `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `staging` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | (omitted) | `required` ✓ |
-| `PUBLIC_GOOGLE_ANALYTICS_ID` | (omitted) | (omitted) | (omitted) | `required` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | (omitted) | `required` ✓ |
 
 ✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
@@ -45,11 +44,6 @@ Astro build flags set automatically by the framework (not configurable via workf
 ### Cloudflare
 - Gating: `import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`
 - Location: src/layouts/Layout.astro
-- Test policy: Skip on local URLs to avoid prod-build setup
-
-### Google Analytics
-- Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_ANALYTICS_ID`
-- Location: src/components/GoogleAnalytics.astro
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 ### Google Site Verification

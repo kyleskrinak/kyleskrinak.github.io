@@ -26,11 +26,7 @@ const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
 // Analytics endpoints the print route's full Layout would otherwise hit in
 // production builds: aborted so CI regeneration never registers pageviews
 // (and their in-flight requests never delay rendering).
-const ANALYTICS_HOSTS = [
-  "googletagmanager.com",
-  "google-analytics.com",
-  "cloudflareinsights.com",
-];
+const ANALYTICS_HOSTS = ["cloudflareinsights.com"];
 
 // Normalize the typographic transformations Astro's markdown pipeline
 // (smartypants) applies, so raw-source expectations compare cleanly against

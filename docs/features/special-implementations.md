@@ -16,7 +16,7 @@ This document catalogs special use cases, custom implementations, and unique con
 - Pagefind search integration
 - GitHub Actions CI/CD workflows
 - AWS S3 + CloudFront deployment
-- Google Analytics integration
+- Cloudflare Web Analytics integration
 - Social sharing component
 
 **These are all best practices that apply to any Astro blog.**
@@ -164,7 +164,7 @@ Indexes all 48 pages (blog posts + static pages) with 4,688 words.
 ### Analytics
 
 ✅ **Files**:
-- `src/components/GoogleAnalytics.astro` - GA4 ready (needs ID)
+- `src/layouts/Layout.astro` - Cloudflare Web Analytics beacon (gated on `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`, production builds only)
 
 ✅ **Standard**: Yes - standard integration
 
@@ -228,7 +228,7 @@ Defines three collections with strict Zod validation:
 **File**: `.env.local` (not in Git)
 
 ```env
-PUBLIC_GA_ID=G-XXXXX          # Google Analytics
+PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
 ```
 
 ---
