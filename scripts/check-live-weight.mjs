@@ -83,10 +83,16 @@ function errorMessage(err) {
 // variant. Real browsers pick one "best" icon per purpose rather than
 // fetching apple-touch-icon.png, alternate favicon sizes, or every manifest
 // icon size; counting all of them (an earlier version of this function)
-// overshoots what any real page load actually costs. Requests
-// Accept-Encoding: identity so the byte count is the exact decoded size
-// with no ambiguity from this script's own fetch() transparently
-// decompressing an encoded response.
+// overshoots what any real page load actually costs.
+//
+// The measurement fetch below lets the server negotiate its normal
+// encoding (gzip/br) rather than forcing identity, so Content-Length
+// reflects the real transfer size — forcing identity would make transfer
+// size equal decoded size for these entries, which isn't representative
+// (matters for site.webmanifest; negligible for already-compressed image
+// formats like the favicon/icon files). fetch()'s own arrayBuffer() still
+// transparently decompresses the body, so the decoded byte count is exact
+// regardless of what encoding the server chose.
 async function collectDeclaredIconResources(page, alreadyCapturedUrls) {
   const manifestUrl = await page.evaluate(() => {
     const link = document.querySelector('link[rel="manifest"]');
@@ -122,9 +128,12 @@ async function collectDeclaredIconResources(page, alreadyCapturedUrls) {
   for (const candidateUrl of candidateUrls) {
     if (alreadyCapturedUrls.has(candidateUrl)) continue;
     try {
-      const res = await fetch(candidateUrl, { headers: { 'Accept-Encoding': 'identity' } });
+      const res = await fetch(candidateUrl);
       if (!res.ok) continue; // e.g. no favicon.ico at this path
       const buffer = await res.arrayBuffer();
+      const contentLength = Number(res.headers.get('content-length'));
+      const transferBytes =
+        Number.isSafeInteger(contentLength) && contentLength > 0 ? contentLength : buffer.byteLength;
       const type =
         candidateUrl === manifestUrl
           ? 'Manifest (declared, not organically fetched)'
@@ -133,7 +142,7 @@ async function collectDeclaredIconResources(page, alreadyCapturedUrls) {
         url: candidateUrl,
         type,
         bytes: buffer.byteLength,
-        transferBytes: buffer.byteLength,
+        transferBytes,
       });
     } catch {
       // Unreachable resource shouldn't crash the whole report.
