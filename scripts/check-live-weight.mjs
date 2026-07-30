@@ -119,15 +119,19 @@ async function collectDeclaredIconResources(page, alreadyCapturedUrls) {
   }
 
   const results = [];
-  for (const iconUrl of candidateUrls) {
-    if (alreadyCapturedUrls.has(iconUrl)) continue;
+  for (const candidateUrl of candidateUrls) {
+    if (alreadyCapturedUrls.has(candidateUrl)) continue;
     try {
-      const res = await fetch(iconUrl, { headers: { 'Accept-Encoding': 'identity' } });
+      const res = await fetch(candidateUrl, { headers: { 'Accept-Encoding': 'identity' } });
       if (!res.ok) continue; // e.g. no favicon.ico at this path
       const buffer = await res.arrayBuffer();
+      const type =
+        candidateUrl === manifestUrl
+          ? 'Manifest (declared, not organically fetched)'
+          : 'Icon (declared, not organically fetched)';
       results.push({
-        url: iconUrl,
-        type: 'Icon (declared, not organically fetched)',
+        url: candidateUrl,
+        type,
         bytes: buffer.byteLength,
         transferBytes: buffer.byteLength,
       });
