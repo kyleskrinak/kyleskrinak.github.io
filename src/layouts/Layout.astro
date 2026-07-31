@@ -89,6 +89,7 @@ const structuredData = {
     {import.meta.env.PROD && !isStaging && (
       <link rel="webmention" href={`https://webmention.io/${webmentionHostname}/webmention`} />
     )}
+    <link rel="me" href={SITE.profile} />
     <meta name="generator" content={Astro.generator} />
 
     <!-- General Meta Tags -->
