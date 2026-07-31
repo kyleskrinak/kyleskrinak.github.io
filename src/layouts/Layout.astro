@@ -87,9 +87,11 @@ const structuredData = {
         Can point to this page or to an external canonical URL via the canonicalURL prop. */}
     <link rel="canonical" href={canonicalURL} />
     {import.meta.env.PROD && !isStaging && (
-      <link rel="webmention" href={`https://webmention.io/${webmentionHostname}/webmention`} />
+      <>
+        <link rel="webmention" href={`https://webmention.io/${webmentionHostname}/webmention`} />
+        <link rel="me" href={SITE.profile} />
+      </>
     )}
-    <link rel="me" href={SITE.profile} />
     <meta name="generator" content={Astro.generator} />
 
     <!-- General Meta Tags -->
