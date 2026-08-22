@@ -209,7 +209,7 @@ tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
 **Baseline Workflow:**
 - **`pr-visual-check.yml`** gates PRs to `staging` by comparing against committed baselines
 - **Updating baselines for commit**: run `npm run test:visual:baseline:docker` (runs the official `mcr.microsoft.com/playwright:v<version>-noble` image, version-matched to the installed `@playwright/test`, matching CI's Ubuntu font stack), then commit the updated PNGs
-- **Quick local iteration** (not for commit): `ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift. Without the env var the command refuses, so the only way to overwrite committed baselines is a deliberate override.
+- **Quick local iteration** (not for commit): `ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift. Without the env var the run refuses. The guard lives in `playwright.config.ts`, not just the npm script, so `npm run test:visual -- --update-snapshots` and a bare `npx playwright test -u` are refused on a non-Linux host too -- the only way to overwrite committed baselines from macOS is a deliberate override.
 
 **Test commands:**
 
