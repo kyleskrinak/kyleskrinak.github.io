@@ -1,5 +1,5 @@
 import type { FullConfig } from '@playwright/test';
-import { assertSnapshotWritesAllowed, overwritesBaselines } from './snapshot-guard';
+import { assertSnapshotWritesAllowed, overwritesBaselines, recordExistingSnapshots } from './snapshot-guard';
 
 /**
  * Authoritative half of the baseline guard: `config.updateSnapshots` is Playwright's
@@ -11,4 +11,7 @@ import { assertSnapshotWritesAllowed, overwritesBaselines } from './snapshot-gua
  */
 export default async function globalSnapshotGuard(config: FullConfig) {
 	assertSnapshotWritesAllowed(overwritesBaselines(config.updateSnapshots));
+
+	// Baseline for the post-run check that closes the `missing`-mode gap.
+	recordExistingSnapshots('tests');
 }

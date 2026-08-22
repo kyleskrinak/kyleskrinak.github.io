@@ -24,6 +24,7 @@ assertSnapshotWritesAllowed(argvRequestsSnapshotWrites(process.argv));
  */
 export default defineConfig({
   globalSetup: './tests/global-snapshot-guard.ts',
+  globalTeardown: './tests/global-snapshot-teardown.ts',
 
   // Omit the OS/platform suffix ({-snapshotSuffix}) so baselines committed on macOS
   // resolve correctly on Linux CI. Default template with that token removed.
