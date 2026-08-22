@@ -3,6 +3,9 @@ import { existsSync, mkdirSync, readdirSync, rmSync, unlinkSync, writeFileSync, 
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
+// Pure mode/argv logic lives in plain JS so the unit suite can cover it directly.
+export { OVERWRITING_MODES, overwritesBaselines, argvRequestsSnapshotWrites } from './snapshot-guard-modes.mjs';
+
 /**
  * Shared refusal for snapshot-writing runs on a host that doesn't match CI.
  *
@@ -14,19 +17,14 @@ import { tmpdir } from 'node:os';
 export const ALLOW_NATIVE_BASELINE = () => process.env.ALLOW_NATIVE_BASELINE === '1';
 
 /**
- * Modes that overwrite baselines which already exist -- the ones worth refusing.
- *
- * Deliberately excludes 'missing', which is Playwright's *default* for every ordinary
- * run: it only fills in snapshots that don't exist yet and can never overwrite a
- * committed PNG, so refusing it would block all local testing to no benefit. A bare
- * `-u` resolves to 'changed', so the explicit update paths are all covered.
+ * Whether the write guards apply at all. Linux matches CI's rendering, and the env var
+ * is the deliberate override.
  */
-const OVERWRITING_MODES = ['all', 'changed'];
+export const guardActive = () => process.platform !== 'linux' && !ALLOW_NATIVE_BASELINE();
 
-export const overwritesBaselines = (mode: string) => OVERWRITING_MODES.includes(mode);
-
+/** Refuse a run that would overwrite baselines from a host that doesn't match CI. */
 export const assertSnapshotWritesAllowed = (writesSnapshots: boolean) => {
-	if (!writesSnapshots || process.platform === 'linux' || ALLOW_NATIVE_BASELINE()) return;
+	if (!writesSnapshots || !guardActive()) return;
 
 	throw new Error(
 		[
@@ -40,12 +38,6 @@ export const assertSnapshotWritesAllowed = (writesSnapshots: boolean) => {
 		].join('\n')
 	);
 };
-
-/**
- * Whether the write guards apply at all. Linux matches CI's rendering, and the env var
- * is the deliberate override.
- */
-export const guardActive = () => process.platform !== 'linux' && !ALLOW_NATIVE_BASELINE();
 
 /**
  * The `missing` exception, closed.
@@ -62,8 +54,13 @@ export const guardActive = () => process.platform !== 'linux' && !ALLOW_NATIVE_B
  * pixels reach the repository.
  */
 const manifestPath = () => {
+	// Keyed by pid as well as checkout: globalSetup and globalTeardown share one runner
+	// process, but two concurrent runs from the same checkout would otherwise share one
+	// manifest -- the second run's setup would clobber the first's list, and whichever
+	// teardown ran first would delete the file, letting the other run's created
+	// snapshots escape the check entirely.
 	const key = createHash('sha256').update(process.cwd()).digest('hex').slice(0, 12);
-	return join(tmpdir(), `astro-blog-snapshots-${key}.json`);
+	return join(tmpdir(), `astro-blog-snapshots-${key}-${process.pid}.json`);
 };
 
 const snapshotFilesUnder = (root: string): string[] => {
@@ -134,54 +131,4 @@ export const assertNoSnapshotsCreated = (root: string) => {
 			'  ALLOW_NATIVE_BASELINE=1 <command>',
 		].join('\n')
 	);
-};
-
-/**
- * Best-effort argv scan, used only to refuse *before* the webServer build starts.
- * Playwright's own parsed value is the authority (see globalSetup in
- * playwright.config.ts); this exists purely so the common cases fail in a second
- * rather than after a full site build. A miss here is not a hole -- globalSetup
- * still catches it -- but a false positive would block a legitimate run, so flags
- * that swallow the rest of a cluster as their value are respected.
- */
-export const argvRequestsSnapshotWrites = (argv: string[]): boolean => {
-	// Short flags taking a value: -c <config>, -g <grep>, -j <workers>. In a cluster
-	// the first such flag consumes the remainder, so `-gu` is grep="u", not -u.
-	const VALUE_CONSUMING = 'cgj';
-	const modes: string[] = [];
-
-	const modeAfter = (index: number) => {
-		const next = argv[index + 1];
-		return next !== undefined && !next.startsWith('-') ? next : 'changed';
-	};
-
-	for (let i = 0; i < argv.length; i++) {
-		const arg = argv[i];
-
-		if (arg.startsWith('--update-snapshots=')) {
-			modes.push(arg.slice('--update-snapshots='.length));
-			continue;
-		}
-		if (arg === '--update-snapshots') {
-			modes.push(modeAfter(i));
-			continue;
-		}
-		// Short-flag cluster: -u, -uall, -xu, -xuall all reach --update-snapshots.
-		if (/^-[^-]/.test(arg)) {
-			const chars = arg.slice(1);
-			for (let k = 0; k < chars.length; k++) {
-				const char = chars[k];
-				if (char === 'u') {
-					const attached = chars.slice(k + 1);
-					modes.push(attached !== '' ? attached : modeAfter(i));
-					break;
-				}
-				if (VALUE_CONSUMING.includes(char)) break;
-			}
-		}
-	}
-
-	// Every occurrence counts, not just the first: Playwright takes the last one, so a
-	// leading `--update-snapshots=none` must not mask a later `--update-snapshots=all`.
-	return modes.some(overwritesBaselines);
 };

@@ -98,17 +98,21 @@ case $ENVIRONMENT in
     # bare (host-rendered) run are only ever correct on a Linux host matching CI. On
     # any other host they overwrite committed files with pixels that CI will reject.
     # Refuse by default; ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch.
-    if [ "${ALLOW_NATIVE_BASELINE:-}" != "1" ]; then
-      echo "Refusing to write baselines from a host-rendered run." >&2
-      echo "" >&2
-      echo "Committed baselines must match CI's Ubuntu rendering. Use:" >&2
-      echo "  ./scripts/visual-test.sh docker-baseline" >&2
-      echo "" >&2
-      echo "To override anyway (only correct on a Linux host matching CI):" >&2
-      echo "  ALLOW_NATIVE_BASELINE=1 ./scripts/visual-test.sh baseline" >&2
-      exit 1
+    # A Linux host already matches CI's rendering, so it needs no override -- the same
+    # exception guardActive() makes in tests/snapshot-guard.ts. Refuse only elsewhere.
+    if [ "$(uname -s)" != "Linux" ]; then
+      if [ "${ALLOW_NATIVE_BASELINE:-}" != "1" ]; then
+        echo "Refusing to write baselines from a $(uname -s) host." >&2
+        echo "" >&2
+        echo "Committed baselines must match CI's Ubuntu rendering. Use:" >&2
+        echo "  ./scripts/visual-test.sh docker-baseline" >&2
+        echo "" >&2
+        echo "To override anyway (only correct on a Linux host matching CI):" >&2
+        echo "  ALLOW_NATIVE_BASELINE=1 ./scripts/visual-test.sh baseline" >&2
+        exit 1
+      fi
+      echo "⚠️  ALLOW_NATIVE_BASELINE=1 — writing baselines from this host's rendering"
     fi
-    echo "⚠️  ALLOW_NATIVE_BASELINE=1 — writing baselines from this host's rendering"
     echo "📸 Creating/updating baselines from LOCAL dev"
     npm run test:visual -- --update-snapshots "${PLAYWRIGHT_ARGS[@]}"
     echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/"

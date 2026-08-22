@@ -57,7 +57,7 @@ npm run test:visual:report
 ./scripts/visual-test.sh local              # Local dev
 ./scripts/visual-test.sh staging            # Staging
 ./scripts/visual-test.sh production         # Production
-./scripts/visual-test.sh baseline           # Create baselines (macOS rendering — fast iteration only; needs ALLOW_NATIVE_BASELINE=1)
+./scripts/visual-test.sh baseline           # Create baselines from this host (fast iteration only; needs ALLOW_NATIVE_BASELINE=1 off Linux)
 ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
 ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container (use for commits)
 ./scripts/visual-test.sh compare            # View report

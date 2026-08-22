@@ -69,6 +69,15 @@ jobs:
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:4321
 
+      # The seo project asserts machine-readable markup contracts (robots directives,
+      # canonical URLs, the representative h-card) that pixel baselines cannot see: a
+      # dropped p-name or a wrong u-url is invisible to a screenshot diff. It ran only
+      # as a local script before, so those assertions gated nothing.
+      - name: Run SEO and markup contract tests
+        run: npm run test:seo
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:4321
+
       - name: Stop preview server
         if: always()
         run: |
