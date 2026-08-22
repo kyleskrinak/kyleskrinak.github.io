@@ -14,27 +14,31 @@ import { BASE_URL } from './tests/test-utils';
  *
  * ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch.
  */
-const snapshotUpdateMode = (argv: string[]): string | undefined => {
+const snapshotUpdateModes = (argv: string[]): string[] => {
+  const modes: string[] = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith('--update-snapshots=')) {
-      return arg.slice('--update-snapshots='.length);
+      modes.push(arg.slice('--update-snapshots='.length));
+      continue;
     }
     if (arg === '--update-snapshots' || arg === '-u') {
       // Playwright's mode value is optional, so the next token is only the mode when
       // it is not another flag. A positional filter read as a mode is harmless: it is
       // simply not 'none', which fails safe toward refusing the run.
       const next = argv[i + 1];
-      return next !== undefined && !next.startsWith('-') ? next : 'changed';
+      modes.push(next !== undefined && !next.startsWith('-') ? next : 'changed');
     }
   }
-  return undefined;
+  return modes;
 };
 
-const updateMode = snapshotUpdateMode(process.argv);
+// Every occurrence counts, not just the first: Playwright takes the last one, so a
+// leading `--update-snapshots=none` must not mask a later `--update-snapshots=all`.
+// Any non-'none' mode is enough to refuse.
+const writesSnapshots = snapshotUpdateModes(process.argv).some((mode) => mode !== 'none');
 if (
-  updateMode !== undefined &&
-  updateMode !== 'none' &&
+  writesSnapshots &&
   process.platform !== 'linux' &&
   process.env.ALLOW_NATIVE_BASELINE !== '1'
 ) {
