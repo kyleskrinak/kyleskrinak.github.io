@@ -47,7 +47,11 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:visual
  *
  * Update baselines:
- *   npm run test:visual -- --update-snapshots
+ *   npm run test:visual:baseline:docker
+ *
+ * Any snapshot-writing run on a non-Linux host is refused by the guard in
+ * playwright.config.ts, since host-rendered pixels do not match CI's Ubuntu
+ * rendering. ALLOW_NATIVE_BASELINE=1 overrides it for throwaway local runs.
  */
 
 test.describe('Visual Regression - Home Page', () => {
