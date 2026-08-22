@@ -49,9 +49,13 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
  * Update baselines:
  *   npm run test:visual:baseline:docker
  *
- * Any snapshot-writing run on a non-Linux host is refused by the guard in
- * playwright.config.ts, since host-rendered pixels do not match CI's Ubuntu
- * rendering. ALLOW_NATIVE_BASELINE=1 overrides it for throwaway local runs.
+ * On a non-Linux host, a run that would *overwrite* existing baselines (-u,
+ * --update-snapshots=all/changed) is refused up front by the guard in
+ * playwright.config.ts. The default `missing` mode is allowed, since it is what
+ * every ordinary run uses -- but if it creates a baseline, globalTeardown deletes
+ * that file and fails the run. Either way no host-rendered pixels, which do not
+ * match CI's Ubuntu rendering, survive to be committed.
+ * ALLOW_NATIVE_BASELINE=1 overrides both for throwaway local runs.
  */
 
 test.describe('Visual Regression - Home Page', () => {

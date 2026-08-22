@@ -55,13 +55,13 @@ export const assertSnapshotWritesAllowed = (writesSnapshots: boolean) => {
  */
 const checkoutKey = () => createHash('sha256').update(process.cwd()).digest('hex').slice(0, 12);
 
-const manifestPath = () => {
+const manifestPath = (pid: number = process.pid) => {
 	// Keyed by pid as well as checkout: globalSetup and globalTeardown share one runner
 	// process, but two concurrent runs from the same checkout would otherwise share one
 	// manifest -- the second run's setup would clobber the first's list, and whichever
 	// teardown ran first would delete the file, letting the other run's created
 	// snapshots escape the check entirely.
-	return join(tmpdir(), `astro-blog-snapshots-${checkoutKey()}-${process.pid}.json`);
+	return join(tmpdir(), `astro-blog-snapshots-${checkoutKey()}-${pid}.json`);
 };
 
 const snapshotFilesUnder = (root: string): string[] => {
@@ -138,9 +138,45 @@ const acquireLock = () => {
 		);
 	}
 
-	// The holder died before its teardown ran. Reclaim, and let a genuine race lose.
+	// The holder died before its teardown ran. Anything it created is still on disk and
+	// would otherwise be scanned into *this* run's manifest as pre-existing -- surviving
+	// the guard for good. Its manifest names what the tree held before it started, so
+	// clean up against that before reclaiming.
+	recoverAfter(holder, 'tests');
+
 	rmSync(path, { force: true });
 	writeFileSync(path, String(process.pid), { flag: 'wx' });
+};
+
+/**
+ * Undo a killed run's snapshot writes, using the manifest it left behind.
+ * Best-effort: without that manifest there is no way to tell its output from a
+ * committed baseline, so nothing is deleted and the run is warned about instead.
+ */
+const recoverAfter = (deadPid: number, root: string) => {
+	const stale = manifestPath(deadPid);
+	if (!existsSync(stale)) {
+		console.warn(
+			`[snapshot-guard] A previous run (pid ${deadPid}) was interrupted and left no manifest. ` +
+				'If it created any baselines, verify them with `git status` before committing.'
+		);
+		return;
+	}
+
+	const before = new Set<string>(JSON.parse(readFileSync(stale, 'utf8')));
+	rmSync(stale, { force: true });
+
+	const created = snapshotFilesUnder(root).filter((file) => !before.has(file));
+	if (created.length === 0) return;
+
+	removeCreated(created);
+	console.warn(
+		[
+			`[snapshot-guard] A previous run (pid ${deadPid}) was interrupted after writing`,
+			`${created.length} host-rendered snapshot(s). Removed:`,
+			...created.map((file) => `  ${file}`),
+		].join('\n')
+	);
 };
 
 const releaseLock = () => {
@@ -149,6 +185,29 @@ const releaseLock = () => {
 		if (readFileSync(path, 'utf8').trim() === String(process.pid)) rmSync(path, { force: true });
 	} catch (error) {
 		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+	}
+};
+
+/**
+ * Delete files this run created, plus any -snapshots directory the run itself created.
+ * Callers only ever pass paths that were absent when their run started.
+ */
+const removeCreated = (created: string[]) => {
+	for (const file of created) {
+		try {
+			unlinkSync(file);
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		}
+	}
+	// rmdirSync fails on a non-empty directory, which is exactly what is wanted here:
+	// never touch a directory that still holds committed baselines.
+	for (const dir of new Set(created.map((file) => dirname(file)))) {
+		try {
+			rmdirSync(dir);
+		} catch {
+			/* still holds committed baselines -- leave it */
+		}
 	}
 };
 
@@ -162,51 +221,40 @@ export const recordExistingSnapshots = (root: string) => {
 
 export const assertNoSnapshotsCreated = (root: string) => {
 	if (!guardActive()) return;
-	const path = manifestPath();
-	if (!existsSync(path)) {
+
+	// The lock stays held through the scan and the deletion. Releasing before them
+	// reopens exactly the race it exists to prevent: another run could record a file
+	// this teardown is about to delete as pre-existing, then recreate it in `missing`
+	// mode with its own manifest not flagging it.
+	try {
+		const path = manifestPath();
+		if (!existsSync(path)) return;
+
+		const before = new Set<string>(JSON.parse(readFileSync(path, 'utf8')));
+		rmSync(path, { force: true });
+
+		const created = snapshotFilesUnder(root).filter((file) => !before.has(file));
+		if (created.length === 0) return;
+
+		// Only ever removes paths absent before this run started.
+		removeCreated(created);
+
+		throw new Error(
+			[
+				`Refusing to keep ${created.length} snapshot(s) written from a ${process.platform} host.`,
+				'',
+				"These had no baseline yet, so Playwright created them from this host's rendering,",
+				"which does not match CI's Ubuntu font stack. They have been deleted:",
+				...created.map((file) => `  ${file}`),
+				'',
+				'Generate them where they will match CI:',
+				'  npm run test:visual:baseline:docker',
+				'',
+				'To keep host-rendered snapshots anyway (only correct on a Linux host matching CI):',
+				'  ALLOW_NATIVE_BASELINE=1 <command>',
+			].join('\n')
+		);
+	} finally {
 		releaseLock();
-		return;
 	}
-
-	const before = new Set<string>(JSON.parse(readFileSync(path, 'utf8')));
-	rmSync(path, { force: true });
-	releaseLock();
-
-	const created = snapshotFilesUnder(root).filter((file) => !before.has(file));
-	if (created.length === 0) return;
-
-	// Only ever removes paths absent before this run started.
-	for (const file of created) {
-		try {
-			unlinkSync(file);
-		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-		}
-	}
-	// Drop the -snapshots directory too if the run was what created it. rmdirSync fails
-	// on a non-empty directory, which is exactly the guard wanted: never touch a
-	// directory that still holds committed baselines.
-	for (const dir of new Set(created.map((file) => dirname(file)))) {
-		try {
-			rmdirSync(dir);
-		} catch {
-			/* still holds committed baselines -- leave it */
-		}
-	}
-
-	throw new Error(
-		[
-			`Refusing to keep ${created.length} snapshot(s) written from a ${process.platform} host.`,
-			'',
-			'These had no baseline yet, so Playwright created them from this host\'s rendering,',
-			"which does not match CI's Ubuntu font stack. They have been deleted:",
-			...created.map((file) => `  ${file}`),
-			'',
-			'Generate them where they will match CI:',
-			'  npm run test:visual:baseline:docker',
-			'',
-			'To keep host-rendered snapshots anyway (only correct on a Linux host matching CI):',
-			'  ALLOW_NATIVE_BASELINE=1 <command>',
-		].join('\n')
-	);
 };
