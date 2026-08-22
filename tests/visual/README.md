@@ -40,8 +40,9 @@ npm run test:visual:baseline:docker
 # Run against a container matching CI, without updating baselines
 npm run test:visual:docker
 
-# Create/update baselines from local macOS rendering (fast iteration only — do not commit the result)
-npm run test:visual:baseline
+# Create/update baselines from local macOS rendering (fast iteration only — do not commit the result).
+# Guarded: refuses unless ALLOW_NATIVE_BASELINE=1, so host-rendered pixels cannot land in a commit by accident.
+ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline
 
 # Test against staging (GitHub Pages)
 npm run test:staging -- --project=visual-*
@@ -56,7 +57,7 @@ npm run test:visual:report
 ./scripts/visual-test.sh local              # Local dev
 ./scripts/visual-test.sh staging            # Staging
 ./scripts/visual-test.sh production         # Production
-./scripts/visual-test.sh baseline           # Create baselines (macOS rendering — fast iteration only)
+./scripts/visual-test.sh baseline           # Create baselines (macOS rendering — fast iteration only; needs ALLOW_NATIVE_BASELINE=1)
 ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
 ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container (use for commits)
 ./scripts/visual-test.sh compare            # View report
@@ -208,7 +209,7 @@ tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
 **Baseline Workflow:**
 - **`pr-visual-check.yml`** gates PRs to `staging` by comparing against committed baselines
 - **Updating baselines for commit**: run `npm run test:visual:baseline:docker` (runs the official `mcr.microsoft.com/playwright:v<version>-noble` image, version-matched to the installed `@playwright/test`, matching CI's Ubuntu font stack), then commit the updated PNGs
-- **Quick local iteration** (not for commit): `npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift
+- **Quick local iteration** (not for commit): `ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift. Without the env var the command refuses, so the only way to overwrite committed baselines is a deliberate override.
 
 **Test commands:**
 

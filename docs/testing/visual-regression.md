@@ -11,7 +11,7 @@ Playwright visual regression tests for key pages. Baselines are committed in `te
 ### Commands
 ```bash
 npm run test:visual                  # Run tests against local baseline
-npm run test:visual:baseline         # Generate new baseline snapshots from macOS rendering (local iteration only — do not commit)
+ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline   # Host-rendered baselines (local iteration only — do not commit; refuses without the env var)
 npm run test:visual:docker           # Run tests in a container matching CI's Ubuntu font rendering
 npm run test:visual:baseline:docker  # Generate baseline snapshots matching CI (use this before committing)
 npm run test:visual:report           # View HTML report

@@ -6,7 +6,7 @@
 #   ./scripts/visual-test.sh local              # Test local dev
 #   ./scripts/visual-test.sh staging            # Test staging
 #   ./scripts/visual-test.sh production         # Test production
-#   ./scripts/visual-test.sh baseline           # Create/update baselines from local
+#   ./scripts/visual-test.sh baseline           # Create/update baselines from local (guarded; see ALLOW_NATIVE_BASELINE)
 #   ./scripts/visual-test.sh docker             # Test against a container matching CI's OS/fonts
 #   ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container
 #
@@ -76,6 +76,21 @@ case $ENVIRONMENT in
     ;;
 
   baseline)
+    # Baselines are compared against CI's Ubuntu rendering, so snapshots written by a
+    # bare (host-rendered) run are only ever correct on a Linux host matching CI. On
+    # any other host they overwrite committed files with pixels that CI will reject.
+    # Refuse by default; ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch.
+    if [ "${ALLOW_NATIVE_BASELINE:-}" != "1" ]; then
+      echo "Refusing to write baselines from a host-rendered run." >&2
+      echo "" >&2
+      echo "Committed baselines must match CI's Ubuntu rendering. Use:" >&2
+      echo "  ./scripts/visual-test.sh docker-baseline" >&2
+      echo "" >&2
+      echo "To override anyway (only correct on a Linux host matching CI):" >&2
+      echo "  ALLOW_NATIVE_BASELINE=1 ./scripts/visual-test.sh baseline" >&2
+      exit 1
+    fi
+    echo "⚠️  ALLOW_NATIVE_BASELINE=1 — writing baselines from this host's rendering"
     echo "📸 Creating/updating baselines from LOCAL dev"
     npm run test:visual -- --update-snapshots
     echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/"
@@ -103,7 +118,7 @@ case $ENVIRONMENT in
     echo "  ./scripts/visual-test.sh local              # Test local dev"
     echo "  ./scripts/visual-test.sh staging            # Test staging (GitHub Pages)"
     echo "  ./scripts/visual-test.sh production         # Test production (kyle.skrinak.com)"
-    echo "  ./scripts/visual-test.sh baseline           # Create/update baselines"
+    echo "  ./scripts/visual-test.sh baseline           # Create/update baselines (guarded; see ALLOW_NATIVE_BASELINE)"
     echo "  ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts"
     echo "  ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container"
     echo "  ./scripts/visual-test.sh compare            # View HTML report"
