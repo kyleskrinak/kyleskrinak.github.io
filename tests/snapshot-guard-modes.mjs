@@ -22,9 +22,10 @@ export const OVERWRITING_MODES = ['all', 'changed'];
 /** @param {string} mode */
 export const overwritesBaselines = (mode) => OVERWRITING_MODES.includes(mode);
 
-// Short flags taking a value: -c <config>, -g <grep>, -j <workers>. In a cluster the
-// first such flag consumes the remainder, so `-gu` is grep="u", not -u.
-const VALUE_CONSUMING = 'cgj';
+// Short flags taking a value: -c <config>, -g <grep>, -G <grep-invert>, -j <workers>.
+// In a cluster the first such flag consumes the remainder, so `-gu` is grep="u" and
+// `-Gu` is grep-invert="u" -- neither is an update flag.
+const VALUE_CONSUMING = 'cgGj';
 
 /**
  * Whether argv asks for a run that would overwrite existing baselines.

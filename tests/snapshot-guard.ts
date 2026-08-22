@@ -53,14 +53,15 @@ export const assertSnapshotWritesAllowed = (writesSnapshots: boolean) => {
  * `npm run test:visual:baseline:docker`. Leaving them is exactly the path by which host
  * pixels reach the repository.
  */
+const checkoutKey = () => createHash('sha256').update(process.cwd()).digest('hex').slice(0, 12);
+
 const manifestPath = () => {
 	// Keyed by pid as well as checkout: globalSetup and globalTeardown share one runner
 	// process, but two concurrent runs from the same checkout would otherwise share one
 	// manifest -- the second run's setup would clobber the first's list, and whichever
 	// teardown ran first would delete the file, letting the other run's created
 	// snapshots escape the check entirely.
-	const key = createHash('sha256').update(process.cwd()).digest('hex').slice(0, 12);
-	return join(tmpdir(), `astro-blog-snapshots-${key}-${process.pid}.json`);
+	return join(tmpdir(), `astro-blog-snapshots-${checkoutKey()}-${process.pid}.json`);
 };
 
 const snapshotFilesUnder = (root: string): string[] => {
@@ -69,8 +70,12 @@ const snapshotFilesUnder = (root: string): string[] => {
 		let entries;
 		try {
 			entries = readdirSync(dir, { withFileTypes: true });
-		} catch {
-			return;
+		} catch (error) {
+			// A directory that isn't there yet is expected -- the -snapshots tree is
+			// created lazily. Anything else (EACCES, EIO) would silently hide files from
+			// the after-run scan and let a host-rendered baseline survive, so fail closed.
+			if ((error as NodeJS.ErrnoException).code === 'ENOENT') return;
+			throw error;
 		}
 		for (const entry of entries) {
 			const full = join(dir, entry.name);
@@ -85,26 +90,99 @@ const snapshotFilesUnder = (root: string): string[] => {
 	return found.sort();
 };
 
+/**
+ * Serialize guarded runs.
+ *
+ * Keying the manifest by pid stops two runs sharing one list, but they still share the
+ * snapshot tree: if both start with the same baseline absent, both record it as absent,
+ * and whichever teardown runs first deletes a file the other run may still be using.
+ * Isolating the tree is not an option -- it is the repository's own baselines -- so the
+ * runs are serialized instead. A second guarded run refuses immediately rather than
+ * racing.
+ *
+ * Only guarded runs take the lock: Linux, CI, and ALLOW_NATIVE_BASELINE=1 never do.
+ */
+const lockPath = () => `${join(tmpdir(), `astro-blog-snapshots-${checkoutKey()}`)}.lock`;
+
+const holderIsAlive = (pid: number) => {
+	try {
+		// Signal 0 checks for the process without touching it.
+		process.kill(pid, 0);
+		return true;
+	} catch (error) {
+		// EPERM means the process exists but belongs to another user -- alive, and
+		// certainly not ours to steal the lock from. Only ESRCH means it is gone.
+		return (error as NodeJS.ErrnoException).code === 'EPERM';
+	}
+};
+
+const acquireLock = () => {
+	const path = lockPath();
+	try {
+		writeFileSync(path, String(process.pid), { flag: 'wx' });
+		return;
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+	}
+
+	const holder = Number.parseInt(readFileSync(path, 'utf8').trim(), 10);
+	if (Number.isFinite(holder) && holderIsAlive(holder)) {
+		throw new Error(
+			[
+				`Another guarded Playwright run (pid ${holder}) is already in progress.`,
+				'',
+				'Guarded runs are serialized because they share this checkout\'s baseline',
+				'files: concurrent runs can delete a snapshot the other is still using.',
+				'Wait for it to finish, or run one of them with ALLOW_NATIVE_BASELINE=1.',
+			].join('\n')
+		);
+	}
+
+	// The holder died before its teardown ran. Reclaim, and let a genuine race lose.
+	rmSync(path, { force: true });
+	writeFileSync(path, String(process.pid), { flag: 'wx' });
+};
+
+const releaseLock = () => {
+	const path = lockPath();
+	try {
+		if (readFileSync(path, 'utf8').trim() === String(process.pid)) rmSync(path, { force: true });
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+	}
+};
+
 export const recordExistingSnapshots = (root: string) => {
 	if (!guardActive()) return;
 	const path = manifestPath();
 	mkdirSync(tmpdir(), { recursive: true });
+	acquireLock();
 	writeFileSync(path, JSON.stringify(snapshotFilesUnder(root)), 'utf8');
 };
 
 export const assertNoSnapshotsCreated = (root: string) => {
 	if (!guardActive()) return;
 	const path = manifestPath();
-	if (!existsSync(path)) return;
+	if (!existsSync(path)) {
+		releaseLock();
+		return;
+	}
 
 	const before = new Set<string>(JSON.parse(readFileSync(path, 'utf8')));
 	rmSync(path, { force: true });
+	releaseLock();
 
 	const created = snapshotFilesUnder(root).filter((file) => !before.has(file));
 	if (created.length === 0) return;
 
 	// Only ever removes paths absent before this run started.
-	for (const file of created) unlinkSync(file);
+	for (const file of created) {
+		try {
+			unlinkSync(file);
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		}
+	}
 	// Drop the -snapshots directory too if the run was what created it. rmdirSync fails
 	// on a non-empty directory, which is exactly the guard wanted: never touch a
 	// directory that still holds committed baselines.

@@ -114,7 +114,11 @@ case $ENVIRONMENT in
       echo "⚠️  ALLOW_NATIVE_BASELINE=1 — writing baselines from this host's rendering"
     fi
     echo "📸 Creating/updating baselines from LOCAL dev"
-    npm run test:visual -- --update-snapshots "${PLAYWRIGHT_ARGS[@]}"
+    # =changed is spelled out because --update-snapshots takes an *optional* mode: a
+    # bare flag would swallow a following positional filter as its mode, so
+    # `... baseline tests/visual/foo.spec.ts` would exit on an invalid mode instead of
+    # updating that one test. 'changed' is Playwright's own preset for the bare flag.
+    npm run test:visual -- --update-snapshots=changed "${PLAYWRIGHT_ARGS[@]}"
     echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/"
     ;;
 
@@ -124,7 +128,8 @@ case $ENVIRONMENT in
 
   docker-baseline)
     echo "📸 Creating/updating baselines via Docker (Ubuntu, matches CI)"
-    run_in_docker " --update-snapshots"
+    # Explicit mode for the same reason as the native baseline path above.
+    run_in_docker " --update-snapshots=changed"
     echo "✓ Baselines updated in tests/visual/visual-regression.spec.ts-snapshots/ (Ubuntu-rendered)"
     ;;
 

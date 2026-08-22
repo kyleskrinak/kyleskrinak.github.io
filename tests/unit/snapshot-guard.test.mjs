@@ -42,6 +42,9 @@ test('a value-consuming short flag swallows the rest of its cluster', () => {
 	assert.equal(argvRequestsSnapshotWrites(argv('-gu')), false);
 	assert.equal(argvRequestsSnapshotWrites(argv('-cu')), false);
 	assert.equal(argvRequestsSnapshotWrites(argv('-ju')), false);
+	// -G is --grep-invert and swallows the cluster exactly like -g.
+	assert.equal(argvRequestsSnapshotWrites(argv('-Gu')), false);
+	assert.equal(argvRequestsSnapshotWrites(argv('-Guall')), false);
 	// `-ug` is not a bypass either: -u swallows 'g' as its mode, and Playwright rejects
 	// it ("argument 'g' is invalid"), so there is no run to guard.
 	assert.equal(argvRequestsSnapshotWrites(argv('-ug')), false);
