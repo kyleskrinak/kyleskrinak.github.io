@@ -1,65 +1,30 @@
 import { defineConfig, devices } from '@playwright/test';
 import { BASE_URL } from './tests/test-utils';
+import { argvRequestsSnapshotWrites, assertSnapshotWritesAllowed } from './tests/snapshot-guard';
 
 /**
- * Refuse to write snapshots from a non-Linux host.
+ * Refuse to write snapshots from a host whose rendering doesn't match CI.
  *
- * Committed baselines are compared against CI's Ubuntu rendering, whose font stack
- * renders slightly taller than macOS. Snapshots written on any other host overwrite
- * committed files with pixels CI will reject. scripts/visual-test.sh guards its own
- * `baseline` mode, but every other entry point -- `npm run test:visual -- -u`, a bare
- * `npx playwright test -u` -- bypasses that script entirely, so the check lives here
- * where all of them pass through. Docker and CI both run Linux, so the modes that are
- * meant to write baselines are unaffected.
+ * scripts/visual-test.sh guards only its own `baseline` mode, so every other entry
+ * point -- `npm run test:visual -- -u`, a bare `npx playwright test -uall` -- would
+ * otherwise overwrite committed PNGs with host-rendered pixels CI rejects.
  *
- * ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch.
+ * Two layers, because argv spellings kept slipping past a scan (`-uall` and `-xu`
+ * both reach --update-snapshots): this fast path refuses common cases before the
+ * webServer build starts, and globalSetup re-checks Playwright's own parsed
+ * `config.updateSnapshots`, which cannot be evaded at all.
+ *
+ * ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch for both.
  */
-const snapshotUpdateModes = (argv: string[]): string[] => {
-  const modes: string[] = [];
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (arg.startsWith('--update-snapshots=')) {
-      modes.push(arg.slice('--update-snapshots='.length));
-      continue;
-    }
-    if (arg === '--update-snapshots' || arg === '-u') {
-      // Playwright's mode value is optional, so the next token is only the mode when
-      // it is not another flag. A positional filter read as a mode is harmless: it is
-      // simply not 'none', which fails safe toward refusing the run.
-      const next = argv[i + 1];
-      modes.push(next !== undefined && !next.startsWith('-') ? next : 'changed');
-    }
-  }
-  return modes;
-};
-
-// Every occurrence counts, not just the first: Playwright takes the last one, so a
-// leading `--update-snapshots=none` must not mask a later `--update-snapshots=all`.
-// Any non-'none' mode is enough to refuse.
-const writesSnapshots = snapshotUpdateModes(process.argv).some((mode) => mode !== 'none');
-if (
-  writesSnapshots &&
-  process.platform !== 'linux' &&
-  process.env.ALLOW_NATIVE_BASELINE !== '1'
-) {
-  throw new Error(
-    [
-      `Refusing to write snapshots from a ${process.platform} host.`,
-      '',
-      "Committed baselines must match CI's Ubuntu rendering. Use:",
-      '  npm run test:visual:baseline:docker',
-      '',
-      'To override anyway (only correct on a Linux host matching CI):',
-      '  ALLOW_NATIVE_BASELINE=1 <command>',
-    ].join('\n')
-  );
-}
+assertSnapshotWritesAllowed(argvRequestsSnapshotWrites(process.argv));
 
 /**
  * Unified Playwright configuration for all test types
  * Uses projects to organize tests by category (visual, SEO, analytics)
  */
 export default defineConfig({
+  globalSetup: './tests/global-snapshot-guard.ts',
+
   // Omit the OS/platform suffix ({-snapshotSuffix}) so baselines committed on macOS
   // resolve correctly on Linux CI. Default template with that token removed.
   snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}{-projectName}{ext}',
