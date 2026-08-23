@@ -2,8 +2,17 @@
 import type { HTMLAttributes } from "astro/types";
 import Socials from "./Socials.astro";
 import Webring from "./Webring.astro";
+import { SITE } from "@/config";
+import { linkWithBase } from "@/utils/linkWithBase";
 
 const currentYear = new Date().getFullYear();
+
+// The h-card is only *representative* on the page whose URL its u-url matches,
+// so it renders on the homepage alone. Trailing slashes are normalized because
+// astro.config.ts sets trailingSlash: "always" while BASE_URL may lack one.
+const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
+const isHome =
+  withSlash(Astro.url.pathname) === withSlash(import.meta.env.BASE_URL || "/");
 
 type Props = {
   noMarginTop?: boolean;
@@ -31,4 +40,32 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
     </div>
   </div>
   <Webring />
+
+  {
+    isHome && (
+      <div class="pb-6 text-center">
+        <div class="inline-block rounded-lg border border-border px-4 py-3">
+          <div class="h-card inline-flex items-center gap-2">
+            <img
+              src={linkWithBase("favicon-96x96.png")}
+              alt=""
+              width="32"
+              height="32"
+              decoding="async"
+              class="u-photo size-8 rounded-full"
+            />
+            <a
+              href={SITE.website}
+              class="p-name u-url font-semibold underline decoration-dashed underline-offset-4 hover:text-accent"
+            >
+              {SITE.author}
+            </a>
+          </div>
+          <p class="mt-1 text-sm opacity-80">
+            That&rsquo;s an h-card. It&rsquo;s there so robots know who I am.
+          </p>
+        </div>
+      </div>
+    )
+  }
 </footer>

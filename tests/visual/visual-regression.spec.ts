@@ -47,7 +47,15 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:visual
  *
  * Update baselines:
- *   npm run test:visual -- --update-snapshots
+ *   npm run test:visual:baseline:docker
+ *
+ * On a non-Linux host, a run that would *overwrite* existing baselines (-u,
+ * --update-snapshots=all/changed) is refused by tests/global-snapshot-guard.ts. The
+ * default `missing` mode is allowed, since every ordinary run uses it -- but if it
+ * creates a baseline, tests/global-snapshot-teardown.ts deletes that file and fails
+ * the run. Either way no host-rendered pixels, which do not match CI's Ubuntu
+ * rendering, survive to be committed.
+ * ALLOW_NATIVE_BASELINE=1 overrides both for throwaway local runs.
  */
 
 test.describe('Visual Regression - Home Page', () => {
