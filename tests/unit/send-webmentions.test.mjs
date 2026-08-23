@@ -415,6 +415,51 @@ describe("attemptLimitFor", () => {
     // A site down for a week of deploys must still be picked up on return.
     assert.ok(attemptLimitFor("transient") >= 10);
   });
+
+  it("gives up on a missing endpoint after a single observation", () => {
+    // The page was fetched and parsed; refetching it next deploy learns
+    // nothing. One is the point — the 30-day re-probe does the rest.
+    assert.equal(attemptLimitFor("no-endpoint"), 1);
+  });
+
+  it("is strictest for a missing endpoint", () => {
+    assert.ok(attemptLimitFor("no-endpoint") < attemptLimitFor("refused"));
+  });
+});
+
+describe("no-endpoint targets are reconsidered, not written off", () => {
+  const now = Date.parse("2026-08-23T00:00:00.000Z");
+
+  it("stops probing immediately after one observation", () => {
+    const record = recordFailure(undefined, "no-endpoint", now);
+    assert.equal(record.failures, 1);
+    assert.equal(shouldSkipTarget(record, now), true);
+  });
+
+  it("probes again once the re-probe interval has passed", () => {
+    // The regression this guards: a target recorded in `sent` would never be
+    // reconsidered, because `sent` is never pruned.
+    const record = recordFailure(undefined, "no-endpoint", now);
+    assert.equal(shouldSkipTarget(record, now + REPROBE_AFTER_MS + 1), false);
+  });
+
+  it("rests another full interval when the re-probe still finds nothing", () => {
+    const first = recordFailure(undefined, "no-endpoint", now);
+    const later = now + REPROBE_AFTER_MS + 1;
+    const second = recordFailure(first, "no-endpoint", later);
+    assert.equal(second.failures, 2);
+    assert.equal(shouldSkipTarget(second, later), true);
+    assert.equal(shouldSkipTarget(second, later + REPROBE_AFTER_MS + 1), false);
+  });
+
+  it("keeps a target pending so a later endpoint still gets delivered", () => {
+    // diffPost drives what gets probed. A no-endpoint target must stay in
+    // `pending`, which is exactly what routing it away from `sent` achieves.
+    const links = ["https://example.com/a/"];
+    const { pending, unchanged } = diffPost(links, { hash: "x", sent: [] });
+    assert.deepEqual(pending, links);
+    assert.equal(unchanged, false);
+  });
 });
 
 describe("shouldSkipTarget", () => {

@@ -24,7 +24,9 @@
  * Targets that keep failing stop being probed. State also carries a per-target
  * record of { failures, kind, lastAttempt }; after a limit that depends on the
  * failure kind, the target is skipped entirely, and reconsidered once every 30
- * days thereafter. A success clears the record.
+ * days thereafter. A success clears the record. "No endpoint advertised" is one
+ * of those kinds rather than a delivery: sites adopt webmentions, and `sent` is
+ * permanent, so a single probe must not settle the question forever.
  *
  * Targets are never pruned from `sent` when a link is removed from a post.
  * Pruning would mean that deleting a link and later restoring it re-notifies a
@@ -38,7 +40,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { readFile, writeFile, readdir } from "node:fs/promises";
+import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseHTML } from "linkedom";
@@ -63,17 +65,25 @@ const REQUEST_TIMEOUT_MS = 15000;
 /**
  * Consecutive-failure limits before a target stops being probed.
  *
- * Two limits, because a 403 and a 503 are not the same signal. A 4xx is a
- * working server answering the question: it has looked at the request and
- * said no, and it will keep saying no. Three identical answers is enough.
- * Everything else — 5xx, a timeout, a DNS failure, a connection reset — is
- * the absence of an answer, which says nothing about whether the site will
- * accept a mention once it is back. That case is deliberately generous: at
- * this repo's deploy cadence ten attempts spans well over a week, so a site
- * down for a week of deploys is still picked up when it returns.
+ * Three limits, because a 403, a 503 and "no endpoint advertised" are not the
+ * same signal. A 4xx is a working server answering the question: it has looked
+ * at the request and said no, and it will keep saying no. Three identical
+ * answers is enough. Everything else — 5xx, a timeout, a DNS failure, a
+ * connection reset — is the absence of an answer, which says nothing about
+ * whether the site will accept a mention once it is back. That case is
+ * deliberately generous: at this repo's deploy cadence ten attempts spans well
+ * over a week, so a site down for a week of deploys is still picked up when it
+ * returns.
+ *
+ * "No endpoint" needs no repetition at all: the page was fetched and parsed
+ * successfully and advertised nothing, and a second identical fetch on the next
+ * deploy cannot say anything new. One observation, then the 30-day
+ * reconsideration — which is the whole point of routing it here rather than
+ * into the permanent `sent` log.
  */
 const MAX_REFUSED_ATTEMPTS = 3;
 const MAX_TRANSIENT_ATTEMPTS = 10;
+const MAX_NO_ENDPOINT_ATTEMPTS = 1;
 
 /**
  * How long a given-up target rests before one more attempt.
@@ -187,10 +197,11 @@ export function classifyFailure(result) {
 }
 
 /**
- * @param {"refused"|"transient"} kind
+ * @param {"refused"|"transient"|"no-endpoint"} kind
  * @returns {number}
  */
 export function attemptLimitFor(kind) {
+  if (kind === "no-endpoint") return MAX_NO_ENDPOINT_ATTEMPTS;
   return kind === "refused" ? MAX_REFUSED_ATTEMPTS : MAX_TRANSIENT_ATTEMPTS;
 }
 
@@ -221,7 +232,7 @@ export function shouldSkipTarget(record, now = Date.now()) {
  * a target alternating 503 and 403 evade every limit forever.
  *
  * @param {{failures?: number}|undefined} record
- * @param {"refused"|"transient"} kind
+ * @param {"refused"|"transient"|"no-endpoint"} kind
  * @param {number} now
  * @returns {{failures: number, kind: string, lastAttempt: string}}
  */
@@ -491,11 +502,18 @@ async function main() {
         delete state.targets[target];
         console.log(`sent ${pageUrl} -> ${target} (${result.status})`);
       } else if (result.noEndpoint) {
-        // Not a failure: the target simply doesn't accept webmentions. Record
-        // it so we stop re-probing the same URL on every future deploy.
-        sent.add(target);
+        // Not a failure, but not permanent either. This goes in `targets`, not
+        // `sent`: `sent` is never pruned by design, so writing here would mean
+        // one probe decides forever that a site will never adopt webmentions —
+        // a stronger claim than we make about a server that actively refuses
+        // us. Recorded as its own kind, it stops being probed immediately and
+        // is reconsidered every 30 days like any other give-up.
+        state.targets[target] = recordFailure(
+          state.targets[target],
+          "no-endpoint",
+          now,
+        );
         noEndpointCount++;
-        delete state.targets[target];
       } else {
         const kind = classifyFailure(result);
         const record = recordFailure(state.targets[target], kind, now);
@@ -514,6 +532,11 @@ async function main() {
   }
 
   if (!args.dryRun) {
+    // The workflow does `mkdir -p`, but the documented CLI contract accepts an
+    // arbitrary --state path and must hold on its own. Reachable only on a
+    // seeding run — a run that read the file proves its directory exists — so
+    // this converts a confusing post-run crash, not a lost delivery.
+    await mkdir(path.dirname(path.resolve(args.state)), { recursive: true });
     await writeFile(args.state, `${JSON.stringify(state, null, 2)}\n`);
   }
 
@@ -523,7 +546,7 @@ async function main() {
     );
   } else {
     console.log(
-      `${pages.length} posts scanned, ${considered} pending targets, ` +
+      `${pages.length} posts scanned, ${considered} targets examined, ` +
         `${sentCount} sent, ${noEndpointCount} without an endpoint, ` +
         `${failedCount} deferred, ${skippedCount} skipped (previously gave up).`,
     );
@@ -535,7 +558,13 @@ async function main() {
 // URL and percent-encodes characters a path may legitimately contain, so a
 // checkout under a directory with a space compares unequal and main() silently
 // never runs.
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// argv[1] is absent under `node -e`, the REPL and some worker contexts;
+// pathToFileURL throws on undefined, and importing this module for its pure
+// functions must never throw.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((err) => {
     console.error(`Webmention sending failed: ${err.message}`);
     process.exitCode = 1;
