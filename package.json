@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=22.22.2"
   },
-  "packageManager": "npm@12.0.1",
+  "packageManager": "npm@12.0.2",
   "scripts": {
     "dev": "astro dev",
     "lint:resume": "node scripts/lint-resume.mjs",
@@ -104,10 +104,10 @@
   },
   "overrides": {
     "devalue": "5.9.0",
-    "fast-uri": "4.1.1",
+    "fast-uri": "4.1.2",
     "fast-xml-builder": "1.3.0",
     "fast-xml-parser": "5.10.1",
-    "flatted": "3.4.2",
+    "flatted": "3.4.4",
     "brace-expansion": "5.0.9",
     "postcss": "8.5.20"
   }
