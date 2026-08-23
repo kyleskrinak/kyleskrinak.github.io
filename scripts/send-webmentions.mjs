@@ -34,8 +34,15 @@
  * prevent. The log grows by URLs-ever-linked, which is small and bounded by
  * content.
  *
+ * A missing state file is an ERROR, not a first run. Only --allow-seed makes
+ * the script seed from current content and send nothing. The caller is the one
+ * that can tell "never run before" from "the download failed", and inferring
+ * the former from an absent file would silently mark every pending delivery as
+ * sent and discard the failure history.
+ *
  * Usage:
  *   node scripts/send-webmentions.mjs --dist dist --state path/to/sent.json
+ *   node scripts/send-webmentions.mjs --allow-seed  # first run: seed, send nothing
  *   node scripts/send-webmentions.mjs --dry-run     # report only, never sends
  */
 
@@ -563,16 +570,31 @@ async function sendOne(source, target) {
   return { ok: true, endpoint, status: res.status };
 }
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const args = {
     dist: "dist",
     state: ".webmention-state/sent.json",
     dryRun: false,
+    allowSeed: false,
   };
+
+  // A flag whose value is missing, or is itself the next flag, would otherwise
+  // sail through as undefined and surface much later as a TypeError from
+  // path.join — a stack trace pointing at the wrong place entirely.
+  const valueFor = (flag, i) => {
+    const value = argv[i + 1];
+    if (value === undefined || value.startsWith("--")) {
+      throw new Error(`${flag} needs a value`);
+    }
+    return value;
+  };
+
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--dist") args.dist = argv[++i];
-    else if (argv[i] === "--state") args.state = argv[++i];
+    if (argv[i] === "--dist") args.dist = valueFor("--dist", i++);
+    else if (argv[i] === "--state") args.state = valueFor("--state", i++);
     else if (argv[i] === "--dry-run") args.dryRun = true;
+    else if (argv[i] === "--allow-seed") args.allowSeed = true;
+    else throw new Error(`Unrecognised argument: ${argv[i]}`);
   }
   return args;
 }
@@ -595,6 +617,18 @@ async function main() {
   const pages = await findPostPages(args.dist);
   const prior = await loadState(args.state);
   const seeding = prior === null;
+
+  // Seeding rewrites the whole log, so it must be asked for, never inferred.
+  // The caller cannot tell "no state yet" from "the download failed" by the
+  // absence of a file, and guessing wrong marks every pending delivery as
+  // sent and discards the failure history — silently, and unrecoverably.
+  if (seeding && !args.allowSeed) {
+    throw new Error(
+      `No state file at ${args.state}. Pass --allow-seed only if this is ` +
+        `genuinely a first run; otherwise the state failed to download and ` +
+        `re-seeding would discard the send history.`,
+    );
+  }
 
   const state = prior ?? { version: STATE_VERSION, posts: {}, targets: {} };
   const now = Date.now();

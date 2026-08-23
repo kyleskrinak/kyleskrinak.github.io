@@ -172,26 +172,40 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .webmention-state
+          SEED=""
 
-          # Backing store follows the ensure-release-pdfs pattern: a
-          # non-latest prerelease holding one asset, bootstrapped on demand.
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release '$TAG' missing — bootstrapping."
+          # Backing store follows the ensure-release-pdfs pattern: a non-latest
+          # prerelease holding one asset, bootstrapped on demand.
+          #
+          # Every branch below distinguishes "absent" from "could not tell".
+          # An absent file and a failed download look identical on disk, and
+          # seeding on the second would mark every pending delivery as sent and
+          # discard the failure history — silently, and with no way back. So
+          # the step fails instead, and the script refuses to seed unless this
+          # explicitly passes --allow-seed. continue-on-error keeps the deploy
+          # green either way; the next deploy retries.
+          if ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null); then
+            if grep -qx 'sent.json' <<<"$ASSETS"; then
+              # The asset exists, so the download must succeed. Under set -e a
+              # transient failure aborts the step rather than seeding.
+              gh release download "$TAG" --pattern sent.json --dir .webmention-state --clobber
+            else
+              echo "Release '$TAG' has no sent.json asset — genuine first run."
+              SEED="--allow-seed"
+            fi
+          else
+            # Either the release does not exist yet or the API is unreachable.
+            # `gh release create` disambiguates: it succeeds only when the tag
+            # is genuinely absent, and under set -e any other outcome aborts.
+            echo "Release '$TAG' not readable — bootstrapping."
             gh release create "$TAG" \
               --title "Webmention send log (automation backing store)" \
               --notes "Tracks which (source, target) webmention pairs have been delivered." \
               --latest=false \
               --prerelease
+            SEED="--allow-seed"
           fi
 
-          # A missing asset is expected exactly once. The script's first-run
-          # guard then seeds from current content and sends nothing, so losing
-          # this file costs a quiet re-seed rather than re-notifying every site
-          # ever linked to.
-          if ! gh release download "$TAG" --pattern sent.json --dir .webmention-state --clobber 2>/dev/null; then
-            echo "No sent.json in '$TAG' — first run will seed without sending."
-          fi
-
-          node scripts/send-webmentions.mjs --dist dist --state .webmention-state/sent.json
+          node scripts/send-webmentions.mjs --dist dist --state .webmention-state/sent.json $SEED
 
           gh release upload "$TAG" .webmention-state/sent.json --clobber

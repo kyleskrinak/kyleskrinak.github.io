@@ -1,11 +1,24 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import {
   extractLinks,
   hashLinks,
   diffPost,
   discoverEndpoint,
   parseLinkHeader,
+  parseArgs,
   pageUrlFor,
   classifyFailure,
   attemptLimitFor,
@@ -697,5 +710,135 @@ describe("blocked hosts are never requested", () => {
   it("still infers the kind from status when none is given", () => {
     assert.equal(classifyFailure({ status: 503 }), "transient");
     assert.equal(classifyFailure({ status: 403 }), "refused");
+  });
+});
+
+describe("parseArgs", () => {
+  it("supplies the documented defaults", () => {
+    assert.deepEqual(parseArgs([]), {
+      dist: "dist",
+      state: ".webmention-state/sent.json",
+      dryRun: false,
+      allowSeed: false,
+    });
+  });
+
+  it("reads values for the flags that take one", () => {
+    const args = parseArgs(["--dist", "build", "--state", "/tmp/s.json"]);
+    assert.equal(args.dist, "build");
+    assert.equal(args.state, "/tmp/s.json");
+  });
+
+  it("sets the boolean flags", () => {
+    const args = parseArgs(["--dry-run", "--allow-seed"]);
+    assert.equal(args.dryRun, true);
+    assert.equal(args.allowSeed, true);
+  });
+
+  // Left unvalidated these become `undefined` and surface much later as a
+  // TypeError from path.join, pointing at the wrong place entirely.
+  it("rejects a flag whose value is missing", () => {
+    assert.throws(() => parseArgs(["--dist"]), /--dist needs a value/);
+    assert.throws(() => parseArgs(["--state"]), /--state needs a value/);
+  });
+
+  it("rejects a flag swallowing the next flag as its value", () => {
+    assert.throws(
+      () => parseArgs(["--dist", "--dry-run"]),
+      /--dist needs a value/,
+    );
+  });
+
+  it("rejects an unrecognised argument rather than ignoring it", () => {
+    assert.throws(() => parseArgs(["--distt", "build"]), /Unrecognised/);
+  });
+});
+
+// The one destructive-by-omission failure mode: a missing state file used to
+// mean "first run", so a failed download looked exactly like a fresh install
+// and re-seeding silently marked every pending delivery as sent. Exercised
+// through the CLI because the guard sits in main(), which is the contract the
+// deploy workflow actually depends on.
+describe("seeding requires --allow-seed", () => {
+  const scriptPath = fileURLToPath(
+    new URL("../../scripts/send-webmentions.mjs", import.meta.url),
+  );
+
+  /** A minimal dist tree with one post carrying one outbound link. */
+  const makeDist = () => {
+    const root = mkdtempSync(join(tmpdir(), "send-webmentions-test-"));
+    const postDir = join(root, "dist", "posts", "hello");
+    mkdirSync(postDir, { recursive: true });
+    writeFileSync(
+      join(postDir, "index.html"),
+      `<!doctype html><html><body><main id="main-content">` +
+        `<article id="article"><p><a href="https://example.com/a/">a</a></p></article>` +
+        `</main></body></html>`,
+    );
+    return root;
+  };
+
+  const run = (root, extraArgs) =>
+    spawnSync(
+      process.execPath,
+      [
+        scriptPath,
+        "--dist",
+        join(root, "dist"),
+        "--state",
+        join(root, "sent.json"),
+        ...extraArgs,
+      ],
+      { encoding: "utf8" },
+    );
+
+  it("refuses to seed when the state file is absent", () => {
+    const root = makeDist();
+    try {
+      const result = run(root, []);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr + result.stdout, /Pass --allow-seed/);
+      // Nothing written: a later run can still recover the real state.
+      assert.equal(existsSync(join(root, "sent.json")), false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("seeds when the first run is stated explicitly", () => {
+    const root = makeDist();
+    try {
+      const result = run(root, ["--allow-seed"]);
+      assert.equal(result.status, 0);
+      assert.match(result.stdout, /Seeded state/);
+      const state = JSON.parse(readFileSync(join(root, "sent.json"), "utf8"));
+      assert.deepEqual(Object.keys(state.targets ?? {}), []);
+      assert.equal(Object.keys(state.posts).length, 1);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("creates the state directory it was pointed at", () => {
+    const root = makeDist();
+    try {
+      const nested = join(root, "deep", "nested", "sent.json");
+      const result = spawnSync(
+        process.execPath,
+        [
+          scriptPath,
+          "--dist",
+          join(root, "dist"),
+          "--state",
+          nested,
+          "--allow-seed",
+        ],
+        { encoding: "utf8" },
+      );
+      assert.equal(result.status, 0);
+      assert.equal(existsSync(nested), true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
