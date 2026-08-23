@@ -103,6 +103,18 @@ const MAX_NO_ENDPOINT_ATTEMPTS = 1;
 export const MAX_REDIRECTS = 5;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
+// What fetch removes when a redirect drops the request body: every header
+// that described the body, not just the one naming its type.
+const BODY_HEADERS = [
+  "content-encoding",
+  "content-language",
+  "content-location",
+  "content-type",
+];
+
+// What must not follow a hop into another origin.
+const CREDENTIAL_HEADERS = ["authorization", "cookie", "proxy-authorization"];
+
 /**
  * How long a given-up target rests before one more attempt.
  *
@@ -539,6 +551,49 @@ function refuse(message) {
 }
 
 /**
+ * Header init in any of its three forms as one lowercased plain object.
+ *
+ * Spreading `init.headers` only works for a plain object — a Headers instance
+ * spreads to nothing and an entry array to a numeric mess. Going through
+ * Headers accepts all three and lowercases the names, so callers of the
+ * result can match a header without guessing how it was spelled.
+ *
+ * @param {HeadersInit|undefined} headers
+ * @returns {Record<string, string>}
+ */
+function normalizeHeaders(headers) {
+  try {
+    return Object.fromEntries(new Headers(headers));
+  } catch (err) {
+    // Headers rejects a malformed name or value, and so would fetch — but
+    // fetch rejects with a bare TypeError, which carries no kind, which
+    // classifyFailure reads as transient and retries ten times across ten
+    // deploys. The headers are built by this script and will be malformed
+    // every one of those times.
+    throw refuse(`unusable request headers: ${err.message}`);
+  }
+}
+
+/**
+ * The headers to carry from `current` into `next`.
+ *
+ * @param {RequestInit} init
+ * @param {URL} current
+ * @param {URL} next
+ * @returns {Record<string, string>}
+ */
+function carryHeaders(init, current, next) {
+  const headers = normalizeHeaders(init.headers);
+
+  // A redirect is the receiver's choice, not ours: anything it names gets
+  // whatever we send, so credentials do not cross an origin boundary.
+  if (next.origin !== current.origin) {
+    for (const name of CREDENTIAL_HEADERS) delete headers[name];
+  }
+  return headers;
+}
+
+/**
  * fetch with the host guard reapplied at every hop.
  *
  * `redirect: "follow"` checks nothing after the first URL, so the guard in
@@ -552,13 +607,32 @@ function refuse(message) {
  * anything but GET/HEAD into GET, 301/302 turn POST into GET, and 307/308
  * preserve both method and body. Receivers depend on this — an http->https
  * 301 in front of an endpoint is ordinary.
+ *
+ * Headers are carried the same way the spec carries them: rebuilt through
+ * `Headers` so the caller's spelling stops mattering, stripped of credentials
+ * on a hop that crosses origins, and — when the method change drops the body
+ * — stripped of all four headers that described it, not only its type. The
+ * host guard decides where we may go; this decides what we hand over once we
+ * are there.
+ *
+ * Stated limit: a 307/308 replays `options.body` on every hop, so a stream
+ * body would be spent after the first. Callers here pass strings.
  */
 export async function guardedFetch(url, options = {}) {
-  let current = url;
-  let init = { ...options, redirect: "manual" };
+  // A URL rather than a string: `next` is one already, and re-parsing the
+  // same address on every hop invites the two spellings to drift apart.
+  let current = new URL(url);
+  // Normalized before the first request, not just before each redirect:
+  // otherwise a malformed header reaches fetch, which throws a TypeError
+  // that no one classifies, and a permanent fault gets retried as transient.
+  let init = {
+    ...options,
+    headers: normalizeHeaders(options.headers),
+    redirect: "manual",
+  };
 
   for (let hop = 0; ; hop++) {
-    const res = await fetch(current, init);
+    const res = await fetch(current.href, init);
     if (!REDIRECT_STATUSES.has(res.status)) return res;
 
     // A 30x with no Location is not a redirect, just an odd response. Handing
@@ -587,17 +661,22 @@ export async function guardedFetch(url, options = {}) {
       );
     }
 
-    const method = init.method ?? "GET";
+    const headers = carryHeaders(init, current, next);
+
+    // fetch uppercases the methods it knows — GET, HEAD, POST and friends —
+    // so a caller writing "post" sends a POST and must be redirected as one.
+    const method = (init.method ?? "GET").toUpperCase();
     if (
       (res.status === 303 && method !== "GET" && method !== "HEAD") ||
       ((res.status === 301 || res.status === 302) && method === "POST")
     ) {
-      const headers = { ...init.headers };
-      // content-type described a body that no longer exists.
-      delete headers["content-type"];
+      // These described a body that no longer exists.
+      for (const name of BODY_HEADERS) delete headers[name];
       init = { ...init, method: "GET", body: undefined, headers };
+    } else {
+      init = { ...init, headers };
     }
-    current = next.href;
+    current = next;
   }
 }
 

@@ -1011,6 +1011,28 @@ describe("guardedFetch — the host guard survives redirects", () => {
       assert.equal(calls[1].method, "HEAD");
     });
 
+    // fetch normalizes the methods it knows, so "post" goes out as a POST.
+    // Comparing the caller's spelling would leave the body on a 301/302.
+    it("rewrites a lowercased post on 302", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", { ...post, method: "post" }),
+      );
+      assert.equal(calls[1].method, "GET");
+      assert.equal(calls[1].body, undefined);
+    });
+
+    it("leaves a lowercased head alone on 303", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b", 303),
+        () => guardedFetch("https://example.com/a", { method: "head" }),
+      );
+      assert.equal(calls[1].method, "head");
+    });
+
     // Receivers put http->https 308s in front of endpoints; dropping the body
     // there would deliver a webmention that says nothing.
     for (const status of [307, 308]) {
@@ -1030,6 +1052,182 @@ describe("guardedFetch — the host guard survives redirects", () => {
         );
       });
     }
+  });
+
+  describe("header handling mirrors the fetch spec", () => {
+    // fetch lowercases header names on the wire, so a delete that matches the
+    // caller's spelling instead would leave the stale header in place.
+    it("drops a capitalised Content-Type when the body goes", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "source=s&target=t",
+          }),
+      );
+      // Read it back through Headers: asserting on the lowercase key alone
+      // would pass while a stale "Content-Type" sat right beside it.
+      assert.equal(
+        new Headers(calls[1].init.headers).get("content-type"),
+        null,
+      );
+    });
+
+    // A Headers instance spreads to {}, which would have quietly dropped
+    // every header — the user-agent this sender identifies itself with above
+    // all — on the first hop.
+    it("carries a Headers instance across a hop", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            headers: new Headers({ "user-agent": "webmention-sender" }),
+          }),
+      );
+      assert.equal(calls[1].init.headers["user-agent"], "webmention-sender");
+    });
+
+    it("carries entry-array headers across a hop", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            headers: [["user-agent", "webmention-sender"]],
+          }),
+      );
+      assert.equal(calls[1].init.headers["user-agent"], "webmention-sender");
+    });
+
+    // The host guard says where we may go; it cannot stop a public host from
+    // keeping what we hand it once we arrive.
+    it("strips credentials on a hop that crosses origins", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.startsWith("https://other.example.org")
+            ? ok
+            : redirectTo("https://other.example.org/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            headers: {
+              Authorization: "Bearer secret",
+              cookie: "session=secret",
+              "user-agent": "webmention-sender",
+            },
+          }),
+      );
+      assert.equal(calls[1].init.headers["authorization"], undefined);
+      assert.equal(calls[1].init.headers["cookie"], undefined);
+      // Only the credentials go; the rest of the request is unchanged.
+      assert.equal(calls[1].init.headers["user-agent"], "webmention-sender");
+    });
+
+    // The spec drops every header that described the body, not just the one
+    // naming its type: a surviving content-encoding announces a gzip payload
+    // that the rewritten GET no longer carries.
+    it("drops every body header when the body goes", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            method: "POST",
+            headers: {
+              "content-type": "application/x-www-form-urlencoded",
+              "content-encoding": "gzip",
+              "content-language": "en",
+              "content-location": "/a",
+              "user-agent": "webmention-sender",
+            },
+            body: "source=s&target=t",
+          }),
+      );
+      const carried = new Headers(calls[1].init.headers);
+      for (const name of [
+        "content-type",
+        "content-encoding",
+        "content-language",
+        "content-location",
+      ]) {
+        assert.equal(carried.get(name), null, `${name} survived the rewrite`);
+      }
+      assert.equal(carried.get("user-agent"), "webmention-sender");
+    });
+
+    // The hop receivers actually put in front of an endpoint. Same host, but
+    // a different scheme is a different origin, so credentials still go.
+    it("strips credentials on an http->https hop", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.startsWith("https://") ? ok : redirectTo("https://example.com/a"),
+        () =>
+          guardedFetch("http://example.com/a", {
+            headers: { authorization: "Bearer secret" },
+          }),
+      );
+      assert.equal(calls[1].init.headers["authorization"], undefined);
+    });
+
+    // Stripping is one-way: coming back to where the credentials would have
+    // been welcome does not re-earn them, because the middle host saw the
+    // chain and could have chosen the return address.
+    it("does not restore credentials when a later hop returns home", async () => {
+      const { calls } = await withFetch(
+        (url) => {
+          if (url === "https://example.com/a")
+            return redirectTo("https://other.example.org/b");
+          if (url === "https://other.example.org/b")
+            return redirectTo("https://example.com/c");
+          return ok;
+        },
+        () =>
+          guardedFetch("https://example.com/a", {
+            headers: { authorization: "Bearer secret" },
+          }),
+      );
+      assert.equal(calls[2].url, "https://example.com/c");
+      assert.equal(calls[2].init.headers["authorization"], undefined);
+    });
+
+    // Headers throws on a malformed name. fetch would have thrown first on a
+    // real request, so arriving here means this script built the header —
+    // permanent, and nothing a receiver can fix by being asked ten times.
+    it("refuses unusable headers before any request goes out", async () => {
+      // The stub accepts what a real fetch would reject, so a responder that
+      // answers at all would let the refusal come from the second hop and
+      // leave the first one classified as transient. This one refuses to
+      // answer: the rejection has to arrive before a request is attempted.
+      const { calls } = await withFetch(
+        () => {
+          throw new Error("fetch must not be called");
+        },
+        () =>
+          assert.rejects(
+            () =>
+              guardedFetch("https://example.com/a", {
+                headers: { "bad header name": "x" },
+              }),
+            { kind: "refused", message: /unusable request headers/ },
+          ),
+      );
+      assert.equal(calls.length, 0);
+    });
+
+    it("keeps credentials on a same-origin hop", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b"),
+        () =>
+          guardedFetch("https://example.com/a", {
+            headers: { authorization: "Bearer secret" },
+          }),
+      );
+      assert.equal(calls[1].init.headers["authorization"], "Bearer secret");
+    });
   });
 });
 
