@@ -548,10 +548,10 @@ function refuse(message) {
  * there verbatim. Following redirects by hand is the only way to inspect each
  * Location before it is requested — fetch offers no hook for it.
  *
- * Method rewriting mirrors the fetch spec so nothing else changes: 303 always
- * becomes GET, 301/302 turn POST into GET, and 307/308 preserve both method
- * and body. Receivers depend on this — an http->https 301 in front of an
- * endpoint is ordinary.
+ * Method rewriting mirrors the fetch spec so nothing else changes: 303 turns
+ * anything but GET/HEAD into GET, 301/302 turn POST into GET, and 307/308
+ * preserve both method and body. Receivers depend on this — an http->https
+ * 301 in front of an endpoint is ordinary.
  */
 export async function guardedFetch(url, options = {}) {
   let current = url;
@@ -587,9 +587,10 @@ export async function guardedFetch(url, options = {}) {
       );
     }
 
+    const method = init.method ?? "GET";
     if (
-      res.status === 303 ||
-      ((res.status === 301 || res.status === 302) && init.method === "POST")
+      (res.status === 303 && method !== "GET" && method !== "HEAD") ||
+      ((res.status === 301 || res.status === 302) && method === "POST")
     ) {
       const headers = { ...init.headers };
       // content-type described a body that no longer exists.

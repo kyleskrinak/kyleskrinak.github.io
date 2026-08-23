@@ -1000,6 +1000,17 @@ describe("guardedFetch — the host guard survives redirects", () => {
       assert.equal(calls[1].body, undefined);
     });
 
+    // The spec rewrites everything but GET and HEAD; a HEAD that came back as
+    // a GET would fetch a body the caller never asked for.
+    it("leaves HEAD alone on 303", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b", 303),
+        () => guardedFetch("https://example.com/a", { method: "HEAD" }),
+      );
+      assert.equal(calls[1].method, "HEAD");
+    });
+
     // Receivers put http->https 308s in front of endpoints; dropping the body
     // there would deliver a webmention that says nothing.
     for (const status of [307, 308]) {
