@@ -19,6 +19,8 @@ import {
   discoverEndpoint,
   parseLinkHeader,
   parseArgs,
+  guardedFetch,
+  MAX_REDIRECTS,
   pageUrlFor,
   classifyFailure,
   attemptLimitFor,
@@ -839,6 +841,182 @@ describe("seeding requires --allow-seed", () => {
       assert.equal(existsSync(nested), true);
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+// `redirect: "follow"` reapplies no guard after the first URL. Verified
+// against a local server: a public page that 302s to a link-local address puts
+// the runner on that service, and a 307 on the endpoint POST replays the body
+// there verbatim. These stub fetch so the ordinary hops can use public
+// hostnames — a loopback test server is itself a blocked host.
+describe("guardedFetch — the host guard survives redirects", () => {
+  /** Replace global fetch with a scripted responder; returns the call log. */
+  const withFetch = async (script, run) => {
+    const calls = [];
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, init) => {
+      calls.push({
+        url,
+        method: init?.method ?? "GET",
+        body: init?.body,
+        init,
+      });
+      const step = script(url, calls.length);
+      return new Response(step.body ?? "", {
+        status: step.status,
+        headers: step.headers ?? {},
+      });
+    };
+    try {
+      return { result: await run(), calls };
+    } finally {
+      globalThis.fetch = real;
+    }
+  };
+
+  const redirectTo = (location, status = 302) => ({
+    status,
+    headers: { location },
+  });
+  const ok = { status: 200, body: "done" };
+
+  it("follows an ordinary chain and returns the final response", async () => {
+    const { result, calls } = await withFetch(
+      (url) =>
+        url === "http://example.com/a"
+          ? redirectTo("https://example.com/a", 301)
+          : ok,
+      () => guardedFetch("http://example.com/a"),
+    );
+    assert.equal(result.status, 200);
+    assert.deepEqual(
+      calls.map((c) => c.url),
+      ["http://example.com/a", "https://example.com/a"],
+    );
+  });
+
+  it("resolves a relative Location against the current URL", async () => {
+    const { calls } = await withFetch(
+      (url) => (url.endsWith("/wm") ? ok : redirectTo("/wm")),
+      () => guardedFetch("https://example.com/deep/page"),
+    );
+    assert.equal(calls[1].url, "https://example.com/wm");
+  });
+
+  // The whole point: the blocked host must never be requested at all.
+  it("refuses a redirect into a blocked host without requesting it", async () => {
+    const { calls } = await withFetch(
+      () => redirectTo("http://169.254.169.254/latest/meta"),
+      async () => {
+        const err = await assert.rejects(
+          () => guardedFetch("https://example.com/page"),
+          /blocked host/,
+        );
+        return err;
+      },
+    );
+    assert.deepEqual(
+      calls.map((c) => c.url),
+      ["https://example.com/page"],
+    );
+  });
+
+  it("classifies a blocked redirect as refused, not transient", async () => {
+    await withFetch(
+      () => redirectTo("http://127.0.0.1:8080/"),
+      async () => {
+        await assert.rejects(() => guardedFetch("https://example.com/page"), {
+          kind: "refused",
+        });
+      },
+    );
+  });
+
+  it("refuses a non-http(s) redirect", async () => {
+    await withFetch(
+      () => redirectTo("data:text/html,x"),
+      () =>
+        assert.rejects(() => guardedFetch("https://example.com/page"), /data:/),
+    );
+  });
+
+  it("caps the chain rather than looping forever", async () => {
+    const { calls } = await withFetch(
+      (_url, n) => redirectTo(`https://example.com/${n}`),
+      () =>
+        assert.rejects(
+          () => guardedFetch("https://example.com/0"),
+          /too many redirects/,
+        ),
+    );
+    assert.equal(calls.length, MAX_REDIRECTS + 1);
+  });
+
+  it("hands back a 30x carrying no Location instead of following it", async () => {
+    const { result, calls } = await withFetch(
+      () => ({ status: 302 }),
+      () => guardedFetch("https://example.com/page"),
+    );
+    assert.equal(result.status, 302);
+    assert.equal(calls.length, 1);
+  });
+
+  describe("method rewriting mirrors the fetch spec", () => {
+    const post = {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "user-agent": "webmention-sender",
+      },
+      body: "source=s&target=t",
+    };
+
+    for (const status of [301, 302]) {
+      it(`turns POST into GET on ${status} and drops the body`, async () => {
+        const { calls } = await withFetch(
+          (url) =>
+            url.endsWith("/b")
+              ? ok
+              : redirectTo("https://example.com/b", status),
+          () => guardedFetch("https://example.com/a", post),
+        );
+        assert.equal(calls[1].method, "GET");
+        assert.equal(calls[1].body, undefined);
+        // A content-type describing a body that no longer exists.
+        assert.equal(calls[1].init.headers["content-type"], undefined);
+        assert.equal(calls[1].init.headers["user-agent"], "webmention-sender");
+      });
+    }
+
+    it("turns POST into GET on 303", async () => {
+      const { calls } = await withFetch(
+        (url) =>
+          url.endsWith("/b") ? ok : redirectTo("https://example.com/b", 303),
+        () => guardedFetch("https://example.com/a", post),
+      );
+      assert.equal(calls[1].method, "GET");
+      assert.equal(calls[1].body, undefined);
+    });
+
+    // Receivers put http->https 308s in front of endpoints; dropping the body
+    // there would deliver a webmention that says nothing.
+    for (const status of [307, 308]) {
+      it(`preserves method and body on ${status}`, async () => {
+        const { calls } = await withFetch(
+          (url) =>
+            url.endsWith("/b")
+              ? ok
+              : redirectTo("https://example.com/b", status),
+          () => guardedFetch("https://example.com/a", post),
+        );
+        assert.equal(calls[1].method, "POST");
+        assert.equal(calls[1].body, "source=s&target=t");
+        assert.equal(
+          calls[1].init.headers["content-type"],
+          "application/x-www-form-urlencoded",
+        );
+      });
     }
   });
 });

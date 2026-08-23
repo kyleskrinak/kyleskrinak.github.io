@@ -88,9 +88,20 @@ const REQUEST_TIMEOUT_MS = 15000;
  * reconsideration — which is the whole point of routing it here rather than
  * into the permanent `sent` log.
  */
+/**
+ * How a target failed, which decides how many times it is retried.
+ *
+ * @typedef {"refused"|"transient"|"no-endpoint"} FailureKind
+ */
+
 const MAX_REFUSED_ATTEMPTS = 3;
 const MAX_TRANSIENT_ATTEMPTS = 10;
 const MAX_NO_ENDPOINT_ATTEMPTS = 1;
+
+// Enough for the usual http->https and apex->www hops without letting a loop
+// tie up the deploy for the whole timeout budget.
+export const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
 /**
  * How long a given-up target rests before one more attempt.
@@ -315,8 +326,12 @@ export function diffPost(currentLinks, entry) {
 /**
  * Classify a failed send, to decide which attempt limit applies.
  *
- * @param {{status?: number}} result
- * @returns {"refused"|"transient"}
+ * `kind` is set by callers that already know the answer — a blocked host or a
+ * blocked redirect is a refusal with no HTTP status to infer one from — and
+ * wins over `status` when present.
+ *
+ * @param {{status?: number, kind?: FailureKind}} result
+ * @returns {FailureKind}
  */
 export function classifyFailure(result) {
   // A caller that already knows the kind says so. Used for blocked hosts,
@@ -333,7 +348,7 @@ export function classifyFailure(result) {
 }
 
 /**
- * @param {"refused"|"transient"|"no-endpoint"} kind
+ * @param {FailureKind} kind
  * @returns {number}
  */
 export function attemptLimitFor(kind) {
@@ -368,7 +383,7 @@ export function shouldSkipTarget(record, now = Date.now()) {
  * a target alternating 503 and 403 evade every limit forever.
  *
  * @param {{failures?: number}|undefined} record
- * @param {"refused"|"transient"|"no-endpoint"} kind
+ * @param {FailureKind} kind
  * @param {number} now
  * @returns {{failures: number, kind: string, lastAttempt: string}}
  */
@@ -509,6 +524,75 @@ async function loadState(statePath) {
   }
 }
 
+/** A permanent refusal: recorded as "refused" rather than retried. */
+function refuse(message) {
+  const err = new Error(message);
+  err.kind = "refused";
+  return err;
+}
+
+/**
+ * fetch with the host guard reapplied at every hop.
+ *
+ * `redirect: "follow"` checks nothing after the first URL, so the guard in
+ * sendOne only ever covered the address we chose. Both bypasses were verified
+ * against a local server: a public page that 302s to a link-local address puts
+ * the runner on that service, and a 307 on the endpoint POST replays the body
+ * there verbatim. Following redirects by hand is the only way to inspect each
+ * Location before it is requested — fetch offers no hook for it.
+ *
+ * Method rewriting mirrors the fetch spec so nothing else changes: 303 always
+ * becomes GET, 301/302 turn POST into GET, and 307/308 preserve both method
+ * and body. Receivers depend on this — an http->https 301 in front of an
+ * endpoint is ordinary.
+ */
+export async function guardedFetch(url, options = {}) {
+  let current = url;
+  let init = { ...options, redirect: "manual" };
+
+  for (let hop = 0; ; hop++) {
+    const res = await fetch(current, init);
+    if (!REDIRECT_STATUSES.has(res.status)) return res;
+
+    // A 30x with no Location is not a redirect, just an odd response. Handing
+    // it back lets the status checks report it like any other failure.
+    const location = res.headers.get("location");
+    if (location === null) return res;
+
+    if (hop >= MAX_REDIRECTS) {
+      throw refuse(`too many redirects starting at ${url}`);
+    }
+
+    let next;
+    try {
+      next = new URL(location, current);
+    } catch {
+      throw refuse(`unfollowable redirect from ${current} to ${location}`);
+    }
+    // data:, file: and friends: fetch would reject most of them anyway, but
+    // the guard below only reasons about hosts, and these have none.
+    if (next.protocol !== "http:" && next.protocol !== "https:") {
+      throw refuse(`refusing ${next.protocol} redirect from ${current}`);
+    }
+    if (isBlockedHost(next.hostname)) {
+      throw refuse(
+        `redirect from ${current} points at a blocked host (${next.href})`,
+      );
+    }
+
+    if (
+      res.status === 303 ||
+      ((res.status === 301 || res.status === 302) && init.method === "POST")
+    ) {
+      const headers = { ...init.headers };
+      // content-type described a body that no longer exists.
+      delete headers["content-type"];
+      init = { ...init, method: "GET", body: undefined, headers };
+    }
+    current = next.href;
+  }
+}
+
 async function sendOne(source, target) {
   // extractLinks already dropped these, so this only fires for a target
   // carried in an old state file or a future caller. Cheap, and the guarantee
@@ -521,8 +605,7 @@ async function sendOne(source, target) {
     };
   }
 
-  const probe = await fetch(target, {
-    redirect: "follow",
+  const probe = await guardedFetch(target, {
     headers: { "user-agent": `webmention-sender (+${source})` },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
@@ -551,7 +634,7 @@ async function sendOne(source, target) {
     };
   }
 
-  const res = await fetch(endpoint, {
+  const res = await guardedFetch(endpoint, {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded",
@@ -676,8 +759,10 @@ async function main() {
         result = await sendOne(pageUrl, target);
       } catch (err) {
         // No response at all — timeout, DNS, connection reset. No status, so
-        // classifyFailure lands on "transient", which is correct.
-        result = { ok: false, reason: err.message };
+        // classifyFailure lands on "transient", which is correct. A guarded
+        // redirect carries its own kind: a redirect into a blocked host is a
+        // refusal, and re-probing it ten times would be pointless.
+        result = { ok: false, reason: err.message, kind: err.kind };
       }
       if (result.ok) {
         // Only successes are recorded, so anything that failed is still
