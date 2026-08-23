@@ -1,22 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 import { BASE_URL } from './tests/test-utils';
-import { argvRequestsSnapshotWrites, assertSnapshotWritesAllowed } from './tests/snapshot-guard';
-
-/**
- * Refuse to write snapshots from a host whose rendering doesn't match CI.
- *
- * scripts/visual-test.sh guards only its own `baseline` mode, so every other entry
- * point -- `npm run test:visual -- -u`, a bare `npx playwright test -uall` -- would
- * otherwise overwrite committed PNGs with host-rendered pixels CI rejects.
- *
- * Two layers, because argv spellings kept slipping past a scan (`-uall` and `-xu`
- * both reach --update-snapshots): this fast path refuses common cases before the
- * webServer build starts, and globalSetup re-checks Playwright's own parsed
- * `config.updateSnapshots`, which cannot be evaded at all.
- *
- * ALLOW_NATIVE_BASELINE=1 is the deliberate escape hatch for both.
- */
-assertSnapshotWritesAllowed(argvRequestsSnapshotWrites(process.argv));
 
 /**
  * Unified Playwright configuration for all test types

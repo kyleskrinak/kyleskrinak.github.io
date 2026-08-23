@@ -2,16 +2,14 @@ import type { FullConfig } from '@playwright/test';
 import { assertSnapshotWritesAllowed, overwritesBaselines, recordExistingSnapshots } from './snapshot-guard';
 
 /**
- * Authoritative half of the baseline guard: `config.updateSnapshots` is Playwright's
- * own parsed value, so it cannot be evaded by an argv spelling the scan in
- * playwright.config.ts doesn't anticipate (`-uall`, `-xu`, a future alias).
+ * Refuse an explicit overwrite, and record the snapshot tree so globalTeardown can tell
+ * what this run created. `config.updateSnapshots` is Playwright's own parsed value, so
+ * no command-line spelling can evade it.
  *
- * Runs after the webServer starts, which is why the argv fast path exists -- but this
- * is the check that actually has to be right.
+ * This runs after the webServer starts, so a refusal costs a build first. That is the
+ * accepted price of not second-guessing argv -- see tests/snapshot-guard.ts.
  */
 export default async function globalSnapshotGuard(config: FullConfig) {
 	assertSnapshotWritesAllowed(overwritesBaselines(config.updateSnapshots));
-
-	// Baseline for the post-run check that closes the `missing`-mode gap.
 	recordExistingSnapshots('tests');
 }
