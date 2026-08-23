@@ -321,6 +321,7 @@ const testEnvVars = new Set([
   'ARCHIVE_PREVIEW_PORT',           // scripts/build-archive-pdf.mjs (preview port override)
   'RESUME_PREVIEW_PORT',            // scripts/print-resume-pdf.mjs (preview port override)
   'RESUME_VARIANTS_DIR',            // scripts/build-resume-variant.mjs (variants dir override)
+  'WEBMENTION_EXPECTED_HOST',       // scripts/send-webmentions.mjs (test seam)
 ]);
 
 // Scan all TypeScript/JavaScript files in src/ and scripts/
