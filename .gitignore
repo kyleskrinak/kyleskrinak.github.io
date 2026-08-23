@@ -46,3 +46,6 @@ tmp/
 # asset, fetched into public/ at deploy time. See .github/actions/ensure-archive-pdfs.
 public/blog-archive.pdf
 public/presentations-archive.pdf
+
+# Webmention send log, pulled from the webmentions-sent release during deploys
+.webmention-state/

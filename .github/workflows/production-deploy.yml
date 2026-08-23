@@ -17,8 +17,8 @@ jobs:
       name: production
       url: https://kyle.skrinak.com
     permissions:
-      contents: write  # ensure-release-pdfs reads/writes the release backing stores
-      id-token: write  # needed for OIDC -> AWS
+      contents: write # ensure-release-pdfs reads/writes the release backing stores
+      id-token: write # needed for OIDC -> AWS
     steps:
       - name: Checkout
         # Pinned to SHA (v4) — consistent supply-chain posture across all workflows.
@@ -146,3 +146,52 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
             --paths "/"
+
+      # Outbound webmentions. Runs LAST, after the site is already live, so the
+      # sources it advertises are fetchable by the receivers it notifies.
+      #
+      # DELIBERATE EXEMPTION from the Blocker Resolution Protocol in CLAUDE.md
+      # ("exit code != 0 -> STOP"). Every failure mode here belongs to somebody
+      # else's server: a receiver that is down, an endpoint that 500s, a DNS
+      # blip. None of it says anything about the deploy, which has already
+      # succeeded by this point, and none of it is actionable here. Failing the
+      # job would turn a stranger's outage into a red build on this repo — the
+      # "moving part that fails loudly on someone else's outage" this design
+      # was chosen to avoid. Per-target failures are already non-fatal inside
+      # the script and retry on the next deploy; continue-on-error covers the
+      # remaining case where the whole step dies (gh, network, node).
+      #
+      # This exemption is scoped to this step. Every other step in this
+      # workflow still fails the deploy.
+      - name: Send outbound webmentions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: https://kyle.skrinak.com/
+          TAG: webmentions-sent
+        run: |
+          set -euo pipefail
+          mkdir -p .webmention-state
+
+          # Backing store follows the ensure-release-pdfs pattern: a
+          # non-latest prerelease holding one asset, bootstrapped on demand.
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release '$TAG' missing — bootstrapping."
+            gh release create "$TAG" \
+              --title "Webmention send log (automation backing store)" \
+              --notes "Tracks which (source, target) webmention pairs have been delivered." \
+              --latest=false \
+              --prerelease
+          fi
+
+          # A missing asset is expected exactly once. The script's first-run
+          # guard then seeds from current content and sends nothing, so losing
+          # this file costs a quiet re-seed rather than re-notifying every site
+          # ever linked to.
+          if ! gh release download "$TAG" --pattern sent.json --dir .webmention-state --clobber 2>/dev/null; then
+            echo "No sent.json in '$TAG' — first run will seed without sending."
+          fi
+
+          node scripts/send-webmentions.mjs --dist dist --state .webmention-state/sent.json
+
+          gh release upload "$TAG" .webmention-state/sent.json --clobber
