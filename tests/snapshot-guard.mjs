@@ -33,10 +33,12 @@ export const guardActive = () => process.platform !== 'linux' && !ALLOW_NATIVE_B
  * snapshots that don't exist yet, so refusing it by mode would block all local testing.
  * The files it does create are caught after the run instead.
  */
-export const overwritesBaselines = (mode: string) => mode === 'all' || mode === 'changed';
+/** @param {string} mode */
+export const overwritesBaselines = (mode) => mode === 'all' || mode === 'changed';
 
 /** Refuse a run that would overwrite baselines from a host that doesn't match CI. */
-export const assertSnapshotWritesAllowed = (writesSnapshots: boolean) => {
+/** @param {boolean} writesSnapshots */
+export const assertSnapshotWritesAllowed = (writesSnapshots) => {
 	if (!writesSnapshots || !guardActive()) return;
 
 	throw new Error(
@@ -58,9 +60,18 @@ const manifestPath = () => {
 	return join(tmpdir(), `astro-blog-snapshots-${key}-${process.pid}.json`);
 };
 
-const snapshotFilesUnder = (root: string): string[] => {
-	const found: string[] = [];
-	const walk = (dir: string, inSnapshotDir: boolean) => {
+/**
+ * Every file inside a `*-snapshots` directory beneath `root`, sorted.
+ * Exported for tests: the mechanics must be checkable on any platform, since the
+ * hooks below no-op on Linux and CI would otherwise cover none of this.
+ *
+ * @param {string} root
+ * @returns {string[]}
+ */
+export const snapshotFilesUnder = (root) => {
+	/** @type {string[]} */
+	const found = [];
+	const walk = (/** @type {string} */ dir, /** @type {boolean} */ inSnapshotDir) => {
 		let entries;
 		try {
 			entries = readdirSync(dir, { withFileTypes: true });
@@ -68,7 +79,7 @@ const snapshotFilesUnder = (root: string): string[] => {
 			// A directory that isn't there yet is expected -- the -snapshots tree is
 			// created lazily. Anything else (EACCES, EIO) would hide files from the scan
 			// and let a host-rendered baseline survive, so fail closed.
-			if ((error as NodeJS.ErrnoException).code === 'ENOENT') return;
+			if (error.code === 'ENOENT') return;
 			throw error;
 		}
 		for (const entry of entries) {
@@ -84,34 +95,34 @@ const snapshotFilesUnder = (root: string): string[] => {
 	return found.sort();
 };
 
-export const recordExistingSnapshots = (root: string) => {
-	if (!guardActive()) return;
-	mkdirSync(tmpdir(), { recursive: true });
-	writeFileSync(manifestPath(), JSON.stringify(snapshotFilesUnder(root)), 'utf8');
+/**
+ * Snapshot files present now that were absent when the run started.
+ *
+ * @param {Set<string>|string[]} before
+ * @param {string} root
+ * @returns {string[]}
+ */
+export const findCreated = (before, root) => {
+	const seen = before instanceof Set ? before : new Set(before);
+	return snapshotFilesUnder(root).filter((file) => !seen.has(file));
 };
 
-export const assertNoSnapshotsCreated = (root: string) => {
-	if (!guardActive()) return;
-
-	const path = manifestPath();
-	if (!existsSync(path)) return;
-
-	const before = new Set<string>(JSON.parse(readFileSync(path, 'utf8')));
-	rmSync(path, { force: true });
-
-	const created = snapshotFilesUnder(root).filter((file) => !before.has(file));
-	if (created.length === 0) return;
-
-	// Only ever removes paths that were absent when this run started.
+/**
+ * Delete files a run created, plus any `-snapshots` directory the run itself created.
+ * Callers only ever pass paths that were absent when their run started.
+ *
+ * @param {string[]} created
+ */
+export const removeCreated = (created) => {
 	for (const file of created) {
 		try {
 			unlinkSync(file);
 		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+			if (error.code !== 'ENOENT') throw error;
 		}
 	}
-	// Drop the -snapshots directory too if the run created it. rmdirSync fails on a
-	// non-empty directory, which is wanted: never touch one holding committed baselines.
+	// rmdirSync fails on a non-empty directory, which is wanted: never touch one that
+	// still holds committed baselines.
 	for (const dir of new Set(created.map((file) => dirname(file)))) {
 		try {
 			rmdirSync(dir);
@@ -119,6 +130,29 @@ export const assertNoSnapshotsCreated = (root: string) => {
 			/* still holds committed baselines -- leave it */
 		}
 	}
+};
+
+/** @param {string} root */
+export const recordExistingSnapshots = (root) => {
+	if (!guardActive()) return;
+	mkdirSync(tmpdir(), { recursive: true });
+	writeFileSync(manifestPath(), JSON.stringify(snapshotFilesUnder(root)), 'utf8');
+};
+
+/** @param {string} root */
+export const assertNoSnapshotsCreated = (root) => {
+	if (!guardActive()) return;
+
+	const path = manifestPath();
+	if (!existsSync(path)) return;
+
+	const before = new Set(JSON.parse(readFileSync(path, 'utf8')));
+	rmSync(path, { force: true });
+
+	const created = findCreated(before, root);
+	if (created.length === 0) return;
+
+	removeCreated(created);
 
 	throw new Error(
 		[

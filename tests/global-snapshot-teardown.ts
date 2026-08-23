@@ -1,4 +1,4 @@
-import { assertNoSnapshotsCreated } from './snapshot-guard';
+import { assertNoSnapshotsCreated } from './snapshot-guard.mjs';
 
 /**
  * Closes the `missing`-mode gap: any snapshot file that did not exist when the run

@@ -1,5 +1,5 @@
 import type { FullConfig } from '@playwright/test';
-import { assertSnapshotWritesAllowed, overwritesBaselines, recordExistingSnapshots } from './snapshot-guard';
+import { assertSnapshotWritesAllowed, overwritesBaselines, recordExistingSnapshots } from './snapshot-guard.mjs';
 
 /**
  * Refuse an explicit overwrite, and record the snapshot tree so globalTeardown can tell
