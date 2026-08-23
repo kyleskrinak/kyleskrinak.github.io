@@ -40,6 +40,7 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { parseHTML } from "linkedom";
 
 /**
@@ -530,7 +531,11 @@ async function main() {
 }
 
 // Only run when invoked directly, so the pure functions above stay importable.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL rather than a `file://` template literal: import.meta.url is a
+// URL and percent-encodes characters a path may legitimately contain, so a
+// checkout under a directory with a space compares unequal and main() silently
+// never runs.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     console.error(`Webmention sending failed: ${err.message}`);
     process.exitCode = 1;
