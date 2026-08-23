@@ -20,6 +20,7 @@ import {
   parseLinkHeader,
   parseArgs,
   guardedFetch,
+  findPostPages,
   MAX_REDIRECTS,
   pageUrlFor,
   classifyFailure,
@@ -1018,5 +1019,76 @@ describe("guardedFetch — the host guard survives redirects", () => {
         );
       });
     }
+  });
+});
+
+describe("findPostPages", () => {
+  const withTree = async (build, run) => {
+    const root = mkdtempSync(join(tmpdir(), "send-webmentions-find-"));
+    try {
+      build(root);
+      return await run(root);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  };
+
+  it("lists built post pages relative to dist", async () => {
+    await withTree(
+      (root) => {
+        mkdirSync(join(root, "posts", "b"), { recursive: true });
+        mkdirSync(join(root, "posts", "a"), { recursive: true });
+        writeFileSync(join(root, "posts", "a", "index.html"), "");
+        writeFileSync(join(root, "posts", "b", "index.html"), "");
+        // Not a post page, and must not be picked up.
+        writeFileSync(join(root, "posts", "a", "other.html"), "");
+      },
+      async (root) => {
+        assert.deepEqual(await findPostPages(root), [
+          join("posts", "a", "index.html"),
+          join("posts", "b", "index.html"),
+        ]);
+      },
+    );
+  });
+
+  it("explains an unbuilt tree in terms of the build", async () => {
+    await withTree(
+      () => {},
+      (root) => assert.rejects(() => findPostPages(root), /run the build/),
+    );
+  });
+
+  // The friendly message used to swallow every readdir failure. A permission
+  // or filesystem fault reported as "run the build" sends whoever reads the
+  // deploy log looking in the wrong place entirely.
+  it("rethrows a filesystem fault instead of blaming the build", async () => {
+    await withTree(
+      (root) => {
+        // A file where the posts directory should be: readdir gives ENOTDIR,
+        // which is deterministic everywhere, unlike a chmod-based EACCES.
+        writeFileSync(join(root, "posts"), "not a directory");
+      },
+      async (root) => {
+        await assert.rejects(
+          () => findPostPages(root),
+          (err) => {
+            assert.equal(err.code, "ENOTDIR");
+            assert.doesNotMatch(err.message, /run the build/);
+            return true;
+          },
+        );
+      },
+    );
+  });
+
+  it("keeps the underlying error as the cause when the tree is missing", async () => {
+    await withTree(
+      () => {},
+      async (root) => {
+        const err = await findPostPages(root).catch((e) => e);
+        assert.equal(err.cause?.code, "ENOENT");
+      },
+    );
   });
 });

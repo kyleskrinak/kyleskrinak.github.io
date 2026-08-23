@@ -485,13 +485,20 @@ export function pageUrlFor(relativePath, siteUrl) {
 // I/O
 // ---------------------------------------------------------------------------
 
-async function findPostPages(distDir) {
+export async function findPostPages(distDir) {
   const root = path.join(distDir, POSTS_DIR);
   let entries;
   try {
     entries = await readdir(root, { recursive: true, withFileTypes: true });
-  } catch {
-    throw new Error(`No ${root} directory — run the build before this script.`);
+  } catch (err) {
+    // Only "not built yet" earns the friendly message. EACCES, ENOTDIR and
+    // EMFILE are real faults, and reporting them as a missing build sends
+    // whoever reads the deploy log looking in entirely the wrong place.
+    if (err.code !== "ENOENT") throw err;
+    throw new Error(
+      `No ${root} directory — run the build before this script.`,
+      { cause: err },
+    );
   }
   return entries
     .filter((e) => e.isFile() && e.name === "index.html")
