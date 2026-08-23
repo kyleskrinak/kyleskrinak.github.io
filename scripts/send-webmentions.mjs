@@ -102,6 +102,128 @@ export const REPROBE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 // ---------------------------------------------------------------------------
 
 /**
+ * Hostnames that must never be requested from a CI runner.
+ *
+ * The sender makes two outbound requests per target: a GET to the target, and
+ * a POST to whatever endpoint that target advertises. The second URL is chosen
+ * by the owner of the linked page, not by us, so "only link to things you
+ * trust" is not a control we actually hold. A page can advertise
+ * `<link rel="webmention" href="http://169.254.169.254/...">` and, without
+ * this check, the runner would POST to the cloud metadata service.
+ *
+ * Blocklist rather than allowlist, per the project's security rule: the set of
+ * legitimate public receivers is open-ended and cannot be enumerated.
+ *
+ * LIMIT, stated rather than implied: this inspects the hostname only. A public
+ * name that resolves to a private address (DNS rebinding) is not caught, since
+ * Node's fetch gives no hook between resolution and connection. Closing that
+ * needs a custom agent resolving and pinning the IP, which is disproportionate
+ * for a static blog notifying other blogs. This raises the cost of the obvious
+ * attack; it is not a sandbox.
+ */
+const BLOCKED_HOSTNAMES = new Set([
+  "localhost",
+  "ip6-localhost",
+  "ip6-loopback",
+]);
+
+/** Suffixes reserved for local/internal resolution (RFC 6762, 8375, GCP). */
+const BLOCKED_SUFFIXES = [".localhost", ".local", ".internal", ".home.arpa"];
+
+/** @returns {number[]|null} four octets, or null if not a dotted quad */
+function parseIpv4(host) {
+  const parts = host.split(".");
+  if (parts.length !== 4) return null;
+  const octets = parts.map((part) =>
+    /^\d{1,3}$/.test(part) ? Number(part) : NaN,
+  );
+  return octets.every((n) => n >= 0 && n <= 255) ? octets : null;
+}
+
+function isBlockedIpv4([a, b]) {
+  if (a === 0) return true; // 0.0.0.0/8 "this network"
+  if (a === 10) return true; // private
+  if (a === 127) return true; // loopback
+  if (a === 169 && b === 254) return true; // link-local, incl. 169.254.169.254
+  if (a === 172 && b >= 16 && b <= 31) return true; // private
+  if (a === 192 && b === 168) return true; // private
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a === 255) return true; // broadcast
+  return false;
+}
+
+/** @returns {number[]|null} eight hextets, or null if unparseable */
+function expandIpv6(addr) {
+  let text = addr.toLowerCase().split("%")[0]; // drop any zone id
+
+  // A trailing dotted quad (::ffff:127.0.0.1) becomes two hextets. URL
+  // normalisation usually does this for us, but a Link header is raw input.
+  const embedded = text.match(/^(.*:)(\d{1,3}(?:\.\d{1,3}){3})$/);
+  if (embedded) {
+    const quad = parseIpv4(embedded[2]);
+    if (!quad) return null;
+    const hi = ((quad[0] << 8) | quad[1]).toString(16);
+    const lo = ((quad[2] << 8) | quad[3]).toString(16);
+    text = `${embedded[1]}${hi}:${lo}`;
+  }
+
+  const halves = text.split("::");
+  if (halves.length > 2) return null;
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves[1] ? halves[1].split(":") : [];
+  const gap = halves.length === 2 ? 8 - head.length - tail.length : 0;
+  if (gap < 0) return null;
+  const parts = [...head, ...Array(gap).fill("0"), ...tail];
+  if (parts.length !== 8) return null;
+
+  const hextets = parts.map((part) =>
+    /^[0-9a-f]{1,4}$/.test(part) ? parseInt(part, 16) : NaN,
+  );
+  return hextets.every((n) => Number.isInteger(n)) ? hextets : null;
+}
+
+function isBlockedIpv6(addr) {
+  const h = expandIpv6(addr);
+  // Unparseable is blocked: if we cannot tell where a request would go, we do
+  // not make it. A dropped mention is cheaper than a request to the metadata
+  // service.
+  if (!h) return true;
+
+  if (h.every((x) => x === 0)) return true; // ::
+  if (h.slice(0, 7).every((x) => x === 0) && h[7] === 1) return true; // ::1
+  if ((h[0] & 0xfe00) === 0xfc00) return true; // fc00::/7 unique local
+  if ((h[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+
+  // IPv4-mapped (::ffff:0:0/96) and IPv4-compatible tunnels reach the v4 host.
+  if (h.slice(0, 5).every((x) => x === 0) && (h[5] === 0xffff || h[5] === 0)) {
+    return isBlockedIpv4([h[6] >> 8, h[6] & 0xff, h[7] >> 8, h[7] & 0xff]);
+  }
+  return false;
+}
+
+/**
+ * Is this hostname one we refuse to send a request to?
+ *
+ * @param {string} hostname - as given by URL.hostname (IPv6 arrives bracketed)
+ * @returns {boolean}
+ */
+export function isBlockedHost(hostname) {
+  if (!hostname) return true;
+  const host = hostname.toLowerCase().replace(/\.$/, ""); // drop the root dot
+
+  if (BLOCKED_HOSTNAMES.has(host)) return true;
+  if (BLOCKED_SUFFIXES.some((suffix) => host.endsWith(suffix))) return true;
+  if (host.startsWith("[") && host.endsWith("]")) {
+    return isBlockedIpv6(host.slice(1, -1));
+  }
+
+  // WHATWG URL normalises 0x7f000001, 2130706433 and 127.1 to dotted decimal
+  // before we see them, so the obvious obfuscations are already flattened.
+  const quad = parseIpv4(host);
+  return quad ? isBlockedIpv4(quad) : false;
+}
+
+/**
  * Extract the outbound link set for one post page.
  *
  * Scoped to `#article` so navigation, the footer h-card, the five SOCIALS
@@ -137,6 +259,9 @@ export function extractLinks(html, pageUrl) {
     // Self-links are not mentions. Sending them would notify our own inbox
     // about our own content.
     if (url.hostname === sourceHost) continue;
+
+    // Never originate a request to a loopback, private or link-local host.
+    if (isBlockedHost(url.hostname)) continue;
 
     // Fragments identify a place within the target, not a different target.
     // Two links to #a and #b of the same page are one mention, not two.
@@ -187,6 +312,10 @@ export function diffPost(currentLinks, entry) {
  * @returns {"refused"|"transient"}
  */
 export function classifyFailure(result) {
+  // A caller that already knows the kind says so. Used for blocked hosts,
+  // which are a permanent refusal with no HTTP status to infer it from.
+  if (result?.kind) return result.kind;
+
   const status = result?.status;
   // A definitive "no" from a server that is up and answering. 404/410 mean
   // the target page itself is gone, which is equally final.
@@ -374,6 +503,17 @@ async function loadState(statePath) {
 }
 
 async function sendOne(source, target) {
+  // extractLinks already dropped these, so this only fires for a target
+  // carried in an old state file or a future caller. Cheap, and the guarantee
+  // belongs with the request, not with one of its callers.
+  if (isBlockedHost(new URL(target).hostname)) {
+    return {
+      ok: false,
+      kind: "refused",
+      reason: "target is a loopback, private or link-local host",
+    };
+  }
+
   const probe = await fetch(target, {
     redirect: "follow",
     headers: { "user-agent": `webmention-sender (+${source})` },
@@ -390,6 +530,19 @@ async function sendOne(source, target) {
   const endpoint = discoverEndpoint(probe, await probe.text());
   if (!endpoint)
     return { ok: false, reason: "no endpoint advertised", noEndpoint: true };
+
+  // THE ONE THAT MATTERS. The endpoint URL is chosen by whoever owns the
+  // linked page — a Link header or a rel=webmention href, resolved against a
+  // URL that may itself be the result of a redirect. It is untrusted input in
+  // a way the target URL is not, and without this check any page we link to
+  // could aim our POST at the runner's metadata service or a local port.
+  if (isBlockedHost(new URL(endpoint).hostname)) {
+    return {
+      ok: false,
+      kind: "refused",
+      reason: `endpoint resolves to a blocked host (${endpoint})`,
+    };
+  }
 
   const res = await fetch(endpoint, {
     method: "POST",

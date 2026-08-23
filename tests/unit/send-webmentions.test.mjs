@@ -9,6 +9,7 @@ import {
   pageUrlFor,
   classifyFailure,
   attemptLimitFor,
+  isBlockedHost,
   shouldSkipTarget,
   recordFailure,
   REPROBE_AFTER_MS,
@@ -591,5 +592,110 @@ describe("failure counter — reset on success", () => {
     const r = recordFailure(undefined, "transient", now);
     assert.equal(r.failures, 1);
     assert.equal(shouldSkipTarget(r, now), false);
+  });
+});
+
+describe("isBlockedHost", () => {
+  // The contract is URL.hostname, so obfuscated literals are normalised by the
+  // URL parser before the predicate sees them. Route them through it here too.
+  const hostOf = (url) => new URL(url).hostname;
+
+  it("blocks loopback in every form the URL parser produces", () => {
+    for (const url of [
+      "http://127.0.0.1/",
+      "http://127.1/",
+      "http://0x7f000001/",
+      "http://2130706433/",
+      "http://017700000001/",
+      "http://[::1]/",
+      "http://[::ffff:127.0.0.1]/",
+    ]) {
+      assert.equal(isBlockedHost(hostOf(url)), true, url);
+    }
+  });
+
+  it("blocks the cloud metadata address", () => {
+    // The reason this check exists at all.
+    assert.equal(isBlockedHost("169.254.169.254"), true);
+    assert.equal(isBlockedHost("metadata.google.internal"), true);
+  });
+
+  it("blocks private and CGNAT ranges", () => {
+    for (const host of [
+      "10.0.0.5",
+      "172.16.0.1",
+      "172.31.255.255",
+      "192.168.1.1",
+      "100.64.0.1",
+      "0.0.0.0",
+      "255.255.255.255",
+    ]) {
+      assert.equal(isBlockedHost(host), true, host);
+    }
+  });
+
+  it("does not over-block neighbouring public ranges", () => {
+    // 172.15/16 and 172.32/16 are public; only 172.16/12 is private.
+    for (const host of [
+      "172.15.0.1",
+      "172.32.0.1",
+      "11.0.0.1",
+      "192.169.1.1",
+      "100.128.0.1",
+      "8.8.8.8",
+      "example.com",
+      "localhost.example.com",
+    ]) {
+      assert.equal(isBlockedHost(host), false, host);
+    }
+  });
+
+  it("blocks IPv6 unique-local and link-local", () => {
+    for (const host of ["[fc00::1]", "[fd12:3456::1]", "[fe80::1]", "[::]"]) {
+      assert.equal(isBlockedHost(host), true, host);
+    }
+    assert.equal(isBlockedHost("[2606:4700::1111]"), false);
+  });
+
+  it("blocks reserved local suffixes and bare localhost", () => {
+    for (const host of [
+      "localhost",
+      "LOCALHOST",
+      "localhost.",
+      "foo.localhost",
+      "printer.local",
+      "thing.home.arpa",
+    ]) {
+      assert.equal(isBlockedHost(host), true, host);
+    }
+  });
+
+  it("fails closed on an empty or unparseable host", () => {
+    assert.equal(isBlockedHost(""), true);
+    assert.equal(isBlockedHost(undefined), true);
+    assert.equal(isBlockedHost("[garbage::::]"), true);
+  });
+});
+
+describe("blocked hosts are never requested", () => {
+  it("drops them at extraction", () => {
+    const html = page(`
+      <a href="http://169.254.169.254/latest/meta-data/">metadata</a>
+      <a href="http://0x7f000001:8080/admin">obfuscated loopback</a>
+      <a href="http://[::ffff:127.0.0.1]/">mapped loopback</a>
+      <a href="https://example.com/real/">a real target</a>
+    `);
+    assert.deepEqual(extractLinks(html, PAGE), ["https://example.com/real/"]);
+  });
+
+  it("treats a blocked host as a refusal, not a transient failure", () => {
+    // Permanent by nature: re-probing a link-local address ten times is
+    // pointless, and the record should stop it after the refusal limit.
+    assert.equal(classifyFailure({ kind: "refused" }), "refused");
+  });
+
+  it("still infers the kind from status when none is given", () => {
+    assert.equal(classifyFailure({ status: 503 }), "transient");
+    assert.equal(classifyFailure({ status: 403 }), "refused");
   });
 });
