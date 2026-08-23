@@ -61,11 +61,12 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 Three branches (never delete): `develop` → `staging` → `main`. All changes via pull requests.
 
-**Before changes:** Docker must be running (push hooks require it). Sync: `git pull --ff-only origin develop` (fails fast on divergence; diagnose per `--ff-only` block below).
+**Before changes:** Docker must be running (push hooks require it). Always `git fetch origin` first, then sync: `git pull --ff-only origin develop` (fails fast on divergence; diagnose per `--ff-only` block below). In comparisons name the **base** with its remote-tracking ref, not a local mirror: `git log origin/main..develop` (what your local develop carries that main lacks) or `git log origin/main..origin/develop` (the same for what is already pushed). `origin/main` is accurate the moment you fetch; a local `main` mirror silently goes stale.
 
 **After PR merges:** fast-forward source branch to include target's merge commit:
 - develop→staging: `git fetch origin && git checkout develop && git pull --ff-only origin develop && git merge --ff-only origin/staging && git push origin develop`
 - staging→main: same for staging, then repeat develop against staging
+- then sync the local `main` mirror: `git fetch origin main:main` (updates the ref without checking it out; local `main` is never committed to, and the ref-only fetch fails loudly if it would not fast-forward)
 
 **If `--ff-only` fails:** `git log --oneline HEAD..origin/<branch>` (what origin has, not you) and `git log --oneline origin/<branch>..HEAD` (what you have, not origin) to diagnose divergence, then `git merge origin/<branch> --no-edit && git push`.
 

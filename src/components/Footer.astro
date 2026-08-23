@@ -45,25 +45,29 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
     isHome && (
       <div class="pb-6 text-center">
         <div class="inline-block rounded-lg border border-border px-4 py-3">
-          <div class="h-card inline-flex items-center gap-2">
-            <img
-              src={linkWithBase("favicon-96x96.png")}
-              alt=""
-              width="32"
-              height="32"
-              decoding="async"
-              class="u-photo size-8 rounded-full"
-            />
-            <a
-              href={SITE.website}
-              class="p-name u-url font-semibold underline decoration-dashed underline-offset-4 hover:text-accent"
-            >
-              {SITE.author}
-            </a>
+          <div class="h-card">
+            <div class="inline-flex items-center gap-2">
+              <img
+                src={linkWithBase("favicon-96x96.png")}
+                alt=""
+                width="32"
+                height="32"
+                decoding="async"
+                class="u-photo size-8 rounded-full"
+              />
+              <a
+                href={SITE.website}
+                class="p-name u-url font-semibold underline decoration-dashed underline-offset-4 hover:text-accent"
+              >
+                {SITE.author}
+              </a>
+            </div>
+            <p class="p-note mx-auto mt-2 max-w-prose text-sm opacity-80">
+              Senior manager of web platform operations, writing on web
+              technology, AI, low-carb living, and the arts and faith if
+              I&rsquo;m so inclined.
+            </p>
           </div>
-          <p class="mt-1 text-sm opacity-80">
-            That&rsquo;s an h-card. It&rsquo;s there so robots know who I am.
-          </p>
         </div>
       </div>
     )
