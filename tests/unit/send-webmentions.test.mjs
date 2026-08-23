@@ -1196,9 +1196,15 @@ describe("guardedFetch — the host guard survives redirects", () => {
     // Headers throws on a malformed name. fetch would have thrown first on a
     // real request, so arriving here means this script built the header —
     // permanent, and nothing a receiver can fix by being asked ten times.
-    it("classifies unusable headers as refused, not transient", async () => {
-      await withFetch(
-        () => redirectTo("https://example.com/b"),
+    it("refuses unusable headers before any request goes out", async () => {
+      // The stub accepts what a real fetch would reject, so a responder that
+      // answers at all would let the refusal come from the second hop and
+      // leave the first one classified as transient. This one refuses to
+      // answer: the rejection has to arrive before a request is attempted.
+      const { calls } = await withFetch(
+        () => {
+          throw new Error("fetch must not be called");
+        },
         () =>
           assert.rejects(
             () =>
@@ -1208,6 +1214,7 @@ describe("guardedFetch — the host guard survives redirects", () => {
             { kind: "refused", message: /unusable request headers/ },
           ),
       );
+      assert.equal(calls.length, 0);
     });
 
     it("keeps credentials on a same-origin hop", async () => {

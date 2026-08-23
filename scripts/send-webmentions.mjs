@@ -551,12 +551,31 @@ function refuse(message) {
 }
 
 /**
- * The headers to carry from `current` into `next`.
+ * Header init in any of its three forms as one lowercased plain object.
  *
  * Spreading `init.headers` only works for a plain object — a Headers instance
  * spreads to nothing and an entry array to a numeric mess. Going through
  * Headers accepts all three and lowercases the names, so callers of the
  * result can match a header without guessing how it was spelled.
+ *
+ * @param {HeadersInit|undefined} headers
+ * @returns {Record<string, string>}
+ */
+function normalizeHeaders(headers) {
+  try {
+    return Object.fromEntries(new Headers(headers));
+  } catch (err) {
+    // Headers rejects a malformed name or value, and so would fetch — but
+    // fetch rejects with a bare TypeError, which carries no kind, which
+    // classifyFailure reads as transient and retries ten times across ten
+    // deploys. The headers are built by this script and will be malformed
+    // every one of those times.
+    throw refuse(`unusable request headers: ${err.message}`);
+  }
+}
+
+/**
+ * The headers to carry from `current` into `next`.
  *
  * @param {RequestInit} init
  * @param {URL} current
@@ -564,16 +583,7 @@ function refuse(message) {
  * @returns {Record<string, string>}
  */
 function carryHeaders(init, current, next) {
-  let headers;
-  try {
-    headers = Object.fromEntries(new Headers(init.headers));
-  } catch (err) {
-    // Headers rejects a malformed name or value. fetch would have rejected
-    // the same headers on the first hop, so reaching this means the request
-    // changed shape mid-chain — a fault in this script, not in the receiver,
-    // and retrying it ten times would only repeat it.
-    throw refuse(`unusable request headers: ${err.message}`);
-  }
+  const headers = normalizeHeaders(init.headers);
 
   // A redirect is the receiver's choice, not ours: anything it names gets
   // whatever we send, so credentials do not cross an origin boundary.
@@ -612,7 +622,14 @@ export async function guardedFetch(url, options = {}) {
   // A URL rather than a string: `next` is one already, and re-parsing the
   // same address on every hop invites the two spellings to drift apart.
   let current = new URL(url);
-  let init = { ...options, redirect: "manual" };
+  // Normalized before the first request, not just before each redirect:
+  // otherwise a malformed header reaches fetch, which throws a TypeError
+  // that no one classifies, and a permanent fault gets retried as transient.
+  let init = {
+    ...options,
+    headers: normalizeHeaders(options.headers),
+    redirect: "manual",
+  };
 
   for (let hop = 0; ; hop++) {
     const res = await fetch(current.href, init);
