@@ -10,7 +10,7 @@
  *         └── <co-located images>
  *
  * Rewrites:
- *   - frontmatter image|heroImage|ogImage paths → ./<basename>
+ *   - frontmatter image|ogImage paths → ./<basename>
  *   - markdown ![alt](path) image paths → ./<basename>
  *   - HTML <img src="..."> blocks → <Image src={importedVar} alt=...>
  *     (file is renamed to .mdx and import statements added after frontmatter)
@@ -31,7 +31,7 @@ const SRC_ASSETS = join(ROOT, 'src/assets/images');
 const PUBLIC_ASSETS_IMAGES = join(ROOT, 'public/assets/images');
 const PUBLIC_ASSETS = join(ROOT, 'public/assets');
 
-const FRONTMATTER_IMAGE_KEYS = ['image', 'heroImage', 'ogImage'];
+const FRONTMATTER_IMAGE_KEYS = ['image', 'ogImage'];
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');

@@ -77,12 +77,21 @@ Schema fields (defined in `src/content.config.ts`):
 
 | Field | Purpose |
 |-------|---------|
-| `image` | On-page hero. Also the default Open Graph card. |
-| `heroImage` | Alternate hero slot. Same `image()` resolution. |
-| `ogImage` | Social-only override (e.g., 1200×630 raster of an SVG hero). |
-| `alt` | Required when `image` or `heroImage` is set (accessibility). |
+| `image` | On-page hero. Also the default Open Graph card. Any raster; SVG is rejected. |
+| `ogImage` | Social-only override when the hero is the wrong image for a link preview. Must be `webp`, `jpg`, `jpeg`, `png` or `gif`. |
+| `alt` | Required when `image` is set (accessibility). |
 | `caption` | Optional caption below the hero image. Accepts inline HTML (e.g. `<em>`, `<a>`). Author-controlled only — do not put user-supplied content here. |
 | `imagePosition` | Optional crop hint (`top`, `center`, `entropy`, etc.). |
+
+The two image fields are checked against different rules because they reach the
+reader differently. `image` is always re-encoded — the build crops it with Sharp
+and emits WebP — so any raster works and only SVG is refused, having nothing a
+crop can act on. `ogImage` is served to link-preview scrapers exactly as
+committed, with no conversion step, so it is limited to the formats those
+scrapers reliably decode: `webp`, `jpg`/`jpeg`, `png`, `gif`. That list is the
+whole rule — anything not on it is refused, including AVIF, SVG, TIFF and BMP.
+
+The same rules apply to an `image` in `src/content/pages/`.
 
 ### Markdown body
 
@@ -148,7 +157,7 @@ exiftool -all= image.webp
 
 ## Accessibility
 
-The schema enforces `alt` whenever an on-page `image` or `heroImage` is set. The build fails without it.
+The schema enforces `alt` whenever an on-page `image` is set. The build fails without it.
 
 Good alt text describes what's in the image:
 
@@ -203,7 +212,7 @@ If a commit is blocked, fix the file rather than bypassing — these all map to 
 - Restart `npm run dev` if you added the file while the server was running.
 
 **Build fails with "alt is required".**
-The schema requires `alt` whenever `image` or `heroImage` is set. Add a descriptive `alt:` field.
+The schema requires `alt` whenever `image` is set. Add a descriptive `alt:` field.
 
 **MDX build fails on `{` or `}`.**
 You have a `<style>` block, an inline JSX expression with literal braces, or a curly-brace character in body text. Strip the `<style>` block (move styles into a layout) or escape braces with `&lbrace;` / `&rbrace;`.

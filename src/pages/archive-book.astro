@@ -17,7 +17,7 @@ import { Image } from "astro:assets";
 import { render } from "astro:content";
 import { getBlogPosts } from "@/utils/getBlogPosts";
 import postFilter from "@/utils/postFilter";
-import { SITE } from "@/config";
+import { SITE, HERO_IMAGE } from "@/config";
 
 const posts = (await getBlogPosts())
   .filter(postFilter)
@@ -299,11 +299,7 @@ const title = `${SITE.author} — Collected Writing`;
                 <Image
                   src={post.data.image}
                   alt={post.data.alt || "Post hero image"}
-                  width={1200}
-                  height={600}
-                  quality={85}
-                  format="webp"
-                  fit="cover"
+                  {...HERO_IMAGE}
                   position={post.data.imagePosition || "center"}
                   loading="eager"
                   decoding="sync"

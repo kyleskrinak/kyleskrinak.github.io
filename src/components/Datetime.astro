@@ -37,8 +37,12 @@ const updFormatted = updDt?.format("D MMM, YYYY");
       { "scale-90": size === "sm" },
     ]}
   />
+  {/* dt-published / dt-updated below are microformats2 properties. They are
+      only read when this component renders inside an h-entry (PostDetails);
+      in Card.astro listings there is no microformat root above them, so a
+      parser ignores them entirely. Harmless there, required here. */}
   <time
-    class:list={["text-sm", { "sm:text-base": size === "lg" }]}
+    class:list={["dt-published", "text-sm", { "sm:text-base": size === "lg" }]}
     datetime={pubDt.toISOString()}
   >{pubFormatted}</time>
   {
@@ -51,7 +55,7 @@ const updFormatted = updDt?.format("D MMM, YYYY");
           Revised on:
         </span>
         <time
-          class:list={["text-sm", { "sm:text-base": size === "lg" }]}
+          class:list={["dt-updated", "text-sm", { "sm:text-base": size === "lg" }]}
           datetime={updDt.toISOString()}
         >
           {updFormatted}
