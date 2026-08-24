@@ -1,5 +1,5 @@
 import satori from "satori";
-import { SITE } from "@/config";
+import { SITE, OG_IMAGE_SIZE } from "@/config";
 import loadFonts from "../loadFonts";
 import loadFaviconBadge from "../loadFaviconBadge";
 
@@ -139,8 +139,8 @@ export default async () => {
       },
     },
     {
-      width: 1200,
-      height: 630,
+      width: OG_IMAGE_SIZE.width,
+      height: OG_IMAGE_SIZE.height,
       embedFont: true,
       fonts: await loadFonts(),
     }
