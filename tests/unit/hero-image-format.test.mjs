@@ -47,6 +47,33 @@ describe('assetExtension', () => {
     assert.equal(assetExtension(undefined), null);
     assert.equal(assetExtension(42), null);
   });
+
+  // Every one of these used to throw rather than return null: the old code
+  // asserted `src` was a string and called .toLowerCase() on whatever it found.
+  // A throw inside superRefine escapes validation as an unhandled exception, so
+  // the shape that should have produced the clearest possible finding instead
+  // produced a stack trace.
+  it('returns null for an object whose src is not a string', () => {
+    assert.equal(assetExtension({ src: 42 }), null);
+    assert.equal(assetExtension({ src: null }), null);
+    assert.equal(assetExtension({ src: { nested: './hero.webp' } }), null);
+    assert.equal(assetExtension({}), null);
+    assert.equal(assetExtension(null), null);
+  });
+
+  // A resolved ImageMetadata still reads correctly — narrowing must not cost
+  // the shape the function exists to handle.
+  it('reads the extension off an object with a string src', () => {
+    assert.equal(assetExtension({ src: '/_astro/hero.abc123.webp' }), 'webp');
+  });
+
+  // And the crash shape reaches the caller as a finding, not an exception.
+  it('reports an unreadable reference instead of throwing', () => {
+    const issues = heroFormatIssues({ image: { src: 42 } });
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].field, 'image');
+    assert.match(issues[0].message, /could not read a file extension/);
+  });
 });
 
 describe('heroFormatIssues: image', () => {

@@ -52,10 +52,18 @@ export const OG_IMAGE_FORMATS = ['webp', 'jpg', 'jpeg', 'png', 'gif'] as const;
  * evaluate, never as a pass.
  */
 export function assetExtension(img: unknown): string | null {
-  const ref = typeof img === 'string' ? img : ((img as { src?: string })?.src ?? '');
+  // The parameter is `unknown` and the return contract is "an extension or
+  // null", so every shape that is not a readable reference has to leave through
+  // the null branch. Narrowing with typeof rather than asserting `src` is a
+  // string is what makes that true: an object whose src is a number would
+  // otherwise reach .toLowerCase() and throw, and a throw here escapes
+  // superRefine as an unhandled exception instead of becoming the addIssue that
+  // the `unreadable` finding below exists to produce.
+  const raw = typeof img === 'string' ? img : (img as { src?: unknown } | null)?.src;
+  if (typeof raw !== 'string') return null;
   // Cut at the first ? or # so a query string or fragment cannot hide the
   // extension behind them and turn a readable reference into a build failure.
-  const path = ref.toLowerCase().split(/[?#]/)[0];
+  const path = raw.toLowerCase().split(/[?#]/)[0];
   const match = /\.([a-z0-9]+)$/.exec(path);
   return match ? match[1] : null;
 }
