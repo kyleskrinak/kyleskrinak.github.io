@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { heroFormatIssues } from './utils/heroImageFormat';
 
 export const BLOG_PATH = 'src/content/blog';
 
@@ -15,6 +16,31 @@ const httpUrl = z.string().trim().url().refine(
 	{ message: 'Must be an absolute http(s) URL' },
 );
 
+// The context object superRefine hands its callback. `z` is re-exported from
+// astro:content as a value only, so `z.RefinementCtx` is not a namespace this
+// module can reach; deriving the type from the value keeps it correct without
+// importing zod directly, which is Astro's dependency and not ours to pin.
+type RefinementCtx = Parameters<
+	Parameters<ReturnType<typeof z.object>['superRefine']>[0]
+>[1];
+
+// Adapter between heroImageFormat.ts (plain data in, plain findings out) and
+// Zod. Both collections call it: `pages` also resolves an `image` through
+// image(), and the format rules are a property of the image pipeline, not of
+// one collection.
+const addImageFormatIssues = (
+	data: Record<string, unknown>,
+	ctx: RefinementCtx,
+) => {
+	for (const { field, message } of heroFormatIssues(data)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message,
+			path: [field],
+		});
+	}
+};
+
 const blog = defineCollection({
 	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
 	schema: ({ image }) => z.object({
@@ -24,7 +50,6 @@ const blog = defineCollection({
 		updatedDate: z.coerce.date().optional(),
 		author: z.string().optional(),
 		image: image().optional(),
-		heroImage: image().optional(),
 		ogImage: image().optional(),
 		alt: z.string().trim().min(1).optional(),
 		caption: z.string().trim().min(1).optional(),
@@ -43,12 +68,17 @@ const blog = defineCollection({
 		toc: z.boolean().optional(),
 		source: z.enum(['jekyll', 'astro']).optional(),
 	}).superRefine((data, ctx) => {
-		// Enforce: if an on-page image field exists, alt text is required for accessibility
-		const hasOnPageImage = data.image || data.heroImage;
-		if (hasOnPageImage && !data.alt) {
+		// Hero and social-card format rules live in src/utils/heroImageFormat.ts
+		// so they can be unit-tested; see that module for why `image` and
+		// `ogImage` are judged differently, and why an unreadable reference is an
+		// error rather than a pass.
+		addImageFormatIssues(data, ctx);
+
+		// Enforce: if an on-page image exists, alt text is required for accessibility
+		if (data.image && !data.alt) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
-				message: 'Alt text is required when an on-page image (image or heroImage) is provided',
+				message: 'Alt text is required when an on-page image is provided',
 				path: ['alt'],
 			});
 		}
@@ -108,7 +138,7 @@ const pages = defineCollection({
 			date: z.coerce.date(),
 			entry: z.string().trim().min(1),
 		})).optional(),
-	}),
+	}).superRefine(addImageFormatIssues),
 });
 
 export const collections = {

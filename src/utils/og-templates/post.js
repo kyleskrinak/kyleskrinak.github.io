@@ -1,6 +1,6 @@
 import satori from "satori";
 // import { html } from "satori-html";
-import { SITE } from "@/config";
+import { SITE, OG_IMAGE_SIZE } from "@/config";
 import loadFonts from "../loadFonts";
 
 // const markup = html`<div
@@ -218,8 +218,8 @@ export default async post => {
       },
     },
     {
-      width: 1200,
-      height: 630,
+      width: OG_IMAGE_SIZE.width,
+      height: OG_IMAGE_SIZE.height,
       embedFont: true,
       fonts: await loadFonts(),
     }

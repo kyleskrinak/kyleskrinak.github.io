@@ -11,11 +11,21 @@ type Props = {
 const { tag, tagName, size = "lg" } = Astro.props;
 ---
 
+{/* p-category on the <a> below is a microformats2 property, read only when this
+    component renders inside an h-entry (PostDetails). On the tags index there is
+    no microformat root above it, so a parser ignores it.
+
+    It sits on the anchor rather than the <li> so its value is the tag text
+    alone, with no surrounding list-item whitespace or icon markup in scope.
+    p-* takes text content, so the value stays the tag name; u-category on the
+    same anchor would instead yield the tag page's URL, which is a different
+    (also valid) shape this deliberately does not use. */}
 <li>
   <a
     href={linkWithBase(`/tags/${tag}/`)}
     transition:name={tag}
     class:list={[
+      "p-category",
       "flex items-center gap-0.5",
       "border-b-2 border-dashed border-foreground",
       "hover:-mt-0.5 hover:border-accent hover:text-accent",

@@ -1,6 +1,6 @@
 ---
 import { render, type CollectionEntry } from "astro:content";
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -15,9 +15,10 @@ import { getPath } from "@/utils/getPath";
 import { linkWithBase } from "@/utils/linkWithBase";
 import { slugifyStr } from "@/utils/slugify";
 import { getReadingTime } from "@/utils/readingTime";
+import { canonicalizePathname } from "@/utils/canonicalizePathname";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
-import { SITE } from "@/config";
+import { SITE, HERO_IMAGE } from "@/config";
 
 type Props = {
   post: CollectionEntry<"blog">;
@@ -44,6 +45,23 @@ const {
 
 const { Content } = await render(post);
 
+/* ========== Microformats2 ==========
+   The h-entry's u-url is this page, not `canonicalURL` from frontmatter: a
+   post may declare an external canonical for SEO, but a webmention receiver
+   fetches the URL we sent as the source and needs the entry to identify that
+   page. Derived the same way Layout derives its canonical so the two agree
+   whenever frontmatter does not override it. */
+const postUrl = new URL(
+  canonicalizePathname(Astro.url.pathname, import.meta.env.BASE_URL),
+  Astro.site
+).href;
+// The same identity the homepage footer h-card carries: name and URL both read
+// SITE, so those cannot drift. The photo is not shared state — this filename is
+// a literal here and in Footer.astro, and nothing enforces that the two h-cards
+// name the same file. (Layout.astro and site.webmanifest.ts use it too, but as
+// the favicon and PWA icon; changing the avatar need not touch those.)
+const authorPhoto = new URL(linkWithBase("favicon-96x96.png"), Astro.site).href;
+
 const readingTime = getReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
@@ -53,9 +71,20 @@ if (initOgImage && typeof initOgImage === 'object' && 'src' in initOgImage) {
   ogImageUrl = initOgImage.src;
 }
 
-// Fall back to hero image (skip SVGs — social scrapers don't render them)
-if (!ogImageUrl && image && !image.src.toLowerCase().endsWith('.svg')) {
-  ogImageUrl = image.src;
+// Fall back to hero image. Use the same derivative the hero <Image> renders,
+// not the raw source: the source is whatever the author supplied (some are
+// portrait, and several exceed 900KB), so scrapers center-crop it and ignore
+// `imagePosition`. Sharing HERO_IMAGE with the <Image> below means identical
+// transform params, so this resolves to that same generated file and emits no
+// extra asset. No format check is needed — content.config.ts rejects SVG heroes
+// at build time, so `image` is always a raster Sharp can crop.
+if (!ogImageUrl && image) {
+  const ogHero = await getImage({
+    src: image,
+    ...HERO_IMAGE,
+    position: imagePosition || "center",
+  });
+  ogImageUrl = ogHero.src;
 }
 
 // Use dynamic OG image if enabled and no remote|local ogImage or hero image
@@ -99,12 +128,12 @@ const nextPost =
   <BackButton />
   <main
     id="main-content"
-    class:list={["app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
+    class:list={["h-entry", "app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
     data-pagefind-body
   >
     <h1
       transition:name={slugifyStr(title.replaceAll(".", "-"))}
-      class="inline-block text-2xl font-bold text-accent sm:text-3xl"
+      class="p-name inline-block text-2xl font-bold text-accent sm:text-3xl"
     >
       {title}
     </h1>
@@ -121,27 +150,48 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
+    {/* Microformats2 identity for this entry. No visible author chrome exists
+        on a post page to carry these, and adding one would change the layout,
+        so they ride on a hidden block: parsers read the DOM and ignore
+        `hidden`, which is what a webmention receiver does with this page.
+        u-photo is an <img> and u-url an <a> because those are the primary
+        element rules for u-* — a parser reaches them before any fallback. */}
+    <div class="post-identity" hidden>
+      <a class="u-url" href={postUrl}>{title}</a>
+      <div class="p-author h-card">
+        <img
+          class="u-photo"
+          src={authorPhoto}
+          alt=""
+          width="32"
+          height="32"
+        />
+        <a class="p-name u-url" href={SITE.website}>{SITE.author}</a>
+      </div>
+    </div>
     {image && (
       <figure class="hero-image mt-8 mb-8 w-full">
-        {/* fit + position route to Sharp's resize at build time so the
-            generated 1200×600 hero is cropped from the part of the source
-            image specified by frontmatter `imagePosition` (default: center).
+        {/* u-featured below is the entry's representative image for link
+            previews. It sits inside the h-entry but outside e-content, which is
+            the shape the h-entry spec documents — the image is declared once
+            here rather than duplicated into the body. (The class cannot be
+            annotated inline: Astro rejects a comment in attribute position.)
+
+            HERO_IMAGE's fit + position route to Sharp's resize at build time
+            so the generated hero is cropped from the part of the source image
+            specified by frontmatter `imagePosition` (default: center).
             densities={[1, 2]} emits a 1x/2x srcset; sources <2400px wide get
             only the 1x candidate (Sharp skips upscaling). */}
         <Image
           src={image}
           alt={alt || "Post hero image"}
-          width={1200}
-          height={600}
-          quality={85}
-          format="webp"
-          fit="cover"
+          {...HERO_IMAGE}
           position={imagePosition || "center"}
           densities={[1, 2]}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+          sizes={`(max-width: 640px) 100vw, (max-width: 1024px) 90vw, ${HERO_IMAGE.width}px`}
           loading="eager"
           decoding="sync"
-          class="rounded-lg shadow-md"
+          class="u-featured rounded-lg shadow-md"
         />
         {caption && (
           <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
@@ -153,7 +203,7 @@ const nextPost =
     )}
     <article
       id="article"
-      class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
+      class="e-content app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
     >
       <Content />
     </article>
