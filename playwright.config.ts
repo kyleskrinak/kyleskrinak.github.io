@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { BASE_URL } from './tests/test-utils';
+import { BASE_URL, PREVIEW_PORT } from './tests/test-utils';
 
 /**
  * Unified Playwright configuration for all test types
@@ -92,14 +92,22 @@ export default defineConfig({
   ],
 
   // Run against production build (not dev server) to avoid Vite 7 dep
-  // pre-bundling issues (504 Outdated Optimize Dep errors). Port 4322
-  // intentionally differs from dev server (4321) to prevent conflicts.
+  // pre-bundling issues (504 Outdated Optimize Dep errors). The port comes from
+  // tests/test-utils.ts, which documents why it is not the dev server's.
   // Uses build:ci (not build) to skip the public/ pagefind copy step.
   // reuseExistingServer is false to ensure fresh builds (avoids stale build issues).
+  //
+  // ASTRO_PREVIEW_BACKGROUND is set because Astro detaches `astro preview` into a
+  // background process when it detects an agent session (am-i-vibing, keyed on
+  // CLAUDECODE among others), and only an unset variable enables that detection --
+  // any value, including 0, turns it off. Detached, the server outlives the run:
+  // Playwright's teardown kills a child it no longer owns, the listener survives,
+  // and every later run dies on Astro's PID lock. Keeping it in the foreground is
+  // what makes the server die with the test run that started it.
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
-        command: 'npm run build:ci && npx astro preview --host localhost --port 4322',
+        command: `npm run build:ci && ASTRO_PREVIEW_BACKGROUND=0 npx astro preview --host localhost --port ${PREVIEW_PORT}`,
         url: BASE_URL,
         reuseExistingServer: false,
         timeout: 180_000,

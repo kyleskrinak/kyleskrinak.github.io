@@ -3,11 +3,25 @@
  */
 
 /**
- * Base URL for tests - defaults to this project's dedicated local preview port (4322).
- * Port 4322 intentionally differs from the local dev server port (4321) to prevent conflicts.
+ * Dedicated local preview port for the Playwright suite.
+ *
+ * Port allocation across this repo, so the number is explained in one place:
+ *   4321 - `astro dev`, `npm run preview`, CI, and scripts/build-archive-pdf.mjs
+ *   4322 - this suite's preview server, deliberately not 4321 so a dev server
+ *          left running does not collide with a test run
+ *   4323 - the resume PDF renderer
+ *
+ * scripts/visual-test.sh mirrors this value as a shell default (it cannot import
+ * TypeScript); the two must stay in sync, and that script's comment says so.
+ */
+export const PREVIEW_PORT = 4322;
+
+/**
+ * Base URL for tests - defaults to this project's dedicated local preview port.
  * Override with PLAYWRIGHT_TEST_BASE_URL for staging/production testing.
  */
-export const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4322';
+export const BASE_URL =
+  process.env.PLAYWRIGHT_TEST_BASE_URL || `http://localhost:${PREVIEW_PORT}`;
 
 /**
  * Detect staging environment from URL pattern or explicit env var
