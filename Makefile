@@ -27,7 +27,7 @@ test: local-test docker-test
 push: test
 	@echo ""
 	@echo "📤 Pushing to GitHub..."
-	git push origin staging
+	git push origin develop
 
 clean:
 	@echo "🧹 Cleaning up Docker image and build cache..."

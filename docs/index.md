@@ -14,7 +14,7 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 ## 🔧 Operations
 
 **For deployments and maintenance:**
-- [Deployment Guide](./operations/deployment.md) - How to deploy to staging and production
+- [Deployment Guide](./operations/deployment.md) - How to deploy to production (and the GitHub Pages disaster-recovery fallback)
 - [Maintenance](./operations/maintenance.md) - Health checks and monitoring
 - [Troubleshooting](./operations/troubleshooting.md) - Common issues and fixes
 

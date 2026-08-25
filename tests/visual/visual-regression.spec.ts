@@ -41,6 +41,8 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
  *   npm run test:visual
  *
  * Staging:
+ *   # Note: kyleskrinak.github.io only serves live content right after a manual
+ *   # workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:visual
  *
  * Production:

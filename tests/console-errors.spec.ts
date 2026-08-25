@@ -3,7 +3,7 @@ import { BASE_URL } from "./test-utils";
 
 /**
  * Test console errors across key pages
- * Run before pushing to staging to catch console issues early
+ * Run before opening a PR to catch console issues early
  *
  * Usage:
  *   npm run dev                    # In terminal 1
@@ -12,6 +12,9 @@ import { BASE_URL } from "./test-utils";
  * Or with a specific environment:
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io \
  *   npx playwright test tests/console-errors.spec.ts
+ *
+ * Note: kyleskrinak.github.io only serves live content right after a manual
+ * workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
  */
 
 const PAGES_TO_TEST = [

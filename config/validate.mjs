@@ -103,9 +103,9 @@ if (existsSync('src/layouts/Layout.astro')) {
 // Excluded workflows (linkwatch.yml, secrets-check.yml, etc.)
 // are intentionally skipped because they don't perform builds.
 const WORKFLOW_TO_ENV_MAP = {
-  'staging-deploy.yml': 'staging-gh',
+  'staging-deploy.yml': 'staging-gh-fallback',
   'production-deploy.yml': 'main-aws',
-  'pr-visual-check.yml': 'pr-visual-staging'
+  'pr-visual-check.yml': 'pr-visual-check'
 };
 
 // Extracts env vars from the step that runs 'npm run build:ci'.

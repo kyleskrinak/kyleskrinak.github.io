@@ -15,7 +15,7 @@ Key features include:
 - Visual regression testing
 - Pagefind search
 - Local resume variant generation
-- Multi-environment deployment (staging vs production)
+- Production deployment with a GitHub Pages disaster-recovery fallback
 
 ## Architecture Overview
 

@@ -6,7 +6,7 @@ This directory contains Playwright tests for the Astro blog. Tests are organized
 
 **Purpose**: Verify no console errors or 404s appear when browsing key pages.
 
-**When to run**: Before pushing to staging to catch issues early (404 resources, syntax errors, etc.)
+**When to run**: Before opening a PR to catch issues early (404 resources, syntax errors, etc.)
 
 ### Running Locally (Against Dev Server)
 
@@ -66,6 +66,8 @@ npm run test:production -- --project=console
 ```bash
 # Analytics tests require a remote URL (tests skip on localhost)
 # Use staging or production:
+# Note: kyleskrinak.github.io only serves live content right after a manual
+# workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
 PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
 
 # Or use the convenience scripts:

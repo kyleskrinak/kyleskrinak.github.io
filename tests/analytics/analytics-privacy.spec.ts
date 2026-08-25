@@ -10,6 +10,8 @@ import { BASE_URL, isLocalUrl } from "../test-utils";
  *
  * Usage:
  *   # Test against staging/production
+ *   # Note: kyleskrinak.github.io only serves live content right after a manual
+ *   # workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
  *
  *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) by test policy,

@@ -179,8 +179,8 @@ See `docs/operations/environment-configuration.md` for complete registry documen
 
 ## Deployment Specific
 
-### GitHub Pages (Staging)
-- Uses `staging` branch
+### GitHub Pages (disaster-recovery fallback)
+- Manual `workflow_dispatch` (plus a quarterly build-only `schedule` dry run), dispatched from `main`
 - Automatically builds with entire `public/` directory
 - Search assets included in deployment ✅
 

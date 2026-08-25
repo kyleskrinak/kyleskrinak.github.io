@@ -88,14 +88,14 @@ export const ConfigRegistry = {
         notes: 'Gated on import.meta.env.PROD — never renders in local dev builds.'
       }
     },
-    'staging-gh': {
+    'staging-gh-fallback': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
-      SITE_URL: { value: 'https://kyleskrinak.github.io/', source: 'workflow', required: true },
-      PUBLIC_DEPLOY_ENV: { value: 'staging', source: 'workflow', required: true },
+      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
+      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Staging omitted - no search engine verification needed for deindexed preview builds' }
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Manual disaster-recovery build for GitHub Pages (workflow_dispatch full-fallback, or the quarterly build-only dry run) — not a continuous deploy. Runs with production settings since a real failover means kyle.skrinak.com DNS could point here. Google site verification omitted; not needed unless this becomes the live host.' }
     },
-    'pr-visual-staging': {
+    'pr-visual-check': {
       // Builds with production settings to match committed baselines (generated locally without
       // analytics tokens). Analytics tokens are deliberately omitted: the scripts load async and
       // don't affect rendered visual output, and local baseline generation runs without them.
@@ -119,8 +119,8 @@ export const ConfigRegistry = {
   buildFlags: {
     'import.meta.env.PROD': {
       'local-develop': false,    // astro dev: always false
-      'staging-gh': true,          // astro build: always true
-      'pr-visual-staging': true,   // astro build: always true
+      'staging-gh-fallback': true, // astro build: always true
+      'pr-visual-check': true,     // astro build: always true
       'main-aws': true             // astro build: always true
     }
   },
@@ -141,9 +141,9 @@ export const ConfigRegistry = {
   },
 
   deployment: {
-    'staging-gh': {
+    'staging-gh-fallback': {
       platform: 'GitHub Pages',
-      mechanism: 'GitHub Actions pages deployment',
+      mechanism: 'GitHub Actions pages deployment (manual workflow_dispatch, plus a quarterly build-only schedule)',
       location: '.github/workflows/staging-deploy.yml',
       variables: {
         // GitHub Pages deployment uses GITHUB_TOKEN (automatic) and pages permissions

@@ -22,7 +22,7 @@ Configured in `renovate.json`. Key posture:
 
 - **`enabledManagers: ["npm"]`** — Renovate manages **only** npm dependencies. It does **not** touch the `Dockerfile` base image or the SHA-pinned GitHub Actions; those are maintained manually (see "Manually pinned" below). This is deliberate — it keeps the supply-chain-critical pins under explicit human control.
 - **`minimumReleaseAge: "7 days"`** — a cooling-off window on all routine bumps so freshly published (potentially compromised) releases age before they can land. Security alerts override this with `minimumReleaseAge: "0 days"`.
-- **`baseBranches: ["develop"]`** + `useBaseBranchConfig: "merge"` — PRs open against `develop` and flow `develop → staging → main`; for a critical CVE the operator fast-tracks promotion manually.
+- **`baseBranches: ["develop"]`** + `useBaseBranchConfig: "merge"` — PRs open against `develop` and flow `develop → main`; for a critical CVE the operator fast-tracks promotion manually.
 - Updates are grouped by ecosystem (astro, testing, dev-tools, tailwind, markdown, build-tools, utilities); major bumps and minor TypeScript bumps open as individual PRs for explicit review.
 
 Review Renovate PRs and the **"Renovate Dependency Dashboard"** GitHub issue as part of the monthly cadence.
@@ -59,10 +59,10 @@ What it does (`scripts/audit-deps.mjs`):
 
 ## CI gates
 
-Both run on pull requests **and** on direct pushes to `develop`/`staging`/`main` (so a change can't reach a deploy branch without the gate), plus `workflow_dispatch`:
+Both run on pull requests **and** on direct pushes to `develop`/`main` (so a change can't reach a deploy branch without the gate), plus `workflow_dispatch`:
 
-- **`supply-chain-audit.yml`** — `npm ci --ignore-scripts` then `npm audit signatures`. Runs on all PRs and all pushes to `develop`/`staging`/`main`. Transient registry errors are retried (3 attempts with backoff); tamper indicators and unrecognized errors fail closed immediately. On sustained failure (registry outage or repeated attempt timeouts) the signature step is skipped with a warning — outage alone is not treated as a supply-chain signal.
-- **`unit-tests.yml`** — `npm run test:unit` (the `audit-deps.mjs` helper's unit suite). Runs on all PRs and all pushes to `develop`/`staging`/`main`.
+- **`supply-chain-audit.yml`** — `npm ci --ignore-scripts` then `npm audit signatures`. Runs on all PRs and all pushes to `develop`/`main`. Transient registry errors are retried (3 attempts with backoff); tamper indicators and unrecognized errors fail closed immediately. On sustained failure (registry outage or repeated attempt timeouts) the signature step is skipped with a warning — outage alone is not treated as a supply-chain signal.
+- **`unit-tests.yml`** — `npm run test:unit` (the `audit-deps.mjs` helper's unit suite). Runs on all PRs and all pushes to `develop`/`main`.
 
 ## Manually pinned (NOT managed by Renovate)
 

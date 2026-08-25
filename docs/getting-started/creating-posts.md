@@ -293,13 +293,13 @@ npm run test:console
 
 ### 5. Commit and open a PR
 
-The repo workflow is `develop → staging → main` via pull request. Push to your working branch (usually `develop`), then open a PR to `staging` so the change deploys to the staging environment first.
+The repo workflow is `develop → main` via pull request. Push to `develop`, then open a PR to `main` so the change goes through CI checks before deploying to production.
 
 ```bash
 git add src/content/blog/2026-01-20-your-post/
 git commit -m "blog: Add new post about your topic"
 git push origin develop
-gh pr create --base staging --head develop --title "blog: Add new post about your topic"
+gh pr create --base main --head develop --title "blog: Add new post about your topic"
 ```
 
 ## Common Mistakes
@@ -345,4 +345,4 @@ See existing posts for examples of style and tone.
 - [ ] Post tested locally with `npm run dev`
 - [ ] No console errors
 - [ ] Links and images working
-- [ ] Pushed to staging first for review
+- [ ] PR opened to main for review

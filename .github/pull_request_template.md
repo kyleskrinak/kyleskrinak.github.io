@@ -20,17 +20,16 @@ Brief summary of the changes in this PR.
 
 ### Testing & Validation
 - [ ] Local build succeeds: `npm run build`.
-- [ ] Visual regression tests pass: `npm run test:visual` (automatically runs on PRs to staging/main).
+- [ ] Visual regression tests pass: `npm run test:visual` (automatically runs on PRs to main).
 - [ ] No new broken links expected (run `npm run check:links` locally; nightly linkwatch will verify after merge).
 - [ ] Console errors checked (no JavaScript errors).
 - [ ] Local preview works: `npx astro preview` (if UI changes).
 - [ ] CI passes on this branch (GitHub Actions).
 - [ ] Environment variables are correctly documented in `.env.example` (if new vars added).
 
-### Staging (if applicable)
-- [ ] Staging CI environment variables configured (e.g., `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`).
-- [ ] Feature validated on staging deployment.
-- [ ] Staging build passes without errors.
+### CI Environment
+- [ ] CI environment variables configured (e.g., `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`).
+- [ ] CI build passes without errors.
 - [ ] No TypeScript or linting errors.
 
 ### Documentation & Changelog
