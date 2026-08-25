@@ -14,7 +14,11 @@ This generates reference screenshots in `tests/visual/visual-regression.spec.ts-
 ```bash
 npm run test:visual
 ```
-Compares current rendering against baselines. Local dev server starts automatically.
+Compares current rendering against baselines. The preview server starts automatically on
+port 4322. This calls Playwright directly, so it does **not** carry the preview-server
+guard described in [Troubleshooting](#a-preview-server-is-live-on-port-n-which-blocks-this-run)
+— if a stray `astro preview` is running, this command reports a 180s `webServer` timeout
+instead of the real cause.
 
 ### 3. Test Staging Before Launch
 ```bash
@@ -278,6 +282,48 @@ timeout: 60000 // 60 seconds
 - Disable animations: `prefers-reduced-motion: reduce`
 - Increase tolerance: `maxDiffPixelRatio: 0.15`
 - Retry on CI: Set `retries: 2` in config
+
+### "A preview server is live on port N, which blocks this run"
+
+The visual suite serves the built site on **port 4322** (defined in `tests/test-utils.ts`,
+mirrored as a shell default in `scripts/visual-test.sh`) — deliberately not the dev
+server's 4321, so `astro dev` and a test run can coexist.
+
+Astro records a running preview in `.astro/preview.json` and refuses to start a second
+one, and that refusal is keyed on **the recorded process, not the port**: a preview on
+*any* port blocks a run that needs 4322. Worse, it refuses by exiting 0 without binding
+anything, so without a guard Playwright sees a `webServer` command that succeeded and can
+only report the 180s timeout that follows. `scripts/visual-test.sh` therefore checks up
+front and fails immediately with the real reason.
+
+**The guard runs in `scripts/visual-test.sh` only** — `npm run test:visual:baseline` and
+`bash scripts/visual-test.sh local`. Every command that calls Playwright directly
+(`npm test`, `npm run test:visual`, `test:seo`, `test:console`, `test:links`,
+`test:analytics`) shares the same `webServer` config but not the guard, and so surfaces
+this condition as an unexplained 180s timeout on port 4322. The fix below is the same
+either way; on those commands you have to reach it yourself. Note the trigger is a live
+`astro preview` specifically — `astro dev` writes no preview record and never causes this.
+
+Fix it with:
+
+```bash
+npx astro preview stop
+```
+
+If the port is held by something that is not an Astro preview:
+
+```bash
+lsof -nP -iTCP:4322 -sTCP:LISTEN
+```
+
+A record whose port has no listener is stale — the script deletes it and continues,
+whatever port it names. That covers the container-PID records older Docker runs left
+behind; current Docker runs mount their own `.astro`, so they no longer touch the host's.
+
+Previews started by the test suite exit with the run: both the script and
+`playwright.config.ts` set `ASTRO_PREVIEW_BACKGROUND=0`, which turns off Astro's agent
+detection (it otherwise detaches the preview inside an agent session, and the survivor
+blocks every later run). Any value works — only an *unset* variable detaches.
 
 ### Different rendering on Mac vs Linux
 `snapshotPathTemplate` removes the OS suffix, so committed baselines *resolve* on any platform — but macOS and Ubuntu font metrics differ enough that `maxDiffPixelRatio: 0.1` doesn't absorb it; expect the height-diff failures described in [Baseline Management](#baseline-management). Regenerate baselines with `npm run test:visual:baseline:docker` rather than raising the tolerance — a looser tolerance would also mask real regressions.

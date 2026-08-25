@@ -23,7 +23,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import GithubSlugger from "github-slugger";
-import { parseFlags } from "./lib/pdf-helpers.mjs";
+import { parseFlags, parsePreviewPort } from "./lib/pdf-helpers.mjs";
 import { renderResumePdf } from "./lib/resume-render.mjs";
 // Single source of truth for the facet vocabulary — shared with the remark
 // plugin that emits the data-facets attributes this script filters on.
@@ -54,15 +54,9 @@ const FLAGS = {
   "--base-url": { key: "baseUrl", value: true },
 };
 
+// Shared with print-resume-pdf.mjs so the variable cannot mean two ports.
 export function parseResumePreviewPort(env = process.env) {
-  const raw = env.RESUME_PREVIEW_PORT || "4323";
-  const port = Number(raw);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(
-      `Invalid RESUME_PREVIEW_PORT '${env.RESUME_PREVIEW_PORT}' — must be an integer 1-65535.`
-    );
-  }
-  return port;
+  return parsePreviewPort("RESUME_PREVIEW_PORT", 4323, env);
 }
 
 function resolveConfigPath(nameOrPath) {

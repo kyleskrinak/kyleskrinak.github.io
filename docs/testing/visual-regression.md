@@ -37,3 +37,5 @@ See also:
 - `/tests/visual/visual-regression.spec.ts` - Test implementation
 - `/.github/workflows/pr-visual-check.yml` - CI gate workflow
 - `playwright.config.ts` - `snapshotPathTemplate` removes OS suffix for cross-platform compatibility
+- Docker runs mount container-only volumes over `node_modules` and `.astro`, so the host's
+  Linux-incompatible modules and its Astro preview record are neither read nor written

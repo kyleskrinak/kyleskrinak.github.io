@@ -121,5 +121,5 @@ If the one-page gate fails, reduce job bullets first with `max_bullets_per_entry
 - Variants are local, one-off artifacts; visually inspect the generated PDF before sending.
 - The published resume body remains the source of truth for default output.
 - The variant builder does not run `astro build`; run `npm run build` first unless using `--base-url`.
-- The default preview port is `4323`. Override with `RESUME_PREVIEW_PORT` if another process is using it.
+- The default preview port is `4323`, shared by `build-resume-variant.mjs` and `print-resume-pdf.mjs` — one variable, one port. Override both with `RESUME_PREVIEW_PORT` if another process is using it. Neither defaults to `4321`; that is the dev server's port, and a preview started there cannot bind, so the render would silently take the dev server's output instead of `dist/`.
 - Variant PDFs should stay outside the repository unless intentionally captured.
