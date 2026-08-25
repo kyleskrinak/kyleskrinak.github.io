@@ -1,6 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import { execFile } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import {
 	parsePreviewPort,
 	portIsLive,
@@ -152,4 +155,37 @@ describe('waitForServer', () => {
 			await server.close();
 		}
 	});
+});
+
+describe('a bad port in the environment fails cleanly', () => {
+	// parsePreviewPort throws. If a script calls it at module scope, the throw
+	// escapes main().catch and Node prints a raw stack trace -- the script's
+	// error handling never runs. These spawn the real scripts to prove the parse
+	// happens somewhere the handler can see it. Guarding the helper alone would
+	// not catch a regression here: the defect is *where* it is called.
+	const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+	function run(script, env) {
+		return new Promise(resolve => {
+			execFile(
+				process.execPath,
+				[path.join(ROOT, 'scripts', script)],
+				{ cwd: ROOT, env: { ...process.env, ...env } },
+				(err, stdout, stderr) => resolve({ code: err ? err.code : 0, stdout, stderr }),
+			);
+		});
+	}
+
+	for (const [script, envVar, bad] of [
+		['print-resume-pdf.mjs', 'RESUME_PREVIEW_PORT', 'abc'],
+		['build-archive-pdf.mjs', 'ARCHIVE_PREVIEW_PORT', '99999'],
+		['build-resume-variant.mjs', 'RESUME_PREVIEW_PORT', '0'],
+	]) {
+		it(`${script} reports ${envVar} without a stack trace`, async () => {
+			const { code, stderr } = await run(script, { [envVar]: bad });
+			assert.equal(code, 2, `expected exit 2, got ${code}: ${stderr}`);
+			assert.match(stderr, new RegExp(`Invalid ${envVar}`));
+			assert.doesNotMatch(stderr, /^\s+at /m, 'a stack trace reached the user');
+		});
+	}
 });

@@ -40,10 +40,19 @@ const FLAGS = {
   "--base-url": { key: "baseUrl", value: true },
 };
 
-// 4324, not the dev server's 4321: see parsePreviewPort for the allocation.
-const PORT = parsePreviewPort("ARCHIVE_PREVIEW_PORT", 4324);
-
 async function main() {
+  // Parsed here, not at module scope: a throw during module evaluation escapes
+  // main().catch below and reaches the user as a raw stack trace. Matches
+  // build-resume-variant.mjs, which exits 2 on bad configuration input.
+  let PORT;
+  try {
+    // 4324, not the dev server's 4321: see parsePreviewPort for the allocation.
+    PORT = parsePreviewPort("ARCHIVE_PREVIEW_PORT", 4324);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+
   const args = parseFlags(process.argv.slice(2), FLAGS, {
     output: "public/blog-archive.pdf",
     skipBuild: false,

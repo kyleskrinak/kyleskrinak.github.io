@@ -25,17 +25,26 @@
 import { parseFlags, parsePreviewPort } from "./lib/pdf-helpers.mjs";
 import { renderResumePdf } from "./lib/resume-render.mjs";
 
-// 4323, shared with build-resume-variant.mjs -- one variable, one meaning.
-const PORT = parsePreviewPort("RESUME_PREVIEW_PORT", 4323);
-
 const FLAGS = {
   "--output": { key: "output", value: true },
   "--base-url": { key: "baseUrl", value: true },
 };
 
 async function main() {
+  // Parsed here, not at module scope: a throw during module evaluation escapes
+  // main().catch below and reaches the user as a raw stack trace. Matches
+  // build-resume-variant.mjs, which exits 2 on bad configuration input.
+  let port;
+  try {
+    // 4323, shared with build-resume-variant.mjs -- one variable, one meaning.
+    port = parsePreviewPort("RESUME_PREVIEW_PORT", 4323);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+
   const args = parseFlags(process.argv.slice(2), FLAGS, { output: "resume.pdf", baseUrl: null });
-  await renderResumePdf({ output: args.output, baseUrl: args.baseUrl, port: PORT });
+  await renderResumePdf({ output: args.output, baseUrl: args.baseUrl, port });
 }
 
 main().catch(err => {
