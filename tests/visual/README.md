@@ -14,7 +14,11 @@ This generates reference screenshots in `tests/visual/visual-regression.spec.ts-
 ```bash
 npm run test:visual
 ```
-Compares current rendering against baselines. Local dev server starts automatically.
+Compares current rendering against baselines. The preview server starts automatically on
+port 4322. This calls Playwright directly, so it does **not** carry the preview-server
+guard described in [Troubleshooting](#a-preview-server-is-live-on-port-n-which-blocks-this-run)
+— if a stray `astro preview` is running, this command reports a 180s `webServer` timeout
+instead of the real cause.
 
 ### 3. Test Staging Before Launch
 ```bash
@@ -291,6 +295,14 @@ one, and that refusal is keyed on **the recorded process, not the port**: a prev
 anything, so without a guard Playwright sees a `webServer` command that succeeded and can
 only report the 180s timeout that follows. `scripts/visual-test.sh` therefore checks up
 front and fails immediately with the real reason.
+
+**The guard runs in `scripts/visual-test.sh` only** — `npm run test:visual:baseline` and
+`bash scripts/visual-test.sh local`. Every command that calls Playwright directly
+(`npm test`, `npm run test:visual`, `test:seo`, `test:console`, `test:links`,
+`test:analytics`) shares the same `webServer` config but not the guard, and so surfaces
+this condition as an unexplained 180s timeout on port 4322. The fix below is the same
+either way; on those commands you have to reach it yourself. Note the trigger is a live
+`astro preview` specifically — `astro dev` writes no preview record and never causes this.
 
 Fix it with:
 

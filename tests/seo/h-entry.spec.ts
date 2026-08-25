@@ -201,7 +201,9 @@ test.describe('Post h-entry', () => {
 
 	test('p-category is absent from an untagged post', async ({ page }) => {
 		await page.goto(resolveUrl(POST_PLAIN), { waitUntil: 'networkidle' });
-		await expect(page.locator('.h-entry .p-category')).toHaveCount(0);
+		// Page-global, as with .dt-updated and .u-featured below: an untagged post
+		// must carry no p-category anywhere, not merely none inside the entry.
+		await expect(page.locator('.p-category')).toHaveCount(0);
 	});
 
 	test('u-featured is the hero image, and sits outside e-content', async ({ page }) => {
@@ -220,14 +222,17 @@ test.describe('Post h-entry', () => {
 		await expect(page.locator('.u-featured')).toHaveCount(0);
 	});
 
-	test('listing pages expose no h-entry', async ({ page }) => {
-		// Cards are summaries, not entries. Note these pages *do* carry .dt-published
-		// (Card.astro renders Datetime) and .p-category (Tag.astro is reused there), so
-		// only the h-entry root can be asserted here -- with no microformat root above
-		// them, a parser ignores those properties.
-		for (const path of ['/tags/', '/archives/']) {
+	// Cards are summaries, not entries. Note these pages *do* carry .dt-published
+	// (Card.astro renders Datetime) and .p-category (Tag.astro is reused there), so
+	// only the h-entry root can be asserted here -- with no microformat root above
+	// them, a parser ignores those properties.
+	//
+	// One test per page rather than a loop: a loop throws on the first failing page
+	// and never reaches the second, so a run reports half the breakage.
+	for (const path of ['/tags/', '/archives/']) {
+		test(`${path} exposes no h-entry`, async ({ page }) => {
 			await page.goto(resolveUrl(path), { waitUntil: 'networkidle' });
 			await expect(page.locator('.h-entry')).toHaveCount(0);
-		}
-	});
+		});
+	}
 });

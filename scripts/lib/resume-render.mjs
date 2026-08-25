@@ -5,7 +5,7 @@
  * renderResumePdf({ output, baseUrl, port?, transform?, expectedOverrides? })
  *   - output: output path (relative to project root or absolute)
  *   - baseUrl: external server URL; omit to spin up `astro preview` over dist/
- *   - port: preview port (default 4321); ignored when baseUrl is provided
+ *   - port: preview port (default 4323); ignored when baseUrl is provided
  *   - transform(page): async fn run against the live Playwright page BEFORE
  *     content verification — variant scripts use this to apply DOM mutations
  *   - expectedOverrides: { title?, requireText? } — override individual
@@ -118,7 +118,9 @@ function countPdfPages(buffer) {
 export async function renderResumePdf({
   output,
   baseUrl,
-  port = 4321,
+  // Callers resolve this through parsePreviewPort; the default only guards a
+  // caller that omits it, and must not be the dev server's 4321.
+  port = 4323,
   transform,
   expectedOverrides,
 } = {}) {
@@ -155,7 +157,7 @@ export async function renderResumePdf({
       }
       resolvedBaseUrl = `http://localhost:${port}`;
       console.log(`→ Starting astro preview on :${port}…`);
-      preview = startPreview(port, { cwd: ROOT });
+      preview = await startPreview(port, { cwd: ROOT });
       await waitForServer(resolvedBaseUrl + "/", { child: preview });
     }
 

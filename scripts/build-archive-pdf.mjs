@@ -24,7 +24,13 @@ import { spawnSync } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { chromium } from "@playwright/test";
-import { parseFlags, startPreview, stopPreview, waitForServer } from "./lib/pdf-helpers.mjs";
+import {
+  parseFlags,
+  parsePreviewPort,
+  startPreview,
+  stopPreview,
+  waitForServer,
+} from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
 
@@ -34,7 +40,8 @@ const FLAGS = {
   "--base-url": { key: "baseUrl", value: true },
 };
 
-const PORT = Number(process.env.ARCHIVE_PREVIEW_PORT || 4321);
+// 4324, not the dev server's 4321: see parsePreviewPort for the allocation.
+const PORT = parsePreviewPort("ARCHIVE_PREVIEW_PORT", 4324);
 
 async function main() {
   const args = parseFlags(process.argv.slice(2), FLAGS, {
@@ -60,7 +67,7 @@ async function main() {
   if (!baseUrl) {
     baseUrl = `http://localhost:${PORT}`;
     console.log(`→ Starting astro preview on :${PORT}…`);
-    preview = startPreview(PORT, { cwd: ROOT });
+    preview = await startPreview(PORT, { cwd: ROOT });
     await waitForServer(baseUrl + "/", { child: preview });
   }
 

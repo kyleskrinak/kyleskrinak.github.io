@@ -30,7 +30,13 @@ cd "$REPO_ROOT"
 # The port this run's preview binds. Defined in tests/test-utils.ts (which
 # documents the repo's port allocation); mirrored here because a shell script
 # cannot import TypeScript. Keep the two in sync.
-PREVIEW_PORT="${PREVIEW_PORT:-4322}"
+#
+# Deliberately not "${PREVIEW_PORT:-4322}". The port Playwright actually binds
+# comes from the TypeScript constant, which reads no environment variable, so an
+# override honoured here alone would guard one port while the run took another --
+# and a guard that reports "clear" about the wrong port is worse than no guard.
+# Making this configurable means wiring both files, not just this line.
+PREVIEW_PORT=4322
 
 # Astro detaches `astro preview` into a background process when it detects an
 # agent session (am-i-vibing, keyed on CLAUDECODE among others). A detached
@@ -54,10 +60,6 @@ export ASTRO_PREVIEW_BACKGROUND=0
 # passed through silently. Staleness is decided by probing the recorded port:
 # if nothing answers, no server exists and the record is safe to remove
 # whatever port it names, and removing it is what releases the PID lock.
-#
-# Note this deliberately does not try to detect a live *containerised* server:
-# `docker run` here publishes no ports, so the container's preview is never
-# reachable from the host and concurrent runs are unsupported either way.
 
 # Is anything listening on $1? The port arrives through the environment rather
 # than being pasted into the program text — it comes out of a file, and file

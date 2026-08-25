@@ -22,16 +22,11 @@
  *   node scripts/print-resume-pdf.mjs --output ./resume.pdf --base-url http://localhost:4321
  */
 
-import { parseFlags } from "./lib/pdf-helpers.mjs";
+import { parseFlags, parsePreviewPort } from "./lib/pdf-helpers.mjs";
 import { renderResumePdf } from "./lib/resume-render.mjs";
 
-const PORT = Number(process.env.RESUME_PREVIEW_PORT || 4321);
-if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
-  console.error(
-    `Invalid RESUME_PREVIEW_PORT '${process.env.RESUME_PREVIEW_PORT}' — must be an integer 1-65535.`
-  );
-  process.exit(2);
-}
+// 4323, shared with build-resume-variant.mjs -- one variable, one meaning.
+const PORT = parsePreviewPort("RESUME_PREVIEW_PORT", 4323);
 
 const FLAGS = {
   "--output": { key: "output", value: true },
