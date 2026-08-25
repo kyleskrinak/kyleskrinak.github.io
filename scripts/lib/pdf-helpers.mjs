@@ -167,6 +167,12 @@ export async function waitForServer(url, { timeoutMs = 60000, child = null } = {
     try {
       const res = await fetch(url, { method: "GET", signal: AbortSignal.timeout(5000) });
       answered = res.ok || res.status === 404;
+      // Only the status is read above, and an undrained body keeps its socket
+      // checked out of undici's pool until GC. Release it on every pass -- this
+      // loop can poll ~120 times before the default deadline. Assigning
+      // `answered` first keeps a throw from cancel() behaviourally inert: it
+      // lands in the catch below exactly as a connection error would.
+      await res.body?.cancel();
     } catch {
       // not ready yet
     }
