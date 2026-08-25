@@ -203,7 +203,7 @@ Re-generates screenshots as new baselines (after code changes), rendered on Ubun
 This blog uses **consistent base path** across all environments set in `astro.config.ts`:
 - **Local/Production/GitHub Pages fallback**: `base: "/"`
 
-This means all environments render identically when compared. The GitHub Pages fallback (`kyleskrinak.github.io`) deploys as a user site at the root path, matching local and production behavior — but only during an active `mode=full-fallback` dispatch; otherwise it serves a redirect stub.
+This means all environments render identically when compared. The GitHub Pages fallback (`kyleskrinak.github.io`) deploys as a user site at the root path, matching local and production behavior — but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy; otherwise it serves a redirect stub.
 
 ### Baseline Management
 
@@ -235,13 +235,14 @@ npm run test:visual:docker
 npm run test:production -- --project=visual-*
 
 # Test the GitHub Pages fallback against baselines (also base = "/") — only
-# meaningful during an active `mode=full-fallback` dispatch
+# meaningful after a mode=full-fallback dispatch has run and before it's
+# overwritten by a mode=stub redeploy
 npm run test:staging -- --project=visual-*
 ```
 
 **Expected behavior:**
 - Local and production should match baselines (identical rendering with base = "/")
-- The GitHub Pages fallback matches too, but only while a full-fallback dispatch is live
+- The GitHub Pages fallback matches too, but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy
 - Failures indicate unintended visual regressions
 
 ### Testing Multiple Browsers

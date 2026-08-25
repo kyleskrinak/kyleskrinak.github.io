@@ -87,7 +87,7 @@ To verify the fallback URL is correct:
 
 1. **Check repository name**: `kyleskrinak.github.io` = user site = root deployment
 2. **Check workflow build**: full-fallback dispatch → BUILD_ENV=production, PUBLIC_DEPLOY_ENV=production → base="/"
-3. **Visit the URL**: https://kyleskrinak.github.io/ should show the redirect stub by default, or the real site during an active full-fallback dispatch
+3. **Visit the URL**: https://kyleskrinak.github.io/ should show the redirect stub by default, or the real site after a full-fallback dispatch has run and before it's overwritten by a stub redeploy
 4. **Check 404**: https://kyleskrinak.github.io/astro-blog/ should return 404
 
 ---
