@@ -227,8 +227,10 @@ test.describe('Post h-entry', () => {
 	// only the h-entry root can be asserted here -- with no microformat root above
 	// them, a parser ignores those properties.
 	//
-	// One test per page rather than a loop: a loop throws on the first failing page
-	// and never reaches the second, so a run reports half the breakage.
+	// The loop generates one test per page; it does not run both pages inside one
+	// test. That matters: a single test asserting both would throw on the first
+	// failing page and never reach the second, so a run would report half the
+	// breakage.
 	for (const path of ['/tags/', '/archives/']) {
 		test(`${path} exposes no h-entry`, async ({ page }) => {
 			await page.goto(resolveUrl(path), { waitUntil: 'networkidle' });

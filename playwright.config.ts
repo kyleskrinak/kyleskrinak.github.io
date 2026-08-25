@@ -104,10 +104,16 @@ export default defineConfig({
   // Playwright's teardown kills a child it no longer owns, the listener survives,
   // and every later run dies on Astro's PID lock. Keeping it in the foreground is
   // what makes the server die with the test run that started it.
+  //
+  // It goes in `env` rather than inline in `command` because an inline VAR=value
+  // prefix is shell syntax, and cmd.exe/PowerShell would take it as the program
+  // name. `env` merges over process.env, so the whole command still inherits PATH
+  // and the rest; build:ci also sees the variable and simply ignores it.
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
     ? undefined
     : {
-        command: `npm run build:ci && ASTRO_PREVIEW_BACKGROUND=0 npx astro preview --host localhost --port ${PREVIEW_PORT}`,
+        command: `npm run build:ci && npx astro preview --host localhost --port ${PREVIEW_PORT}`,
+        env: { ASTRO_PREVIEW_BACKGROUND: '0' },
         url: BASE_URL,
         reuseExistingServer: false,
         timeout: 180_000,
