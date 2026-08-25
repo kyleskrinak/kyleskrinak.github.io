@@ -1,4 +1,4 @@
-# Staging URL Reference
+# GitHub Pages Fallback URL Reference
 
 **AUTHORITATIVE SOURCE**: This document defines the correct URL for the GitHub Pages disaster-recovery fallback.
 
@@ -6,7 +6,7 @@
 
 **GitHub Pages disaster-recovery fallback**: `https://kyleskrinak.github.io/`
 
-**⚠️ IMPORTANT**: This URL normally serves a small redirect stub (meta-refresh + canonical to `kyle.skrinak.com`, `noindex,nofollow`), not the real site. It only mirrors production content while a manual `workflow_dispatch` of `staging-deploy.yml` with `mode=full-fallback` is active — see [Deployment Guide](./deployment.md). It deploys to the **root** of the domain, NOT to a subpath like `/astro-blog/`.
+**⚠️ IMPORTANT**: This URL normally serves a small redirect stub (meta-refresh + canonical to `kyle.skrinak.com`, `noindex,nofollow`), not the real site. It mirrors production content only after a manual `workflow_dispatch` of `staging-deploy.yml` with `mode=full-fallback` runs, and keeps serving that content until a `mode=stub` dispatch overwrites it — it does not revert automatically when the workflow run finishes. See [Deployment Guide](./deployment.md). It deploys to the **root** of the domain, NOT to a subpath like `/astro-blog/`.
 
 ## Why the Fallback Uses Root Path
 
@@ -57,7 +57,7 @@ When documenting or testing the fallback, use:
 
 ## Test Commands
 
-**⚠️ These only produce meaningful results while a `mode=full-fallback` dispatch is active** — at any other time `kyleskrinak.github.io` serves the redirect stub, and these commands will just test that stub, not the real site. No trailing slash, to avoid double slashes in URL concatenation:
+**⚠️ These only produce meaningful results after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy** — at any other time `kyleskrinak.github.io` serves the redirect stub, and these commands will just test that stub, not the real site. No trailing slash, to avoid double slashes in URL concatenation:
 ```bash
 # Individual suite against the fallback
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo

@@ -14,7 +14,7 @@ This section covers deploying, maintaining, and troubleshooting the Astro blog i
 ## Deployment
 
 - **[Deployment Guide](./deployment.md)** - Complete instructions for production deployment and the GitHub Pages disaster-recovery fallback
-- **[Staging URL Reference](./staging-url-reference.md)** - Authoritative staging URL documentation (GitHub Pages user site constraints)
+- **[GitHub Pages Fallback URL Reference](./staging-url-reference.md)** - Authoritative fallback URL documentation (GitHub Pages user site constraints)
 
 ### Quick Deploy
 ```bash
@@ -42,7 +42,7 @@ gh pr create --base main --head develop
 - URL: https://kyleskrinak.github.io/ (root - user site constraint)
 - Normally serves: a redirect stub to production
 - Triggers on: Manual `workflow_dispatch` only, not continuous
-- **See**: [Staging URL Reference](./staging-url-reference.md) for details
+- **See**: [GitHub Pages Fallback URL Reference](./staging-url-reference.md) for details
 
 **Production Environment**:
 - URL: https://kyle.skrinak.com/

@@ -70,8 +70,10 @@ npm run test:production
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
 # Run all Playwright test suites against the GitHub Pages disaster-recovery fallback
-# — only meaningful while a manual `mode=full-fallback` dispatch is active; otherwise
-# this just tests the redirect stub. See docs/operations/staging-url-reference.md.
+# — only meaningful after a manual `mode=full-fallback` dispatch has run and before
+# it's overwritten by a `mode=stub` redeploy (it does not revert automatically when
+# the workflow finishes); otherwise this just tests the redirect stub.
+# See docs/operations/staging-url-reference.md.
 npm run test:staging
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:console
 ```

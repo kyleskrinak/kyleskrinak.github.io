@@ -24,7 +24,7 @@ npm run test:console
 npm run test:staging -- --project=console
 ```
 
-This targets the GitHub Pages disaster-recovery fallback (`kyleskrinak.github.io`). It only serves live content right after a manual `workflow_dispatch` with `mode=full-fallback` — otherwise it's a redirect stub, and this will just report on the stub.
+This targets the GitHub Pages disaster-recovery fallback (`kyleskrinak.github.io`). It serves live content only after a manual `workflow_dispatch` with `mode=full-fallback` has run, and keeps serving it until a `mode=stub` dispatch overwrites it — it does not revert automatically when the workflow finishes. Otherwise it's a redirect stub, and this will just report on the stub.
 
 ### Running Against Production
 
@@ -116,7 +116,7 @@ npm run test:visual:baseline:docker
 npm run test:staging -- --project=visual-*
 ```
 
-Only meaningful while a manual `mode=full-fallback` dispatch is active — see the note above under Console Errors.
+Only meaningful after a manual `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy — see the note above under Console Errors.
 
 ## Troubleshooting
 

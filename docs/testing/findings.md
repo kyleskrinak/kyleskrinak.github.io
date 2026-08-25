@@ -3,7 +3,7 @@
 **Date**: 2026-01-20
 **Status**: ✅ Complete - No visual defects found
 
-**⚠️ Note (2026-08-25)**: This report describes the pre-migration deployment model, where GitHub Pages was a continuous staging deploy. Since PR #353, GitHub Pages is a manual `workflow_dispatch`-only disaster-recovery fallback and normally serves a redirect stub, not the real site — see [Staging URL Reference](../operations/staging-url-reference.md). The "staging" testing steps below (lines under "Staging Comparison" and "Staging Testing") only produce meaningful results while a `mode=full-fallback` dispatch is active; they are no longer routine pre-launch guidance.
+**⚠️ Note (2026-08-25)**: This report describes the pre-migration deployment model, where GitHub Pages was a continuous staging deploy. Since PR #353, GitHub Pages is a manual `workflow_dispatch`-only disaster-recovery fallback and normally serves a redirect stub, not the real site — see [GitHub Pages Fallback URL Reference](../operations/staging-url-reference.md). The "staging" testing steps below (lines under "Staging Comparison" and "Staging Testing") only produce meaningful results after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy — the fallback does not revert automatically when the workflow finishes; these steps are no longer routine pre-launch guidance.
 
 ## Executive Summary
 

@@ -30,7 +30,7 @@ Tests against production URL. Should match baselines.
 ```bash
 npm run test:staging -- --project=visual-*
 ```
-Only meaningful while a manual `workflow_dispatch` with `mode=full-fallback` is active — otherwise `kyleskrinak.github.io` serves a redirect stub, not the real site, and this just tests the stub. Not part of routine pre-launch validation.
+Only meaningful after a manual `workflow_dispatch` with `mode=full-fallback` has run and before it's overwritten by a `mode=stub` redeploy — it does not revert automatically when the workflow finishes. Otherwise `kyleskrinak.github.io` serves a redirect stub, not the real site, and this just tests the stub. Not part of routine pre-launch validation.
 
 ## Available Commands
 
@@ -51,8 +51,10 @@ ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline
 # Test against production (kyle.skrinak.com)
 npm run test:production -- --project=visual-*
 
-# Test against the GitHub Pages disaster-recovery fallback — only meaningful during
-# an active `mode=full-fallback` dispatch, otherwise this tests the redirect stub
+# Test against the GitHub Pages disaster-recovery fallback — only meaningful after a
+# `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub`
+# redeploy (it does not revert automatically when the workflow finishes), otherwise
+# this tests the redirect stub
 npm run test:staging -- --project=visual-*
 
 # View HTML report of last test run
@@ -110,8 +112,10 @@ npm run test:visual:report
 ### During a Disaster-Recovery Drill (Not a Routine Launch Step)
 ```bash
 # 1. Dispatch staging-deploy.yml with mode=full-fallback (BUILD_ENV=production)
-#    Note: kyleskrinak.github.io only serves live content while this dispatch is
-#    active — otherwise it's a redirect stub, and the commands below just test that.
+#    Note: kyleskrinak.github.io serves live content only after this dispatch has
+#    run, until a mode=stub dispatch overwrites it — it does not revert
+#    automatically when the workflow finishes. Otherwise it's a redirect stub,
+#    and the commands below just test that.
 # 2. Test the fallback renders correctly
 npm run test:staging -- --project=visual-*
 
