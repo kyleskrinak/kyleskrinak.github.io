@@ -8,7 +8,7 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 
 **Live Sites**:
 - 🚀 [Production](https://kyle.skrinak.com/) - Main blog
-- 🧪 [Staging](https://kyleskrinak.github.io/) - Testing environment (GitHub Pages user site, root path)
+- 🧪 [Staging](https://kyleskrinak.github.io/) - Disaster-recovery fallback (GitHub Pages user site, root path); normally shows a redirect stub to production, manual dispatch only
 
 ## ✨ Features
 

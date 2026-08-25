@@ -46,7 +46,7 @@ This section covers testing strategies, test runs, and quality validation for th
 
 ### Performance Testing
 - **Lighthouse Reports** - Performance auditing (reports saved to `lighthouse-reports/` directory, gitignored)
-- Generate reports: Run Lighthouse against deployed site (staging or production)
+- Generate reports: Run Lighthouse against production (`kyle.skrinak.com`) — the GitHub Pages fallback normally serves a redirect stub, not the real site
 - View historical trends in local `lighthouse-reports/` directory after running audits
 
 ## Test Results
@@ -63,15 +63,17 @@ npm run test:seo             # SEO meta tags & sitemap
 npm run test:links           # Link validation
 npm run test:analytics       # Analytics privacy (requires non-local PLAYWRIGHT_TEST_BASE_URL)
 
-# Run all Playwright test suites against staging
-npm run test:staging
-
 # Run all Playwright test suites against production
 npm run test:production
 
-# Run specific suite against staging/production (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:console
+# Run specific suite against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
+
+# Run all Playwright test suites against the GitHub Pages disaster-recovery fallback
+# — only meaningful while a manual `mode=full-fallback` dispatch is active; otherwise
+# this just tests the redirect stub. See docs/operations/staging-url-reference.md.
+npm run test:staging
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:console
 ```
 
 See [Testing Guide](../../tests/README.md) for detailed instructions.

@@ -3,6 +3,8 @@
 **Date**: 2026-01-20
 **Status**: ✅ Complete - No visual defects found
 
+**⚠️ Note (2026-08-25)**: This report describes the pre-migration deployment model, where GitHub Pages was a continuous staging deploy. Since PR #353, GitHub Pages is a manual `workflow_dispatch`-only disaster-recovery fallback and normally serves a redirect stub, not the real site — see [Staging URL Reference](../operations/staging-url-reference.md). The "staging" testing steps below (lines under "Staging Comparison" and "Staging Testing") only produce meaningful results while a `mode=full-fallback` dispatch is active; they are no longer routine pre-launch guidance.
+
 ## Executive Summary
 
 Visual regression testing comparing local development to staging and production environments revealed **no visual defects**. All environments use the same base path configuration and render identically.
@@ -107,7 +109,7 @@ npm run test:production -- --project=visual-*
 ### Before Production Launch
 
 1. **Generate baselines** from local dev (✅ Complete)
-2. **Deploy to staging** and visually spot-check key pages
+2. ~~Deploy to staging and visually spot-check key pages~~ (no longer applicable — GitHub Pages is not a continuous pre-launch environment; see note above)
 3. **Run production tests** post-launch to ensure match with local
 4. **Weekly monitoring** to catch CSS or layout regressions
 

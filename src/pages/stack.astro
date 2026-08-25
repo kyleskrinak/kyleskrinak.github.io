@@ -147,7 +147,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ol>
         <li><strong>develop</strong> — all work lands here first.</li>
-        <li><strong>main</strong> — a pull request from develop to main triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, and runs a visual-regression pass, then the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation. <a href="https://kyleskrinak.github.io">GitHub Pages</a> is kept separately as an on-demand disaster-recovery fallback, stood up manually via a GitHub Actions dispatch only if AWS ever becomes unavailable.</li>
+        <li><strong>main</strong> — a pull request from develop to main triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, and runs a visual-regression pass, then the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation. <a href="https://kyleskrinak.github.io">GitHub Pages</a> is kept separately as an on-demand disaster-recovery fallback: it normally serves a small redirect stub pointing back to kyle.skrinak.com, and only publishes the real site if I manually dispatch the fallback workflow during an actual AWS outage.</li>
       </ol>
 
       <p>

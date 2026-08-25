@@ -1,14 +1,14 @@
 # Staging URL Reference
 
-**AUTHORITATIVE SOURCE**: This document defines the correct staging URL for all documentation.
+**AUTHORITATIVE SOURCE**: This document defines the correct URL for the GitHub Pages disaster-recovery fallback.
 
-## Current Staging URL
+## Current Fallback URL
 
-**Staging Environment**: `https://kyleskrinak.github.io/`
+**GitHub Pages disaster-recovery fallback**: `https://kyleskrinak.github.io/`
 
-**⚠️ IMPORTANT**: Staging deploys to the **root** of the domain, NOT to a subpath like `/astro-blog/`.
+**⚠️ IMPORTANT**: This URL normally serves a small redirect stub (meta-refresh + canonical to `kyle.skrinak.com`, `noindex,nofollow`), not the real site. It only mirrors production content while a manual `workflow_dispatch` of `staging-deploy.yml` with `mode=full-fallback` is active — see [Deployment Guide](./deployment.md). It deploys to the **root** of the domain, NOT to a subpath like `/astro-blog/`.
 
-## Why Staging Uses Root Path
+## Why the Fallback Uses Root Path
 
 **Repository Name**: `kyleskrinak.github.io`
 
@@ -23,11 +23,11 @@ This is a **GitHub Pages User Site** (not a Project Site), which has strict depl
 
 ## Build Configuration
 
-**staging-deploy.yml workflow**:
+**staging-deploy.yml workflow** (`mode=full-fallback`, manual dispatch only):
 ```yaml
-BUILD_ENV: production          # Uses production build mode
-PUBLIC_DEPLOY_ENV: staging     # But marks as staging environment
-SITE_URL: https://kyleskrinak.github.io/
+BUILD_ENV: production
+PUBLIC_DEPLOY_ENV: production   # Full-fallback behaves like production, not a staging environment
+SITE_URL: https://kyle.skrinak.com/
 ```
 
 **astro.config.ts**:
@@ -37,11 +37,11 @@ SITE_URL: https://kyleskrinak.github.io/
 const base = "/";
 ```
 
-**Current behavior**: Both staging and production use `base: "/"` (root path). This is required because the repository name matches the GitHub Pages user site pattern.
+**Current behavior**: `base: "/"` applies regardless of which target is deployed. This is required because the repository name matches the GitHub Pages user site pattern.
 
 ## Correct URLs in Documentation
 
-When documenting or testing staging, use:
+When documenting or testing the fallback, use:
 
 ✅ **CORRECT** (for display/links):
 - `https://kyleskrinak.github.io/` (with or without trailing slash)
@@ -57,16 +57,16 @@ When documenting or testing staging, use:
 
 ## Test Commands
 
-**Correct staging test commands** (no trailing slash to avoid double slashes in URL concatenation):
+**⚠️ These only produce meaningful results while a `mode=full-fallback` dispatch is active** — at any other time `kyleskrinak.github.io` serves the redirect stub, and these commands will just test that stub, not the real site. No trailing slash, to avoid double slashes in URL concatenation:
 ```bash
-# Individual suite against staging
+# Individual suite against the fallback
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
 
-# All suites against staging (package.json script)
+# All suites against the fallback (package.json script)
 npm run test:staging
 ```
 
-**package.json should define**:
+**package.json defines**:
 ```json
 {
   "test:staging": "cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io playwright test"
@@ -83,15 +83,15 @@ The confusion was resolved by understanding GitHub Pages user site deployment co
 
 ## Verification
 
-To verify the staging URL is correct:
+To verify the fallback URL is correct:
 
 1. **Check repository name**: `kyleskrinak.github.io` = user site = root deployment
-2. **Check workflow build**: BUILD_ENV=production → base="/"
-3. **Visit staging site**: https://kyleskrinak.github.io/ should load the site
+2. **Check workflow build**: full-fallback dispatch → BUILD_ENV=production, PUBLIC_DEPLOY_ENV=production → base="/"
+3. **Visit the URL**: https://kyleskrinak.github.io/ should show the redirect stub by default, or the real site during an active full-fallback dispatch
 4. **Check 404**: https://kyleskrinak.github.io/astro-blog/ should return 404
 
 ---
 
-**Last Updated**: March 15, 2026
+**Last Updated**: August 25, 2026
 **Authority**: Deployment team
 **Related**: [Deployment Guide](./deployment.md), [Build Configuration](./build-configuration.md)

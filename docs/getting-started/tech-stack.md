@@ -36,7 +36,7 @@ See [README.md - Tech Stack](../../README.md#-tech-stack) for the current techno
 ## Infrastructure
 
 - **Hosting (Production)**: AWS S3 + CloudFront
-- **Hosting (Staging)**: GitHub Pages
+- **Hosting (Disaster-Recovery Fallback)**: GitHub Pages, manual dispatch only
 - **Analytics**: Cloudflare Web Analytics
 - **CI/CD**: GitHub Actions workflows
 

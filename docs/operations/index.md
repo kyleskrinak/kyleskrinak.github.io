@@ -38,10 +38,10 @@ gh pr create --base main --head develop
 
 ## Key Information
 
-**Staging Environment**:
+**GitHub Pages (disaster-recovery fallback)**:
 - URL: https://kyleskrinak.github.io/ (root - user site constraint)
-- Deployed on: GitHub Pages
-- Triggers on: Manual `workflow_dispatch` (disaster-recovery only, not continuous)
+- Normally serves: a redirect stub to production
+- Triggers on: Manual `workflow_dispatch` only, not continuous
 - **See**: [Staging URL Reference](./staging-url-reference.md) for details
 
 **Production Environment**:
