@@ -83,7 +83,7 @@ npm run config:inspect   # Debug configuration values
 
 ## 🧪 Testing & Quality Assurance
 
-**PR Checks** (run on PRs to staging/main):
+**PR Checks** (run on PRs to main):
 - **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
 
 **Scheduled Checks** (nightly):
@@ -139,7 +139,7 @@ Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [
 | **Language** | [TypeScript](https://www.typescriptlang.org/) |
 | **Search** | [Pagefind](https://pagefind.app/) |
 | **Testing** | [Playwright](https://playwright.dev/) |
-| **Deployment** | GitHub Pages (staging) + AWS S3/CloudFront (production) |
+| **Deployment** | GitHub Pages (disaster-recovery fallback) + AWS S3/CloudFront (production) |
 | **CI/CD** | GitHub Actions |
 
 ## 📈 Performance
@@ -154,11 +154,10 @@ See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for Jeky
 
 ## 🚢 Deployment
 
-Changes flow through three long-lived branches:
+Changes flow through two long-lived branches:
 
 1. **develop** — all new work lands here; runs CI checks on every push
-2. **staging** → auto-deploys to GitHub Pages for pre-production review
-3. **main** → triggers production deploy to AWS S3 + CloudFront with CDN invalidation
+2. **main** — a PR from develop triggers build/config-validate/visual-regression checks, then on merge the production deploy to AWS S3 + CloudFront with CDN invalidation
 
 See [Deployment Guide](./docs/operations/deployment.md) for details.
 

@@ -92,14 +92,14 @@ npm run build:presentations
 **The Implementation**:
 - Playwright visual regression tests for key pages
 - Baselines committed to `tests/visual/visual-regression.spec.ts-snapshots/`
-- Run locally during development, and enforced as a CI gate on PRs targeting `staging` (`.github/workflows/pr-visual-check.yml`)
+- Run locally during development, and enforced as a CI gate on PRs targeting `main` (`.github/workflows/pr-visual-check.yml`)
 
 **Why This is Custom**:
 Most projects use Percy.io, Chromatic, or other cloud services. This project maintains baselines in the repo and enforces them via a GitHub Actions gate instead of a third-party visual diffing service.
 
 **Files**:
 - `tests/visual/visual-regression.spec.ts` - Test suite
-- `.github/workflows/pr-visual-check.yml` - CI gate on PRs to `staging`
+- `.github/workflows/pr-visual-check.yml` - CI gate on PRs to `main`
 
 **Trade-offs**:
 - ✅ No cloud service cost
@@ -235,9 +235,9 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
 
 ## Deployment Architecture
 
-### Staging (GitHub Pages)
+### GitHub Pages (disaster-recovery fallback)
 
-✅ **Trigger**: Push to `staging` branch
+✅ **Trigger**: Manual `workflow_dispatch`, plus a quarterly build-only `schedule` dry run
 ✅ **Process**: GitHub Actions → Build → Deploy
 ✅ **URL**: GitHub Pages URL
 
@@ -274,9 +274,9 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
    - It's archived (not recommended)
    - Use standalone Slidev instead
 
-5. **Modify GitHub Actions without testing staging first**
-   - Staging → Production workflow
-   - Test CI/CD changes on staging branch
+5. **Modify GitHub Actions without testing on a PR first**
+   - Develop → Production workflow
+   - Test CI/CD changes on a `develop → main` PR before merging
 
 ---
 
@@ -304,8 +304,8 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
 ### Updating Deployment
 
 1. Modify `.github/workflows/production-deploy.yml` for AWS changes
-2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages changes
-3. Test on staging branch first
+2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages fallback changes
+3. Test on a `develop → main` PR first
 
 ---
 

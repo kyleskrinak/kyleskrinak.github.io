@@ -5,11 +5,11 @@
 
 ## Environment Variable Matrix
 
-| Variable | local-develop | staging-gh | pr-visual-staging | main-aws |
+| Variable | local-develop | staging-gh-fallback | pr-visual-check | main-aws |
 |----------|----------|----------|----------|----------|
 | `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
-| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyleskrinak.github.io/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `staging` ✓ | `production` ✓ | `production` ✓ |
+| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `production` ✓ | `production` ✓ | `production` ✓ |
 | `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | (omitted) | `required` ✓ |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | (omitted) | `required` ✓ |
 
@@ -19,7 +19,7 @@
 
 Astro build flags set automatically by the framework (not configurable via workflow env vars):
 
-| Flag | local-develop | staging-gh | pr-visual-staging | main-aws |
+| Flag | local-develop | staging-gh-fallback | pr-visual-check | main-aws |
 |------|----------|----------|----------|----------|
 | `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 
@@ -55,9 +55,9 @@ Astro build flags set automatically by the framework (not configurable via workf
 
 ## Deployment Infrastructure
 
-### Staging (GitHub Pages)
+### GitHub Pages (disaster-recovery fallback)
 - Platform: GitHub Pages
-- Mechanism: GitHub Actions pages deployment
+- Mechanism: GitHub Actions pages deployment (manual workflow_dispatch, plus a quarterly build-only schedule)
 - Variables: None (uses automatic GITHUB_TOKEN)
 
 ### Production (AWS S3 + CloudFront)

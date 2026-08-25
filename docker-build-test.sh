@@ -78,7 +78,7 @@ if docker build -t "$IMAGE_NAME" .; then
     echo "✅ Docker build successful!"
     echo ""
     echo "Next steps:"
-    echo "  - Push:  git push origin staging"
+    echo "  - Push:  git push origin develop"
     echo "  - Clean: docker rmi $IMAGE_NAME"
 else
     echo ""

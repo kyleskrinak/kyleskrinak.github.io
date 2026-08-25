@@ -1,9 +1,37 @@
 name: Staging (GitHub Pages)
 
+# GitHub Pages here is a manually-invoked disaster-recovery fallback for kyle.skrinak.com
+# (production runs on AWS S3 + CloudFront via a family account that won't be available
+# indefinitely), not a continuous preview environment. See issue #337.
+#
+# - workflow_dispatch mode=stub (default): publishes a static redirect stub. This is what
+#   normally sits at kyleskrinak.github.io.
+# - workflow_dispatch mode=full-fallback: builds and publishes the real site, with SITE_URL
+#   and PUBLIC_DEPLOY_ENV set as if this were production — a real failover means DNS will
+#   eventually point kyle.skrinak.com here, so it has to behave like production (indexable,
+#   correct canonicals/sitemap/RSS/OG URLs, real webmention/rel="me" links).
+# - schedule (quarterly): a build-only dry run of the full-fallback path with no deploy step,
+#   to catch action deprecation / dependency drift before an actual incident. Note: GitHub
+#   auto-disables schedule triggers after 60 days of repo inactivity, with no alert — worth
+#   knowing given how quiet this repo can get.
+#
+# The github-pages deployment environment only allows deploys from the `main`
+# branch (see repo Settings > Environments > github-pages). If you're dispatching this
+# manually during an actual outage, run it from `main` — dispatching from any
+# other branch will build successfully and then have deploy-pages rejected by environment
+# protection.
 on:
-  push:
-    branches:
-      - staging
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "stub = publish the redirect page; full-fallback = publish the real site (disaster recovery)"
+        type: choice
+        options:
+          - stub
+          - full-fallback
+        default: stub
+  schedule:
+    - cron: '0 9 1 1,4,7,10 *'
 
 permissions:
   contents: read
@@ -15,8 +43,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build
+  build-stub:
+    name: Build (stub)
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'stub'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        # Pinned to SHA (v4) — consistent supply-chain posture across all workflows.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Assemble redirect stub
+        run: |
+          mkdir -p dist
+          cp .github/pages-stub/index.html dist/index.html
+          cp .github/pages-stub/robots.txt dist/robots.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+          retention-days: 1
+
+  build-full:
+    name: Build (full fallback)
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode == 'full-fallback') || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
       contents: write  # ensure-release-pdfs reads/writes the release backing stores
@@ -34,25 +85,28 @@ jobs:
       - name: Validate configuration registry
         run: npm run config:validate
 
-      - name: Check Cloudflare staging token presence
+      - name: Check Cloudflare production token presence
         # Informational only — logs presence/absence but does not fail the build.
         # Enforcement (exit 1 on missing) is in secrets-check.yml (workflow_dispatch).
         run: |
           if [ -n "${PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN:-}" ]; then
-            echo "Cloudflare staging token is set (masked)."
+            echo "Cloudflare production token is set (masked)."
           else
-            echo "Cloudflare staging token is NOT set."
+            echo "Cloudflare production token is NOT set."
           fi
         env:
-          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_STAGING }}
+          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
 
       - name: Build site
         run: npm run build:ci
         env:
           BUILD_ENV: production
-          PUBLIC_DEPLOY_ENV: staging
-          SITE_URL: https://kyleskrinak.github.io/
-          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_STAGING }}
+          PUBLIC_DEPLOY_ENV: production
+          SITE_URL: https://kyle.skrinak.com/
+          # Uses the production Cloudflare token (not staging) so a real full-fallback
+          # deploy reports traffic under production analytics, matching that this build
+          # is meant to behave like production for the duration of an incident.
+          PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN_PROD }}
 
       # Runs AFTER the build (renders from the built dist/) but BEFORE the artifact
       # upload so the PDFs ship in the deployed artifact. Staging uses its own
@@ -60,6 +114,10 @@ jobs:
       # bundle-test.html is excluded from the presentations PDF (it's a build
       # test artifact, not a deck), so it must not feed the hash either.
       - name: Ensure archive PDFs
+        # Skipped on schedule: this step writes to real GitHub Release assets
+        # (contents: write), which would make the quarterly dry run not actually
+        # build-only.
+        if: github.event_name != 'schedule'
         uses: ./.github/actions/ensure-release-pdfs
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -89,6 +147,8 @@ jobs:
       # schema) — a change to any of these alters the printed page.
       # astro.config.ts churns ~monthly → ~one spurious regen/month; accepted tradeoff.
       - name: Ensure resume PDF
+        # Skipped on schedule: see the "Ensure archive PDFs" step above.
+        if: github.event_name != 'schedule'
         uses: ./.github/actions/ensure-release-pdfs
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -122,7 +182,12 @@ jobs:
 
   deploy-pages:
     name: Deploy to GitHub Pages
-    needs: build
+    needs: [build-stub, build-full]
+    # schedule runs are a build-only smoke test and must never deploy — that's what keeps
+    # the quarterly dry run from overwriting the stub or tearing down a live fallback.
+    if: >-
+      github.event_name != 'schedule' && always() &&
+      (needs.build-stub.result == 'success' || needs.build-full.result == 'success')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -16,7 +16,7 @@ See [README.md - Tech Stack](../../README.md#-tech-stack) for the current techno
 | **Search** | [Pagefind](https://pagefind.app/) | 1.x |
 | **Testing** | [Playwright](https://playwright.dev/) | 1.x |
 | **CI/CD** | GitHub Actions | - |
-| **Deployment** | AWS S3/CloudFront (prod), GitHub Pages (staging) | - |
+| **Deployment** | AWS S3/CloudFront (prod), GitHub Pages (disaster-recovery fallback) | - |
 
 ## Development Tools
 

@@ -109,6 +109,8 @@ npm run test:visual:report
 ### 24 Hours Before Launch
 ```bash
 # 1. Deploy staging build (with BUILD_ENV=production in GitHub Actions)
+#    Note: kyleskrinak.github.io only serves live content right after a manual
+#    workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
 # 2. Test staging renders correctly
 npm run test:staging -- --project=visual-*
 
@@ -211,7 +213,7 @@ tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
 ```
 
 **Baseline Workflow:**
-- **`pr-visual-check.yml`** gates PRs to `staging` by comparing against committed baselines
+- **`pr-visual-check.yml`** gates PRs to `main` by comparing against committed baselines
 - **Updating baselines for commit**: run `npm run test:visual:baseline:docker` (runs the official `mcr.microsoft.com/playwright:v<version>-noble` image, version-matched to the installed `@playwright/test`, matching CI's Ubuntu font stack), then commit the updated PNGs
 - **Quick local iteration** (not for commit): `ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline` regenerates from macOS rendering — fine for eyeballing a change locally, but don't commit the result or CI will fail on font-height drift. Without the env var the run refuses. The guard is not the npm script: `tests/global-snapshot-guard.ts` reads Playwright's own parsed mode as `globalSetup`, so `npm run test:visual -- --update-snapshots` and every spelling of `npx playwright test -u` are refused alike on a non-Linux host. Only the overwriting modes (`all`, `changed`) are refused by mode; `missing` is the default for ordinary runs and refusing it would block local testing. It can still create a baseline for a new or renamed test, so `tests/global-snapshot-teardown.ts` deletes any snapshot the run created and fails the run -- the emptied `-snapshots` directory goes too, while any directory still holding committed baselines is left alone. The one way to overwrite committed baselines from macOS is a deliberate `ALLOW_NATIVE_BASELINE=1`.
 
@@ -264,7 +266,7 @@ await page.goto('/?lang=fr'); // French
 
 ## CI/CD Integration
 
-Visual regression runs automatically via `.github/workflows/pr-visual-check.yml` on every PR targeting `staging`. The workflow builds the site with production settings, installs Chromium and WebKit, runs `npm run test:visual` against committed baselines, and uploads diff artifacts on failure.
+Visual regression runs automatically via `.github/workflows/pr-visual-check.yml` on every PR targeting `main`. The workflow builds the site with production settings, installs Chromium and WebKit, runs `npm run test:visual` against committed baselines, and uploads diff artifacts on failure.
 
 ## Troubleshooting
 
@@ -346,7 +348,7 @@ scripts/visual-test.sh (helper script)
 
 ## Tips for Success
 
-1. **Baselines committed to repo** — update with `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering) and commit the PNGs; `pr-visual-check.yml` gates PRs to staging against them
+1. **Baselines committed to repo** — update with `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering) and commit the PNGs; `pr-visual-check.yml` gates PRs to main against them
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
 4. **Test all environments** before launch (local → staging → production)

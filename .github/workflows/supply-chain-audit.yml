@@ -4,7 +4,7 @@ on:
   # push covers direct commits to the long-lived branches so a dependency change
   # can't reach a deploy branch without signature verification running.
   push:
-    branches: [develop, staging, main]
+    branches: [develop, main]
   pull_request:
   workflow_dispatch:
 

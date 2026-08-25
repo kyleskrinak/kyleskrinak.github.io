@@ -5,18 +5,16 @@ This document defines the branching strategy and PR workflow for the kyleskrinak
 ## Branch Structure
 
 - **`develop`**: Main integration branch for active development. Work directly on this branch. Fast iteration, direct commits.
-- **`staging`**: Pre-production testing environment. Receives validated changes from `develop`. Deploys to GitHub Pages. Tests the next release candidate before promoting to `main`.
-- **`main`**: Production-ready code, always stable. Receives only validated releases from `staging` via PR. Deploys to kyle.skrinak.com via AWS S3 + CloudFront.
+- **`main`**: Production-ready code, always stable. Receives only validated releases from `develop` via PR. Deploys to kyle.skrinak.com via AWS S3 + CloudFront.
 - **Feature branches** (optional): Use only when you need work isolation (long-running features, experimental work, or when working with others). Otherwise, commit directly to `develop`.
 
 ## Key Rules
 
 1. **Work directly on `develop`**: For solo development, commit and push directly to `develop`. This is the fastest workflow.
 2. **Feature branches are optional**: Use them only when you need isolation (experiments, long-running features, collaboration). Otherwise, they add overhead without benefit.
-3. **`staging` is the pre-release gate**: Merge `develop` to `staging` for final testing before production. No PR required.
-4. **`main` is production**: Requires PR from `staging`. Only validated, tested releases merge to `main`.
-5. **Flow is linear**: `develop` → `staging` (test) → `main` (PR + release)
-6. **Never commit directly to `main`**: All changes to production flow through the PR process.
+3. **`main` is production**: Requires PR from `develop`. The PR runs build, config-validate, and visual-regression checks before merge.
+4. **Flow is linear**: `develop` → `main` (PR + release)
+5. **Never commit directly to `main`**: All changes to production flow through the PR process.
 
 ## Standard Workflow (Direct to Develop)
 
@@ -33,13 +31,8 @@ git commit -m "feat(sitemap): exclude noindex pages from sitemap"
 # 3. Push directly to develop
 git push origin develop
 
-# 4. When ready to test, merge to staging
-git checkout staging && git pull origin staging
-git merge develop --no-edit
-git push origin staging
-
-# 5. Validate on staging, then create PR: staging → main
-gh pr create --base main --head staging --title "Release: description"
+# 4. When ready to release, create PR: develop → main
+gh pr create --base main --head develop --title "Release: description"
 ```
 
 **When to use feature branches instead**:
@@ -52,33 +45,29 @@ gh pr create --base main --head staging --title "Release: description"
 - ❌ Direct commits to `main`
 - ❌ Pushing directly to `main`
 - ❌ Merging to `main` without a PR
-- ❌ Skipping validation on staging before promoting to main
+- ❌ Skipping the PR's build/config-validate/visual-regression checks before merging
 
-**Why**: For solo development, feature branches add friction (create, merge, delete) without benefit. Work directly on `develop`, use `staging` as your testing gate, and gate production via PR to `main`.
+**Why**: For solo development, feature branches add friction (create, merge, delete) without benefit. Work directly on `develop`, and gate production via PR to `main`.
 
 ## Before You Begin: Prerequisite State
 
-Before starting new feature work, if no release or hotfix is in progress, verify that `staging` and `main` are aligned (and no pending PRs are blocking release). `develop` can be ahead, which is normal for active feature development.
+Before starting new feature work, if no release or hotfix is in progress, verify that `develop` and `main` aren't already diverged in a way that would block a clean release (and no pending PRs are blocking release).
 
 ```bash
 # Check branch alignment
 git fetch origin
 echo "main:" && git rev-parse origin/main
-echo "staging:" && git rev-parse origin/staging
+echo "develop:" && git rev-parse origin/develop
 ```
 
-`staging` and `main` SHAs should match when no release or hotfix is in progress. If not:
+If `develop` is behind `main` (e.g. after a hotfix landed directly on `main`), sync it:
 
-1. Check for pending PRs targeting `staging` or `main` that need merging first.
-2. If PRs are merged, pull and verify alignment:
-   ```bash
-   git checkout staging
-   git pull origin staging
-   git checkout main
-   git pull origin main
-   ```
-
-**Why**: `staging` and `main` must be in sync when you are not actively validating a release or hotfix. `develop` can be ahead (that's where active work happens), but release gates should be clean outside of those windows.
+```bash
+git checkout develop
+git pull --ff-only origin develop
+git merge --ff-only origin/main
+git push origin develop
+```
 
 ## Optional: Feature Branch Workflow
 
@@ -118,35 +107,19 @@ git push origin --delete feature/your-feature-name  # Delete remote
 - No PR required for merging to `develop`
 - Use `--no-ff` to preserve merge commits
 
-## Integrate Develop → Staging (When Ready for Testing)
+## Open PR: Develop → Main (Release PR)
 
-When you have a set of features ready to validate in the staging environment, merge `develop` to `staging` (local merge or PR):
-
-```bash
-gh pr create --base staging --head develop --title "chore: sync staging with develop for testing"
-```
-
-Or via GitHub UI: Open a PR with base `staging`, head `develop` (optional).
-
-Once merged and CI passes, staging automatically builds and deploys to GitHub Pages. Staging will be deindexed (robots.txt blocks crawlers; no effect on functionality).
-
-Validate on Staging
-
-- Feature works as expected in the staging environment.
-- Check Cloudflare analytics dashboard if applicable (if you provided a staging token).
-- Wait for ≥ 1 day if needed to ensure stability.
-
-## Open PR: Staging → Main (Release PR)
-
-Once staging is stable and validated:
+Once `develop` is ready to ship:
 
 - **Base**: `main`
-- **Head**: `staging`
+- **Head**: `develop`
 - **Title**: e.g., `Release: v1.2.0 — Add Cloudflare analytics`
+
+Opening the PR triggers the build, config-validate, and visual-regression checks (`pr-visual-check.yml`, `unit-tests.yml`, `supply-chain-audit.yml`). All must pass before merge.
 
 **PR Checklist (stricter for releases):**
 
-- [ ] Staging validated for ≥ 1 day with no issues.
+- [ ] CI checks pass (build, config-validate, visual regression).
 - [ ] Changelog updated with all changes since last release.
 - [ ] Version number decided (semantic versioning: MAJOR.MINOR.PATCH).
 - [ ] Release notes prepared (copy from Changelog).
@@ -202,19 +175,13 @@ List branches that have been merged to `develop`:
 git branch --merged develop
 ```
 
-List branches merged to `staging`:
-
-```bash
-git branch --merged staging
-```
-
 List branches merged to `main`:
 
 ```bash
 git branch --merged main
 ```
 
-**Safe to delete**: Any branch listed that is not the current branch and is not `develop`, `staging`, or `main`.
+**Safe to delete**: Any branch listed that is not the current branch and is not `develop` or `main`.
 
 ### Safe Deletion Process
 
@@ -248,10 +215,10 @@ git push origin --delete feature/your-feature-name
 
 ```bash
 # Show merged branches (safe to delete)
-git branch -r --merged develop | grep -v main | grep -v staging | grep -v develop
+git branch -r --merged develop | grep -v main | grep -v develop
 
 # Bulk delete (use carefully!)
-git branch -r --merged develop | grep -v main | grep -v staging | grep -v develop | \
+git branch -r --merged develop | grep -v main | grep -v develop | \
   sed 's|origin/||' | xargs -I {} git push origin --delete {}
 ```
 
@@ -265,7 +232,6 @@ git branch --merged develop | grep -v develop | xargs -I {} git branch -d {}
 ### Branches to Never Delete
 
 - ✅ `main` (production)
-- ✅ `staging` (pre-release)
 - ✅ `develop` (active integration)
 
 ### Cleanup Frequency
@@ -284,12 +250,6 @@ Use `.env` file (not committed; see `.env.example`):
 PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=cfb_xxxxx
 ```
 
-### Staging CI (GitHub Actions)
-
-Set in GitHub Secrets:
-- Variable name: `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`
-- Value: (Cloudflare staging token, or leave blank to disable analytics)
-
 ### Production CI (AWS Pipeline)
 
 Set in AWS Systems Manager Parameter Store or AWS Secrets Manager:
@@ -306,10 +266,6 @@ Enforce via GitHub:
 - Require CI to pass (GitHub Actions).
 - Optional: Require PR review (recommended to catch issues early in feature development).
 
-### `staging`
-- Require CI to pass (GitHub Actions).
-- Optional: Require PR review; can be less strict than `main` since it's a testing environment.
-
 ### `main`
 - Require pull request review before merge (≥ 1 approval).
 - Require CI to pass (GitHub Actions + Docker build).
@@ -317,26 +273,23 @@ Enforce via GitHub:
 - Restrict who can push (e.g., only maintainers).
 - Dismiss stale reviews on new commits.
 
-To configure: Repository → Settings → Branches → Add Rule for `main` and `staging`.
+To configure: Repository → Settings → Branches → Add Rule for `main`.
 
 ## Rollback Strategy
 
-### If a Feature on Develop or Staging is Broken
+### If a Feature on Develop is Broken
 
 1. Identify the problematic commit(s).
-2. Create a hotfix branch off the affected branch:
+2. Create a hotfix branch off `develop`:
    ```bash
-   # If the issue is on develop:
    git checkout -b hotfix/revert-broken-feature develop
-   # Or if on staging:
-   git checkout -b hotfix/revert-broken-feature staging
    ```
 3. Revert the commit:
    ```bash
    git revert <commit-hash>
    git push -u origin hotfix/revert-broken-feature
    ```
-4. Open a PR to the original branch, merge, validate, then propagate fixes upstream (to staging/main as needed).
+4. Open a PR to `develop`, merge, validate, then propagate the fix to `main` in the next release PR.
 
 ### If Production is Broken
 
@@ -346,8 +299,8 @@ To configure: Repository → Settings → Branches → Add Rule for `main` and `
    # Fix the issue
    git push -u origin hotfix/production-fix
    ```
-2. Open PR to `staging`, validate, then to `main`.
-3. Tag and release.
+2. Open PR to `main`, validate, then merge.
+3. Tag and release. Sync `develop` from `main` afterward (see [Sync Branches After Release](#sync-branches-after-release)).
 
 ### Quick Feature Toggle (No Code Change)
 
@@ -399,38 +352,36 @@ Maintained manually in this project. Commit messages follow conventional format 
 - Pagefind output directory path in build script.
 
 ### Changed
-- Staging is now de-indexed (robots.txt, noindex meta tag).
+- Preview deploys are now de-indexed (robots.txt, noindex meta tag).
 ```
 
 Update before tagging a release.
 
 ## Release Checklist
 
-Before merging `staging` → `main`:
+Before merging `develop` → `main`:
 
-- [ ] Staging has been tested for ≥ 1 day (or agreed testing window).
-- [ ] All PRs from features to staging are merged.
+- [ ] CI checks pass (build, config-validate, visual regression).
+- [ ] All feature branches intended for this release are merged to `develop`.
 - [ ] Changelog.md updated with version, date, features, fixes, breaking changes.
 - [ ] Semantic version assigned (MAJOR.MINOR.PATCH).
 - [ ] No open blocking issues or PRs.
 - [ ] Rollback plan documented (if complex feature).
 - [ ] Feature toggles (env vars) reviewed; production values set in AWS.
 
-Once complete, merge `staging` → `main`, tag, and deploy.
+Once complete, merge `develop` → `main`, tag, and deploy.
 
 ## Questions & Troubleshooting
 
-### Q: Can I commit directly to `develop`, `staging`, or `main`?
+### Q: Can I commit directly to `develop` or `main`?
 
 A: **`develop`**: Yes. Direct commits and pushes are allowed for fast iteration. Use feature branches + direct merge, or push directly.
-
-**`staging`**: Yes. Direct commits and local merges are allowed when you want fast iteration or to batch tests.
 
 **`main`**: No. All changes require PRs for audit, validation, and release control.
 
 ### Q: What if I need an urgent production fix?
 
-A: Create a `hotfix/` branch off `main`, fix, PR to `staging`, validate quickly, then to `main`. Tag and release. Then sync `staging` ← `main`.
+A: Create a `hotfix/` branch off `main`, fix, PR to `main`, validate quickly, merge. Tag and release. Then sync `develop` from `main`.
 
 ### Q: Can I rebase instead of merge?
 
@@ -445,7 +396,7 @@ git branch -d feature/your-feature-name
 git push origin --delete feature/your-feature-name
 ```
 
-### Q: What if staging and main diverge?
+### Q: What if develop and main diverge unexpectedly?
 
 A: Sync them after the release:
 
@@ -454,15 +405,6 @@ git checkout develop
 git pull origin develop
 git merge main
 git push origin develop
-```
-
-Then optionally sync staging:
-
-```bash
-git checkout staging
-git pull origin staging
-git merge develop
-git push origin staging
 ```
 
 This ensures they stay in lockstep for future releases and development.

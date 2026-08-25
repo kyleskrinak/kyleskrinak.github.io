@@ -4,7 +4,7 @@ on:
   # push covers direct commits to the long-lived branches so the gate can't be
   # bypassed by pushing straight to develop without opening a PR.
   push:
-    branches: [develop, staging, main]
+    branches: [develop, main]
   pull_request:
   workflow_dispatch:
 

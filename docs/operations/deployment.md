@@ -6,10 +6,10 @@ This document describes the deployment process for the Astro blog migration.
 
 The Astro blog supports two deployment pipelines:
 
-1. **Staging**: Deployed to GitHub Pages on pushes to the `staging` branch
+1. **GitHub Pages**: Disaster-recovery fallback, deployed manually via `workflow_dispatch` (plus a quarterly build-only `schedule` dry run)
 2. **Production**: Deployed to AWS S3 + CloudFront on pushes to the `main` branch
 
-## GitHub Pages Staging Deployment
+## GitHub Pages Disaster-Recovery Fallback
 
 ### Setup
 
@@ -17,9 +17,9 @@ No additional setup required. GitHub Pages is automatically configured when you 
 
 ### Process
 
-1. Push code to the `staging` branch
+1. Manually dispatch `staging-deploy.yml` from `main` (see its header comment for why)
 2. GitHub Actions automatically builds the site
-3. Site is deployed to GitHub Pages staging URL
+3. Site is deployed to the GitHub Pages URL
 
 ### Access
 
@@ -179,7 +179,6 @@ Configure in GitHub repository settings (Settings → Secrets and variables → 
 ### GitHub Actions
 
 View deployment status in the repository Actions tab:
-- Staging: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Astaging
 - Production: https://github.com/kyleskrinak/kyleskrinak.github.io/actions?query=branch%3Amain
 
 ### CloudFront
@@ -246,11 +245,11 @@ Monitor in GitHub Actions logs.
 
 ## Automated Quality Gates
 
-PRs to `staging` run visual regression tests as a gate. Additional quality checks run on scheduled intervals:
+PRs to `main` run visual regression tests as a gate. Additional quality checks run on scheduled intervals:
 
 ### Visual Regression Testing
 
-**Workflow**: `pr-visual-check.yml` — runs on PRs targeting `staging`.
+**Workflow**: `pr-visual-check.yml` — runs on PRs targeting `main`.
 Compares against committed baselines in `tests/visual/visual-regression.spec.ts-snapshots/`, then runs the `seo` project against the same preview server. That second step covers machine-readable markup contracts a screenshot diff cannot see — robots directives, canonical URLs, and the representative h-card.
 On failure, diff artifacts are uploaded. To update baselines after an intentional visual change, run `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering — a bare macOS baseline will fail this gate on font-height drift alone) and commit the updated snapshots.
 

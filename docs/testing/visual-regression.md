@@ -1,10 +1,10 @@
 # Visual Regression Testing
 
 ## Status
-✅ **ACTIVE** — CI gate on PRs to `staging`. Baselines committed to repo.
+✅ **ACTIVE** — CI gate on PRs to `main`. Baselines committed to repo.
 
 ## Overview
-Playwright visual regression tests for key pages. Baselines are committed in `tests/visual/visual-regression.spec.ts-snapshots/` (`snapshotPathTemplate` drops the OS suffix from filenames but keeps `{-projectName}`, so baselines stay per-project — it does not make the pixels themselves OS-agnostic; baselines must actually be *generated* on Ubuntu to match CI, see below). The `pr-visual-check.yml` workflow runs them as a gate on all PRs targeting `staging`.
+Playwright visual regression tests for key pages. Baselines are committed in `tests/visual/visual-regression.spec.ts-snapshots/` (`snapshotPathTemplate` drops the OS suffix from filenames but keeps `{-projectName}`, so baselines stay per-project — it does not make the pixels themselves OS-agnostic; baselines must actually be *generated* on Ubuntu to match CI, see below). The `pr-visual-check.yml` workflow runs them as a gate on all PRs targeting `main`.
 
 ## Local Development
 
