@@ -276,7 +276,12 @@ test.describe('Visual Regression - Responsive Design', () => {
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
-      await expect(page).toHaveScreenshot(`home-${viewport.name}.png`, {
+      // Named `viewport-`, not `home-`: these labels are forced widths, not
+      // devices. The project axis already encodes device emulation, so
+      // viewport-desktop-visual-mobile.png is a 1920px-wide page rendered under
+      // iPhone 12 emulation -- a name like home-desktop-visual-mobile.png reads
+      // as a device baseline it is not.
+      await expect(page).toHaveScreenshot(`viewport-${viewport.name}.png`, {
         fullPage: true,
         maxDiffPixelRatio: 0.1,
       });

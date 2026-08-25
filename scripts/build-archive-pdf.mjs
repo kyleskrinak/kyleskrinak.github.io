@@ -24,7 +24,13 @@ import { spawnSync } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { chromium } from "@playwright/test";
-import { parseFlags, startPreview, stopPreview, waitForServer } from "./lib/pdf-helpers.mjs";
+import {
+  parseFlags,
+  parsePreviewPort,
+  startPreview,
+  stopPreview,
+  waitForServer,
+} from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
 
@@ -34,9 +40,19 @@ const FLAGS = {
   "--base-url": { key: "baseUrl", value: true },
 };
 
-const PORT = Number(process.env.ARCHIVE_PREVIEW_PORT || 4321);
-
 async function main() {
+  // Parsed here, not at module scope: a throw during module evaluation escapes
+  // main().catch below and reaches the user as a raw stack trace. Matches
+  // build-resume-variant.mjs, which exits 2 on bad configuration input.
+  let PORT;
+  try {
+    // 4324, not the dev server's 4321: see parsePreviewPort for the allocation.
+    PORT = parsePreviewPort("ARCHIVE_PREVIEW_PORT", 4324);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+
   const args = parseFlags(process.argv.slice(2), FLAGS, {
     output: "public/blog-archive.pdf",
     skipBuild: false,
@@ -60,7 +76,7 @@ async function main() {
   if (!baseUrl) {
     baseUrl = `http://localhost:${PORT}`;
     console.log(`→ Starting astro preview on :${PORT}…`);
-    preview = startPreview(PORT, { cwd: ROOT });
+    preview = await startPreview(PORT, { cwd: ROOT });
     await waitForServer(baseUrl + "/", { child: preview });
   }
 

@@ -22,16 +22,8 @@
  *   node scripts/print-resume-pdf.mjs --output ./resume.pdf --base-url http://localhost:4321
  */
 
-import { parseFlags } from "./lib/pdf-helpers.mjs";
+import { parseFlags, parsePreviewPort } from "./lib/pdf-helpers.mjs";
 import { renderResumePdf } from "./lib/resume-render.mjs";
-
-const PORT = Number(process.env.RESUME_PREVIEW_PORT || 4321);
-if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
-  console.error(
-    `Invalid RESUME_PREVIEW_PORT '${process.env.RESUME_PREVIEW_PORT}' — must be an integer 1-65535.`
-  );
-  process.exit(2);
-}
 
 const FLAGS = {
   "--output": { key: "output", value: true },
@@ -39,8 +31,20 @@ const FLAGS = {
 };
 
 async function main() {
+  // Parsed here, not at module scope: a throw during module evaluation escapes
+  // main().catch below and reaches the user as a raw stack trace. Matches
+  // build-resume-variant.mjs, which exits 2 on bad configuration input.
+  let port;
+  try {
+    // 4323, shared with build-resume-variant.mjs -- one variable, one meaning.
+    port = parsePreviewPort("RESUME_PREVIEW_PORT", 4323);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+
   const args = parseFlags(process.argv.slice(2), FLAGS, { output: "resume.pdf", baseUrl: null });
-  await renderResumePdf({ output: args.output, baseUrl: args.baseUrl, port: PORT });
+  await renderResumePdf({ output: args.output, baseUrl: args.baseUrl, port });
 }
 
 main().catch(err => {
