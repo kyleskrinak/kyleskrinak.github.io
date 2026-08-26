@@ -25,9 +25,9 @@ No additional setup required. GitHub Pages is automatically configured when you 
 
 - URL: `https://kyleskrinak.github.io/`
 
-**⚠️ IMPORTANT**: Staging deploys to the root path (not `/astro-blog/`) because `kyleskrinak.github.io` is a GitHub Pages **user site**. User sites must deploy to root - this is a GitHub Pages platform constraint.
+**⚠️ IMPORTANT**: The GitHub Pages fallback deploys to the root path (not `/astro-blog/`) because `kyleskrinak.github.io` is a GitHub Pages **user site**. User sites must deploy to root - this is a GitHub Pages platform constraint.
 
-See [Staging URL Reference](./staging-url-reference.md) for authoritative documentation.
+See [GitHub Pages Fallback URL Reference](./staging-url-reference.md) for authoritative documentation.
 
 ## AWS Production Deployment
 

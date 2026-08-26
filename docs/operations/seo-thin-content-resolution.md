@@ -113,17 +113,20 @@ Run tests:
 # SEO meta tags (local development)
 npm run test:seo
 
-# Test against staging (cross-platform)
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
-
 # Test against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
 # Or use shortcuts (runs all Playwright test suites against environment)
-npm run test:staging      # All test suites against staging
 npm run test:production   # All test suites against production
 
-# Note: For most reliable staging tests, use explicit PLAYWRIGHT_TEST_BASE_URL commands above.
+# GitHub Pages disaster-recovery fallback (publishing is manual via workflow_dispatch;
+# a quarterly schedule trigger is a build-only dry run that never deploys):
+# only meaningful after a `mode=full-fallback` dispatch has run and before it's
+# overwritten by a `mode=stub` redeploy (it does not revert automatically when
+# the workflow finishes) — otherwise it just tests the redirect stub.
+# See docs/operations/staging-url-reference.md.
+cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
+npm run test:staging
 ```
 
 ---

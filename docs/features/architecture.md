@@ -33,8 +33,9 @@ For detailed architecture information, see:
 ┌─────────────────────────────────────────────────────────────┐
 │                      Deployment                              │
 ├─────────────────────────────────────────────────────────────┤
-│  Staging (GitHub Pages): kyleskrinak.github.io/ (root)      │
-│  Production (AWS S3 + CloudFront): kyle.skrinak.com         │
+│  GitHub Pages (disaster-recovery fallback, manual dispatch): │
+│    kyleskrinak.github.io/ (root) — normally a redirect stub  │
+│  Production (AWS S3 + CloudFront): kyle.skrinak.com          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -65,11 +66,11 @@ For detailed architecture information, see:
 ### 5. **Environment-Based Feature Gating**
 - Analytics load only in production with valid tokens
 - Respects DNT/GPC privacy signals
-- Environment variables control behavior (staging vs production)
+- Environment variables control behavior (deploy-environment gating, independent of which host serves the build)
 
-### 6. **Multi-Environment Deployment**
-- **Staging (GitHub Pages)**: Preview changes, test before production
-- **Production (AWS S3 + CloudFront)**: CDN-backed, intelligent caching
+### 6. **Deployment Targets**
+- **Production (AWS S3 + CloudFront)**: CDN-backed, intelligent caching; the only continuously deployed target
+- **GitHub Pages (disaster-recovery fallback)**: publishing is manual via `workflow_dispatch` (a quarterly `schedule` trigger also runs a build-only dry run but never deploys); normally serves a redirect stub to production; publishes the real site only if manually dispatched with `mode=full-fallback` — for an actual AWS outage or to verify the fallback still works
 - Same codebase, different configurations
 
 ## Component Architecture

@@ -32,8 +32,8 @@ npm run check:live-weight   # Real uncompressed-bytes check against production, 
 ```
 
 **Deployment Verification**:
-- Staging: https://kyleskrinak.github.io/ (user site - root path only)
 - Production: https://kyle.skrinak.com/
+- GitHub Pages disaster-recovery fallback: https://kyleskrinak.github.io/ (user site - root path only) — normally shows a redirect stub, not comparable to production unless a `mode=full-fallback` dispatch has run and hasn't yet been overwritten by a `mode=stub` redeploy (it does not revert automatically when the workflow finishes)
 
 **Analytics Dashboard**:
 - Cloudflare Web Analytics (production traffic monitoring)

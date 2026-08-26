@@ -1,6 +1,6 @@
 # Visual Regression Testing
 
-Playwright-based visual regression tests to catch unintended changes in layout, styling, and responsive design across different environments (local, staging, production).
+Playwright-based visual regression tests to catch unintended changes in layout, styling, and responsive design across different environments (local, production, and the GitHub Pages disaster-recovery fallback).
 
 ## Quick Start
 
@@ -20,17 +20,17 @@ guard described in [Troubleshooting](#a-preview-server-is-live-on-port-n-which-b
 — if a stray `astro preview` is running, this command reports a 180s `webServer` timeout
 instead of the real cause.
 
-### 3. Test Staging Before Launch
-```bash
-npm run test:staging -- --project=visual-*
-```
-Tests against GitHub Pages staging URL. This validates that staging renders identically to local.
-
-### 4. Verify Production After Launch
+### 3. Verify Production After Launch
 ```bash
 npm run test:production -- --project=visual-*
 ```
-Tests against production URL. Should match staging and baselines.
+Tests against production URL. Should match baselines.
+
+### 4. Test the GitHub Pages Fallback (Disaster Recovery Only)
+```bash
+npm run test:staging -- --project=visual-*
+```
+Only meaningful after a manual `workflow_dispatch` with `mode=full-fallback` has run and before it's overwritten by a `mode=stub` redeploy — it does not revert automatically when the workflow finishes. Otherwise `kyleskrinak.github.io` serves a redirect stub, not the real site, and this just tests the stub. Not part of routine pre-launch validation.
 
 ## Available Commands
 
@@ -48,19 +48,22 @@ npm run test:visual:docker
 # Guarded: refuses unless ALLOW_NATIVE_BASELINE=1, so host-rendered pixels cannot land in a commit by accident.
 ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline
 
-# Test against staging (GitHub Pages)
-npm run test:staging -- --project=visual-*
-
 # Test against production (kyle.skrinak.com)
 npm run test:production -- --project=visual-*
+
+# Test against the GitHub Pages disaster-recovery fallback — only meaningful after a
+# `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub`
+# redeploy (it does not revert automatically when the workflow finishes), otherwise
+# this tests the redirect stub
+npm run test:staging -- --project=visual-*
 
 # View HTML report of last test run
 npm run test:visual:report
 
 # Or use the shell script directly
 ./scripts/visual-test.sh local              # Local dev
-./scripts/visual-test.sh staging            # Staging
 ./scripts/visual-test.sh production         # Production
+./scripts/visual-test.sh staging            # GitHub Pages fallback (disaster-recovery only)
 ./scripts/visual-test.sh baseline           # Create baselines from this host (fast iteration only; needs ALLOW_NATIVE_BASELINE=1 off Linux)
 ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
 ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container (use for commits)
@@ -106,15 +109,17 @@ npm run test:visual
 npm run test:visual:report
 ```
 
-### 24 Hours Before Launch
+### During a Disaster-Recovery Drill (Not a Routine Launch Step)
 ```bash
-# 1. Deploy staging build (with BUILD_ENV=production in GitHub Actions)
-#    Note: kyleskrinak.github.io only serves live content right after a manual
-#    workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
-# 2. Test staging renders correctly
+# 1. Dispatch staging-deploy.yml with mode=full-fallback (BUILD_ENV=production)
+#    Note: kyleskrinak.github.io serves live content only after this dispatch has
+#    run, until a mode=stub dispatch overwrites it — it does not revert
+#    automatically when the workflow finishes. Otherwise it's a redirect stub,
+#    and the commands below just test that.
+# 2. Test the fallback renders correctly
 npm run test:staging -- --project=visual-*
 
-# 3. Review report - staging should match local (both use base = "/")
+# 3. Review report - should match local (both use base = "/")
 # Expected: Identical rendering to local baselines
 npm run test:visual:report
 
@@ -196,9 +201,9 @@ Re-generates screenshots as new baselines (after code changes), rendered on Ubun
 ### Important: Base Path Configuration
 
 This blog uses **consistent base path** across all environments set in `astro.config.ts`:
-- **All environments (Local/Staging/Production)**: `base: "/"`
+- **Local/Production/GitHub Pages fallback**: `base: "/"`
 
-This means **all environments render identically**. Staging (GitHub Pages) deploys as a user site at the root path, matching local and production behavior.
+This means all environments render identically when compared. The GitHub Pages fallback (`kyleskrinak.github.io`) deploys as a user site at the root path, matching local and production behavior — but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy; otherwise it serves a redirect stub.
 
 ### Baseline Management
 
@@ -226,16 +231,18 @@ npm run test:visual:baseline:docker
 # Verify against those baselines in the same Ubuntu container, without updating them
 npm run test:visual:docker
 
-# Test staging against baselines (also base = "/")
-npm run test:staging -- --project=visual-*
-
 # Test production against baselines (base = "/" at kyle.skrinak.com)
 npm run test:production -- --project=visual-*
+
+# Test the GitHub Pages fallback against baselines (also base = "/") — only
+# meaningful after a mode=full-fallback dispatch has run and before it's
+# overwritten by a mode=stub redeploy
+npm run test:staging -- --project=visual-*
 ```
 
 **Expected behavior:**
-- All environments should match baselines (identical rendering with base = "/")
-- Tests should pass consistently across local, staging, and production
+- Local and production should match baselines (identical rendering with base = "/")
+- The GitHub Pages fallback matches too, but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy
 - Failures indicate unintended visual regressions
 
 ### Testing Multiple Browsers
@@ -351,7 +358,7 @@ scripts/visual-test.sh (helper script)
 1. **Baselines committed to repo** — update with `npm run test:visual:baseline:docker` (matches CI's Ubuntu font rendering) and commit the PNGs; `pr-visual-check.yml` gates PRs to main against them
 2. **Review diffs carefully** before accepting failures as baselines
 3. **Run before pushing** to catch regressions early
-4. **Test all environments** before launch (local → staging → production)
+4. **Test before launch** (local → production); reserve the GitHub Pages fallback for disaster-recovery drills, not routine pre-launch checks
 5. **Keep tests updated** when intentionally changing design
 
 ## Resources

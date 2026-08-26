@@ -145,8 +145,9 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 	test.describe('Staging Environment', () => {
 		test('all pages have noindex,nofollow on staging', async ({ page }) => {
 			test.skip(!isStaging, 'This test only runs on staging');
-			// NOTE: Staging is auto-detected from BASE_URL (github.io). To test staging
-			// behavior locally, set environment variables:
+			// NOTE: Staging is no longer auto-detected from BASE_URL — the GitHub Pages
+			// fallback (github.io) builds with PUBLIC_DEPLOY_ENV=production, not staging.
+			// To exercise this test, set environment variables explicitly:
 			//   PUBLIC_DEPLOY_ENV=staging (makes app render staging meta tags)
 			//   PLAYWRIGHT_DEPLOY_ENV=staging (makes test suite run staging-only tests)
 			// Example: PUBLIC_DEPLOY_ENV=staging PLAYWRIGHT_DEPLOY_ENV=staging npm run test:seo

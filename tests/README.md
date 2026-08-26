@@ -18,13 +18,13 @@ npm run dev
 npm run test:console
 ```
 
-### Running Against Staging
+### Running Against the GitHub Pages Fallback
 
 ```bash
 npm run test:staging -- --project=console
 ```
 
-This will test the live staging site on GitHub Pages and report any console errors.
+This targets the GitHub Pages disaster-recovery fallback (`kyleskrinak.github.io`). It serves live content only after a manual `workflow_dispatch` with `mode=full-fallback` has run, and keeps serving it until a `mode=stub` dispatch overwrites it — it does not revert automatically when the workflow finishes. Otherwise it's a redirect stub, and this will just report on the stub.
 
 ### Running Against Production
 
@@ -110,17 +110,19 @@ When you intentionally change the UI, update the baseline snapshots to match CI'
 npm run test:visual:baseline:docker
 ```
 
-### Running Against Staging
+### Running Against the GitHub Pages Fallback
 
 ```bash
 npm run test:staging -- --project=visual-*
 ```
 
+Only meaningful after a manual `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy — see the note above under Console Errors.
+
 ## Troubleshooting
 
 ### Test times out
 - **Dev server**: Make sure `npm run dev` is running in another terminal
-- **Staging/Production**: Check your internet connection
+- **Fallback/Production**: Check your internet connection
 
 ### Resource not found errors
 - Run `npm run build:ci` first to ensure all assets are built
