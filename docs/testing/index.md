@@ -73,11 +73,6 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 # — only meaningful after a manual `mode=full-fallback` dispatch has run and before
 # it's overwritten by a `mode=stub` redeploy (it does not revert automatically when
 # the workflow finishes); otherwise this just tests the redirect stub.
-# CAUTION: the seo project auto-detects any github.io base URL as "staging" and
-# asserts noindex,nofollow on a representative set of pages (see tests/test-utils.ts
-# isStaging and tests/seo/seo-meta-tags.spec.ts), which will report false failures
-# against a full-fallback deploy (production-like, indexable content). Exclude it, e.g.:
-#   npm run test:staging -- --project=console --project=visual-desktop --project=visual-mobile --project=analytics --project=links --project=layout
 # See docs/operations/staging-url-reference.md.
 npm run test:staging
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:console
