@@ -58,11 +58,14 @@ When documenting or testing the fallback, use:
 ## Test Commands
 
 **⚠️ These only produce meaningful results after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy** — at any other time `kyleskrinak.github.io` serves the redirect stub, and these commands will just test that stub, not the real site. No trailing slash, to avoid double slashes in URL concatenation:
+
+**⚠️ The `test:seo` project is not reliable against this URL**: it auto-detects any `github.io` base URL as "staging" (see `tests/test-utils.ts` `isStaging`) and asserts `noindex,nofollow` on every page, regardless of the actual deploy mode. A `mode=full-fallback` deploy is production-like (indexable), so those assertions will fail against it. Use `test:seo` here only to confirm the redirect stub's own `noindex,nofollow` tag; for everything else, exclude the `seo` project.
 ```bash
-# Individual suite against the fallback
+# Individual suite against the fallback (only valid for confirming the redirect stub's own noindex,nofollow)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
 
-# All suites against the fallback (package.json script)
+# All suites against the fallback (package.json script) — includes the seo project and
+# will report false noindex,nofollow failures against a full-fallback (production-like) deploy
 npm run test:staging
 ```
 
