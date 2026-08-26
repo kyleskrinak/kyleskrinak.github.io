@@ -125,8 +125,9 @@ npm run test:production   # All test suites against production
 # overwritten by a `mode=stub` redeploy (it does not revert automatically when
 # the workflow finishes) — otherwise it just tests the redirect stub.
 # CAUTION: the seo project always treats a github.io base URL as "staging" and
-# asserts noindex,nofollow on every page (tests/test-utils.ts isStaging), even
-# when mode=full-fallback is serving production-like, indexable content — so
+# asserts noindex,nofollow on a representative set of pages (tests/test-utils.ts
+# isStaging), even when mode=full-fallback is serving production-like, indexable
+# content — so
 # these two commands will report false failures against a live full-fallback
 # deploy. They're only reliable for confirming the redirect stub's own tag.
 # See docs/operations/staging-url-reference.md.
