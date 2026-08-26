@@ -70,7 +70,7 @@ For detailed architecture information, see:
 
 ### 6. **Deployment Targets**
 - **Production (AWS S3 + CloudFront)**: CDN-backed, intelligent caching; the only continuously deployed target
-- **GitHub Pages (disaster-recovery fallback)**: manual `workflow_dispatch` only, normally serves a redirect stub to production; publishes the real site only if manually dispatched with `mode=full-fallback` during an AWS outage
+- **GitHub Pages (disaster-recovery fallback)**: publishing is manual via `workflow_dispatch` (a quarterly `schedule` trigger also runs a build-only dry run but never deploys); normally serves a redirect stub to production; publishes the real site only if manually dispatched with `mode=full-fallback` during an AWS outage
 - Same codebase, different configurations
 
 ## Component Architecture

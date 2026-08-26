@@ -119,7 +119,8 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 # Or use shortcuts (runs all Playwright test suites against environment)
 npm run test:production   # All test suites against production
 
-# GitHub Pages disaster-recovery fallback (manual workflow_dispatch only):
+# GitHub Pages disaster-recovery fallback (publishing is manual via workflow_dispatch;
+# a quarterly schedule trigger is a build-only dry run that never deploys):
 # only meaningful after a `mode=full-fallback` dispatch has run and before it's
 # overwritten by a `mode=stub` redeploy (it does not revert automatically when
 # the workflow finishes) — otherwise it just tests the redirect stub.

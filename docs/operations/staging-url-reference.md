@@ -23,7 +23,7 @@ This is a **GitHub Pages User Site** (not a Project Site), which has strict depl
 
 ## Build Configuration
 
-**staging-deploy.yml workflow** (`mode=full-fallback`, manual dispatch only):
+**staging-deploy.yml workflow** (`mode=full-fallback` build path — manual dispatch to deploy, or a quarterly `schedule` dry run that never deploys):
 ```yaml
 BUILD_ENV: production
 PUBLIC_DEPLOY_ENV: production   # Full-fallback behaves like production, not a staging environment

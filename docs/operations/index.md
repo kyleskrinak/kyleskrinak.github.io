@@ -22,8 +22,9 @@ This section covers deploying, maintaining, and troubleshooting the Astro blog i
 git push origin develop
 gh pr create --base main --head develop
 
-# GitHub Pages disaster-recovery fallback: manual workflow_dispatch only
-# (see staging-deploy.yml), not triggered by a push.
+# GitHub Pages disaster-recovery fallback: manual workflow_dispatch to deploy
+# (see staging-deploy.yml); a quarterly schedule trigger also runs but is a
+# build-only dry run that never deploys. Not triggered by a push.
 ```
 
 ## Maintenance & Monitoring
@@ -41,7 +42,7 @@ gh pr create --base main --head develop
 **GitHub Pages (disaster-recovery fallback)**:
 - URL: https://kyleskrinak.github.io/ (root - user site constraint)
 - Normally serves: a redirect stub to production
-- Triggers on: Manual `workflow_dispatch` only, not continuous
+- Triggers on: Manual `workflow_dispatch` to deploy (plus a quarterly `schedule`-triggered build-only dry run that never deploys), not continuous
 - **See**: [GitHub Pages Fallback URL Reference](./staging-url-reference.md) for details
 
 **Production Environment**:
