@@ -43,13 +43,25 @@ let cachedPostsPromise: Promise<PostJson[]> | null = null;
 
 async function getPosts(): Promise<PostJson[]> {
   if (cachedPosts) return cachedPosts;
-  cachedPostsPromise ??= fetch(linkWithBase("/posts/index.json")).then(r => r.json());
+  cachedPostsPromise ??= fetch(linkWithBase("/posts/index.json")).then(r => {
+    if (!r.ok) {
+      throw new Error(`Failed to load posts/index.json: ${r.status} ${r.statusText}`);
+    }
+    return r.json();
+  });
   cachedPosts = await cachedPostsPromise;
   return cachedPosts;
 }
 
 function computeBatchSize(list: HTMLUListElement): number {
-  const liHeight = list.querySelector("li")?.getBoundingClientRect().height || 0;
+  const li = list.querySelector("li");
+  if (!li) return 5;
+
+  const rectHeight = li.getBoundingClientRect().height;
+  const style = window.getComputedStyle(li);
+  const marginHeight = parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+  const liHeight = rectHeight + marginHeight;
+
   if (liHeight <= 0) return 5;
   return Math.max(Math.floor(window.innerHeight / liHeight), 5);
 }
@@ -127,19 +139,28 @@ function init() {
 
   button.addEventListener("click", async () => {
     button.disabled = true;
-    const posts = await getPosts();
-    const batchSize = computeBatchSize(list);
-    const nextBatch = posts.slice(renderedCount, renderedCount + batchSize);
 
-    const items = appendPosts(list, nextBatch);
-    renderedCount += nextBatch.length;
+    try {
+      const posts = await getPosts();
+      const batchSize = computeBatchSize(list);
+      const nextBatch = posts.slice(renderedCount, renderedCount + batchSize);
 
-    status.textContent = `${nextBatch.length} more post${nextBatch.length === 1 ? "" : "s"} loaded`;
+      const items = appendPosts(list, nextBatch);
+      renderedCount += nextBatch.length;
 
-    if (renderedCount >= posts.length) {
-      button.remove();
-      items[0]?.querySelector("a")?.focus();
-    } else {
+      status.textContent = `${nextBatch.length} more post${nextBatch.length === 1 ? "" : "s"} loaded`;
+
+      if (renderedCount >= posts.length) {
+        button.remove();
+        items[0]?.querySelector("a")?.focus();
+      } else {
+        button.disabled = false;
+      }
+    } catch (err) {
+      console.error("Failed to load more posts:", err);
+      cachedPostsPromise = null;
+      status.className = "";
+      status.textContent = "Sorry, we couldn't load more posts. Please try again.";
       button.disabled = false;
     }
   });
