@@ -8,6 +8,7 @@ import Tag from "@/components/Tag.astro";
 import Datetime from "@/components/Datetime.astro";
 import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
+import ReplyViaEmail from "@/components/ReplyViaEmail.astro";
 import Webmentions from "@/components/Webmentions.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
@@ -219,6 +220,8 @@ const nextPost =
     <BackToTopButton />
 
     <ShareLinks />
+
+    <ReplyViaEmail {title} />
 
     <Webmentions />
 
