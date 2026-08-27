@@ -1,0 +1,14 @@
+---
+import { SITE } from "@/config";
+
+type Props = { title: string };
+
+const { title } = Astro.props;
+
+const mailtoHref = `mailto:${SITE.blogContactEmail}?subject=${encodeURIComponent(`Re: ${title}`)}`;
+---
+
+<p class="text-sm text-skin-base opacity-80">
+  Have a thought? <a href={mailtoHref} class="underline decoration-dashed underline-offset-4 hover:text-accent">Reply by email</a>.
+  I read everything that isn't spam.
+</p>
