@@ -49,7 +49,7 @@ test.describe('Load More (blog listing progressive enhancement)', () => {
 		await expect(page.locator('#load-more-btn')).toHaveCount(0);
 	});
 
-	test('page 2 renders statically with no Load More button or script', async ({ page }) => {
+	test('page 2 renders statically with no Load More button or list', async ({ page }) => {
 		await page.goto(resolveUrl('/posts/2/'), { waitUntil: 'networkidle' });
 
 		await expect(page.locator('#load-more-btn')).toHaveCount(0);

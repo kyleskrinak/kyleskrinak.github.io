@@ -148,6 +148,7 @@ function init() {
       const items = appendPosts(list, nextBatch);
       renderedCount += nextBatch.length;
 
+      status.className = "sr-only";
       status.textContent = `${nextBatch.length} more post${nextBatch.length === 1 ? "" : "s"} loaded`;
 
       if (renderedCount >= posts.length) {
