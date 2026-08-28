@@ -21,7 +21,7 @@ const { page } = Astro.props;
 <Layout title={`Posts | ${SITE.title}`} noindex={true}>
   <Header />
   <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
-    <ul>
+    <ul id="post-list" data-load-more={page.currentPage === 1 && page.lastPage > 1 ? true : undefined}>
       {page.data.map(data => <Card {...data} />)}
     </ul>
   </Main>
@@ -30,3 +30,7 @@ const { page } = Astro.props;
 
   <Footer noMarginTop={page.lastPage > 1} />
 </Layout>
+
+{page.currentPage === 1 && page.lastPage > 1 && (
+  <script src="../../scripts/load-more.ts"></script>
+)}

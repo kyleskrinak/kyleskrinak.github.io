@@ -7,8 +7,8 @@ tags:
 image: ./drupal_logo.webp
 alt: Drupal logo
 source: jekyll
-description: See the <a href="https://security.duke.edu/">Duke University IT
-  Security Office</a> for comprehensive security standards...
+description: See the Duke University IT Security Office for comprehensive
+  security standards...
 ---
 
 
