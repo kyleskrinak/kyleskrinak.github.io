@@ -34,8 +34,10 @@ test.describe('Load More (blog listing progressive enhancement)', () => {
 		expect(previousCount).toBe(5);
 
 		const button = page.locator('#load-more-btn');
+		const minBatchSize = 5;
+		const maxClicks = Math.ceil((posts.length - previousCount) / minBatchSize) + 1;
 		let clicks = 0;
-		while ((await button.count()) > 0 && clicks < 50) {
+		while ((await button.count()) > 0 && clicks < maxClicks) {
 			await button.click();
 			await expect
 				.poll(async () => page.locator('#post-list > li').count())
