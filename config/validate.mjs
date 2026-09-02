@@ -322,6 +322,10 @@ const testEnvVars = new Set([
   'RESUME_PREVIEW_PORT',            // print-resume-pdf.mjs + build-resume-variant.mjs (port override)
   'RESUME_VARIANTS_DIR',            // scripts/build-resume-variant.mjs (variants dir override)
   'WEBMENTION_EXPECTED_HOST',       // scripts/send-webmentions.mjs (test seam)
+  'NOTION_API_TOKEN',               // scripts/migrate-notion-post.mjs, scripts/notion-writeback.mjs
+  'NOTION_BLOG_BACKLOG_DATA_SOURCE_ID', // scripts/migrate-notion-post.mjs
+  'GH_TOKEN',                       // scripts/migrate-notion-post.mjs (gh CLI open-PR guard)
+  'GITHUB_OUTPUT',                  // well-known GitHub Actions platform var (scripts/migrate-notion-post.mjs)
 ]);
 
 // Scan all TypeScript/JavaScript files in src/ and scripts/

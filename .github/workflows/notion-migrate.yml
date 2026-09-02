@@ -1,0 +1,114 @@
+name: Notion draft migration
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: notion-migrate
+  cancel-in-progress: false # never cancel a mid-flight migration
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v5
+        with:
+          ref: develop
+
+      - uses: ./.github/actions/setup-node-build
+
+      - run: npm ci
+
+      - name: Run Notion migration script
+        id: migrate
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+          NOTION_BLOG_BACKLOG_DATA_SOURCE_ID: ${{ vars.NOTION_BLOG_BACKLOG_DATA_SOURCE_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/migrate-notion-post.mjs
+
+      - name: Validate generated post
+        if: steps.migrate.outputs.slug != ''
+        run: |
+          npm run check:images
+          node scripts/lint-directives.mjs
+
+      - name: Open PR
+        if: steps.migrate.outputs.slug != ''
+        id: cpr
+        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        with:
+          branch: automation/notion-${{ steps.migrate.outputs.slug }}
+          base: develop
+          title: "New post from Notion: ${{ steps.migrate.outputs.title }}"
+          body: |
+            Auto-migrated from Notion (page `${{ steps.migrate.outputs.notion-page-id }}`).
+
+            Review content, images, and consider `:::cards` formatting.
+            Flip `published: true` when ready. Future URL: ${{ steps.migrate.outputs.post-url }}
+          commit-message: "Add draft post from Notion: ${{ steps.migrate.outputs.slug }}"
+          add-paths: src/content/blog/**
+
+      - name: Write back to Notion
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: |
+          node scripts/notion-writeback.mjs \
+            --page-id "${{ steps.migrate.outputs.notion-page-id }}" \
+            --url "${{ steps.migrate.outputs.post-url }}" \
+            --status "in review"
+
+      - name: Report failure to Notion + tracking issue
+        if: failure() && steps.migrate.outputs.notion-page-id != ''
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            const title = `Notion migration failed: ${{ steps.migrate.outputs.title }}`;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `Automated Notion → blog post migration failed for this page.\n\nWorkflow run: ${runUrl}\n\nCheck the run logs for the failing step. The Notion page's \`Next Action\` field has been updated to flag the stuck state.`;
+
+            const { owner, repo } = context.repo;
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = openIssues.find((issue) => issue.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ["automation"],
+              });
+            }
+
+      - name: Flag stuck page in Notion
+        if: failure() && steps.migrate.outputs.notion-page-id != ''
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        run: |
+          node scripts/notion-writeback.mjs \
+            --page-id "${{ steps.migrate.outputs.notion-page-id }}" \
+            --next-action "Migration failed — see GitHub issue"

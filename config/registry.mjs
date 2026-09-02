@@ -162,5 +162,31 @@ export const ConfigRegistry = {
         AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' }
       }
     },
+  },
+
+  // Documentation only — not enforced by config:validate.mjs, since these
+  // vars are read by standalone Node scripts (scripts/migrate-notion-post.mjs,
+  // scripts/notion-writeback.mjs), never by astro build/dev, and
+  // notion-migrate.yml is intentionally excluded from WORKFLOW_TO_ENV_MAP
+  // (it never runs `npm run build:ci`).
+  externalServices: {
+    notion: {
+      mechanism: 'Notion → repo blog-post migration automation',
+      location: '.github/workflows/notion-migrate.yml',
+      variables: {
+        NOTION_API_TOKEN: {
+          value: 'required',
+          source: 'secret',
+          location: 'scripts/migrate-notion-post.mjs, scripts/notion-writeback.mjs',
+          notes: 'Notion internal integration token. Scope the integration\'s connection to the Blog Backlog database only — not workspace-wide.'
+        },
+        NOTION_BLOG_BACKLOG_DATA_SOURCE_ID: {
+          value: '89a69798-d03b-4ebb-8a7e-1259c0cc1c7a',
+          source: 'github-var',
+          location: 'scripts/migrate-notion-post.mjs',
+          notes: 'Data source id for the Blog Backlog database (page id 4f820a24-1018-44f3-b9b8-6952e2f92d48).'
+        }
+      }
+    }
   }
 };
