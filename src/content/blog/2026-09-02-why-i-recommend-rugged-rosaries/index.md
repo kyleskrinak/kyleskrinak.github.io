@@ -10,7 +10,7 @@ tags:
   - rosary
   - product-recommendation
   - personal
-published: false
+published: true
 ---
 
 Though I was raised nominally Catholic, I made a hasty and complete exit in my teens. I returned to the faith after finding consolation amid increasing despair from my exploration of atheism. I had an epiphany of sorts in a small cinder-block Catholic church in Arkansas. It was there that I reverted to and renewed my faith. Once, while arriving early for Sunday Mass, I heard a repeated litany of "Hail Marys…" I couldn't describe it, but the cadence caught my attention. I wanted to understand what this was. That was my first introduction. Soon afterward, I would occasionally pray a Rosary, usually at a weekly men's group meeting, then, in time, more frequently. I was convinced there was something "there," however ineffable. I may not have always wanted to pray one at the start, but I was always glad when I finished. Then, maybe 15 years ago, I made it my daily practice as one of those successful New Year's Eve commitments that stuck. For the record, I have an excellent track record of meeting NYE commitments and succeeding, confounding those who dismiss them. I maintain a near-daily habit of saying the Rosary. Here's an [overview of the Rosary from EWTN](https://www.ewtn.com/catholicism/library/history-of-the-rosary-1142) if you are unfamiliar with the prayer.
