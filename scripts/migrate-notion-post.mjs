@@ -27,6 +27,7 @@ import { promisify } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { readdir, appendFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { stringify as stringifyYaml } from 'yaml';
 import kebabcase from 'lodash.kebabcase';
 import slugify from 'slugify';
@@ -51,7 +52,7 @@ const DATA_SOURCE_ID = process.env.NOTION_BLOG_BACKLOG_DATA_SOURCE_ID;
 function hasNonLatin(str) {
 	return /[^\x00-\x7F]/.test(str);
 }
-function slugifyStr(str) {
+export function slugifyStr(str) {
 	const normalized = str.replace(/\+/g, ' plus ');
 	if (hasNonLatin(normalized)) {
 		return kebabcase(normalized);
@@ -59,7 +60,7 @@ function slugifyStr(str) {
 	return slugify(normalized, { lower: true });
 }
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
 	const opts = { dryRun: false };
 	for (const a of argv) {
 		if (a === '--dry-run') opts.dryRun = true;
@@ -81,7 +82,7 @@ async function writeOutput(name, value) {
 	}
 }
 
-function plainTextTitle(page) {
+export function plainTextTitle(page) {
 	const richText = page.properties?.Name?.title ?? [];
 	// Notion titles can contain soft line breaks; collapse all whitespace
 	// (not just leading/trailing) so PR titles, issue titles, and logs
@@ -97,14 +98,14 @@ function postUrlValue(page) {
 // code block contents (where backticks/bold/link syntax would corrupt the
 // code or break fence structure) and for any value going into GitHub
 // metadata or frontmatter, where Markdown isn't wanted or would be unsafe.
-function richTextToPlainText(richText) {
+export function richTextToPlainText(richText) {
 	return (richText ?? []).map(t => t.plain_text).join('');
 }
 
 // A fixed triple-backtick fence breaks if the code itself contains a run of
 // 3+ backticks (the fence would terminate early). Use a fence one backtick
 // longer than the longest backtick run in the content, minimum 3.
-function fenceFor(code) {
+export function fenceFor(code) {
 	const runs = code.match(/`+/g) ?? [];
 	const longest = runs.reduce((max, r) => Math.max(max, r.length), 0);
 	return '`'.repeat(Math.max(3, longest + 1));
@@ -115,7 +116,7 @@ function fenceFor(code) {
 // isn't http(s) so a "javascript:"/"data:" URL can't be emitted into a
 // generated post. Notion hrefs are always absolute (not repo-relative), so
 // an http(s)-only allowlist doesn't risk breaking valid relative links.
-function safeHttpUrl(url) {
+export function safeHttpUrl(url) {
 	try {
 		const parsed = new URL(url);
 		return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
@@ -130,7 +131,7 @@ function safeHttpUrl(url) {
 // the content, and pad with a space on each side when the content starts
 // or ends with a backtick (or with whitespace, which would otherwise be
 // ambiguous with the padding itself).
-function inlineCodeSpan(s) {
+export function inlineCodeSpan(s) {
 	const runs = s.match(/`+/g) ?? [];
 	const longest = runs.reduce((max, r) => Math.max(max, r.length), 0);
 	const fence = '`'.repeat(longest + 1);
@@ -138,20 +139,37 @@ function inlineCodeSpan(s) {
 	return needsPad ? `${fence} ${s} ${fence}` : `${fence}${s}${fence}`;
 }
 
-function richTextToMarkdown(richText) {
+// Escapes CommonMark's inline special characters in literal text that is
+// NOT already going through a code span (code spans are delimited by
+// backticks and their content is literal per spec, so inlineCodeSpan()
+// handles that case on its own — running this over code-span content too
+// would double-escape it). Without this, Notion text that merely *contains*
+// markdown-significant characters — "*emphasis*" typed as literal text, a
+// stray "_", a "[citation]", or a pasted "<tag>" — would be silently
+// reinterpreted as Markdown/HTML by the renderer instead of appearing as
+// the literal characters the author typed.
+export function escapeMarkdownText(s) {
+	return s.replace(/[\\`*_[\]<>]/g, '\\$&');
+}
+
+export function richTextToMarkdown(richText) {
 	return (richText ?? []).map(t => {
 		let s = t.plain_text;
-		if (t.annotations?.code) s = inlineCodeSpan(s);
-		if (t.annotations?.bold) s = `**${s}**`;
-		if (t.annotations?.italic) s = `*${s}*`;
+		if (t.annotations?.code) {
+			s = inlineCodeSpan(s);
+		} else {
+			s = escapeMarkdownText(s);
+			if (t.annotations?.bold) s = `**${s}**`;
+			if (t.annotations?.italic) s = `*${s}*`;
+		}
 		if (t.href) {
 			const safeHref = safeHttpUrl(t.href);
-			// Escape `]` in the link text so it can't prematurely close the
-			// Markdown link-text slot and corrupt the surrounding syntax.
-			// Wrap the destination in angle brackets — CommonMark treats a
-			// bare destination as ending at whitespace or an unbalanced
-			// `)`, both of which a real URL can contain.
-			if (safeHref) s = `[${s.replace(/\]/g, '\\]')}](<${safeHref}>)`;
+			// s is already escaped above (including `]`), so it can't
+			// prematurely close the Markdown link-text slot. Wrap the
+			// destination in angle brackets — CommonMark treats a bare
+			// destination as ending at whitespace or an unbalanced `)`,
+			// both of which a real URL can contain.
+			if (safeHref) s = `[${s}](<${safeHref}>)`;
 		}
 		return s;
 	}).join('');
@@ -250,9 +268,10 @@ async function fetchContentAndImages(notion, pageId) {
 				const webpBuffer = await convertImageBuffer(buffer);
 				const outName = `image-${images.length + 1}.webp`;
 				images.push({ buffer: webpBuffer, name: outName, alt: captionText });
-				// Escape `]` so a caption containing a literal bracket can't
-				// prematurely close the Markdown alt-text slot.
-				lines.push(`![${captionText.replace(/\]/g, '\\]')}](./${outName})`);
+				// Markdown image alt text follows the same inline-text grammar
+				// as link text, so it needs the same escaping (not just `]`) —
+				// the frontmatter `alt` field above intentionally stays plain.
+				lines.push(`![${escapeMarkdownText(captionText)}](./${outName})`);
 				break;
 			}
 		}
@@ -402,7 +421,15 @@ async function main() {
 	console.log(`Migrated Notion page ${page.id} -> ${postDir}`);
 }
 
-main().catch(err => {
-	console.error(err.stack || err.message || err);
-	process.exit(1);
-});
+// Only run when invoked directly, so the pure functions above stay importable
+// (e.g. by tests/unit/migrate-notion-post.test.mjs) without instantiating the
+// Notion client or exiting the process. Same pattern as send-webmentions.mjs.
+if (
+	process.argv[1] &&
+	import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+	main().catch(err => {
+		console.error(err.stack || err.message || err);
+		process.exit(1);
+	});
+}
