@@ -19,8 +19,11 @@
  *   GH_TOKEN                            required unless --dry-run
  *   GITHUB_OUTPUT                       optional; if unset, outputs are logged
  *
- * Exits 0 with no output written when there is nothing to migrate, or when
- * the selected page has already been migrated (idempotency guards below).
+ * Exits 0 with no output written when there is nothing to migrate. When the
+ * selected page has already been migrated, the idempotency guards below
+ * still return early, but `notion-page-id`, `title`, and `slug` are written
+ * before those guards run — only `post-url` is withheld on that no-op path
+ * (see .github/workflows/notion-migrate.yml, which gates on `post-url`).
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
