@@ -124,10 +124,24 @@ function safeHttpUrl(url) {
 	}
 }
 
+// Inline code spans wrapped with a fixed single backtick break if the text
+// itself contains a backtick (e.g. a template literal). CommonMark code
+// spans use a fence one backtick longer than the longest backtick run in
+// the content, and pad with a space on each side when the content starts
+// or ends with a backtick (or with whitespace, which would otherwise be
+// ambiguous with the padding itself).
+function inlineCodeSpan(s) {
+	const runs = s.match(/`+/g) ?? [];
+	const longest = runs.reduce((max, r) => Math.max(max, r.length), 0);
+	const fence = '`'.repeat(longest + 1);
+	const needsPad = s !== '' && /^[`\s]|[`\s]$/.test(s);
+	return needsPad ? `${fence} ${s} ${fence}` : `${fence}${s}${fence}`;
+}
+
 function richTextToMarkdown(richText) {
 	return (richText ?? []).map(t => {
 		let s = t.plain_text;
-		if (t.annotations?.code) s = `\`${s}\``;
+		if (t.annotations?.code) s = inlineCodeSpan(s);
 		if (t.annotations?.bold) s = `**${s}**`;
 		if (t.annotations?.italic) s = `*${s}*`;
 		if (t.href) {
