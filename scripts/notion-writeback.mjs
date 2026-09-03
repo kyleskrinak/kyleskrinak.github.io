@@ -15,15 +15,25 @@
  */
 import { Client } from '@notionhq/client';
 
+const FLAGS = new Set(['--page-id', '--url', '--status', '--next-action']);
+
 function parseArgs(argv) {
 	const opts = { pageId: null, url: null, status: null, nextAction: null };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
-		if (a === '--page-id') opts.pageId = argv[++i];
-		else if (a === '--url') opts.url = argv[++i];
-		else if (a === '--status') opts.status = argv[++i];
-		else if (a === '--next-action') opts.nextAction = argv[++i];
-		else throw new Error(`Unknown flag: ${a}`);
+		if (!FLAGS.has(a)) throw new Error(`Unknown flag: ${a}`);
+		const value = argv[++i];
+		// Guard against a flag being last (value undefined) or immediately
+		// followed by another flag (value would silently become that flag's
+		// name) — both would otherwise leave opts fields undefined and let
+		// mode detection below produce confusing errors.
+		if (value === undefined || FLAGS.has(value)) {
+			throw new Error(`${a} requires a value`);
+		}
+		if (a === '--page-id') opts.pageId = value;
+		else if (a === '--url') opts.url = value;
+		else if (a === '--status') opts.status = value;
+		else if (a === '--next-action') opts.nextAction = value;
 	}
 	return opts;
 }

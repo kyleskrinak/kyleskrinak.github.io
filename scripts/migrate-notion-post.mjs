@@ -24,6 +24,7 @@
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { randomUUID } from 'node:crypto';
 import { readdir, appendFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
@@ -32,6 +33,7 @@ import slugify from 'slugify';
 import { Client } from '@notionhq/client';
 import {
 	SLUG_RE,
+	DATE_PREFIX_RE,
 	todayUTCDate,
 	convertImageBuffer,
 	createPostDirectory,
@@ -67,11 +69,15 @@ function parseArgs(argv) {
 }
 
 async function writeOutput(name, value) {
-	const line = `${name}=${value}\n`;
 	if (process.env.GITHUB_OUTPUT) {
-		await appendFile(process.env.GITHUB_OUTPUT, line);
+		// Multiline-safe form (GitHub Actions "heredoc" output syntax). The
+		// simple NAME=value form corrupts GITHUB_OUTPUT if value contains a
+		// newline (e.g. a Notion title with a line break) — a random
+		// delimiter avoids collisions with the value's own content.
+		const delimiter = `ghadelimiter_${randomUUID()}`;
+		await appendFile(process.env.GITHUB_OUTPUT, `${name}<<${delimiter}\n${value}\n${delimiter}\n`);
 	} else {
-		console.log(`[output] ${line.trim()}`);
+		console.log(`[output] ${name}=${value}`);
 	}
 }
 
@@ -190,18 +196,26 @@ async function fetchContentAndImages(notion, pageId) {
 	return { markdown: lines.join('\n').trim() + '\n', images };
 }
 
-async function directoryExistsForSlug(slug) {
+// Both guards below key off slugStem (the title-derived slug with no date
+// prefix), not the full date-prefixed slug — the slug embeds today's date,
+// so a rerun on a later day for the same Notion page would otherwise derive
+// a different slug and silently defeat the idempotency check.
+
+async function directoryExistsForSlug(slugStem) {
 	const entries = await readdir(BLOG_DIR).catch(() => []);
-	return entries.some(name => name === slug || name.endsWith(`-${slug}`));
+	return entries.some(name => {
+		const match = name.match(DATE_PREFIX_RE);
+		return match ? match[2] === slugStem : name === slugStem;
+	});
 }
 
-async function openPrExistsForSlug(slug) {
-	const branch = `automation/notion-${slug}`;
+async function openPrExistsForSlug(slugStem) {
 	try {
-		const { stdout } = await execFileAsync('gh', ['pr', 'list', '--head', branch, '--state', 'open', '--json', 'number']);
-		return JSON.parse(stdout).length > 0;
+		const { stdout } = await execFileAsync('gh', ['pr', 'list', '--state', 'open', '--json', 'headRefName', '--limit', '100']);
+		const branchRe = new RegExp(`^automation/notion-(?:\\d{4}-\\d{2}-\\d{2}-)?${slugStem}$`);
+		return JSON.parse(stdout).some(pr => branchRe.test(pr.headRefName));
 	} catch (err) {
-		throw new Error(`Failed to check for an existing open PR (branch ${branch}): ${err.message}`);
+		throw new Error(`Failed to check for an existing open PR (slug stem "${slugStem}"): ${err.message}`);
 	}
 }
 
@@ -260,8 +274,8 @@ async function main() {
 	await writeOutput('slug', slug);
 
 	// Idempotency guards, in order (see plan for why each is needed).
-	if (await directoryExistsForSlug(slug)) {
-		console.log(`Post directory for slug "${slug}" already exists — already migrated, skipping.`);
+	if (await directoryExistsForSlug(slugStem)) {
+		console.log(`A post directory for "${slugStem}" already exists — already migrated, skipping.`);
 		return;
 	}
 	const existingPostUrl = postUrlValue(page);
@@ -269,8 +283,8 @@ async function main() {
 		console.log(`Page ${page.id} already has a Post URL (${existingPostUrl}) — skipping.`);
 		return;
 	}
-	if (!opts.dryRun && await openPrExistsForSlug(slug)) {
-		console.log(`An open PR already exists for slug "${slug}" — skipping.`);
+	if (!opts.dryRun && await openPrExistsForSlug(slugStem)) {
+		console.log(`An open PR already exists for "${slugStem}" — skipping.`);
 		return;
 	}
 
