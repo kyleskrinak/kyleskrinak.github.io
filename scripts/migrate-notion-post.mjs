@@ -83,11 +83,22 @@ async function writeOutput(name, value) {
 
 function plainTextTitle(page) {
 	const richText = page.properties?.Name?.title ?? [];
-	return richText.map(t => t.plain_text).join('').trim();
+	// Notion titles can contain soft line breaks; collapse all whitespace
+	// (not just leading/trailing) so PR titles, issue titles, and logs
+	// stay single-line and stable.
+	return richText.map(t => t.plain_text).join('').replace(/\s+/g, ' ').trim();
 }
 
 function postUrlValue(page) {
 	return page.properties?.['Post URL']?.url ?? null;
+}
+
+// Plain-text extraction with no Markdown formatting applied — required for
+// code block contents (where backticks/bold/link syntax would corrupt the
+// code or break fence structure) and for any value going into GitHub
+// metadata or frontmatter, where Markdown isn't wanted or would be unsafe.
+function richTextToPlainText(richText) {
+	return (richText ?? []).map(t => t.plain_text).join('');
 }
 
 function richTextToMarkdown(richText) {
@@ -164,7 +175,10 @@ async function fetchContentAndImages(notion, pageId) {
 				break;
 			case 'code': {
 				const lang = block.code.language ?? '';
-				const code = richTextToMarkdown(block.code.rich_text);
+				// Plain text only — running code content through
+				// richTextToMarkdown() would inject backticks/bold/link
+				// syntax into the code and can break the fence itself.
+				const code = richTextToPlainText(block.code.rich_text);
 				lines.push(`\`\`\`${lang}\n${code}\n\`\`\``);
 				break;
 			}
@@ -177,7 +191,11 @@ async function fetchContentAndImages(notion, pageId) {
 			case 'image': {
 				const img = block.image;
 				const url = img.type === 'external' ? img.external.url : img.file.url;
-				const captionText = richTextToMarkdown(img.caption) || `image ${images.length + 1}`;
+				// Plain text, not Markdown — this value also lands in the
+				// post's frontmatter `alt` field, where Markdown syntax
+				// (links, formatting) would be invalid/unwanted.
+				const captionText =
+					richTextToPlainText(img.caption).replace(/\s+/g, ' ').trim() || `image ${images.length + 1}`;
 				const res = await fetch(url);
 				if (!res.ok) {
 					throw new Error(`Failed to download Notion image (${res.status}): ${url}`);
@@ -186,7 +204,9 @@ async function fetchContentAndImages(notion, pageId) {
 				const webpBuffer = await convertImageBuffer(buffer);
 				const outName = `image-${images.length + 1}.webp`;
 				images.push({ buffer: webpBuffer, name: outName, alt: captionText });
-				lines.push(`![${captionText}](./${outName})`);
+				// Escape `]` so a caption containing a literal bracket can't
+				// prematurely close the Markdown alt-text slot.
+				lines.push(`![${captionText.replace(/\]/g, '\\]')}](./${outName})`);
 				break;
 			}
 		}
