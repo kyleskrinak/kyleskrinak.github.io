@@ -97,6 +97,34 @@ function postUrlValue(page) {
 	return page.properties?.['Post URL']?.url ?? null;
 }
 
+// Collapse-and-trim, shared by the plain-text property extractors below —
+// mirrors plainTextTitle()'s whitespace handling so Description/Caption
+// behave the same way a multi-line Notion title does.
+function collapseWhitespace(s) {
+	return s.replace(/\s+/g, ' ').trim();
+}
+
+export function plainTextDescription(page) {
+	return collapseWhitespace(richTextToPlainText(page.properties?.Description?.rich_text));
+}
+
+// Distinct from an image block's own Notion caption (which feeds `alt` —
+// see fetchContentAndImages()): this is the page-level `Caption` property,
+// which becomes the post's frontmatter `caption` field. content.config.ts
+// declares `caption` with `.min(1)` — an empty string fails the Astro
+// build, not just a missing key — so callers must omit the frontmatter key
+// entirely when this returns ''.
+export function plainTextCaption(page) {
+	return collapseWhitespace(richTextToPlainText(page.properties?.Caption?.rich_text));
+}
+
+// Notion auto-creates new multi-select options on write with no
+// case-insensitive dedup against existing ones ("react" and "React" become
+// two separate options) — this is a known limitation, not handled here.
+export function extractTags(page) {
+	return (page.properties?.Tags?.multi_select ?? []).map(option => option.name.trim());
+}
+
 // Plain-text extraction with no Markdown formatting applied — required for
 // code block contents (where backticks/bold/link syntax would corrupt the
 // code or break fence structure) and for any value going into GitHub
@@ -405,9 +433,17 @@ async function main() {
 		const frontmatter = {
 			title,
 			pubDate: `${utcDate}T00:00:00.000Z`,
-			tags: [],
+			tags: extractTags(page),
 			published: false,
 		};
+		const description = plainTextDescription(page);
+		if (description) {
+			frontmatter.description = description;
+		}
+		const caption = plainTextCaption(page);
+		if (caption) {
+			frontmatter.caption = caption;
+		}
 		if (images.length > 0) {
 			frontmatter.image = `./${images[0].name}`;
 			frontmatter.alt = images[0].alt;
