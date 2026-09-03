@@ -101,13 +101,32 @@ function richTextToPlainText(richText) {
 	return (richText ?? []).map(t => t.plain_text).join('');
 }
 
+// Notion link hrefs are untrusted external input — same rationale as
+// safeHttpUrl() in src/components/Webmentions.astro: reject anything that
+// isn't http(s) so a "javascript:"/"data:" URL can't be emitted into a
+// generated post. Notion hrefs are always absolute (not repo-relative), so
+// an http(s)-only allowlist doesn't risk breaking valid relative links.
+function safeHttpUrl(url) {
+	try {
+		const parsed = new URL(url);
+		return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+	} catch {
+		return null;
+	}
+}
+
 function richTextToMarkdown(richText) {
 	return (richText ?? []).map(t => {
 		let s = t.plain_text;
 		if (t.annotations?.code) s = `\`${s}\``;
 		if (t.annotations?.bold) s = `**${s}**`;
 		if (t.annotations?.italic) s = `*${s}*`;
-		if (t.href) s = `[${s}](${t.href})`;
+		if (t.href) {
+			const safeHref = safeHttpUrl(t.href);
+			// Escape `]` in the link text so it can't prematurely close the
+			// Markdown link-text slot and corrupt the surrounding syntax.
+			if (safeHref) s = `[${s.replace(/\]/g, '\\]')}](${safeHref})`;
+		}
 		return s;
 	}).join('');
 }
@@ -342,7 +361,10 @@ async function main() {
 		console.log(`Created ${indexPath}`);
 	});
 
-	const siteUrl = 'https://kyle.skrinak.com';
+	// SITE_URL override, production default — same pattern as
+	// scripts/send-webmentions.mjs, so the canonical domain stays
+	// single-sourced if it ever changes.
+	const siteUrl = (process.env.SITE_URL || 'https://kyle.skrinak.com/').replace(/\/+$/, '');
 	const postUrl = `${siteUrl}/posts/${slug}/`;
 	await writeOutput('post-url', postUrl);
 

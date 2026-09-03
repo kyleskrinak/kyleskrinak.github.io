@@ -47,6 +47,8 @@ This creates the directory, writes `index.md` with a minimal frontmatter stub (`
 
 Posts can also start as drafts in the Notion "Blog Backlog" database instead of a local scaffold. Use `npm run new-post` for a post you're writing directly in the editor; use Notion when you want to draft away from the repo (e.g. on mobile) and let automation open the PR for you.
 
+The repo's `.mcp.json` registers the hosted Notion MCP server so an editor/agent working in this repo can browse and query the Blog Backlog database directly — it's contributor tooling, not something the migration workflow or scripts depend on.
+
 **Workflow:**
 
 1. Draft the post as a page in the Blog Backlog database. Content, headings, code blocks, quotes, dividers, and images are all supported.

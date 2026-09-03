@@ -85,7 +85,10 @@ jobs:
               state: "open",
               per_page: 100,
             });
-            const existing = openIssues.find((issue) => issue.title === title);
+            // issues.listForRepo returns both issues and pull requests;
+            // exclude PRs so a same-titled PR isn't mistaken for the
+            // tracking issue and commented on instead.
+            const existing = openIssues.find((issue) => !issue.pull_request && issue.title === title);
 
             if (existing) {
               await github.rest.issues.createComment({

@@ -65,7 +65,11 @@ async function main() {
 	const successMode = opts.url !== null || opts.status !== null;
 	const failureMode = opts.nextAction !== null;
 	if (successMode === failureMode) {
-		console.error('Pass either (--url and --status) or --next-action, not both.');
+		console.error(
+			successMode
+				? 'Pass either (--url and --status) or --next-action, not both.'
+				: 'Pass exactly one mode: (--url and --status) or --next-action.'
+		);
 		console.error(usage());
 		process.exit(2);
 	}
