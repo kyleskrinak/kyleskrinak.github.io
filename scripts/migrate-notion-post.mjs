@@ -167,11 +167,15 @@ export function richTextToMarkdown(richText) {
 		}
 		if (t.href) {
 			const safeHref = safeHttpUrl(t.href);
-			// s is already escaped above (including `]`), so it can't
-			// prematurely close the Markdown link-text slot. Wrap the
-			// destination in angle brackets — CommonMark treats a bare
-			// destination as ending at whitespace or an unbalanced `)`,
-			// both of which a real URL can contain.
+			// s can't prematurely close the Markdown link-text slot either
+			// way: non-code tokens went through escapeMarkdownText() above
+			// (including `]`), and code-annotated tokens are wrapped by
+			// inlineCodeSpan() as a backtick code span — CommonMark parses
+			// code spans as atomic units before matching link brackets, so
+			// a literal `]` inside one is inert. Wrap the destination in
+			// angle brackets — CommonMark treats a bare destination as
+			// ending at whitespace or an unbalanced `)`, both of which a
+			// real URL can contain.
 			if (safeHref) s = `[${s}](<${safeHref}>)`;
 		}
 		return s;
