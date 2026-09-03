@@ -327,7 +327,11 @@ async function main() {
 	await writeOutput('title', title);
 
 	const slugStem = slugifyStr(title);
-	const slug = `${todayUTCDate()}-${slugStem}`;
+	// Capture the UTC date once and reuse it everywhere below — calling
+	// todayUTCDate() again later could return a different day if the run
+	// straddles UTC midnight, desyncing the slug from pubDate/post-url.
+	const utcDate = todayUTCDate();
+	const slug = `${utcDate}-${slugStem}`;
 	if (!SLUG_RE.test(slugStem)) {
 		throw new Error(`Derived slug "${slug}" is invalid after slugifying title "${title}".`);
 	}
@@ -360,7 +364,7 @@ async function main() {
 
 		const frontmatter = {
 			title,
-			pubDate: `${todayUTCDate()}T00:00:00.000Z`,
+			pubDate: `${utcDate}T00:00:00.000Z`,
 			tags: [],
 			published: false,
 		};

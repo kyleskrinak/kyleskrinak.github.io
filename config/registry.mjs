@@ -164,9 +164,10 @@ export const ConfigRegistry = {
     },
   },
 
-  // Documentation only — not enforced by config:validate.mjs, since these
-  // vars are read by standalone Node scripts (scripts/migrate-notion-post.mjs,
-  // scripts/notion-writeback.mjs), never by astro build/dev, and
+  // Documentation only — not part of the astro.config.ts env schema, since
+  // these vars are read by standalone Node scripts (scripts/migrate-notion-post.mjs,
+  // scripts/notion-writeback.mjs), never by astro build/dev. config/validate.mjs
+  // does still enforce their usage via the testEnvVars allowlist, and
   // notion-migrate.yml is intentionally excluded from WORKFLOW_TO_ENV_MAP
   // (it never runs `npm run build:ci`).
   externalServices: {

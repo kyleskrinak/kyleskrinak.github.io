@@ -62,7 +62,7 @@ The repo's `.mcp.json` registers the hosted Notion MCP server so an editor/agent
 **Troubleshooting:**
 
 - A workflow run with no output/no PR is a normal no-op — it means no page had `Status: ready to post` at push time, not a failure.
-- If a page failed to migrate (check for a `Notion migration failed: <title>` GitHub issue, or the page's `Next Action` field), fix the underlying issue and re-trigger the workflow (`workflow_dispatch`, or another push to `develop`). The page is only skipped once it has a non-empty `Post URL` or a merged post directory already exists — clearing `Post URL` is not needed to retry after a failure, only if you want to force a full re-migration of an already-completed page.
+- If a page failed to migrate (check for a `Notion migration failed: <title>` GitHub issue, or the page's `Next Action` field), fix the underlying issue and re-trigger the workflow (`workflow_dispatch`, or another push to `develop`). The page is skipped as a no-op once it has a non-empty `Post URL`, a merged post directory already exists, or an open PR for it already exists (this last case prevents a duplicate PR if a previous run opened one but the Notion write-back step failed) — clearing `Post URL` is not needed to retry after a failure, only if you want to force a full re-migration of an already-completed page.
 
 ## Frontmatter (Metadata)
 
