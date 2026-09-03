@@ -43,6 +43,27 @@ npm run new-post -- 2026-01-20-my-first-astro-post --images ~/Desktop/post-image
 
 This creates the directory, writes `index.md` with a minimal frontmatter stub (`title`, today's UTC `pubDate`, empty `tags`, `published: false`), and — with `--images` — copies/converts images into the post directory and wires the first one in as the hero. See [Image Workflow Guide](./images.md) for details.
 
+## Drafting in Notion
+
+Posts can also start as drafts in the Notion "Blog Backlog" database instead of a local scaffold. Use `npm run new-post` for a post you're writing directly in the editor; use Notion when you want to draft away from the repo (e.g. on mobile) and let automation open the PR for you.
+
+The repo's `.mcp.json` registers the hosted Notion MCP server so an editor/agent working in this repo can browse and query the Blog Backlog database directly — it's contributor tooling, not something the migration workflow or scripts depend on.
+
+**Workflow:**
+
+1. Draft the post as a page in the Blog Backlog database. Content, headings, code blocks, quotes, dividers, and images are all supported.
+2. When ready, set the page's `Status` to `ready to post`.
+3. On the next push to `develop` (or a manual `workflow_dispatch` run), `.github/workflows/notion-migrate.yml` picks up the oldest `ready to post` page, converts it to `src/content/blog/YYYY-MM-DD-slug/index.md`, and opens a PR against `develop`. The page's `Status` is set to `in review` and `Post URL` is filled in with the (future) live URL.
+4. Review the PR like any other: check the converted content, add `:::cards` formatting for images if desired (this is not done automatically — see [Card Grids](#card-grids)), and flip `published: true` when ready.
+5. After the PR merges, manually set the Notion page's `Status` to `posted`. This last step is intentionally manual — the automation never merges PRs or flips `published: true` itself.
+
+**Block conversion:** paragraphs, headings, bulleted/numbered lists, code blocks, quotes, dividers, and images convert automatically. Anything else (tables, embeds, columns, synced blocks) lands as an HTML comment marker (`<!-- MIGRATION: unsupported block "type" omitted -->`) in the generated Markdown — search for `MIGRATION:` in the PR diff and fill those sections in by hand. Nested content (a toggle, callout, or sub-list indented under another block) is not fetched at all — a `<!-- MIGRATION: nested content under this ... block was omitted -->` marker flags it the same way; check the source page in Notion and add it manually.
+
+**Troubleshooting:**
+
+- A workflow run with no output/no PR is a normal no-op — it means no page had `Status: ready to post` at push time, not a failure.
+- If a page failed to migrate (check for a `Notion migration failed: <title>` GitHub issue, or the page's `Next Action` field), fix the underlying issue and re-trigger the workflow (`workflow_dispatch`, or another push to `develop`). The page is skipped as a no-op once it has a non-empty `Post URL`, a merged post directory already exists, or an open PR for it already exists (this last case prevents a duplicate PR if a previous run opened one but the Notion write-back step failed) — clearing `Post URL` is not needed to retry after a failure, only if you want to force a full re-migration of an already-completed page.
+
 ## Frontmatter (Metadata)
 
 Every post needs frontmatter at the top. Copy this template:
@@ -338,7 +359,7 @@ See existing posts for examples of style and tone.
 ---
 
 **Quick checklist before publishing:**
-- [ ] Frontmatter has `title`, `description`, `pubDate`
+- [ ] Frontmatter has `title`, `pubDate` (required); `description` set (recommended, not enforced)
 - [ ] Directory is `src/content/blog/YYYY-MM-DD-slug/`
 - [ ] Images are co-located in the post directory and referenced as `./name.webp`
 - [ ] `alt` is set whenever `image` is set
