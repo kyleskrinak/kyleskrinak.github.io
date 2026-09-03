@@ -101,6 +101,15 @@ function richTextToPlainText(richText) {
 	return (richText ?? []).map(t => t.plain_text).join('');
 }
 
+// A fixed triple-backtick fence breaks if the code itself contains a run of
+// 3+ backticks (the fence would terminate early). Use a fence one backtick
+// longer than the longest backtick run in the content, minimum 3.
+function fenceFor(code) {
+	const runs = code.match(/`+/g) ?? [];
+	const longest = runs.reduce((max, r) => Math.max(max, r.length), 0);
+	return '`'.repeat(Math.max(3, longest + 1));
+}
+
 // Notion link hrefs are untrusted external input — same rationale as
 // safeHttpUrl() in src/components/Webmentions.astro: reject anything that
 // isn't http(s) so a "javascript:"/"data:" URL can't be emitted into a
@@ -125,7 +134,10 @@ function richTextToMarkdown(richText) {
 			const safeHref = safeHttpUrl(t.href);
 			// Escape `]` in the link text so it can't prematurely close the
 			// Markdown link-text slot and corrupt the surrounding syntax.
-			if (safeHref) s = `[${s.replace(/\]/g, '\\]')}](${safeHref})`;
+			// Wrap the destination in angle brackets — CommonMark treats a
+			// bare destination as ending at whitespace or an unbalanced
+			// `)`, both of which a real URL can contain.
+			if (safeHref) s = `[${s.replace(/\]/g, '\\]')}](<${safeHref}>)`;
 		}
 		return s;
 	}).join('');
@@ -198,7 +210,8 @@ async function fetchContentAndImages(notion, pageId) {
 				// richTextToMarkdown() would inject backticks/bold/link
 				// syntax into the code and can break the fence itself.
 				const code = richTextToPlainText(block.code.rich_text);
-				lines.push(`\`\`\`${lang}\n${code}\n\`\`\``);
+				const fence = fenceFor(code);
+				lines.push(`${fence}${lang}\n${code}\n${fence}`);
 				break;
 			}
 			case 'quote':
