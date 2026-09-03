@@ -36,13 +36,13 @@ jobs:
         run: node scripts/migrate-notion-post.mjs
 
       - name: Validate generated post
-        if: steps.migrate.outputs.slug != ''
+        if: steps.migrate.outputs.post-url != ''
         run: |
           npm run check:images
           node scripts/lint-directives.mjs
 
       - name: Open PR
-        if: steps.migrate.outputs.slug != ''
+        if: steps.migrate.outputs.post-url != ''
         id: cpr
         uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
         with:

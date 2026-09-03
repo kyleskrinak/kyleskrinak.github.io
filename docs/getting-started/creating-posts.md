@@ -55,7 +55,7 @@ Posts can also start as drafts in the Notion "Blog Backlog" database instead of 
 4. Review the PR like any other: check the converted content, add `:::cards` formatting for images if desired (this is not done automatically — see [Card Grids](#card-grids)), and flip `published: true` when ready.
 5. After the PR merges, manually set the Notion page's `Status` to `posted`. This last step is intentionally manual — the automation never merges PRs or flips `published: true` itself.
 
-**Block conversion:** paragraphs, headings, bulleted/numbered lists, code blocks, quotes, dividers, and images convert automatically. Anything else (tables, embeds, columns, synced blocks) lands as an HTML comment marker (`<!-- MIGRATION: unsupported block "type" omitted -->`) in the generated Markdown — search for `MIGRATION:` in the PR diff and fill those sections in by hand.
+**Block conversion:** paragraphs, headings, bulleted/numbered lists, code blocks, quotes, dividers, and images convert automatically. Anything else (tables, embeds, columns, synced blocks) lands as an HTML comment marker (`<!-- MIGRATION: unsupported block "type" omitted -->`) in the generated Markdown — search for `MIGRATION:` in the PR diff and fill those sections in by hand. Nested content (a toggle, callout, or sub-list indented under another block) is not fetched at all — a `<!-- MIGRATION: nested content under this ... block was omitted -->` marker flags it the same way; check the source page in Notion and add it manually.
 
 **Troubleshooting:**
 

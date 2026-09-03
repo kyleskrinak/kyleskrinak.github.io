@@ -190,6 +190,14 @@ async function fetchContentAndImages(notion, pageId) {
 				break;
 			}
 		}
+		if (block.has_children) {
+			// Nested children (indented sub-blocks: toggles, nested lists,
+			// callouts, etc.) are never fetched here — fetchAllBlocks only
+			// walks the page's top-level block list — so flag the gap
+			// instead of silently dropping the nested content.
+			lines.push(`<!-- MIGRATION: nested content under this ${type} block was omitted — review in Notion -->`);
+			console.warn(`Block "${type}" has nested children that were not migrated — inserted marker, review manually.`);
+		}
 		lines.push('');
 	}
 
