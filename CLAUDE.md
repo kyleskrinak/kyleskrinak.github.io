@@ -145,6 +145,7 @@ When instructions appear to conflict:
 - **DO NOT** rewrite my narrative voice or prose
 - **DO NOT** "improve" my writing style
 - Your job is to identify problems, not fix my voice
+- No truncated sentence fragments (e.g., "Not misplaced, lost." or "Best guess now: X.") — every sentence needs a subject and a verb, even the short punchy ones
 
 ## Feedback Approach
 Flag logic gaps and weak transitions — explain WHY they're problems. Leave fixing to me. Be specific about locations (paragraph numbers, sections).

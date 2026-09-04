@@ -51,13 +51,15 @@ The repo's `.mcp.json` registers the hosted Notion MCP server so an editor/agent
 
 **Workflow:**
 
-1. Draft the post as a page in the Blog Backlog database. Content, headings, code blocks, quotes, dividers, and images are all supported.
+1. Draft the post as a page in the Blog Backlog database (duplicate the "Blog Post Template" page, or the database's template picker once it's set up, for the right shape). Content, headings, code blocks, quotes, dividers, and images are all supported. Fill in the `Description`, `Tags`, and `Caption` properties alongside the body — they map directly to the post's `description`, `tags`, and `caption` frontmatter fields.
 2. When ready, set the page's `Status` to `ready to post`.
 3. On the next push to `develop` (or a manual `workflow_dispatch` run), `.github/workflows/notion-migrate.yml` picks up the oldest `ready to post` page, converts it to `src/content/blog/YYYY-MM-DD-slug/index.md`, and opens a PR against `develop`. The page's `Status` is set to `in review` and `Post URL` is filled in with the (future) live URL.
 4. Review the PR like any other: check the converted content, add `:::cards` formatting for images if desired (this is not done automatically — see [Card Grids](#card-grids)), and flip `published: true` when ready.
 5. After the PR merges, manually set the Notion page's `Status` to `posted`. This last step is intentionally manual — the automation never merges PRs or flips `published: true` itself.
 
 **Block conversion:** paragraphs, headings, bulleted/numbered lists, code blocks, quotes, dividers, and images convert automatically. Anything else (tables, embeds, columns, synced blocks) lands as an HTML comment marker (`<!-- MIGRATION: unsupported block "type" omitted -->`) in the generated Markdown — search for `MIGRATION:` in the PR diff and fill those sections in by hand. Nested content (a toggle, callout, or sub-list indented under another block) is not fetched at all — a `<!-- MIGRATION: nested content under this ... block was omitted -->` marker flags it the same way; check the source page in Notion and add it manually.
+
+**Frontmatter mapping:** `Description`, `Tags`, and `Caption` are Notion properties you fill in directly. `pubDate` is always the migration date (not editorial — there's no property for it), `alt` comes from the first image block's own Notion caption, and `image` is that same first image — none of these three are typed into a property.
 
 **Troubleshooting:**
 

@@ -4,6 +4,9 @@ import {
   richTextToMarkdown,
   richTextToPlainText,
   plainTextTitle,
+  plainTextDescription,
+  plainTextCaption,
+  extractTags,
   fenceFor,
   inlineCodeSpan,
   safeHttpUrl,
@@ -130,6 +133,47 @@ describe('plainTextTitle', () => {
 
   it('returns an empty string when the title property is missing', () => {
     assert.equal(plainTextTitle({ properties: {} }), '');
+  });
+});
+
+describe('plainTextDescription', () => {
+  it('collapses whitespace/trims, like plainTextTitle', () => {
+    const page = { properties: { Description: { rich_text: [{ plain_text: '  A summary\nacross lines  ' }] } } };
+    assert.equal(plainTextDescription(page), 'A summary across lines');
+  });
+
+  it('returns an empty string when the property is missing', () => {
+    assert.equal(plainTextDescription({ properties: {} }), '');
+  });
+});
+
+describe('plainTextCaption', () => {
+  it('collapses whitespace/trims, like plainTextTitle', () => {
+    const page = { properties: { Caption: { rich_text: [{ plain_text: '  Photo by A. Uthor  ' }] } } };
+    assert.equal(plainTextCaption(page), 'Photo by A. Uthor');
+  });
+
+  it('returns an empty string when the property is missing', () => {
+    assert.equal(plainTextCaption({ properties: {} }), '');
+  });
+
+  it('returns an empty string for a whitespace-only property, not a non-empty string', () => {
+    // content.config.ts declares caption with .min(1) — callers must treat
+    // this the same as "missing" and omit the frontmatter key, or the
+    // Astro build fails on an empty string.
+    const page = { properties: { Caption: { rich_text: [{ plain_text: '   \n  ' }] } } };
+    assert.equal(plainTextCaption(page), '');
+  });
+});
+
+describe('extractTags', () => {
+  it('maps multi_select options to trimmed name strings', () => {
+    const page = { properties: { Tags: { multi_select: [{ name: ' react ' }, { name: 'astro' }] } } };
+    assert.deepEqual(extractTags(page), ['react', 'astro']);
+  });
+
+  it('returns an empty array when the property is missing', () => {
+    assert.deepEqual(extractTags({ properties: {} }), []);
   });
 });
 
