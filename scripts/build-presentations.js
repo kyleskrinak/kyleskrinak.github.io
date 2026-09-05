@@ -985,7 +985,7 @@ function generateHtml(title, slides, notes, outputName) {
             lines.push('});');
             lines.push('setInterval(tick, 1000);');
             lines.push('update();');
-            lines.push('<' + '/script></body></html>');
+            lines.push('</scr' + 'ipt></body></html>');
             return lines.join('\\n');
         }
 

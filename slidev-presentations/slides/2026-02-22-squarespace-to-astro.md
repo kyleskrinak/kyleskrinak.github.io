@@ -15,7 +15,7 @@ This is a case study in applying disciplined project management to an AI-acceler
 ---
 
 <div style="text-align: center;">
-  <img src="/assets/images/2026-03-02-squarespace-to-cf-pages.webp" alt="Squarespace to Cloudflare Pages migration workflow" style="max-width: 90%; height: auto; margin: 0 auto; display: block;">
+  <img src="/presentations/assets/2026-03-02-squarespace-to-cf-pages.webp" alt="Squarespace to Cloudflare Pages migration workflow" style="max-width: 90%; height: auto; margin: 0 auto; display: block;">
   <p style="margin-top: 1rem; font-style: italic; color: #222; font-size: 1.1em;">original site — migrated site</p>
 </div>
 
