@@ -49,3 +49,6 @@ public/presentations-archive.pdf
 
 # Webmention send log, pulled from the webmentions-sent release during deploys
 .webmention-state/
+
+# CloudFront function rollback snapshots (timestamped, pulled from LIVE)
+infra/cloudfront/.rollback/
