@@ -160,6 +160,25 @@ export const ConfigRegistry = {
         AWS_REGION: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
         AWS_S3_BUCKET: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' },
         AWS_CLOUDFRONT_DISTRIBUTION_ID: { value: 'required', source: 'github-var', location: '.github/workflows/production-deploy.yml' }
+      },
+      // Deliberately a sibling of `variables`, not a member of it: validate.mjs
+      // cross-checks every key under `variables` against `vars.*` usage in the
+      // workflow, and these are not workflow variables. The function is shipped
+      // by hand from a developer machine, not by production-deploy.yml.
+      edgeFunction: {
+        name: 'Redirect_Trailing_Slash',
+        distributionId: 'E1YF7GVLAW8XON',
+        eventType: 'viewer-request',
+        runtime: 'cloudfront-js-1.0',
+        source: 'infra/cloudfront/redirect-trailing-slash.js',
+        testCases: 'infra/cloudfront/test-cases.json',
+        deployWith: 'infra/cloudfront/deploy.sh (add --publish to promote DEVELOPMENT to LIVE)',
+        responsibilities: [
+          '301 extensionless paths to the canonical trailing-slash form',
+          'rewrite trailing-slash paths to index.html for the S3 origin',
+          '301 legacy Jekyll and pre-rename URLs to their current locations'
+        ],
+        notes: 'Vendored into the repo so the function is not console-only. CloudFront allows one function per event type, so legacy redirects live inside this function rather than a second one. Published source is capped at 10 KB including comments; deploy.sh enforces that before staging. Runs ahead of the cache, so publishing takes effect with no invalidation.'
       }
     },
   },

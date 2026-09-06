@@ -164,6 +164,111 @@ async function main() {
       ]);
     });
 
+    // 4d. Regression guard for the phantom same-origin URLs this book used to
+    // emit. Three print rules can split a string mid-word: the generated
+    // `::after` URL and `.print-embed-fallback .url` both set
+    // `word-break: break-all`, and `pre` sets `word-wrap: break-word`. A
+    // same-origin URL reaching any of them can print as a fragment such as
+    // `https://kyle.skrinak.com/posts/2026-02-02-fun-at-scal`, which Google
+    // extracts from the PDF and crawls as a real page, then reports as a 404.
+    //
+    // The rule is read back out of the live stylesheet rather than restated
+    // here, so this cannot drift from archive-book.astro: the selector that
+    // decides what prints is the selector the guard tests, and the same-origin
+    // hosts come from that selector's own :not() exclusions.
+    //
+    // Ordinary prose is deliberately not scanned. Without a mid-word break rule
+    // a long URL wraps intact, and an intact same-origin URL is a real page
+    // rather than a phantom.
+    const guard = await page.evaluate(() => {
+      const printRules = [];
+      // Recursive: the rule sits at the top level today, but wrapping it in
+      // `@media print` is the obvious future refactor of a print stylesheet,
+      // and a flat scan would quietly stop finding it.
+      const collect = (rules) => {
+        for (const rule of rules) {
+          if (rule.style && (rule.style.content || "").includes("attr(href)")) {
+            printRules.push(rule);
+          }
+          if (rule.cssRules) collect(rule.cssRules); // @media, @supports, nesting
+        }
+      };
+      for (const sheet of document.styleSheets) {
+        try {
+          collect(sheet.cssRules);
+        } catch {
+          continue; // cross-origin sheet, not ours
+        }
+      }
+      // Fail loudly rather than pass vacuously: a guard that finds nothing to
+      // check is worse than no guard, because it reports success either way.
+      if (printRules.length === 0) {
+        throw new Error(
+          'no printed-URL rule found in the page stylesheet. Did the `content: " (" attr(href) ")"` rule in archive-book.astro move?'
+        );
+      }
+
+      const hosts = new Set();
+      for (const rule of printRules) {
+        const exclusions = rule.selectorText.matchAll(/:not\(\[href\^?=["']https?:\/\/([^"'\/?#]+)/g);
+        for (const m of exclusions) hosts.add(m[1]);
+      }
+      if (hosts.size === 0) {
+        throw new Error(
+          "the printed-URL rule excludes no same-origin host, so every internal link will print its URL and truncate. This is the original defect."
+        );
+      }
+
+      // The host must run out at this exact point: the next character cannot be
+      // one a hostname could continue with. That is what stops a lookalike such
+      // as kyle.skrinak.com.example or kyle.skrinak.computer from counting as
+      // same-origin, and requiring the scheme immediately before the host stops
+      // an unrelated host like notkyle.skrinak.com matching as a substring.
+      // Case-insensitive on purpose: CSS attribute selectors match the href
+      // case-sensitively, so an uppercase host slips past the exclusion above
+      // and does print. That is a leak worth failing on, not one to mirror.
+      const escaped = [...hosts].map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      const sameOrigin = new RegExp(`https?://(?:${escaped.join("|")})(?![a-z0-9.-])`, "i");
+
+      const findings = [];
+      const scan = (text, where) => {
+        const value = (text || "").trim();
+        if (sameOrigin.test(value)) findings.push({ where, text: value.slice(0, 160) });
+      };
+
+      // (a) The URLs the print CSS generates. getComputedStyle resolves
+      // attr(href), so this is the literal string that reaches the page.
+      for (const rule of printRules) {
+        // Read the pseudo-element the rule actually targets. Stripping ::before
+        // from the selector while only ever reading ::after would silently scan
+        // the wrong side of the element.
+        const pseudo = /::before\b/.test(rule.selectorText) ? "::before" : "::after";
+        const selector = rule.selectorText.replace(/::(after|before)\b/g, "");
+        for (const el of document.querySelectorAll(selector)) {
+          scan(getComputedStyle(el, pseudo).content, `printed URL on <a href="${el.getAttribute("href")}">`);
+        }
+      }
+      // (b) The embed fallbacks this script substitutes at step 4a.
+      for (const el of document.querySelectorAll(".print-embed-fallback .url")) {
+        scan(el.textContent, "embed fallback URL");
+      }
+      // (c) Code blocks, which break mid-token once one overruns the column.
+      for (const el of document.querySelectorAll("pre")) {
+        scan(el.textContent, "code block");
+      }
+      return { findings, hosts: [...hosts] };
+    });
+
+    if (guard.findings.length > 0) {
+      const detail = guard.findings.map(f => `    \u00b7 ${f.where}\n      ${f.text}`).join("\n");
+      throw new Error(
+        `${guard.findings.length} same-origin URL(s) would print into the PDF, where they can ` +
+          `truncate mid-word into phantom URLs that Google crawls and reports as 404s:\n${detail}\n` +
+          `  same-origin hosts checked: ${guard.hosts.join(", ")}`
+      );
+    }
+    console.log(`  \u00b7 phantom-URL guard: clean (${guard.hosts.join(", ")})`);
+
     // 5. Emit the PDF. preferCSSPageSize honours the page's @page 6x9in rule.
     await mkdir(dirname(outputPath), { recursive: true });
     await page.pdf({

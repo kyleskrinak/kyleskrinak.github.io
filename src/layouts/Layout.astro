@@ -136,7 +136,7 @@ const structuredData = {
     <script
       type="application/ld+json"
       is:inline
-      set:html={JSON.stringify(structuredData)}
+      set:html={JSON.stringify(structuredData).replace(/</g, "\\u003c")}
     />
 
     <!-- Enable RSS feed auto-discovery  -->

@@ -1,0 +1,53 @@
+[
+  { "uri": "/wohd/",
+    "expect": { "status": 301, "location": "/presentations/wohd.html" },
+    "why": "mapped legacy URL, canonical slash form" },
+
+  { "uri": "/wohd",
+    "expect": { "status": 301, "location": "/presentations/wohd.html" },
+    "why": "mapped legacy URL, non-slash form must reach the target in ONE hop, not bounce through the trailing-slash 301 first" },
+
+  { "uri": "/pages/my-low-carb.html",
+    "expect": { "status": 301, "location": "/lchf/" },
+    "why": "dotted path: skips the extensionless branch entirely, so it needs an exact-match entry or it 404s" },
+
+  { "uri": "/personal%20productivity/vim-for-writers/",
+    "expect": { "status": 301, "location": "/posts/2017-02-09-vim-for-writers/" },
+    "why": "request.uri arrives percent-encoded; the map is keyed in %20 form" },
+
+  { "uri": "/personal%20productivity/first-blog-post",
+    "expect": { "status": 301, "location": "/posts/2016-10-31-first-blog-post/" },
+    "why": "percent-encoded AND non-slash: both lookups must compose" },
+
+  { "uri": "/posts/2018-04-09-drupalcon-nashville-2018-04-09-2018-higher-ed-summit-day/",
+    "expect": { "status": 301, "location": "/posts/2018-04-09-drupalcon-nashville-higher-ed-summit-day/" },
+    "why": "repeated-date slug renamed in bcc0768; the exact legacy slug came from git history, not reconstruction" },
+
+  { "uri": "/year-archive/",
+    "expect": { "status": 301, "location": "/archives/" },
+    "why": "Jekyll listing page -> the only indexable listing page" },
+
+  { "uri": "/posts/2022-05-04-wohd/",
+    "expect": { "passthrough": "/posts/2022-05-04-wohd/index.html" },
+    "why": "CONTROL: a real post must still be rewritten to index.html, not caught by the map" },
+
+  { "uri": "/about",
+    "expect": { "status": 301, "location": "/about/" },
+    "why": "CONTROL: pre-existing trailing-slash 301 must survive" },
+
+  { "uri": "/about/",
+    "expect": { "passthrough": "/about/index.html" },
+    "why": "CONTROL: pre-existing index.html rewrite must survive" },
+
+  { "uri": "/",
+    "expect": { "passthrough": "/" },
+    "why": "CONTROL: root must fall through untouched to DefaultRootObject" },
+
+  { "uri": "/favicon.ico",
+    "expect": { "passthrough": "/favicon.ico" },
+    "why": "CONTROL: dotted asset path must pass through unmodified" },
+
+  { "uri": "/constructor",
+    "expect": { "status": 301, "location": "/constructor/" },
+    "why": "CONTROL: prototype-chain key must NOT resolve as a map hit; it should fall through to the ordinary trailing-slash 301" }
+]
