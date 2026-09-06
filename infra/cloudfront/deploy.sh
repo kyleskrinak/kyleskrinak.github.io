@@ -95,8 +95,18 @@ do_verify() {
     status_want=$(jq -r ".[$i].expect.status // \"\"" "$CASES")
     loc_want=$(jq -r ".[$i].expect.location // \"\"" "$CASES")
 
+    # The `|| true` is load-bearing, and so is the `echo`. This subshell inherits
+    # `set -e` from the top of the file, so an unreachable host (curl exits 6 for
+    # DNS, 7 for refused, 28 for timeout) would kill the subshell before `echo`
+    # appended the newline. `read` would then reach EOF mid-line, return 1, and
+    # trip `set -e` in this function -- aborting the whole run at the first
+    # unreachable case rather than reporting it. curl still writes its -w line on
+    # a failed transfer, so the case lands as a MISS with code 000, which is what
+    # a read-only observer should do. `${code:-000}` covers a curl killed before
+    # it wrote anything at all.
     read -r code loc < <(curl -sS -o /dev/null --path-as-is --max-time 20 \
-        -w '%{http_code} %{redirect_url}' "${SITE_ORIGIN}${uri}"; echo)
+        -w '%{http_code} %{redirect_url}' "${SITE_ORIGIN}${uri}" || true; echo)
+    code=${code:-000}
 
     if [ -n "$status_want" ]; then
       loc_path="${loc#"$SITE_ORIGIN"}"
