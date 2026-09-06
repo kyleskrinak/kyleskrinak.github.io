@@ -166,17 +166,52 @@ test.describe('Sitemap Validation', () => {
 			});
 		});
 
-		test('all URLs have lastmod dates', async () => {
-			const lastmodMatches = sitemapContent.matchAll(/<lastmod>(.*?)<\/lastmod>/g);
-			const lastmodDates = Array.from(lastmodMatches, match => match[1]);
+		test('posts carry a real lastmod; other entries omit it', async () => {
+			// Parsed per <url> block rather than by counting tags document-wide.
+			// A document-wide count cannot tell "every post declares its own date"
+			// apart from "every URL declares the same build date" — which is
+			// exactly the defect this sitemap used to have, and which a bare
+			// count assertion would happily keep passing.
+			const entries = Array.from(
+				sitemapContent.matchAll(/<url>([\s\S]*?)<\/url>/g),
+				match => ({
+					loc: match[1].match(/<loc>(.*?)<\/loc>/)?.[1] ?? '',
+					lastmod: match[1].match(/<lastmod>(.*?)<\/lastmod>/)?.[1],
+				})
+			);
 
-			// Should have same number of lastmod tags as URLs
-			expect(lastmodDates.length).toBe(sitemapUrls.length);
+			expect(entries.length).toBe(sitemapUrls.length);
 
-			// All dates should be in YYYY-MM-DD format
-			lastmodDates.forEach(date => {
-				expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+			const isPost = (loc: string) => new URL(loc).pathname.startsWith('/posts/');
+			const posts = entries.filter(entry => isPost(entry.loc));
+			const others = entries.filter(entry => !isPost(entry.loc));
+
+			expect(posts.length).toBeGreaterThan(0);
+
+			// Posts draw lastmod from frontmatter (updatedDate ?? pubDate).
+			posts.forEach(({ loc, lastmod }) => {
+				expect(lastmod, `Expected ${loc} to carry a lastmod`).toBeDefined();
+				expect(lastmod).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 			});
+
+			// Static pages, presentation decks and the archive PDFs have no
+			// per-entry modification date to draw on. Omitting the element is
+			// valid per the sitemaps.org schema and is preferred over stamping
+			// the build date, which tells crawlers that every URL changes on
+			// every deploy and so carries no signal about what actually did.
+			others.forEach(({ loc, lastmod }) => {
+				expect(lastmod, `Expected ${loc} to omit lastmod`).toBeUndefined();
+			});
+
+			// The build-date regression has a distinct signature: every post
+			// sharing one value. Assert against it directly.
+			if (posts.length > 1) {
+				const distinct = new Set(posts.map(post => post.lastmod));
+				expect(
+					distinct.size,
+					'All posts share one lastmod — build-date regression'
+				).toBeGreaterThan(1);
+			}
 		});
 	});
 
