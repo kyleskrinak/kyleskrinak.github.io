@@ -72,9 +72,25 @@ const title = `${SITE.author} — Collected Writing`;
 // Interpolated rather than static because SITE.website follows SITE_URL, which
 // differs between staging and production builds. Both schemes are excluded in
 // case older content links over http.
+//
+// Each exclusion pins the character after the host to a real URL delimiter
+// rather than matching the bare host as a prefix. A bare prefix would also
+// swallow lookalike external hosts such as https://kyle.skrinak.com.example/,
+// whose URLs SHOULD print. The exact-match clause is not decorative: content
+// links to the bare origin with no path, which a delimiter-only match would
+// start printing and truncating.
 const siteHost = SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+const sameOriginExclusion = ["https", "http"]
+  .flatMap((scheme) => [
+    `[href^="${scheme}://${siteHost}/"]`,
+    `[href^="${scheme}://${siteHost}?"]`,
+    `[href^="${scheme}://${siteHost}#"]`,
+    `[href="${scheme}://${siteHost}"]`,
+  ])
+  .map((selector) => `:not(${selector})`)
+  .join("");
 const printedUrlCss = `
-      .chapter a[href^="http"]:not(.url-in-text):not([href^="https://${siteHost}"]):not([href^="http://${siteHost}"])::after {
+      .chapter a[href^="http"]:not(.url-in-text)${sameOriginExclusion}::after {
         content: " (" attr(href) ")";
         font-size: 9pt;
         color: #1a4d8f;
