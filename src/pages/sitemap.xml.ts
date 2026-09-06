@@ -45,7 +45,12 @@ const XML_ENTITIES: Record<string, string> = {
 const escapeXml = (value: string) =>
   value.replace(/[&<>"']/g, char => XML_ENTITIES[char]);
 
-/** W3C datetime, date-only precision — what sitemaps.org expects for `lastmod`. */
+/**
+ * W3C datetime truncated to day precision. The sitemaps.org schema accepts a full
+ * datetime for `lastmod`; day precision is a deliberate choice rather than a
+ * requirement. A post's frontmatter time-of-day tells a crawler nothing it can act
+ * on, and a coarser value avoids implying churn finer than the content actually has.
+ */
 const isoDay = (date: Date) => date.toISOString().split("T")[0];
 
 type SitemapEntry = { path: string; lastmod?: string };
