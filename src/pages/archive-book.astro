@@ -70,8 +70,8 @@ const title = `${SITE.author} — Collected Writing`;
 // live PDF link annotation, so digital readers lose nothing.
 //
 // Interpolated rather than static because SITE.website follows SITE_URL, which
-// differs between staging and production builds. Both schemes are excluded in
-// case older content links over http.
+// every build workflow sets to the production origin but a local build can
+// override. Both schemes are excluded in case older content links over http.
 //
 // Each exclusion pins the character after the host to a real URL delimiter
 // rather than matching the bare host as a prefix. A bare prefix would also
