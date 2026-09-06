@@ -5,9 +5,9 @@
  * Runtime:      cloudfront-js-1.0
  *
  * THIS FILE IS THE SOURCE OF TRUTH. AWS holds a deployed copy; edit here and
- * ship with ./deploy.sh, never through the console. Before this file existed
- * the function lived only in AWS, which broke the project's single-source-of-
- * truth rule for configuration.
+ * ship with ./infra/cloudfront/deploy.sh, never through the console. Before
+ * this file existed the function lived only in AWS, which broke the project's
+ * single-source-of-truth rule for configuration.
  *
  * Runtime constraints (cloudfront-js-1.0 is ES5.1 plus a few ES6 additions):
  *   - No const/let, arrow functions, template literals, Object.entries,
