@@ -44,6 +44,16 @@
  *
  * Every target below was confirmed 200 on production, and every key below was
  * confirmed 404, before this map was written.
+ *
+ * Three later keys are the exception to that 404 rule: /code-presentation/,
+ * /personal/lorraine-barbara-kubik-skrinak/ and
+ * /personal/two-guys-watch-a-burning-house/ answered 200 as meta-refresh stubs
+ * under src/pages/. URL Inspection showed why that 200 was worthless — the
+ * stubs carried `noindex`, so Google dropped the URLs rather than following
+ * them to their canonical, discarding exactly the link equity this map exists
+ * to preserve. The stub files were deleted in the same commit that added these
+ * entries; each target here is the stub's own canonical, so the destination a
+ * visitor reaches is unchanged and only the mechanism differs.
  */
 var LEGACY_REDIRECTS = {
     // Jekyll listing and pagination pages.
@@ -61,11 +71,17 @@ var LEGACY_REDIRECTS = {
     '/drupal/drupalcon-nashville-2018-video-playlist/': '/posts/2018-05-13-drupalcon-nashville-2018-video-playlist/',
     '/in-the-jekyll-garden/': '/posts/2021-04-02-in-the-jekyll-garden/',
 
-    // Presentation shortcut. Points at the deck, not at the post that
-    // announces it, matching the /code-presentation/ stub, which canonicals
-    // to /presentations/code-presentation.html. A deck is the destination in
-    // its own right; it does not need a post as a landing page.
+    // Converted from meta-refresh stubs; see the block comment above. Targets
+    // are the stubs' own canonicals, so the destination is unchanged.
+    '/personal/lorraine-barbara-kubik-skrinak/': '/posts/2019-10-31-lorraine-barbara-kubik-skrinak/',
+    '/personal/two-guys-watch-a-burning-house/': '/posts/2021-01-18-two-guys-watch-a-burning-house/',
+
+    // Presentation shortcuts. Point at the deck, not at the post that announces
+    // it; a deck is a destination in its own right and does not need a post as
+    // a landing page. /code-presentation/ was a stub whose canonical
+    // pointed here.
     '/wohd/': '/presentations/wohd.html',
+    '/code-presentation/': '/presentations/code-presentation.html',
 
     // "personal productivity" category, space percent-encoded as it arrives.
     '/personal%20productivity/first-blog-post/': '/posts/2016-10-31-first-blog-post/',

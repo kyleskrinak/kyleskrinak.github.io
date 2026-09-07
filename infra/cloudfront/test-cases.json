@@ -27,6 +27,22 @@
     "expect": { "status": 301, "location": "/archives/" },
     "why": "Jekyll listing page -> the only indexable listing page" },
 
+  { "uri": "/code-presentation/",
+    "expect": { "status": 301, "location": "/presentations/code-presentation.html" },
+    "why": "converted meta-refresh stub: the stub answered 200 but carried noindex, so Google dropped the URL instead of following it to this canonical" },
+
+  { "uri": "/personal/lorraine-barbara-kubik-skrinak/",
+    "expect": { "status": 301, "location": "/posts/2019-10-31-lorraine-barbara-kubik-skrinak/" },
+    "why": "converted meta-refresh stub; target is the stub's own canonical" },
+
+  { "uri": "/personal/two-guys-watch-a-burning-house",
+    "expect": { "status": 301, "location": "/posts/2021-01-18-two-guys-watch-a-burning-house/" },
+    "why": "converted stub, non-slash form: must reach the target in ONE hop rather than bouncing through the trailing-slash 301 into a path that no longer has a page behind it" },
+
+  { "uri": "/personal/meet-holly/",
+    "expect": { "status": 301, "location": "/posts/2021-01-30-meet-holly/" },
+    "why": "CONTROL: the pre-existing /personal/ entry must be unaffected by the two stub conversions added alongside it" },
+
   { "uri": "/posts/2022-05-04-wohd/",
     "expect": { "passthrough": "/posts/2022-05-04-wohd/index.html" },
     "why": "CONTROL: a real post must still be rewritten to index.html, not caught by the map" },
