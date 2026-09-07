@@ -4,30 +4,8 @@ This document describes the deployment process for the Astro blog migration.
 
 ## Overview
 
-The Astro blog supports two deployment pipelines:
-
-1. **GitHub Pages**: Disaster-recovery fallback, deployed manually via `workflow_dispatch` (plus a quarterly build-only `schedule` dry run)
-2. **Production**: Deployed to AWS S3 + CloudFront on pushes to the `main` branch
-
-## GitHub Pages Disaster-Recovery Fallback
-
-### Setup
-
-No additional setup required. GitHub Pages is automatically configured when you enable it in repository settings.
-
-### Process
-
-1. Manually dispatch `staging-deploy.yml` from `main` (see its header comment for why)
-2. GitHub Actions automatically builds the site
-3. Site is deployed to the GitHub Pages URL
-
-### Access
-
-- URL: `https://kyleskrinak.github.io/`
-
-**⚠️ IMPORTANT**: The GitHub Pages fallback deploys to the root path (not `/astro-blog/`) because `kyleskrinak.github.io` is a GitHub Pages **user site**. User sites must deploy to root - this is a GitHub Pages platform constraint.
-
-See [GitHub Pages Fallback URL Reference](./staging-url-reference.md) for authoritative documentation.
+The Astro blog has one deployment pipeline: the site is deployed to AWS S3 + CloudFront on
+pushes to the `main` branch. That is the only deploy target.
 
 ## AWS Production Deployment
 
@@ -112,7 +90,6 @@ Configure in GitHub repository settings (Settings → Secrets and variables → 
 | Secret Name | Value |
 |-------------|-------|
 | `CLOUDFLARE_TOKEN_PROD` | Cloudflare Web Analytics token (production) |
-| `CLOUDFLARE_TOKEN_STAGING` | Cloudflare Web Analytics token (staging, optional) |
 
 ### Verifying Secrets Configuration
 
@@ -124,7 +101,7 @@ Use the manual **secrets-check.yml** workflow to verify tokens are configured:
 gh workflow run secrets-check.yml
 ```
 
-This workflow checks both staging and production Cloudflare Analytics tokens without exposing their values.
+This workflow checks the production Cloudflare Analytics token without exposing its value.
 
 ### Process
 
@@ -159,7 +136,6 @@ Configure in GitHub repository settings (Settings → Secrets and variables → 
 
 **Analytics Secrets**:
 - `CLOUDFLARE_TOKEN_PROD` - Production Cloudflare Web Analytics token (required for production analytics)
-- `CLOUDFLARE_TOKEN_STAGING` - Staging token (optional, leave blank to disable staging analytics)
 
 **AWS Deployment Variables** (see AWS IAM Setup section above):
 - `AWS_ACCOUNT_ID` - Your AWS account ID

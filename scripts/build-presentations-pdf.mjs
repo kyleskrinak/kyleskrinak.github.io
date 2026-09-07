@@ -25,7 +25,7 @@ import { createServer } from "node:http";
 import { readFile, readdir, mkdir, stat } from "node:fs/promises";
 import { dirname, resolve, join, extname, basename, sep } from "node:path";
 import { chromium } from "@playwright/test";
-import { parseFlags } from "./lib/pdf-helpers.mjs";
+import { parseFlags, resolveSiteUrl, rewriteToProductionUrl } from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
 const PUBLIC_DIR = join(ROOT, "public");
@@ -237,6 +237,61 @@ async function main() {
         new Promise(r => setTimeout(r, 15000)),
       ]);
     });
+
+    // 2b. Point every deck link at the public site.
+    //
+    // Two things are wrong with these links as authored, and one base cannot fix
+    // both. The combined document is assembled at the server root, so the <base>
+    // above resolves a deck-relative `other-deck.html` to `<origin>/other-deck.html`
+    // -- dropping the /presentations/ directory the decks are actually served
+    // from -- and the origin it resolves against is an ephemeral local port that
+    // means nothing to a reader. Swapping the <base> to the production URL
+    // outright would fix both at once, but it also resolves the table of
+    // contents' bare `#deck-N` fragments against that URL, turning intra-PDF
+    // navigation that currently works into external links. Rewriting per anchor
+    // lets fragments be left alone.
+    //
+    // Runs after the image settling above: the <base> still has to point at the
+    // local server while assets load.
+    const siteUrl = resolveSiteUrl();
+    const rewriteOptions = {
+      localDocBase: `${baseUrl}/`,
+      prodDocBase: `${siteUrl}/presentations/`,
+      localOrigins: [baseUrl],
+    };
+    const authored = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"), (a, index) => ({
+        index,
+        href: a.getAttribute("href"),
+      }))
+    );
+    if (authored.length === 0) {
+      throw new Error(
+        "no anchors found in the combined deck document. Either extraction returned empty decks or the markup changed; rewriting and guarding both silently pass on an empty set."
+      );
+    }
+    const rewrites = authored
+      .map(({ index, href }) => ({ index, href: rewriteToProductionUrl(href, rewriteOptions) }))
+      .filter(entry => entry.href !== null);
+    await page.evaluate(entries => {
+      const anchors = document.querySelectorAll("a[href]");
+      for (const { index, href } of entries) anchors[index].setAttribute("href", href);
+    }, rewrites);
+
+    // Re-run the same decision over the rewritten document: anything still
+    // eligible is something the rewrite failed to correct. Idempotence is the
+    // assertion, which reuses the tested function rather than restating it.
+    const remaining = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"), a => a.getAttribute("href"))
+    );
+    const missed = remaining.filter(href => rewriteToProductionUrl(href, rewriteOptions) !== null);
+    if (missed.length > 0) {
+      throw new Error(
+        `${missed.length} link(s) still point at the local server after rewriting, and would ship ` +
+          `as dead URLs:\n${missed.map(h => `    · ${h}`).join("\n")}`
+      );
+    }
+    console.log(`  · rewrote ${rewrites.length} local link(s) to ${siteUrl}/presentations/`);
 
     // 3. Print.
     await mkdir(dirname(outputPath), { recursive: true });

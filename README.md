@@ -6,9 +6,8 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 ![Astro](https://img.shields.io/badge/Astro-purple?style=for-the-badge&logo=astro&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-**Live Sites**:
+**Live Site**:
 - 🚀 [Production](https://kyle.skrinak.com/) - Main blog
-- 🧪 [Fallback](https://kyleskrinak.github.io/) - Disaster-recovery fallback (GitHub Pages user site, root path); normally shows a redirect stub to production, publishing is manual (a quarterly scheduled dry run never deploys)
 
 ## ✨ Features
 

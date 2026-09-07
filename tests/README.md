@@ -18,14 +18,6 @@ npm run dev
 npm run test:console
 ```
 
-### Running Against the GitHub Pages Fallback
-
-```bash
-npm run test:staging -- --project=console
-```
-
-This targets the GitHub Pages disaster-recovery fallback (`kyleskrinak.github.io`). It serves live content only after a manual `workflow_dispatch` with `mode=full-fallback` has run, and keeps serving it until a `mode=stub` dispatch overwrites it — it does not revert automatically when the workflow finishes. Otherwise it's a redirect stub, and this will just report on the stub.
-
 ### Running Against Production
 
 ```bash
@@ -65,13 +57,9 @@ npm run test:production -- --project=console
 
 ```bash
 # Analytics tests require a remote URL (tests skip on localhost)
-# Use staging or production:
-# Note: kyleskrinak.github.io only serves live content right after a manual
-# workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
-PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
+PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npx playwright test tests/analytics/analytics-privacy.spec.ts
 
-# Or use the convenience scripts:
-npm run test:staging -- --project=analytics
+# Or use the convenience script:
 npm run test:production -- --project=analytics
 ```
 
@@ -110,19 +98,17 @@ When you intentionally change the UI, update the baseline snapshots to match CI'
 npm run test:visual:baseline:docker
 ```
 
-### Running Against the GitHub Pages Fallback
+### Running Against Production
 
 ```bash
-npm run test:staging -- --project=visual-*
+npm run test:production -- --project=visual-*
 ```
-
-Only meaningful after a manual `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy — see the note above under Console Errors.
 
 ## Troubleshooting
 
 ### Test times out
 - **Dev server**: Make sure `npm run dev` is running in another terminal
-- **Fallback/Production**: Check your internet connection
+- **Production**: Check your internet connection
 
 ### Resource not found errors
 - Run `npm run build:ci` first to ensure all assets are built

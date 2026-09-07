@@ -5,13 +5,12 @@
 
 ## Environment Variable Matrix
 
-| Variable | local-develop | staging-gh-fallback | pr-visual-check | main-aws |
-|----------|----------|----------|----------|----------|
-| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
-| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_DEPLOY_ENV` | (fallback: `production`) | `production` ✓ | `production` ✓ | `production` ✓ |
-| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | `required` ✓ | (omitted) | `required` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | (omitted) | `required` ✓ |
+| Variable | local-develop | pr-visual-check | main-aws |
+|----------|----------|----------|----------|
+| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ |
+| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | (omitted) | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ |
 
 ✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
 
@@ -19,15 +18,15 @@
 
 Astro build flags set automatically by the framework (not configurable via workflow env vars):
 
-| Flag | local-develop | staging-gh-fallback | pr-visual-check | main-aws |
-|------|----------|----------|----------|----------|
-| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
+| Flag | local-develop | pr-visual-check | main-aws |
+|------|----------|----------|----------|
+| `import.meta.env.PROD` | `false` | `true` | `true` |
 
 ## Astro Configuration
 
 ### base: `/`
 - Location: astro.config.ts
-- Reason: GitHub Pages user site must deploy to root
+- Reason: Site deploys to the root of kyle.skrinak.com, never to a subpath
 - Impacts: All URLs, Canonical paths, Asset paths
 
 ### trailingSlash: `always`
@@ -54,11 +53,6 @@ Astro build flags set automatically by the framework (not configurable via workf
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.
 
 ## Deployment Infrastructure
-
-### GitHub Pages (disaster-recovery fallback)
-- Platform: GitHub Pages
-- Mechanism: GitHub Actions pages deployment (manual workflow_dispatch, plus a quarterly build-only schedule)
-- Variables: None (uses automatic GITHUB_TOKEN)
 
 ### Production (AWS S3 + CloudFront)
 - Platform: AWS S3 + CloudFront

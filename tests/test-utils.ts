@@ -25,34 +25,10 @@ export const PREVIEW_PORT = 4322;
 
 /**
  * Base URL for tests - defaults to this project's dedicated local preview port.
- * Override with PLAYWRIGHT_TEST_BASE_URL for staging/production testing.
+ * Override with PLAYWRIGHT_TEST_BASE_URL for production testing.
  */
 export const BASE_URL =
   process.env.PLAYWRIGHT_TEST_BASE_URL || `http://localhost:${PREVIEW_PORT}`;
-
-/**
- * Detect staging environment from explicit env vars only.
- * Used by tests to adjust expectations (staging has noindex,nofollow on all pages)
- *
- * `BASE_URL` containing 'github.io' is deliberately NOT used to auto-detect staging:
- * kyleskrinak.github.io is now a manual disaster-recovery fallback (see
- * docs/operations/staging-url-reference.md) that either serves a static redirect
- * stub or, during a `mode=full-fallback` dispatch, an Astro build with
- * `PUBLIC_DEPLOY_ENV=production` — never `staging`. Auto-detecting staging from the
- * URL would make SEO tests assert noindex,nofollow against a deploy that is meant
- * to be indexable.
- *
- * Detection priority:
- * 1. PLAYWRIGHT_DEPLOY_ENV explicitly set to 'staging' (test-side: runs staging-only tests)
- * 2. PUBLIC_DEPLOY_ENV explicitly set to 'staging' (app-side: makes app render staging meta tags)
- *
- * For local staging testing, set both environment variables:
- *   PUBLIC_DEPLOY_ENV=staging (makes app render staging meta tags)
- *   PLAYWRIGHT_DEPLOY_ENV=staging (makes test suite run staging-only tests)
- */
-export const isStaging =
-  process.env.PLAYWRIGHT_DEPLOY_ENV === 'staging' ||
-  process.env.PUBLIC_DEPLOY_ENV === 'staging';
 
 /**
  * Detect if BASE_URL is a local development URL

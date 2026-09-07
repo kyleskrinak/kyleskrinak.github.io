@@ -72,7 +72,7 @@ function cleanVersion(v: string | undefined): string {
       </table>
 
       <p>
-        Disqus comment embeds used to modestly lower Performance and Best Practices — third-party scripts affect Largest Contentful Paint. After a one-month free trial generated no conversation, I decided a paid Disqus license wasn't worth maintaining for a personal blog and removed the integration. SEO scores 100 on the production URL. Running Lighthouse against a staging or preview URL drops that score because those URLs don't match the canonical address the site declares.
+        Disqus comment embeds used to modestly lower Performance and Best Practices — third-party scripts affect Largest Contentful Paint. After a one-month free trial generated no conversation, I decided a paid Disqus license wasn't worth maintaining for a personal blog and removed the integration. SEO scores 100 on the production URL. Running Lighthouse against a preview URL drops that score because those URLs don't match the canonical address the site declares.
       </p>
 
       <p class="text-sm italic opacity-80">
@@ -147,7 +147,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ol>
         <li><strong>develop</strong> — all work lands here first.</li>
-        <li><strong>main</strong> — a pull request from develop to main triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, and runs a visual-regression pass, then the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation. <a href="https://kyleskrinak.github.io">GitHub Pages</a> is kept separately as an on-demand disaster-recovery fallback: it normally serves a small redirect stub pointing back to kyle.skrinak.com, and only publishes the real site if I manually dispatch the fallback workflow — for an actual AWS outage or to verify the fallback still works.</li>
+        <li><strong>main</strong> — a pull request from develop to main triggers a <a href="https://github.com/features/actions">GitHub Actions</a> build pipeline that runs the full build, validates configuration, and runs a visual-regression pass, then the production deploy: Astro build, S3 sync, and a CloudFront cache invalidation.</li>
       </ol>
 
       <p>

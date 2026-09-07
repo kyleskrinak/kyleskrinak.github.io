@@ -17,14 +17,6 @@ const issues = [];
 // the module still loads and validation reports a mismatch rather than crashing.
 const BUILD_ENV_DEFAULT = ConfigRegistry.environments?.['local-develop']?.BUILD_ENV?.value ?? 'production';
 
-// Expected default for PUBLIC_DEPLOY_ENV fallbacks — derived from registry main-aws environment.
-// main-aws is the anchor because PUBLIC_DEPLOY_ENV fallbacks in robots.txt.ts and Layout.astro
-// produce production behavior when the var is absent (no staging banner, indexing allowed).
-// Semantically distinct from BUILD_ENV_DEFAULT: these are deploy-environment indicators,
-// not build-environment selectors. Values happen to match today but may diverge independently.
-// Optional chaining + hardcoded fallback: guards against registry path deletion at load time.
-const DEPLOY_ENV_DEFAULT = ConfigRegistry.environments?.['main-aws']?.PUBLIC_DEPLOY_ENV?.value ?? 'production';
-
 // Read astro.config.ts once at top (used in multiple validations)
 const astroConfigContent = existsSync('astro.config.ts')
   ? readFileSync('astro.config.ts', 'utf-8')
@@ -103,7 +95,6 @@ if (existsSync('src/layouts/Layout.astro')) {
 // Excluded workflows (linkwatch.yml, secrets-check.yml, etc.)
 // are intentionally skipped because they don't perform builds.
 const WORKFLOW_TO_ENV_MAP = {
-  'staging-deploy.yml': 'staging-gh-fallback',
   'production-deploy.yml': 'main-aws',
   'pr-visual-check.yml': 'pr-visual-check'
 };
@@ -455,34 +446,6 @@ if (astroConfigContent) {
     const expectedDefault = BUILD_ENV_DEFAULT;
     if (schemaDefault !== expectedDefault) {
       issues.push(`astro.config.ts BUILD_ENV schema default "${schemaDefault}" should be "${expectedDefault}" (per registry local-develop)`);
-    }
-  }
-}
-
-// Validate robots.txt.ts PUBLIC_DEPLOY_ENV fallback matches expected default
-if (existsSync('src/pages/robots.txt.ts')) {
-  const robotsContent = readFileSync('src/pages/robots.txt.ts', 'utf-8');
-  const fallbackMatch = robotsContent.match(/PUBLIC_DEPLOY_ENV\s*\?\?\s*["']([^"']+)["']/);
-  if (fallbackMatch === null) {
-    issues.push('Failed to extract PUBLIC_DEPLOY_ENV fallback from robots.txt.ts - code format may have changed');
-  } else {
-    const fallbackValue = fallbackMatch[1];
-    if (fallbackValue !== DEPLOY_ENV_DEFAULT) {
-      issues.push(`robots.txt.ts PUBLIC_DEPLOY_ENV fallback "${fallbackValue}" should be "${DEPLOY_ENV_DEFAULT}"`);
-    }
-  }
-}
-
-// Validate Layout.astro PUBLIC_DEPLOY_ENV fallback matches expected default
-if (existsSync('src/layouts/Layout.astro')) {
-  const layoutContent = readFileSync('src/layouts/Layout.astro', 'utf-8');
-  const fallbackMatch = layoutContent.match(/PUBLIC_DEPLOY_ENV\s*\?\?\s*["']([^"']+)["']/);
-  if (fallbackMatch === null) {
-    issues.push('Failed to extract PUBLIC_DEPLOY_ENV fallback from Layout.astro - code format may have changed');
-  } else {
-    const fallbackValue = fallbackMatch[1];
-    if (fallbackValue !== DEPLOY_ENV_DEFAULT) {
-      issues.push(`Layout.astro PUBLIC_DEPLOY_ENV fallback "${fallbackValue}" should be "${DEPLOY_ENV_DEFAULT}"`);
     }
   }
 }

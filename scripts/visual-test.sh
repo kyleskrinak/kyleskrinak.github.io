@@ -4,7 +4,6 @@
 #
 # Usage:
 #   ./scripts/visual-test.sh local              # Test local dev
-#   ./scripts/visual-test.sh staging            # Test staging
 #   ./scripts/visual-test.sh production         # Test production
 #   ./scripts/visual-test.sh baseline           # Create/update baselines from local (guarded; see ALLOW_NATIVE_BASELINE)
 #   ./scripts/visual-test.sh docker             # Test against a container matching CI's OS/fonts
@@ -217,7 +216,7 @@ run_in_docker() {
 # preview-server message. The docker modes do not call it -- their container has
 # its own .astro (see run_in_docker) and its own network namespace, so neither
 # the host's record nor the host's ports have any bearing on them.
-# The staging/production modes set PLAYWRIGHT_TEST_BASE_URL, which makes
+# The production mode sets PLAYWRIGHT_TEST_BASE_URL, which makes
 # playwright.config.ts skip webServer entirely (see its webServer branch), and
 # `compare` starts no server at all.
 case $ENVIRONMENT in
@@ -225,11 +224,6 @@ case $ENVIRONMENT in
     prepare_host_preview_port
     echo "🧪 Running visual tests against LOCAL (http://localhost:$PREVIEW_PORT)"
     npm run test:visual -- "${PLAYWRIGHT_ARGS[@]}"
-    ;;
-
-  staging)
-    echo "🧪 Running visual tests against STAGING (GitHub Pages)"
-    PLAYWRIGHT_TEST_BASE_URL="https://kyleskrinak.github.io" npm run test:visual -- "${PLAYWRIGHT_ARGS[@]}"
     ;;
 
   production)
@@ -288,7 +282,6 @@ case $ENVIRONMENT in
     echo ""
     echo "Usage:"
     echo "  ./scripts/visual-test.sh local              # Test local dev"
-    echo "  ./scripts/visual-test.sh staging            # Test staging (GitHub Pages)"
     echo "  ./scripts/visual-test.sh production         # Test production (kyle.skrinak.com)"
     echo "  ./scripts/visual-test.sh baseline           # Create/update baselines (guarded; see ALLOW_NATIVE_BASELINE)"
     echo "  ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts"

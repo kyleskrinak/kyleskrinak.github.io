@@ -160,7 +160,7 @@ test.describe('Post h-entry', () => {
 
 		const href = await entryUrl.evaluate((el) => (el as HTMLAnchorElement).href);
 		// Path equality always holds: postUrl is built from Astro.site, so only the
-		// origin can differ between the production, staging, and local base URLs.
+		// origin can differ between the production and local base URLs.
 		expect(withSlash(new URL(href).pathname)).toBe(withSlash(new URL(page.url()).pathname));
 
 		const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');

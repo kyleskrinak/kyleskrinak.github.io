@@ -7,6 +7,8 @@ import path from 'node:path';
 import {
 	parsePreviewPort,
 	portIsLive,
+	resolveSiteUrl,
+	rewriteToProductionUrl,
 	startPreview,
 	waitForServer,
 } from '../../scripts/lib/pdf-helpers.mjs';
@@ -188,4 +190,185 @@ describe('a bad port in the environment fails cleanly', () => {
 			assert.doesNotMatch(stderr, /^\s+at /m, 'a stack trace reached the user');
 		});
 	}
+});
+
+/*
+ * resolveSiteUrl / rewriteToProductionUrl
+ *
+ * Chromium writes the resolved absolute URL into every PDF link annotation, so
+ * the origin a page was rendered from ships in the file. These two builders
+ * render against local preview servers, which is how localhost URLs reached
+ * readers (issue #368).
+ */
+
+// What the archive book resolves against locally, and what it should resolve
+// against in the PDF. Same path in both: only the origin is wrong there.
+const ARCHIVE = {
+	localDocBase: 'http://localhost:4324/archive-book/',
+	prodDocBase: 'https://kyle.skrinak.com/archive-book/',
+	localOrigins: ['http://localhost:4324'],
+};
+
+// The combined deck document is assembled at the server root while the decks are
+// served from /presentations/, so the production base carries a path the local
+// one does not. An origin swap alone would not fix these.
+const DECKS = {
+	localDocBase: 'http://127.0.0.1:51245/',
+	prodDocBase: 'https://kyle.skrinak.com/presentations/',
+	localOrigins: ['http://127.0.0.1:51245'],
+};
+
+describe('resolveSiteUrl', () => {
+	it('honours SITE_URL', () => {
+		assert.equal(resolveSiteUrl({ SITE_URL: 'https://staging.example.com/' }), 'https://staging.example.com');
+	});
+
+	it('falls back to the production site when SITE_URL is unset', () => {
+		assert.equal(resolveSiteUrl({}), 'https://kyle.skrinak.com');
+	});
+
+	it('treats a blank SITE_URL as unset, however it was spelled', () => {
+		// An empty value and a whitespace-only one are the same mistake: a .env
+		// line with nothing after the "=", or a CI expression that expanded to
+		// nothing. Both fall back rather than failing the build.
+		assert.equal(resolveSiteUrl({ SITE_URL: '' }), 'https://kyle.skrinak.com');
+		assert.equal(resolveSiteUrl({ SITE_URL: '   ' }), 'https://kyle.skrinak.com');
+		assert.equal(resolveSiteUrl({ SITE_URL: '\t\n' }), 'https://kyle.skrinak.com');
+	});
+
+	it('still trims a real value rather than rejecting it', () => {
+		assert.equal(resolveSiteUrl({ SITE_URL: '  https://example.com/  ' }), 'https://example.com');
+	});
+
+	it('strips trailing slashes so callers can append a path', () => {
+		assert.equal(resolveSiteUrl({ SITE_URL: 'https://kyle.skrinak.com///' }), 'https://kyle.skrinak.com');
+	});
+
+	it('keeps a subdirectory path if one is configured', () => {
+		assert.equal(resolveSiteUrl({ SITE_URL: 'https://example.com/blog/' }), 'https://example.com/blog');
+	});
+
+	it('throws on a value that is not an absolute URL', () => {
+		assert.throws(() => resolveSiteUrl({ SITE_URL: 'kyle.skrinak.com' }), /not a valid absolute URL/);
+	});
+
+	it('rejects schemes that cannot serve a published page', () => {
+		assert.throws(() => resolveSiteUrl({ SITE_URL: 'file:///tmp/site/' }), /must be http or https/);
+		assert.throws(() => resolveSiteUrl({ SITE_URL: 'ftp://example.com/' }), /must be http or https/);
+	});
+});
+
+describe('rewriteToProductionUrl', () => {
+	it('rewrites a root-relative link in the archive book', () => {
+		assert.equal(
+			rewriteToProductionUrl('/posts/2018-10-13-n-1/', ARCHIVE),
+			'https://kyle.skrinak.com/posts/2018-10-13-n-1/'
+		);
+	});
+
+	it('rewrites an absolute localhost link, dropping the preview port', () => {
+		assert.equal(
+			rewriteToProductionUrl('http://localhost:4324/blog-archive.pdf', ARCHIVE),
+			'https://kyle.skrinak.com/blog-archive.pdf'
+		);
+	});
+
+	it('rewrites a protocol-relative local link', () => {
+		assert.equal(
+			rewriteToProductionUrl('//localhost:4324/posts/x/', ARCHIVE),
+			'https://kyle.skrinak.com/posts/x/'
+		);
+	});
+
+	it('restores the /presentations/ prefix a deck-relative link loses', () => {
+		assert.equal(
+			rewriteToProductionUrl('tts-profile-mgmt.html', DECKS),
+			'https://kyle.skrinak.com/presentations/tts-profile-mgmt.html'
+		);
+	});
+
+	it('resolves a deck link that climbs out of /presentations/', () => {
+		assert.equal(
+			rewriteToProductionUrl('../posts/2022-04-07-code-presentation/', DECKS),
+			'https://kyle.skrinak.com/posts/2022-04-07-code-presentation/'
+		);
+	});
+
+	it('preserves query and fragment through the swap', () => {
+		assert.equal(
+			rewriteToProductionUrl('/search/?q=drupal#results', ARCHIVE),
+			'https://kyle.skrinak.com/search/?q=drupal#results'
+		);
+	});
+
+	// The href above is root-relative, so it resolves against the production base
+	// and never reaches the branch that reassembles an already-absolute URL by
+	// hand. That branch needs its own coverage.
+	it('preserves query and fragment on an already-absolute local link', () => {
+		assert.equal(
+			rewriteToProductionUrl('http://localhost:4324/search/?q=drupal#results', ARCHIVE),
+			'https://kyle.skrinak.com/search/?q=drupal#results'
+		);
+	});
+
+	// A path beginning with `//` reads as protocol-relative if it is re-parsed as
+	// a relative reference, which silently swaps the production origin for
+	// whatever the path names. It must stay a path.
+	it('keeps the production origin when the path itself starts with //', () => {
+		assert.equal(
+			rewriteToProductionUrl('http://localhost:4324//evil.example/x', ARCHIVE),
+			'https://kyle.skrinak.com//evil.example/x'
+		);
+	});
+
+	it('leaves a genuinely external link alone', () => {
+		assert.equal(rewriteToProductionUrl('https://www.youtube.com/watch?v=EJo9tPXGPo8', ARCHIVE), null);
+	});
+
+	it('leaves an already-absolute production link alone', () => {
+		assert.equal(rewriteToProductionUrl('https://kyle.skrinak.com/posts/x/', ARCHIVE), null);
+	});
+
+	it('is idempotent: its own output is never rewritten again', () => {
+		const once = rewriteToProductionUrl('/posts/x/', ARCHIVE);
+		assert.equal(rewriteToProductionUrl(once, ARCHIVE), null);
+	});
+
+	it('leaves a bare fragment alone, which Chromium emits as an internal PDF destination', () => {
+		assert.equal(rewriteToProductionUrl('#user-content-fn-1', ARCHIVE), null);
+		assert.equal(rewriteToProductionUrl('#deck-3', DECKS), null);
+	});
+
+	for (const href of ['mailto:trinitywebsupport@duke.edu', 'tel:+19195551212', 'javascript:void(0)', 'data:text/plain,x']) {
+		it(`leaves ${href.split(':')[0]}: alone`, () => {
+			assert.equal(rewriteToProductionUrl(href, ARCHIVE), null);
+		});
+	}
+
+	// A string prefix test would treat every one of these as local. URL.origin
+	// cannot, because the host has already ended by that point.
+	for (const href of [
+		'http://localhost.example.com/x',
+		'http://localhost:4324.example.com/x',
+		'http://127.0.0.1.evil.com/x',
+		'https://notlocalhost:4324/x',
+	]) {
+		it(`does not treat the lookalike host ${href} as local`, () => {
+			assert.equal(rewriteToProductionUrl(href, ARCHIVE), null);
+		});
+	}
+
+	it('does not treat a different local port as local', () => {
+		assert.equal(rewriteToProductionUrl('http://localhost:9999/x', ARCHIVE), null);
+	});
+
+	for (const [label, href] of [['null', null], ['undefined', undefined], ['empty', ''], ['whitespace', '   ']]) {
+		it(`returns null for an ${label} href`, () => {
+			assert.equal(rewriteToProductionUrl(href, ARCHIVE), null);
+		});
+	}
+
+	it('returns null rather than throwing on an unparseable href', () => {
+		assert.equal(rewriteToProductionUrl('http://[unclosed', ARCHIVE), null);
+	});
 });
