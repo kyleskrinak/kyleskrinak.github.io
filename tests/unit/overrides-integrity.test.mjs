@@ -80,20 +80,63 @@ const isAtLeast = (version, floor, label) => {
 	return true;
 };
 
-const overrides = pkg.overrides;
+/**
+ * Derived at module load, so they must not throw on malformed input: a bare
+ * `Object.entries(undefined)` here would crash the file before any test ran,
+ * replacing the deliberate assertion below with an opaque loader error. The raw
+ * values stay available so the first test can still report what was actually wrong.
+ */
+const rawOverrides = pkg.overrides;
+const overrides = rawOverrides && typeof rawOverrides === 'object' ? rawOverrides : {};
+
+const rawLockPackages = lock.packages;
+const lockPackages = rawLockPackages && typeof rawLockPackages === 'object' ? rawLockPackages : {};
 
 /** Entries whose value is a string: a tree-wide pin for that package. */
 const topLevel = Object.entries(overrides).filter(([, value]) => typeof value === 'string');
 
 /** Entries whose value is an object: per-parent exceptions to a tree-wide pin. */
-const nested = Object.entries(overrides).filter(([, value]) => typeof value === 'object');
+const nested = Object.entries(overrides).filter(
+	([, value]) => value && typeof value === 'object' && !Array.isArray(value),
+);
+
+/**
+ * Every place the lockfile resolves `name`, at any depth, as
+ * `{ path, parent, version }`. `parent` is the package the copy is nested under,
+ * or null when it is hoisted to the root `node_modules`.
+ *
+ * Splitting on `/node_modules/` keeps scoped names (`@scope/pkg`) intact, since
+ * their slash is not a nesting boundary.
+ */
+const lockEntriesFor = (name) => {
+	const found = [];
+	for (const [path, entry] of Object.entries(lockPackages)) {
+		if (!path || !entry?.version) continue; // root project entry, or a link/workspace
+		const segments = `/${path}`.split('/node_modules/');
+		if (segments.at(-1) !== name) continue;
+		found.push({
+			path,
+			parent: segments.length > 2 ? segments.at(-2) : null,
+			version: entry.version,
+		});
+	}
+	return found;
+};
 
 test('overrides block is present and non-empty', () => {
 	assert.ok(
-		overrides && typeof overrides === 'object',
+		rawOverrides && typeof rawOverrides === 'object' && !Array.isArray(rawOverrides),
 		'package.json must declare an overrides block -- every entry is an advisory pin',
 	);
 	assert.ok(topLevel.length > 0, 'expected at least one tree-wide override pin');
+});
+
+test('lockfile exposes a package map to check against', () => {
+	assert.ok(
+		rawLockPackages && typeof rawLockPackages === 'object',
+		'package-lock.json has no `packages` map, so no override can be verified against the ' +
+			'resolved tree. Expected lockfileVersion 2 or 3.',
+	);
 });
 
 test('every override sits at or above its advisory floor', () => {
@@ -180,7 +223,7 @@ test('lockfile resolves each nested carve-out to its declared version', () => {
 	for (const [parent, block] of nested) {
 		for (const [name, version] of Object.entries(block)) {
 			const path = `node_modules/${parent}/node_modules/${name}`;
-			const entry = lock.packages[path];
+			const entry = lockPackages[path];
 			assert.ok(
 				entry,
 				`lockfile has no ${path}, so the "${parent}" > "${name}" carve-out did not ` +
@@ -196,15 +239,32 @@ test('lockfile resolves each nested carve-out to its declared version', () => {
 	}
 });
 
-test('lockfile resolves each tree-wide pin to its declared version', () => {
+test('lockfile resolves each tree-wide pin everywhere it is not carved out', () => {
+	// A tree-wide override applies at every depth, so checking only the hoisted
+	// `node_modules/<name>` copy would miss drift in a package that npm placed
+	// solely under a parent -- and would skip the check entirely, silently, for a
+	// package that never hoists.
 	for (const [name, version] of topLevel) {
-		const entry = lock.packages[`node_modules/${name}`];
-		if (!entry) continue; // hoisted elsewhere or not installed at the root
-		assert.equal(
-			entry.version,
-			version,
-			`lockfile resolves node_modules/${name} to ${entry.version}, but package.json ` +
-				`pins it to ${version} -- run \`npm install\` and commit the lockfile.`,
+		const entries = lockEntriesFor(name);
+		assert.ok(
+			entries.length > 0,
+			`package.json pins "${name}" to ${version} but the lockfile resolves it nowhere. ` +
+				'The pin is vestigial -- drop it, and its ADVISORY_FLOORS entry, once the ' +
+				'dependency is genuinely gone.',
 		);
+
+		for (const { path, parent, version: resolved } of entries) {
+			// A nested carve-out is a deliberate exemption from the tree-wide version;
+			// the carve-out tests above own it.
+			if (parent && overrides[parent]?.[name]) continue;
+
+			assert.equal(
+				resolved,
+				version,
+				`lockfile resolves ${path} to ${resolved}, but package.json pins "${name}" to ` +
+					`${version}. Either package.json and package-lock.json disagree -- run ` +
+					'`npm install` -- or this copy needs a deliberate nested carve-out.',
+			);
+		}
 	}
 });
