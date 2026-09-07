@@ -79,7 +79,17 @@ const title = `${SITE.author} — Collected Writing`;
 // whose URLs SHOULD print. The exact-match clause is not decorative: content
 // links to the bare origin with no path, which a delimiter-only match would
 // start printing and truncating.
-const siteHost = SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+// Parsed rather than sliced with regex. The PDF builder reads these exclusions
+// back and stops its host capture at the first "/", so anything but a bare host
+// here makes the two disagree: a SITE_URL carrying a pathname would leave the
+// path in the selector while the builder saw only the host, and every
+// same-origin link would miss its own exclusion and print a truncating URL —
+// the defect the exclusions exist to prevent. Parsing also lowercases the host
+// (CSS attribute selectors are case-sensitive; hosts are not) and normalizes
+// away redundant trailing slashes, which a single .replace(/\/$/) would not.
+// An unparseable SITE.website throws the build rather than emitting selectors
+// that silently match nothing.
+const siteHost = new URL(SITE.website).host;
 const sameOriginExclusion = ["https", "http"]
   .flatMap((scheme) => [
     `[href^="${scheme}://${siteHost}/"]`,
@@ -272,13 +282,13 @@ const printedUrlCss = `
     <section class="cover">
       <h1>{SITE.author}<br />Collected Writing</h1>
       <div class="range">{firstYear}–{lastYear}</div>
-      <div class="site">{SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
+      <div class="site">{siteHost}</div>
     </section>
 
     <section class="colophon">
       <h2>About this book</h2>
       <p>
-        This is a complete archive of the writing published at {SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "")},
+        This is a complete archive of the writing published at {siteHost},
         current as of {currentAsOf}. It contains {posts.length} pieces written between
         {firstYear} and {lastYear}, arranged in the order they were written, oldest first.
       </p>

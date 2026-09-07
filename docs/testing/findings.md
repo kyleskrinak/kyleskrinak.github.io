@@ -3,11 +3,11 @@
 **Date**: 2026-01-20
 **Status**: ✅ Complete - No visual defects found
 
-**⚠️ Note (2026-08-25)**: This report describes the pre-migration deployment model, where GitHub Pages was a continuous staging deploy. Since PR #353, GitHub Pages is a disaster-recovery fallback whose publishing is manual (a quarterly `schedule` trigger also runs but is a build-only dry run that never deploys) and normally serves a redirect stub, not the real site — see [GitHub Pages Fallback URL Reference](../operations/staging-url-reference.md). The "staging" testing steps below (lines under "Staging Comparison" and "Staging Testing") only produce meaningful results after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy — the fallback does not revert automatically when the workflow finishes; these steps are no longer routine pre-launch guidance.
+**⚠️ Note (2026-09-07)**: This report predates the move to AWS S3 + CloudFront as the only deploy target. The numbers are kept for the record, not as guidance.
 
 ## Executive Summary
 
-Visual regression testing comparing local development to staging and production environments revealed **no visual defects**. All environments use the same base path configuration and render identically.
+Visual regression testing comparing local development to production revealed **no visual defects**. Both use the same base path configuration and render identically.
 
 ## Test Results
 
@@ -16,7 +16,6 @@ Visual regression testing comparing local development to staging and production 
 | Environment | Base Path | URL | Configuration |
 |---|---|---|---|
 | Local Dev | `/` | http://localhost:4321 | `BUILD_ENV` unset (defaults to `"production"`) |
-| Staging | `/` | https://kyleskrinak.github.io | `BUILD_ENV=production` (explicit) |
 | Production | `/` | https://kyle.skrinak.com | `BUILD_ENV=production` (explicit) |
 
 ### Test Execution
@@ -28,10 +27,6 @@ Visual regression testing comparing local development to staging and production 
 - About, search, archives pages
 - Responsive viewports (320px - 1920px)
 - Hero image rendering
-
-**Staging Comparison**: ✅ All tests pass (staging uses same base path as local)
-- Staging deploys as GitHub Pages user site at root path
-- No layout variations expected or observed
 
 ## Root Cause Analysis
 
@@ -57,9 +52,8 @@ const base = "/";
 
 ### Why This Is Correct Behavior
 
-- **GitHub Pages user site**: Deploys at root (`/`) as user site (kyleskrinak.github.io)
-- **Production difference**: Uses root path `/` at custom domain
-- **Configuration**: Automatically handles by `BUILD_ENV` environment variable in workflow
+- **Production**: Uses root path `/` at the custom domain
+- **Configuration**: Automatically handled by the `BUILD_ENV` environment variable in the workflow
 
 ## Validation Results
 
@@ -88,14 +82,6 @@ npm run test:visual
 - Should pass consistently
 - Catches code-introduced regressions
 
-### Staging Testing (Pre-Launch Validation)
-```bash
-npm run test:staging -- --project=visual-*
-```
-- Tests GitHub Pages deployment
-- Expected: Identical rendering to local (both use `/` base path)
-- Verifies content loads and renders identically
-
 ### Production Testing (Post-Launch)
 ```bash
 npm run test:production -- --project=visual-*
@@ -109,9 +95,8 @@ npm run test:production -- --project=visual-*
 ### Before Production Launch
 
 1. **Generate baselines** from local dev (✅ Complete)
-2. ~~Deploy to staging and visually spot-check key pages~~ (no longer applicable — GitHub Pages is not a continuous pre-launch environment; see note above)
-3. **Run production tests** post-launch to ensure match with local
-4. **Weekly monitoring** to catch CSS or layout regressions
+2. **Run production tests** post-launch to ensure match with local
+3. **Weekly monitoring** to catch CSS or layout regressions
 
 ### Asset Verification Checklist
 

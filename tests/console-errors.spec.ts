@@ -10,11 +10,8 @@ import { BASE_URL } from "./test-utils";
  *   npx playwright test tests/console-errors.spec.ts   # In terminal 2
  *
  * Or with a specific environment:
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io \
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com \
  *   npx playwright test tests/console-errors.spec.ts
- *
- * Note: kyleskrinak.github.io only serves live content right after a manual
- * workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
  */
 
 const PAGES_TO_TEST = [

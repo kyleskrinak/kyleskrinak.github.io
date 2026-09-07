@@ -47,7 +47,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { year, month, day, slug } = Astro.params;
 
-// Build new and old URLs (with base path for staging support)
+// Build new and old URLs (with base path)
 const postPath = getPath(post.id, post.filePath);
 const newUrl = linkWithBase(postPath);
 const oldUrl = linkWithBase(`/${year}/${month}/${day}/${slug}/`);

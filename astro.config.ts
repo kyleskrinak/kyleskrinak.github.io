@@ -19,10 +19,9 @@ import { rehypeImageOptimization } from "./src/lib/rehype-components";
 import { SITE } from "./src/config/index";
 
 // https://astro.build/config
-// NOTE: Repository "kyleskrinak.github.io" is a GitHub Pages USER SITE and MUST deploy to root (/).
-// GitHub Pages does not allow user sites to deploy to subpaths like /astro-blog/.
-// Both staging and production use base: "/" (root path).
-// See: docs/operations/staging-url-reference.md for authoritative staging URL documentation.
+// NOTE: The site deploys to the root of kyle.skrinak.com (S3 + CloudFront), never to a
+// subpath, so base stays "/". Canonical URLs, asset paths and link validation all assume it.
+// See: docs/operations/deployment.md.
 const base = "/";
 
 export default defineConfig({
@@ -84,11 +83,6 @@ export default defineConfig({
         optional: true,
       }),
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: envField.string({
-        access: "public",
-        context: "client",
-        optional: true,
-      }),
-      PUBLIC_DEPLOY_ENV: envField.string({
         access: "public",
         context: "client",
         optional: true,
