@@ -227,6 +227,19 @@ describe('resolveSiteUrl', () => {
 		assert.equal(resolveSiteUrl({}), 'https://kyle.skrinak.com');
 	});
 
+	it('treats a blank SITE_URL as unset, however it was spelled', () => {
+		// An empty value and a whitespace-only one are the same mistake: a .env
+		// line with nothing after the "=", or a CI expression that expanded to
+		// nothing. Both fall back rather than failing the build.
+		assert.equal(resolveSiteUrl({ SITE_URL: '' }), 'https://kyle.skrinak.com');
+		assert.equal(resolveSiteUrl({ SITE_URL: '   ' }), 'https://kyle.skrinak.com');
+		assert.equal(resolveSiteUrl({ SITE_URL: '\t\n' }), 'https://kyle.skrinak.com');
+	});
+
+	it('still trims a real value rather than rejecting it', () => {
+		assert.equal(resolveSiteUrl({ SITE_URL: '  https://example.com/  ' }), 'https://example.com');
+	});
+
 	it('strips trailing slashes so callers can append a path', () => {
 		assert.equal(resolveSiteUrl({ SITE_URL: 'https://kyle.skrinak.com///' }), 'https://kyle.skrinak.com');
 	});

@@ -212,7 +212,12 @@ export async function waitForServer(url, { timeoutMs = 60000, child = null } = {
  * comment on step 4d there.
  */
 export function resolveSiteUrl(env = process.env) {
-  const raw = (env.SITE_URL || "https://kyle.skrinak.com/").trim();
+  // Trim before the fallback, not after. A blank SITE_URL means "unset" however
+  // it got that way — a .env line with trailing spaces, or a workflow expression
+  // that expanded to nothing. "" already fell through to the fallback, so letting
+  // "   " throw instead made two spellings of the same non-configuration behave
+  // differently. A value that is present but genuinely wrong still throws.
+  const raw = (env.SITE_URL ?? "").trim() || "https://kyle.skrinak.com/";
   let url;
   try {
     url = new URL(raw);
