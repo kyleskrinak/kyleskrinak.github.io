@@ -28,7 +28,7 @@ This section covers testing strategies, test runs, and quality validation for th
 - **Test suite**: `tests/analytics/analytics-privacy.spec.ts` - Cloudflare Analytics privacy compliance
 - Validates respect for Do Not Track (DNT) signals
 - Ensures Global Privacy Control (GPC) compliance
-- Confirms analytics load only in production builds when a token is configured (staging token optional)
+- Confirms analytics load only in production builds when a token is configured
 
 ### SEO & Sitemap Testing
 - **Test suites**:
@@ -68,14 +68,6 @@ npm run test:production
 
 # Run specific suite against production (cross-platform)
 cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
-
-# Run all Playwright test suites against the GitHub Pages disaster-recovery fallback
-# — only meaningful after a manual `mode=full-fallback` dispatch has run and before
-# it's overwritten by a `mode=stub` redeploy (it does not revert automatically when
-# the workflow finishes); otherwise this just tests the redirect stub.
-# See docs/operations/staging-url-reference.md.
-npm run test:staging
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:console
 ```
 
 See [Testing Guide](../../tests/README.md) for detailed instructions.

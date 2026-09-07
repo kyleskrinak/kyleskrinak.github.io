@@ -3,7 +3,6 @@ import { ClientRouter } from "astro:transitions";
 import {
   PUBLIC_GOOGLE_SITE_VERIFICATION,
   PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN,
-  PUBLIC_DEPLOY_ENV,
 } from "astro:env/client";
 import { SITE } from "@/config";
 import { canonicalizePathname } from "@/utils/canonicalizePathname";
@@ -25,7 +24,7 @@ type Props = {
 };
 
 // Ensure trailing slash to match directory-style URLs
-// Preserve trailing slash for root ('/') and BASE_URL (e.g., '/astro-blog/' on staging)
+// Preserve trailing slash for root ('/') and BASE_URL
 const basePathname = import.meta.env.BASE_URL;
 const pathname = canonicalizePathname(Astro.url.pathname, basePathname);
 
@@ -46,9 +45,6 @@ const {
 // root-relative paths against the origin, ignoring the current page path.
 const socialImageURL = new URL(ogImage, Astro.url);
 const webmentionHostname = new URL(SITE.website).hostname;
-
-const deployEnv = PUBLIC_DEPLOY_ENV ?? "production";
-const isStaging = deployEnv === "staging";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -86,7 +82,7 @@ const structuredData = {
     {/* Canonical link: tells search engines and tools where the "true" content lives.
         Can point to this page or to an external canonical URL via the canonicalURL prop. */}
     <link rel="canonical" href={canonicalURL} />
-    {import.meta.env.PROD && !isStaging && (
+    {import.meta.env.PROD && (
       <>
         <link rel="webmention" href={`https://webmention.io/${webmentionHostname}/webmention`} />
         <link rel="me" href={SITE.profile} />
@@ -163,14 +159,10 @@ const structuredData = {
       )
     }
 
-    {/* Staging is deindexed to prevent preview builds from appearing in search results.
-        Production is indexed normally (default behavior). Canonical link tag above can
-        optionally point to external content if needed.
-        Related: src/pages/robots.txt.ts (staging: Disallow: /, production: Allow: /) */}
-    {isStaging && (
-      <meta name="robots" content="noindex,nofollow" />
-    )}
-    {!isStaging && noindex && (
+    {/* Pages are indexed by default. Navigation and functional pages opt out via the
+        `noindex` prop, keeping `follow` so crawlers still discover content through them.
+        Related: src/pages/robots.txt.ts (Allow: /). */}
+    {noindex && (
       <meta name="robots" content="noindex,follow" />
     )}
 

@@ -45,7 +45,7 @@ test.describe('Representative h-card', () => {
 	test('h-card u-url matches the homepage canonical URL', async ({ page }) => {
 		// An h-card is only *representative* where its u-url matches the page's own URL.
 		// Comparing against the rendered canonical (rather than a hardcoded domain) keeps
-		// this correct across the production, staging, and local base URLs.
+		// this correct across the production and local base URLs.
 		await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
 
 		const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');

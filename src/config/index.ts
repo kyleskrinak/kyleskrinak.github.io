@@ -1,4 +1,4 @@
-// Determine website URL: SITE_URL is set by all build workflows (staging and production).
+// Determine website URL: SITE_URL is set by all build workflows.
 // Local dev without SITE_URL falls back to the production URL.
 // To test with a different URL locally, set SITE_URL explicitly.
 //

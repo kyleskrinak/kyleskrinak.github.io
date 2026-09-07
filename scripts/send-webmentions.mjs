@@ -55,10 +55,9 @@ import { parseHTML } from "linkedom";
 /**
  * The only host allowed to originate webmentions.
  *
- * Defence against this step being copy-pasted into another workflow: staging
- * builds the same content under kyleskrinak.github.io, and sending from there
- * would publish the wrong canonical identity to every receiver. Overridable
- * only for tests.
+ * Defence against this step being copy-pasted into another workflow: any build
+ * that serves the same content under a different host would publish the wrong
+ * canonical identity to every receiver. Overridable only for tests.
  */
 const EXPECTED_HOST =
   process.env.WEBMENTION_EXPECTED_HOST || "kyle.skrinak.com";

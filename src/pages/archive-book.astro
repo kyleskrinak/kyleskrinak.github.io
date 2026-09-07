@@ -79,7 +79,14 @@ const title = `${SITE.author} — Collected Writing`;
 // whose URLs SHOULD print. The exact-match clause is not decorative: content
 // links to the bare origin with no path, which a delimiter-only match would
 // start printing and truncating.
-const siteHost = SITE.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+// Lowercased because hosts are case-insensitive but CSS attribute selectors are
+// not, and the PDF builder compares against hrefs that have been through the URL
+// parser, which lowercases the host. An uppercase SITE.website would otherwise
+// make every same-origin link miss its own exclusion and print its URL.
+const siteHost = SITE.website
+  .replace(/^https?:\/\//, "")
+  .replace(/\/$/, "")
+  .toLowerCase();
 const sameOriginExclusion = ["https", "http"]
   .flatMap((scheme) => [
     `[href^="${scheme}://${siteHost}/"]`,

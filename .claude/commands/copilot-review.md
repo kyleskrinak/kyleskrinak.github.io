@@ -125,7 +125,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 
 ## After Pushing
 
-Once you push to staging/develop:
+Once you push to develop:
 - The PR will automatically update
 - Wait for user to report if Copilot has more feedback
 - Be ready for additional rounds if patterns were missed

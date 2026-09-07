@@ -179,11 +179,6 @@ See `docs/operations/environment-configuration.md` for complete registry documen
 
 ## Deployment Specific
 
-### GitHub Pages (disaster-recovery fallback)
-- Manual `workflow_dispatch` (plus a quarterly build-only `schedule` dry run), dispatched from `main`
-- Automatically builds with entire `public/` directory
-- Search assets included in deployment ✅
-
 ### AWS S3 + CloudFront (Production)
 - Uses `main` branch  
 - Builds with `build:ci` (no copy step)
@@ -196,13 +191,12 @@ See `docs/operations/environment-configuration.md` for complete registry documen
 
 ### Cloudflare Web Analytics
 
-The site integrates Cloudflare Web Analytics for privacy-friendly, lightweight traffic monitoring on production (kyle.skrinak.com). Staging can temporarily enable analytics with its own token only when you need to validate the beacon.
+The site integrates Cloudflare Web Analytics for privacy-friendly, lightweight traffic monitoring on production (kyle.skrinak.com).
 
 **Configuration**:
 
 - **Token**: Set via environment variable `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`.
 - **Loading**: Beacon loads only when `import.meta.env.PROD === true` and the token is present.
-- **Staging**: CI leaves the token blank by default (no analytics). Provide a staging token only if you want to validate analytics in staging.
 - **Privacy**: No cookies; minimal data collection. Update privacy page to disclose usage.
 
 **Setup**:
@@ -236,7 +230,6 @@ Centralizes Node.js setup across all workflows to ensure consistency.
 
 **Used by**:
 - `production-deploy.yml`
-- `staging-deploy.yml`
 - `linkwatch.yml`
 - `pr-visual-check.yml`
 

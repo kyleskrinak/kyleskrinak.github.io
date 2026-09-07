@@ -9,19 +9,17 @@ import { BASE_URL, isLocalUrl } from "../test-utils";
  * Test-side policy: Tests skip on local URLs to avoid relying on local prod-build setup and to prevent analytics noise
  *
  * Usage:
- *   # Test against staging/production
- *   # Note: kyleskrinak.github.io only serves live content right after a manual
- *   # workflow_dispatch with mode=full-fallback — otherwise it's a redirect stub.
- *   PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npx playwright test tests/analytics/analytics-privacy.spec.ts
+ *   # Test against production
+ *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npx playwright test tests/analytics/analytics-privacy.spec.ts
  *
  *   # Note: Tests are skipped on local URLs (localhost, 127.0.0.1, .local, ::1) by test policy,
  *   # not because the app can't load analytics locally (it could with a prod build + token)
  */
 
 test.describe("Cloudflare Analytics Privacy Signals", () => {
-  // Skip unless running against a remote URL (staging/production)
+  // Skip unless running against a remote URL (production)
   // Analytics only load in production builds; skip for all local development URLs
-  test.skip(isLocalUrl, "Analytics tests require staging or production URL (set PLAYWRIGHT_TEST_BASE_URL)");
+  test.skip(isLocalUrl, "Analytics tests require a production URL (set PLAYWRIGHT_TEST_BASE_URL)");
 
   test("should load beacon script when no privacy signals are set", async ({ page, context }) => {
     // Mock navigator properties with no privacy signals

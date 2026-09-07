@@ -304,8 +304,7 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
 ### Updating Deployment
 
 1. Modify `.github/workflows/production-deploy.yml` for AWS changes
-2. Modify `.github/workflows/staging-deploy.yml` for GitHub Pages fallback changes
-3. Test on a `develop → main` PR first
+2. Test on a `develop → main` PR first
 
 ---
 

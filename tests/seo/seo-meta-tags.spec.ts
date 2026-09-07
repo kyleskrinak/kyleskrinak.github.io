@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BASE_URL, isStaging } from '../test-utils';
+import { BASE_URL } from '../test-utils';
 
 // Normalize base pathname to avoid double slashes (e.g., /site//tags/)
 const basePathname = (() => {
@@ -37,8 +37,6 @@ const getRobotsMetaTag = async (page: import('@playwright/test').Page) => {
 test.describe('SEO Meta Tags - Robots Directives', () => {
 	test.describe('System/Navigation Pages (should have noindex)', () => {
 		test('tags index page has noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/tags/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -46,8 +44,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('individual tag pages have noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/tags/ai/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -55,8 +51,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('search page has noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/search/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -64,8 +58,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('pagination pages have noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			// First page of paginated posts listing
 			await page.goto(resolveUrl('/posts/'), { waitUntil: 'networkidle' });
 			let robotsContent = await getRobotsMetaTag(page);
@@ -78,8 +70,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('presentations index has noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -87,8 +77,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('presentation directory pages have noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/presentations/wohd/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -103,8 +91,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 
 	test.describe('Functional Pages (should have noindex)', () => {
 		test('404 page has noindex,follow', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/404/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -114,8 +100,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 
 	test.describe('Content Pages (should NOT have noindex)', () => {
 		test('home page has no robots meta tag', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
@@ -123,8 +107,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('blog posts have no robots meta tag', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			// Test a blog post with past date for stability
 			await page.goto(resolveUrl('/posts/2018-04-07-drupalcon-nashville-2018/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
@@ -133,45 +115,10 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 
 		test('about page has no robots meta tag', async ({ page }) => {
-			test.skip(isStaging, 'Staging has noindex,nofollow on all pages');
-
 			await page.goto(resolveUrl('/about/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
 			expect(robotsContent).toBeNull();
-		});
-	});
-
-	test.describe('Staging Environment', () => {
-		test('all pages have noindex,nofollow on staging', async ({ page }) => {
-			test.skip(!isStaging, 'This test only runs on staging');
-			// NOTE: Staging is no longer auto-detected from BASE_URL — the GitHub Pages
-			// fallback (github.io) builds with PUBLIC_DEPLOY_ENV=production, not staging.
-			// To exercise this test, set environment variables explicitly:
-			//   PUBLIC_DEPLOY_ENV=staging (makes app render staging meta tags)
-			//   PLAYWRIGHT_DEPLOY_ENV=staging (makes test suite run staging-only tests)
-			// Example: PUBLIC_DEPLOY_ENV=staging PLAYWRIGHT_DEPLOY_ENV=staging npm run test:seo
-
-			// Test representative pages from each template type to ensure
-			// staging directives are enforced everywhere, including pages
-			// that don't use the Layout component
-			const stagingPages = [
-				'/', // home page
-				'/posts/2018-04-07-drupalcon-nashville-2018/', // blog post with past date
-				'/tags/', // tags index (system page)
-				'/tags/ai/', // representative tag detail page
-				'/posts/2/', // representative pagination page
-				'/presentations/wohd/', // presentation landing directory page (not the .html presentation file)
-			];
-
-			for (const pagePath of stagingPages) {
-				await page.goto(resolveUrl(pagePath), { waitUntil: 'networkidle' });
-				const robotsContent = await getRobotsMetaTag(page);
-				expect(
-					robotsContent,
-					`Expected ${pagePath} to have robots noindex,nofollow on staging`
-				).toBe('noindex,nofollow');
-			}
 		});
 	});
 
@@ -216,25 +163,18 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 					`Expected canonical URL to have production hostname for ${pagePath}`
 				).not.toBe('localhost');
 
-				// Verify canonical uses correct origin and path (production domain)
-				// This catches issues like staging canonicalizing to itself instead of production
-				if (!isStaging) {
-					// On production/localhost: expect production canonicals
-					// IMPORTANT: Domain is intentionally hardcoded (not derived from config)
-					// to ensure staging canonicals point to production. If we derived from
-					// config, staging might use staging URL and this test would incorrectly pass.
-					// If the production domain changes, update this constant.
-					const expectedOrigin = 'https://kyle.skrinak.com';
-					const expectedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
-					const expectedCanonicalUrl = `${expectedOrigin}${expectedPath}`;
+				// Verify canonical uses correct origin and path (production domain).
+				// IMPORTANT: Domain is intentionally hardcoded (not derived from config)
+				// so a misconfigured build cannot make this test pass against itself.
+				// If the production domain changes, update this constant.
+				const expectedOrigin = 'https://kyle.skrinak.com';
+				const expectedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
+				const expectedCanonicalUrl = `${expectedOrigin}${expectedPath}`;
 
-					expect(
-						href,
-						`Expected ${pagePath} canonical URL to be ${expectedCanonicalUrl}`
-					).toBe(expectedCanonicalUrl);
-				}
-				// TODO: Staging currently canonicalizes to github.io but should point to production
-				// to avoid staging being indexed. Fix in separate PR.
+				expect(
+					href,
+					`Expected ${pagePath} canonical URL to be ${expectedCanonicalUrl}`
+				).toBe(expectedCanonicalUrl);
 			}
 		});
 	});

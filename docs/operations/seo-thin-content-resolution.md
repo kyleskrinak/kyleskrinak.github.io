@@ -45,13 +45,10 @@ Rather than adding content to navigation pages or removing them entirely, we imp
 
 | Directive | Use Case | Behavior |
 |-----------|----------|----------|
-| `noindex,follow` | Production system pages | Don't index page, but crawl links to find content |
-| `noindex,nofollow` | Staging environment | Don't index page, don't crawl links (complete isolation) |
+| `noindex,follow` | System/navigation pages | Don't index page, but crawl links to find content |
 | (no tag) | Content pages | Index normally |
 
-**Production navigation pages** use `follow` because we want search engines to discover our blog posts and presentations by following links from tag pages, pagination, etc.
-
-**Staging** uses `nofollow` because we want complete isolation - no indexing, no crawling, no discovery.
+**Navigation pages** use `follow` because we want search engines to discover our blog posts and presentations by following links from tag pages, pagination, etc.
 
 ---
 
@@ -63,10 +60,7 @@ Rather than adding content to navigation pages or removing them entirely, we imp
    - Added `noindex?: boolean` prop
    - Conditional rendering:
      ```typescript
-     {isStaging && (
-       <meta name="robots" content="noindex,nofollow" />
-     )}
-     {!isStaging && noindex && (
+     {noindex && (
        <meta name="robots" content="noindex,follow" />
      )}
      ```
@@ -99,7 +93,6 @@ Created comprehensive test suites:
 **SEO Meta Tags** (`tests/seo/seo-meta-tags.spec.ts`):
 - ✅ Verifies system pages have `noindex,follow`
 - ✅ Verifies content pages have no robots tag
-- ✅ Verifies staging has `noindex,nofollow` on all pages
 - ✅ Validates canonical URLs across all page types
 
 **Sitemap Validation** (`tests/seo/sitemap.spec.ts`):
@@ -118,15 +111,6 @@ cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:seo
 
 # Or use shortcuts (runs all Playwright test suites against environment)
 npm run test:production   # All test suites against production
-
-# GitHub Pages disaster-recovery fallback (publishing is manual via workflow_dispatch;
-# a quarterly schedule trigger is a build-only dry run that never deploys):
-# only meaningful after a `mode=full-fallback` dispatch has run and before it's
-# overwritten by a `mode=stub` redeploy (it does not revert automatically when
-# the workflow finishes) — otherwise it just tests the redirect stub.
-# See docs/operations/staging-url-reference.md.
-cross-env PLAYWRIGHT_TEST_BASE_URL=https://kyleskrinak.github.io npm run test:seo
-npm run test:staging
 ```
 
 ---
@@ -230,12 +214,11 @@ When adding new page types, ask:
    - Content (posts, articles, presentations) → Index
    - Navigation (tags, categories) → Noindex,follow
    - Functional (search, 404) → Noindex,follow
-   - Admin/staging → Noindex,nofollow
 
    **Note**: The primary `/archives/` page is an exception - it's kept indexed because it provides a unique chronological view distinct from simple paginated listings.
 
 3. **Should search engines follow links on this page?**
-   - Usually yes (use `follow`) unless it's staging/admin
+   - Yes — every page type here uses `follow`, so crawlers keep discovering content
 
 ---
 

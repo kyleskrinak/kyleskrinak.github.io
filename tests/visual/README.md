@@ -26,12 +26,6 @@ npm run test:production -- --project=visual-*
 ```
 Tests against production URL. Should match baselines.
 
-### 4. Test the GitHub Pages Fallback (Disaster Recovery Only)
-```bash
-npm run test:staging -- --project=visual-*
-```
-Only meaningful after a manual `workflow_dispatch` with `mode=full-fallback` has run and before it's overwritten by a `mode=stub` redeploy — it does not revert automatically when the workflow finishes. Otherwise `kyleskrinak.github.io` serves a redirect stub, not the real site, and this just tests the stub. Not part of routine pre-launch validation.
-
 ## Available Commands
 
 ```bash
@@ -51,19 +45,12 @@ ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline
 # Test against production (kyle.skrinak.com)
 npm run test:production -- --project=visual-*
 
-# Test against the GitHub Pages disaster-recovery fallback — only meaningful after a
-# `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub`
-# redeploy (it does not revert automatically when the workflow finishes), otherwise
-# this tests the redirect stub
-npm run test:staging -- --project=visual-*
-
 # View HTML report of last test run
 npm run test:visual:report
 
 # Or use the shell script directly
 ./scripts/visual-test.sh local              # Local dev
 ./scripts/visual-test.sh production         # Production
-./scripts/visual-test.sh staging            # GitHub Pages fallback (disaster-recovery only)
 ./scripts/visual-test.sh baseline           # Create baselines from this host (fast iteration only; needs ALLOW_NATIVE_BASELINE=1 off Linux)
 ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
 ./scripts/visual-test.sh docker-baseline    # Create/update baselines from that container (use for commits)
@@ -107,26 +94,6 @@ npm run test:visual
 
 # 3. Review HTML report
 npm run test:visual:report
-```
-
-### During a Disaster-Recovery Drill (Not a Routine Launch Step)
-```bash
-# 1. Dispatch staging-deploy.yml with mode=full-fallback (BUILD_ENV=production)
-#    Note: kyleskrinak.github.io serves live content only after this dispatch has
-#    run, until a mode=stub dispatch overwrites it — it does not revert
-#    automatically when the workflow finishes. Otherwise it's a redirect stub,
-#    and the commands below just test that.
-# 2. Test the fallback renders correctly
-npm run test:staging -- --project=visual-*
-
-# 3. Review report - should match local (both use base = "/")
-# Expected: Identical rendering to local baselines
-npm run test:visual:report
-
-# 4. Verify key pages load correctly:
-#    - https://kyleskrinak.github.io/ (home)
-#    - https://kyleskrinak.github.io/posts/ (blog archive)
-#    - https://kyleskrinak.github.io/about/ (about)
 ```
 
 ### Launch Day
@@ -201,9 +168,9 @@ Re-generates screenshots as new baselines (after code changes), rendered on Ubun
 ### Important: Base Path Configuration
 
 This blog uses **consistent base path** across all environments set in `astro.config.ts`:
-- **Local/Production/GitHub Pages fallback**: `base: "/"`
+- **Local/Production**: `base: "/"`
 
-This means all environments render identically when compared. The GitHub Pages fallback (`kyleskrinak.github.io`) deploys as a user site at the root path, matching local and production behavior — but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy; otherwise it serves a redirect stub.
+This means local and production render identically when compared.
 
 ### Baseline Management
 
@@ -233,16 +200,10 @@ npm run test:visual:docker
 
 # Test production against baselines (base = "/" at kyle.skrinak.com)
 npm run test:production -- --project=visual-*
-
-# Test the GitHub Pages fallback against baselines (also base = "/") — only
-# meaningful after a mode=full-fallback dispatch has run and before it's
-# overwritten by a mode=stub redeploy
-npm run test:staging -- --project=visual-*
 ```
 
 **Expected behavior:**
 - Local and production should match baselines (identical rendering with base = "/")
-- The GitHub Pages fallback matches too, but only after a `mode=full-fallback` dispatch has run and before it's overwritten by a `mode=stub` redeploy
 - Failures indicate unintended visual regressions
 
 ### Testing Multiple Browsers

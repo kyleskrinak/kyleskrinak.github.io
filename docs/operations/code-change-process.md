@@ -20,8 +20,8 @@ Find all files that interact with or depend on the area you're changing:
 - **Documentation**: GitFlow docs, deployment docs, architectural notes
 
 **Example**: Changing SEO indexing logic requires checking:
-- Layout.astro (meta tags, astro:env/client imports for PUBLIC_DEPLOY_ENV)
-- robots.txt.ts (crawling directives, isStaging logic)
+- Layout.astro (meta tags, the `noindex` prop, astro:env/client imports)
+- robots.txt.ts (crawling directives)
 - .env.example (environment variables reference)
 - Deployment docs (if environment behavior changed)
 
@@ -71,10 +71,11 @@ Present your exploration findings and planned approach to stakeholders for appro
    - Reference related files if logic spans multiple places
    - Example:
      ```jsx
-     {/* Staging is deindexed to prevent preview builds from appearing in search results.
-         Production uses default indexing (no explicit tag needed).
-         Related: robots.txt.ts (staging: Disallow: /, production: Allow: /) */}
-     {isStaging && <meta name="robots" content="noindex,nofollow" />}
+     {/* Navigation and functional pages opt out of indexing but keep `follow`,
+         so crawlers still discover content through them. Content pages get no
+         tag at all — default indexing.
+         Related: robots.txt.ts (Allow: /) */}
+     {noindex && <meta name="robots" content="noindex,follow" />}
      ```
 
 3. **Atomic Changes**
@@ -103,9 +104,9 @@ Example:
 ```
 fix(seo): align indexing logic across meta tags and robots.txt
 
-- Staging meta tag: noindex,nofollow (prevent preview indexing)
-- Production meta tag: none (use default indexing behavior)
-- robots.txt already aligned: staging blocks all, production allows all
+- Navigation pages: noindex,follow (keep crawl paths, drop thin-content entries)
+- Content pages: no meta tag (use default indexing behavior)
+- robots.txt already aligned: allows all, points at the sitemap
 - Canonical tag documented for optional external content pointing
 
 Ensures robots.txt and HTML directives don't conflict.

@@ -111,11 +111,6 @@ ${ConfigRegistry.astro.trailingSlash.impact.map(i => `  - ${i}`).join('\n')}
 
 ## Deployment Infrastructure
 
-### GitHub Pages (disaster-recovery fallback)
-- Platform: ${ConfigRegistry.deployment['staging-gh-fallback'].platform}
-- Mechanism: ${ConfigRegistry.deployment['staging-gh-fallback'].mechanism}
-- Variables: None (uses automatic GITHUB_TOKEN)
-
 ### Production (AWS S3 + CloudFront)
 - Platform: ${ConfigRegistry.deployment['main-aws'].platform}
 - Mechanism: ${ConfigRegistry.deployment['main-aws'].mechanism}

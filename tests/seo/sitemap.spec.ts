@@ -148,7 +148,7 @@ test.describe('Sitemap Validation', () => {
 			expect(sitemapContent).toContain('</urlset>');
 		});
 
-		test('all URLs use production domain (not staging)', async () => {
+		test('all URLs use the production domain', async () => {
 			const productionDomain = 'https://kyle.skrinak.com';
 			sitemapUrls.forEach(url => {
 				expect(url.startsWith(productionDomain), `Expected ${url} to start with ${productionDomain}`).toBeTruthy();

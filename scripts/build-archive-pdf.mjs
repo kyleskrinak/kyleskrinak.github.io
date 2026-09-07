@@ -27,12 +27,69 @@ import { chromium } from "@playwright/test";
 import {
   parseFlags,
   parsePreviewPort,
+  rewriteToProductionUrl,
   startPreview,
   stopPreview,
   waitForServer,
 } from "./lib/pdf-helpers.mjs";
 
 const ROOT = process.cwd();
+
+/**
+ * Runs in the page, not in Node. Reads the printed-URL rule out of the live
+ * stylesheet and returns the hosts its `:not()` exclusions treat as same-origin.
+ *
+ * This is the only place the site's public host is determined. archive-book.astro
+ * bakes it into those exclusions at *site build* time from SITE.website, while
+ * this script runs in a separate process that CI gives no SITE_URL. Resolving it
+ * independently here could therefore disagree with the page, and a disagreement
+ * is not cosmetic: step 4c-ter rewrites relative hrefs to absolute ones, and an
+ * absolute href is exactly what `a[href^="http"]` starts matching. Suppression
+ * then rests entirely on these exclusions, so a mismatch would print every
+ * internal URL with `word-break: break-all` -- reintroducing the truncated
+ * phantom URLs that 19c819b and 212d8e5 removed. Asking the page is the only
+ * source that cannot drift from it.
+ */
+function readPrintedUrlHosts() {
+  const printRules = [];
+  // Recursive: the rule sits at the top level today, but wrapping it in
+  // `@media print` is the obvious future refactor of a print stylesheet, and a
+  // flat scan would quietly stop finding it.
+  const collect = (rules) => {
+    for (const rule of rules) {
+      if (rule.style && (rule.style.content || "").includes("attr(href)")) {
+        printRules.push(rule);
+      }
+      if (rule.cssRules) collect(rule.cssRules); // @media, @supports, nesting
+    }
+  };
+  for (const sheet of document.styleSheets) {
+    try {
+      collect(sheet.cssRules);
+    } catch {
+      continue; // cross-origin sheet, not ours
+    }
+  }
+  // Fail loudly rather than pass vacuously: a guard that finds nothing to check
+  // is worse than no guard, because it reports success either way.
+  if (printRules.length === 0) {
+    throw new Error(
+      'no printed-URL rule found in the page stylesheet. Did the `content: " (" attr(href) ")"` rule in archive-book.astro move?'
+    );
+  }
+
+  const hosts = new Set();
+  for (const rule of printRules) {
+    const exclusions = rule.selectorText.matchAll(/:not\(\[href\^?=["']https?:\/\/([^"'\/?#]+)/g);
+    for (const m of exclusions) hosts.add(m[1]);
+  }
+  if (hosts.size === 0) {
+    throw new Error(
+      "the printed-URL rule excludes no same-origin host, so every internal link will print its URL and truncate. This is the original defect."
+    );
+  }
+  return [...hosts];
+}
 
 const FLAGS = {
   "--output": { key: "output", value: true },
@@ -164,6 +221,71 @@ async function main() {
       ]);
     });
 
+    // 4c-bis. Ask the page which host it considers same-origin. See
+    // readPrintedUrlHosts for why this cannot come from process.env.
+    const sameOriginHosts = await page.evaluate(readPrintedUrlHosts);
+    if (sameOriginHosts.length !== 1) {
+      throw new Error(
+        `expected exactly one same-origin host in the printed-URL rule, found ${sameOriginHosts.length} ` +
+          `(${sameOriginHosts.join(", ")}). Cannot choose which one internal links should point at.`
+      );
+    }
+    // https, not http: archive-book.astro excludes both schemes for the host, so
+    // either is suppressed, and only one of them is a URL worth shipping.
+    const siteOrigin = `https://${sameOriginHosts[0]}`;
+
+    // 4c-ter. Rewrite local links to the public site. Chromium writes the
+    // *resolved* URL into each link annotation, so without this every internal
+    // link in the book ships as http://localhost:<port>/... and dead-ends for
+    // the reader. Runs before the 4d guard on purpose: these rewrites turn
+    // relative hrefs into absolute ones, which is precisely what the guard below
+    // exists to check, so the guard has to see the page in its final state.
+    //
+    // Split across the page/Node boundary rather than done in one evaluate():
+    // the decision is a pure function that unit tests can reach, and only the
+    // reading and writing happen in the page.
+    const authored = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"), (a, index) => ({
+        index,
+        href: a.getAttribute("href"),
+      }))
+    );
+    if (authored.length === 0) {
+      throw new Error(
+        "no anchors found in the rendered book. Either the page failed to render its content or the markup changed; rewriting and guarding both silently pass on an empty set."
+      );
+    }
+    const rewriteOptions = {
+      // The book resolves relative links against its own directory, and it sits
+      // at the same path in both places, so only the origin differs. Keeping the
+      // path identical means link resolution is byte-for-byte what it is today.
+      localDocBase: pageUrl,
+      prodDocBase: `${siteOrigin}/archive-book/`,
+      localOrigins: [new URL(pageUrl).origin],
+    };
+    const rewrites = authored
+      .map(({ index, href }) => ({ index, href: rewriteToProductionUrl(href, rewriteOptions) }))
+      .filter(entry => entry.href !== null);
+    await page.evaluate(entries => {
+      const anchors = document.querySelectorAll("a[href]");
+      for (const { index, href } of entries) anchors[index].setAttribute("href", href);
+    }, rewrites);
+
+    // Re-run the same decision over the rewritten page: anything still eligible
+    // is something the rewrite failed to correct. Idempotence is the assertion,
+    // which reuses the tested function instead of restating its rules here.
+    const remaining = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"), a => a.getAttribute("href"))
+    );
+    const missed = remaining.filter(href => rewriteToProductionUrl(href, rewriteOptions) !== null);
+    if (missed.length > 0) {
+      throw new Error(
+        `${missed.length} link(s) still point at the preview server after rewriting, and would ship ` +
+          `as dead localhost URLs:\n${missed.map(h => `    · ${h}`).join("\n")}`
+      );
+    }
+    console.log(`  · rewrote ${rewrites.length} local link(s) to ${siteOrigin}`);
+
     // 4d. Regression guard for the phantom same-origin URLs this book used to
     // emit. Three print rules can split a string mid-word: the generated
     // `::after` URL and `.print-embed-fallback .url` both set
@@ -180,7 +302,7 @@ async function main() {
     // Ordinary prose is deliberately not scanned. Without a mid-word break rule
     // a long URL wraps intact, and an intact same-origin URL is a real page
     // rather than a phantom.
-    const guard = await page.evaluate(() => {
+    const guard = await page.evaluate((hosts) => {
       const printRules = [];
       // Recursive: the rule sits at the top level today, but wrapping it in
       // `@media print` is the obvious future refactor of a print stylesheet,
@@ -200,22 +322,13 @@ async function main() {
           continue; // cross-origin sheet, not ours
         }
       }
-      // Fail loudly rather than pass vacuously: a guard that finds nothing to
-      // check is worse than no guard, because it reports success either way.
+      // The live rule objects cannot cross the page boundary, so they are
+      // re-collected here for the scan below. The hosts are not: they arrive
+      // from step 4c-bis, which read this same stylesheet, so the origin the
+      // rewrite targeted and the origin this guard trusts are one value.
       if (printRules.length === 0) {
         throw new Error(
           'no printed-URL rule found in the page stylesheet. Did the `content: " (" attr(href) ")"` rule in archive-book.astro move?'
-        );
-      }
-
-      const hosts = new Set();
-      for (const rule of printRules) {
-        const exclusions = rule.selectorText.matchAll(/:not\(\[href\^?=["']https?:\/\/([^"'\/?#]+)/g);
-        for (const m of exclusions) hosts.add(m[1]);
-      }
-      if (hosts.size === 0) {
-        throw new Error(
-          "the printed-URL rule excludes no same-origin host, so every internal link will print its URL and truncate. This is the original defect."
         );
       }
 
@@ -257,7 +370,7 @@ async function main() {
         scan(el.textContent, "code block");
       }
       return { findings, hosts: [...hosts] };
-    });
+    }, sameOriginHosts);
 
     if (guard.findings.length > 0) {
       const detail = guard.findings.map(f => `    \u00b7 ${f.where}\n      ${f.text}`).join("\n");

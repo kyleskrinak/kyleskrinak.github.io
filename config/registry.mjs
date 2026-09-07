@@ -41,15 +41,15 @@ export const ConfigRegistry = {
     base: {
       value: '/',
       location: 'astro.config.ts',
-      reason: 'GitHub Pages user site must deploy to root',
-      relatedDocs: 'docs/operations/staging-url-reference.md',
+      reason: 'Site deploys to the root of kyle.skrinak.com, never to a subpath',
+      relatedDocs: 'docs/operations/deployment.md',
       impact: ['All URLs', 'Canonical paths', 'Asset paths']
     },
     trailingSlash: {
       value: 'always',
       location: 'astro.config.ts',
       reason: 'Consistency with Jekyll URL structure',
-      relatedDocs: 'docs/operations/staging-url-reference.md#url-structure',
+      relatedDocs: 'docs/operations/build-configuration.md',
       impact: [
         'Canonical URLs must end with /',
         'Redirects preserve trailing slash',
@@ -69,12 +69,6 @@ export const ConfigRegistry = {
         required: false,
         notes: 'Not set as env var; src/config/index.ts falls back to production URL. Set SITE_URL explicitly to override.'
       },
-      PUBLIC_DEPLOY_ENV: {
-        value: 'production',
-        source: 'fallback',
-        required: false,
-        notes: 'Not set as env var; Layout.astro and robots.txt.ts fall back to "production" when absent (no staging banner, indexing allowed).'
-      },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: {
         value: null,
         source: 'omitted',
@@ -88,27 +82,18 @@ export const ConfigRegistry = {
         notes: 'Gated on import.meta.env.PROD — never renders in local dev builds.'
       }
     },
-    'staging-gh-fallback': {
-      BUILD_ENV: { value: 'production', source: 'workflow', required: true },
-      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
-      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
-      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
-      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false, notes: 'Manual disaster-recovery build for GitHub Pages (workflow_dispatch full-fallback, or the quarterly build-only dry run) — not a continuous deploy. Runs with production settings since a real failover means kyle.skrinak.com DNS could point here. Google site verification omitted; not needed unless this becomes the live host.' }
-    },
     'pr-visual-check': {
       // Builds with production settings to match committed baselines (generated locally without
       // analytics tokens). Analytics tokens are deliberately omitted: the scripts load async and
       // don't affect rendered visual output, and local baseline generation runs without them.
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
-      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: null, source: 'omitted', required: false },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
     },
     'main-aws': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
-      PUBLIC_DEPLOY_ENV: { value: 'production', source: 'workflow', required: true },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: 'required', source: 'secret', required: true },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: 'required', source: 'secret', required: true }
     }
@@ -119,7 +104,6 @@ export const ConfigRegistry = {
   buildFlags: {
     'import.meta.env.PROD': {
       'local-develop': false,    // astro dev: always false
-      'staging-gh-fallback': true, // astro build: always true
       'pr-visual-check': true,     // astro build: always true
       'main-aws': true             // astro build: always true
     }
@@ -141,15 +125,6 @@ export const ConfigRegistry = {
   },
 
   deployment: {
-    'staging-gh-fallback': {
-      platform: 'GitHub Pages',
-      mechanism: 'GitHub Actions pages deployment (manual workflow_dispatch, plus a quarterly build-only schedule)',
-      location: '.github/workflows/staging-deploy.yml',
-      variables: {
-        // GitHub Pages deployment uses GITHUB_TOKEN (automatic) and pages permissions
-        // No explicit deployment variables required
-      }
-    },
     'main-aws': {
       platform: 'AWS S3 + CloudFront',
       mechanism: 'OIDC authentication + AWS CLI',
