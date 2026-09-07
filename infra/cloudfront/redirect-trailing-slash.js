@@ -71,14 +71,15 @@ var LEGACY_REDIRECTS = {
     '/drupal/drupalcon-nashville-2018-video-playlist/': '/posts/2018-05-13-drupalcon-nashville-2018-video-playlist/',
     '/in-the-jekyll-garden/': '/posts/2021-04-02-in-the-jekyll-garden/',
 
-    // Converted from meta-refresh stubs; see the block comment below. Targets
+    // Converted from meta-refresh stubs; see the block comment above. Targets
     // are the stubs' own canonicals, so the destination is unchanged.
     '/personal/lorraine-barbara-kubik-skrinak/': '/posts/2019-10-31-lorraine-barbara-kubik-skrinak/',
     '/personal/two-guys-watch-a-burning-house/': '/posts/2021-01-18-two-guys-watch-a-burning-house/',
 
     // Presentation shortcuts. Point at the deck, not at the post that announces
     // it; a deck is a destination in its own right and does not need a post as
-    // a landing page. /code-presentation/ was a stub canonicaling here.
+    // a landing page. /code-presentation/ was a stub whose canonical
+    // pointed here.
     '/wohd/': '/presentations/wohd.html',
     '/code-presentation/': '/presentations/code-presentation.html',
 
