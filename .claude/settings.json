@@ -1,5 +1,10 @@
 {
   "alwaysThinkingEnabled": true,
+  "autoCompactWindow": 170000,
   "autoCompactEnabled": true,
-  "autoCompactWindow": 170000
+  "permissions": {
+    "allow": [
+      "Bash(gh repo view *)"
+    ]
+  }
 }
