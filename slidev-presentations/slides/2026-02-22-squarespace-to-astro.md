@@ -215,7 +215,8 @@ When AI underperforms, the failure is usually traceable to insufficient context.
 
 **See it live**
 - [skrinakcreative.com](https://skrinakcreative.com) — production site, now running on Astro
-- [elena-skrinak-md37.squarespace.com](https://elena-skrinak-md37.squarespace.com) — original Squarespace site, available until September 12, 2026
+- `elena-skrinak-md37.squarespace.com` — original Squarespace site
+  - *Editorial note (2026-09-13): the original Squarespace site expired on September 12, 2026, and the link has been removed.*
 
 **Read the full story**
 - [From Squarespace to Astro: A Migration Story](https://kyle.skrinak.com/posts/2026-03-02-from-squarespace-to-astro/) — full narrative with project context, decision-making process, and lessons learned
