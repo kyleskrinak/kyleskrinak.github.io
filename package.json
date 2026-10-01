@@ -115,6 +115,6 @@
     "markdownlint-cli2": {
       "js-yaml": "5.2.2"
     },
-    "postcss": "8.5.26"
+    "postcss": "8.5.28"
   }
 }
