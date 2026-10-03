@@ -91,6 +91,7 @@ if (isManualMode) {
 let htmltestOutput = '';
 let statusByUrl = new Map();
 let failedUrls = [];
+let nonNetworkFailures = [];
 
 if (!isManualMode) {
   try {
@@ -118,6 +119,7 @@ if (!isManualMode) {
   const parsed = parseHtmltestFailures(htmltestOutput);
   statusByUrl = parsed.statusByUrl;
   failedUrls = parsed.failedUrls;
+  nonNetworkFailures = parsed.nonNetworkFailures;
 
   const totalFailures = parsed.totalFailures;
   const uniqueUrls = failedUrls.length;
@@ -127,9 +129,21 @@ if (!isManualMode) {
     console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) after canonicalization/deduplication\n`);
   }
 
+  // Markup, accessibility and internal-reference failures are not something a
+  // browser can adjudicate: the referenced image may well answer 200 while the
+  // alt attribute is still missing. They fail the build on their own, so tier 2
+  // can never turn them into a pass.
+  if (nonNetworkFailures.length > 0) {
+    console.error(`\n❌ ${nonNetworkFailures.length} failure(s) that browser verification cannot excuse:`);
+    console.error('━'.repeat(60));
+    nonNetworkFailures.forEach(line => console.error(`  ${line}`));
+    console.error('\n   These are markup, accessibility or internal-reference errors.');
+    console.error('   They fail the check regardless of the tier 2 results below.');
+  }
+
   if (uniqueUrls === 0) {
     console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
-    console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
+    console.error('   Failing check: please review the htmltest output above.\n');
     process.exit(1);
   }
 
@@ -511,8 +525,14 @@ console.log('\n' + '━'.repeat(60));
 // Note: 403/429/999 withheld, 5xx server errors, and auth-required unverifiable
 // URLs stay visible in the report but do not trigger exit(1).
 // Only genuinely broken links fail.
-if (trulyBroken.length > 0) {
-  console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention\n`);
+if (trulyBroken.length > 0 || nonNetworkFailures.length > 0) {
+  if (trulyBroken.length > 0) {
+    console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention`);
+  }
+  if (nonNetworkFailures.length > 0) {
+    console.log(`⚠️  ${nonNetworkFailures.length} markup/accessibility failure(s) listed above`);
+  }
+  console.log('');
   process.exit(1);
 }
 

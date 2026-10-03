@@ -26,6 +26,10 @@ const LINE = {
     "  src attribute missing --- posts/x/index.html --> ",
   internalMissing:
     "  target does not exist --- about/index.html --> /missing/page/",
+  // Same line shape as a network failure, but an accessibility defect: the CDN
+  // answers 200 while the alt attribute is still missing.
+  altMissingExternal:
+    "  alt attribute missing --- posts/x/index.html --> https://cdn.example.com/image.png",
   header: "htmltest started at 08:52:53 on dist",
   rule: "========================================================================",
   footer: "3 errors in 1 documents",
@@ -60,12 +64,13 @@ describe("parseHtmltestFailures — which lines yield URLs", () => {
     assert.deepEqual(failedUrls, ["https://expired.badssl.com/"]);
   });
 
-  it("ignores failures whose target is not an http(s) URL", () => {
-    const { failedUrls, totalFailures } = parseHtmltestFailures(
+  it("routes failures whose target is not an http(s) URL to the fatal bucket", () => {
+    const { failedUrls, totalFailures, nonNetworkFailures } = parseHtmltestFailures(
       outputOf(LINE.altEmpty, LINE.srcMissing, LINE.internalMissing)
     );
     assert.deepEqual(failedUrls, [], "nothing for the browser to verify");
     assert.equal(totalFailures, 0);
+    assert.equal(nonNetworkFailures.length, 3, "and none of them silently dropped");
   });
 
   it("ignores header, rule and footer lines", () => {
@@ -89,6 +94,60 @@ describe("parseHtmltestFailures — which lines yield URLs", () => {
       assert.equal(totalFailures, 0);
       assert.equal(skippedCount, 0);
     }
+  });
+});
+
+describe("parseHtmltestFailures — diagnostic kind decides the route", () => {
+  // A markup failure on an externally hosted image has the same line shape as a
+  // network failure. Forwarding it to tier 2 would launder it into a pass: the
+  // image answers 200, so it lands in `reachable` and nothing fails.
+  it("does not forward a markup failure that happens to have a URL target", () => {
+    const { failedUrls, nonNetworkFailures } = parseHtmltestFailures(
+      outputOf(LINE.altMissingExternal)
+    );
+    assert.deepEqual(failedUrls, [], "the browser cannot excuse a missing alt");
+    assert.deepEqual(nonNetworkFailures, [
+      "alt attribute missing --- posts/x/index.html --> https://cdn.example.com/image.png",
+    ]);
+  });
+
+  it("separates network and non-network failures in one run", () => {
+    const { failedUrls, nonNetworkFailures } = parseHtmltestFailures(
+      outputOf(LINE.status403, LINE.altMissingExternal, LINE.timeout, LINE.internalMissing)
+    );
+    assert.deepEqual(failedUrls, ["https://www.npmjs.com/", "http://10.255.255.1/hangs"]);
+    assert.equal(nonNetworkFailures.length, 2);
+  });
+
+  it("treats an unrecognised message as fatal rather than forwarding it", () => {
+    // Fail closed: a new htmltest check must not be able to reach tier 2 and be
+    // excused by a 200. An unknown message produces a loud, named failure.
+    const { failedUrls, nonNetworkFailures } = parseHtmltestFailures(
+      outputOf("  some future htmltest check --- a/index.html --> https://example.com/x")
+    );
+    assert.deepEqual(failedUrls, []);
+    assert.equal(nonNetworkFailures.length, 1);
+  });
+
+  it("recognises Head and Post transport errors as network failures", () => {
+    const { failedUrls, nonNetworkFailures } = parseHtmltestFailures(
+      outputOf(
+        '  Head "https://a.example/x": EOF --- i.html --> https://a.example/x',
+        '  Post "https://b.example/y": context deadline exceeded --- i.html --> https://b.example/y'
+      )
+    );
+    assert.deepEqual(failedUrls, ["https://a.example/x", "https://b.example/y"]);
+    assert.deepEqual(nonNetworkFailures, []);
+  });
+
+  it("keeps a URL ending in a parenthesis intact", () => {
+    // An earlier version trimmed trailing punctuation and would have requested
+    // the wrong URL for a Wikipedia disambiguation link.
+    const url = "https://en.wikipedia.org/wiki/Bank_(topography)";
+    const { failedUrls } = parseHtmltestFailures(
+      outputOf(`  Non-OK status: 404 --- a/index.html --> ${url}`)
+    );
+    assert.deepEqual(failedUrls, [url]);
   });
 });
 

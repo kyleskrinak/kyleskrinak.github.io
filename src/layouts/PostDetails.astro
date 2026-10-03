@@ -263,14 +263,19 @@ const nextPost =
     <form method="dialog">
       <button type="submit" aria-label="Close lightbox">✕</button>
     </form>
-    {/* Placeholder src/alt: the lightbox script overwrites both from the
-        clicked image when the dialog opens. A 1x1 transparent GIF keeps the
-        element valid before then — htmltest flags a src-less img, and an
-        empty src would make the browser re-request the page. No width/height
-        here on purpose: real dimensions vary per image and CSS sizes the
-        dialog, so declaring 1x1 would fight the actual layout. The dialog is
-        closed until opened, so it contributes nothing to page CLS. */}
-    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" />
+    {/* Placeholder src/alt/dimensions: the lightbox script overwrites all of
+        them from the clicked image when the dialog opens. A 1x1 transparent GIF
+        keeps the element valid before then — htmltest flags a src-less img, and
+        an empty src would make the browser re-request the page. The attributes
+        match the placeholder so they are never a lie; openLightbox replaces
+        them with the real intrinsic size so CSS can reserve the right box
+        before the full image decodes. */}
+    <img
+      src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      width="1"
+      height="1"
+      alt=""
+    />
   </dialog>
   <Footer />
 </Layout>
@@ -400,6 +405,15 @@ const nextPost =
     function openLightbox(cardImg) {
       if (dialog.open) return;
       dialog._openerEl = cardImg;
+      // Carry over the intrinsic size before showing the dialog. The clicked
+      // image is already laid out, so naturalWidth/naturalHeight are known, and
+      // with width:auto/height:auto in CSS they give the lightbox the correct
+      // aspect ratio immediately — otherwise the box is sized from the 1x1
+      // placeholder and jumps once the replacement finishes decoding.
+      if (cardImg.naturalWidth && cardImg.naturalHeight) {
+        lightboxImg.width = cardImg.naturalWidth;
+        lightboxImg.height = cardImg.naturalHeight;
+      }
       lightboxImg.src = cardImg.currentSrc || cardImg.src;
       lightboxImg.alt = cardImg.alt;
       dialog.showModal();
@@ -431,6 +445,8 @@ const nextPost =
       dialog.addEventListener("close", () => {
         lightboxImg.removeAttribute("src");
         lightboxImg.alt = "";
+        lightboxImg.width = 1;
+        lightboxImg.height = 1;
         dialog._openerEl?.focus();
         dialog._openerEl = null;
       });

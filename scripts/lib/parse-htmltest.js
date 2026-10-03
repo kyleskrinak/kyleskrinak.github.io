@@ -15,24 +15,45 @@
 //   Non-OK status: 403 --- about/index.html --> https://www.npmjs.com/
 //   request exceeded our ExternalTimeout --- index.html --> http://10.0.0.1/x
 //   Get "http://h/x": dial tcp: lookup h: no such host --- index.html --> http://h/x
+//   alt attribute missing --- posts/x/index.html --> https://cdn.example.com/i.png
 //
-// Matching that shape, and requiring the target to be an http(s) URL, is what
-// makes this robust. The previous implementation listed message substrings
-// ('Non-OK status', 'Get "http', 'tls:') and so silently dropped any failure
-// whose wording was not on the list — most importantly htmltest's timeout,
-// 'request exceeded our ExternalTimeout', which names no URL scheme in its
-// message. A URL dropped here reaches no bucket at all: it fails the gate
-// without ever being named in the report. Matching the line structure instead
-// of the prose means a new or reworded htmltest message cannot reintroduce
-// that hole.
-const FAILURE_LINE = /\s---\s+\S+\s+-->\s+(https?:\/\/\S+?)[\s"':)\]]*$/;
-
-// Internal-target failures (alt text, missing files, directory slashes) use the
-// same line shape with a non-URL target, so FAILURE_LINE skips them: the
-// browser has nothing to verify for those and they are reported by htmltest
-// directly.
+// The target is a single whitespace-free token, so capturing it whole avoids
+// having to guess where it ends — an earlier version trimmed trailing
+// punctuation and would have mangled a legitimate URL ending in ')', such as a
+// Wikipedia disambiguation link.
+const FAILURE_LINE = /^\s*(.*?)\s+---\s+\S+\s+-->\s*(\S*)/;
 
 const ANSI = /\u001b\[[0-9;]*m/g;
+
+// Structure alone cannot say whether a failure is a network outcome: the fourth
+// example above is a missing alt attribute on an externally hosted image, and it
+// has exactly the same shape as a network failure with an http(s) target.
+// Forwarding it to tier 2 would launder an accessibility defect into a pass,
+// because the image answers 200 and tier 2 only reports on reachability.
+//
+// So the message decides the route, and only these shapes — an HTTP status, a Go
+// transport error from htmltest's URL check, or htmltest's own timeout — mean
+// "the network was consulted".
+const NETWORK_MESSAGES = [
+  /^Non-OK status:\s*\d{3}\b/,
+  /^(?:Get|Head|Post)\s+"[^"]*":/,
+  /request exceeded our ExternalTimeout/
+];
+
+/**
+ * Anything whose message is not recognisably a network outcome is treated as a
+ * markup, accessibility or internal-reference failure and is fatal.
+ *
+ * This direction is deliberate. Defaulting an unrecognised message to "network"
+ * would let a new htmltest check pass the gate silently; defaulting it to fatal
+ * can only cause a loud, reported failure that names the offending line. Issue
+ * #391's real damage was silence — a URL that reached no bucket failed the gate
+ * with nothing in the report to explain it — so the fail-closed direction is
+ * what keeps that from recurring, not the matching itself.
+ */
+function isNetworkMessage(message) {
+  return NETWORK_MESSAGES.some(pattern => pattern.test(message));
+}
 
 /**
  * Canonical URL for deduplication. Share buttons differ only in their query
@@ -78,18 +99,21 @@ export function getCanonicalUrl(url) {
 }
 
 /**
- * Extract the external URLs that failed htmltest, with their HTTP status where
- * htmltest reported one.
+ * Split htmltest's failures into external URLs for browser verification and
+ * failures that must fail the build on their own.
  *
  * @param {string} output - combined stdout+stderr from htmltest
- * @returns {{failedUrls: string[], statusByUrl: Map<string, number|null>, totalFailures: number, skippedCount: number}}
+ * @returns {{failedUrls: string[], statusByUrl: Map<string, number|null>, totalFailures: number, skippedCount: number, nonNetworkFailures: string[]}}
  *   failedUrls is one representative URL per canonical group. statusByUrl maps
- *   every URL seen to its status, or null when the failure carried no status
- *   (a timeout, DNS or TLS error).
+ *   every URL seen to its status, or null when the failure carried no status (a
+ *   timeout, DNS or TLS error). nonNetworkFailures holds the verbatim lines that
+ *   tier 2 cannot adjudicate — markup, accessibility and internal references —
+ *   which the caller must treat as fatal regardless of what tier 2 concludes.
  */
 export function parseHtmltestFailures(output) {
   const statusByUrl = new Map();
   const allUrls = [];
+  const nonNetworkFailures = [];
 
   const lines = String(output ?? '').replace(ANSI, '').split('\n');
 
@@ -97,9 +121,17 @@ export function parseHtmltestFailures(output) {
     const match = line.match(FAILURE_LINE);
     if (!match) continue;
 
-    const url = match[1];
+    const message = match[1].trim();
+    const url = match[2];
 
-    const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
+    const isExternal = /^https?:\/\//.test(url);
+
+    if (!isExternal || !isNetworkMessage(message)) {
+      nonNetworkFailures.push(line.trim());
+      continue;
+    }
+
+    const statusMatch = message.match(/Non-OK status:\s*(\d{3})/);
     const newStatus = statusMatch ? Number(statusMatch[1]) : null;
     const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
 
@@ -139,6 +171,7 @@ export function parseHtmltestFailures(output) {
     failedUrls,
     statusByUrl,
     totalFailures: allUrls.length,
-    skippedCount: allUrls.length - failedUrls.length
+    skippedCount: allUrls.length - failedUrls.length,
+    nonNetworkFailures
   };
 }
