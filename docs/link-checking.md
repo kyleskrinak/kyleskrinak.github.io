@@ -370,11 +370,11 @@ The repository runs automated link checks every night via GitHub Actions:
 1. Builds the site
 2. Installs htmltest and Playwright Chromium
 3. Runs `check:links` (two-tier verification)
-4. Creates/updates GitHub issue if broken links found
+4. Creates/updates GitHub issue if the check fails
 
 **Issue Reporting:**
 - **Title:** "Link check failure report"
-- **Trigger:** Only genuinely broken links (failed both htmltest AND browser)
+- **Trigger:** Either genuinely broken links (failed both htmltest AND browser) or non-network failures — markup, accessibility and internal-reference diagnostics, which bypass tier 2 and fail on their own. The issue body distinguishes the two, because a markup-only run exits before Chromium starts and so has no browser results to show.
 - **Auto-filtered:** 403s that work in browser are NOT reported; auth-required domains (linkedin.com) are reported as unverifiable but do NOT fail CI
 - **Action:** Review issue, fix broken links; manually verify any unverifiable URLs listed
 

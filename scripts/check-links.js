@@ -142,8 +142,15 @@ if (!isManualMode) {
   }
 
   if (uniqueUrls === 0) {
-    console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
-    console.error('   Failing check: please review the htmltest output above.\n');
+    if (nonNetworkFailures.length > 0) {
+      // Fully accounted for above: the fatal bucket explains every failure, so
+      // there is nothing for the browser to adjudicate. Say so, rather than
+      // implying unexplained errors.
+      console.error('\n❌ All htmltest failures are non-network — nothing for tier 2 to verify.\n');
+    } else {
+      console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
+      console.error('   Failing check: please review the htmltest output above.\n');
+    }
     process.exit(1);
   }
 
@@ -524,7 +531,7 @@ console.log('\n' + '━'.repeat(60));
 // Exit with appropriate code
 // Note: 403/429/999 withheld, 5xx server errors, and auth-required unverifiable
 // URLs stay visible in the report but do not trigger exit(1).
-// Only genuinely broken links fail.
+// Genuinely broken links and non-network diagnostics fail; nothing else does.
 if (trulyBroken.length > 0 || nonNetworkFailures.length > 0) {
   if (trulyBroken.length > 0) {
     console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention`);
