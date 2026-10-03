@@ -22,8 +22,17 @@ function makePage({
   let current = "about:blank";
   return {
     async goto(url) {
+      if (gotoError) {
+        // A real browser leaves page.url() at about:blank when navigation fails
+        // before anything commits, which is the case verifyUrl's fallback exists
+        // for. Only an explicit finalUrl models a failure part-way through a
+        // redirect chain, where the last URL navigated to does survive. Assigning
+        // `current` unconditionally here would make the fallback test pass
+        // through the wrong branch.
+        if (finalUrl) current = finalUrl;
+        throw new Error(gotoError);
+      }
       current = finalUrl ?? url;
-      if (gotoError) throw new Error(gotoError);
       if (nullResponse) return null;
       return {
         status: () => status,
@@ -168,7 +177,12 @@ describe("verifyUrl redirect and error reporting", () => {
   });
 
   it("falls back to the original URL when goto throws before navigating", async () => {
-    const r = await verifyUrl(makePage({ gotoError: "boom" }), "https://example.com/x");
+    // The stub leaves page.url() at about:blank here, so this genuinely
+    // exercises verify-url's fallback rather than reading back a URL the stub
+    // already navigated to.
+    const page = makePage({ gotoError: "boom" });
+    assert.equal(page.url(), "about:blank", "precondition: never navigated");
+    const r = await verifyUrl(page, "https://example.com/x");
     assert.equal(r.finalUrl, "https://example.com/x");
     assert.equal(r.redirected, false, "about:blank must not count as a redirect");
   });
