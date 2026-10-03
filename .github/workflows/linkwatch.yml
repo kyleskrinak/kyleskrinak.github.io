@@ -74,15 +74,27 @@ jobs:
             const repo = context.repo.repo;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
+            // The check fails for two unrelated reasons, and the report must not
+            // conflate them: a broken external link is adjudicated by the browser,
+            // while a markup or internal-reference failure bypasses tier 2 entirely
+            // (a markup-only run exits before Chromium even starts).
             const body =
-              `Two-tier link check detected broken links (verified with real browser).\n\n` +
+              `The two-tier link check failed. See the report below for which category.\n\n` +
               `- Workflow run: ${runUrl}\n` +
               `- Branch/ref: ${context.ref}\n` +
               `- Commit: ${context.sha}\n\n` +
               `Report:\n\`\`\`\n${report}\n\`\`\`\n\n` +
-              `Links shown above failed both htmltest AND browser verification. ` +
-              `Review the job logs for details. Links that work in browser (403s, bot-detected) ` +
-              `are automatically filtered out and not reported here.`;
+              `**How to read this report**\n\n` +
+              `- **Broken links** — listed under 'need manual attention'. These failed ` +
+              `htmltest AND browser verification, so the URL is genuinely unreachable. ` +
+              `Links that work in a real browser (403s, bot detection) and hosts returning ` +
+              `5xx are reported as context but do not fail the check.\n` +
+              `- **Markup, accessibility or internal-reference failures** — listed under ` +
+              `'browser verification cannot excuse'. A browser cannot adjudicate these: a ` +
+              `referenced image may answer 200 while its alt attribute is still missing. ` +
+              `They fail on their own and never reach tier 2, so do not expect browser ` +
+              `results for them.\n\n` +
+              `Either category can be present without the other. Review the job logs for details.`;
 
             // Find an existing open issue with the exact title.
             const issues = await github.paginate(github.rest.issues.listForRepo, {

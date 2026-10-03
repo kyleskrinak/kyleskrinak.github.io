@@ -22,6 +22,7 @@ import { chromium } from 'playwright';
 import { existsSync } from 'fs';
 import { verifyUrl } from './lib/verify-url.js';
 import { resolveBrowserMode } from './lib/browser-mode.js';
+import { parseHtmltestFailures } from './lib/parse-htmltest.js';
 
 const DIST_DIR = 'dist';
 
@@ -90,6 +91,7 @@ if (isManualMode) {
 let htmltestOutput = '';
 let statusByUrl = new Map();
 let failedUrls = [];
+let nonNetworkFailures = [];
 
 if (!isManualMode) {
   try {
@@ -112,118 +114,43 @@ if (!isManualMode) {
 
   console.log(htmltestOutput);
 
-  // Extract failed URLs from htmltest output
-  const urlPattern = /https?:\/\/[^\s]+/g;
-  const failedLines = htmltestOutput.split('\n').filter(line =>
-    line.includes('Non-OK status') ||
-    line.includes('Get "http') ||
-    line.includes('tls:')
-  );
+  // Extract failed URLs from htmltest output. Parsing lives in lib/parse-htmltest.js
+  // so it can be unit-tested without running htmltest or launching a browser.
+  const parsed = parseHtmltestFailures(htmltestOutput);
+  statusByUrl = parsed.statusByUrl;
+  failedUrls = parsed.failedUrls;
+  nonNetworkFailures = parsed.nonNetworkFailures;
 
-/**
- * Get canonical URL for deduplication purposes
- * Share buttons with different query params are treated as the same URL
- */
-function getCanonicalUrl(url) {
-  try {
-    const urlObj = new URL(url);
-    // Share services - only check base URL once regardless of shared content
-    const shareServices = [
-      'wa.me',
-      'facebook.com/sharer.php',
-      'x.com/intent',
-      'twitter.com/intent',
-      'pinterest.com/pin',
-      't.me/share'
-    ];
-
-    const isShareService = shareServices.some(service => {
-      const [serviceHost, ...servicePathParts] = service.split('/');
-      const servicePath = servicePathParts.length ? '/' + servicePathParts.join('/') : '';
-      const hostname = urlObj.hostname;
-      const pathname = urlObj.pathname;
-
-      const hostnameMatches =
-        hostname === serviceHost ||
-        hostname.endsWith('.' + serviceHost);
-
-      const pathMatches =
-        servicePath === '' ? true : pathname.startsWith(servicePath);
-
-      return hostnameMatches && pathMatches;
-    });
-
-    if (isShareService) {
-      // Return base URL without query params for share services
-      return urlObj.origin + urlObj.pathname;
-    }
-
-    // For other URLs, return as-is
-    return url;
-  } catch {
-    return url;
-  }
-}
-
-  const allUrls = [];
-
-  failedLines.forEach(line => {
-    const matches = line.match(urlPattern);
-    if (!matches) return;
-
-    // Clean trailing punctuation from htmltest output (quotes, colons, etc.)
-    let url = matches[matches.length - 1];
-    url = url.replace(/["':)\]]+$/, '');
-
-    const statusMatch = line.match(/Non-OK status:\s*(\d{3})/);
-    const newStatus = statusMatch ? Number(statusMatch[1]) : null;
-    const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
-
-    // Set status if first encounter, or overwrite null with actual status code
-    if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
-      statusByUrl.set(url, newStatus);
-    }
-
-    allUrls.push(url);
-  });
-
-  // Deduplicate URLs intelligently using canonical form
-  // Select representative URL with best known status for accurate reporting
-  const canonicalToRepUrl = new Map();
-
-  for (const url of allUrls) {
-    const canonical = getCanonicalUrl(url);
-    const currentStatus = statusByUrl.get(url);
-
-    if (!canonicalToRepUrl.has(canonical)) {
-      // First time we see this canonical URL: tentatively use this URL
-      canonicalToRepUrl.set(canonical, url);
-    } else {
-      const existingUrl = canonicalToRepUrl.get(canonical);
-      const existingStatus = statusByUrl.get(existingUrl);
-
-      // Prefer a URL that has a concrete status over one with null/undefined
-      if ((existingStatus == null) && (currentStatus != null)) {
-        canonicalToRepUrl.set(canonical, url);
-      }
-    }
-  }
-
-  for (const repUrl of canonicalToRepUrl.values()) {
-    failedUrls.push(repUrl);
-  }
-
-  const totalFailures = allUrls.length;
+  const totalFailures = parsed.totalFailures;
   const uniqueUrls = failedUrls.length;
-  const skippedCount = totalFailures - uniqueUrls;
+  const skippedCount = parsed.skippedCount;
 
   if (skippedCount > 0) {
     console.log(`\nℹ️  Skipped ${skippedCount} duplicate URL(s) after canonicalization/deduplication\n`);
   }
 
+  // Markup, accessibility and internal-reference failures are not something a
+  // browser can adjudicate: the referenced image may well answer 200 while the
+  // alt attribute is still missing. They fail the build on their own, so tier 2
+  // can never turn them into a pass.
+  if (nonNetworkFailures.length > 0) {
+    console.error(`\n❌ ${nonNetworkFailures.length} failure(s) that browser verification cannot excuse:`);
+    console.error('━'.repeat(60));
+    nonNetworkFailures.forEach(line => console.error(`  ${line}`));
+    console.error('\n   These are markup, accessibility or internal-reference errors.');
+    console.error('   They fail the check regardless of the tier 2 results below.');
+  }
+
   if (uniqueUrls === 0) {
-    console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
-    console.error('   Failing check: please review the htmltest output above for internal link issues.\n');
+    if (nonNetworkFailures.length > 0) {
+      // Fully accounted for above: the fatal bucket explains every failure, so
+      // there is nothing for the browser to adjudicate. Say so, rather than
+      // implying unexplained errors.
+      console.error('\n❌ All htmltest failures are non-network — nothing for tier 2 to verify.\n');
+    } else {
+      console.error('\n❌ htmltest reported errors, but no external URLs were found to verify.');
+      console.error('   Failing check: please review the htmltest output above.\n');
+    }
     process.exit(1);
   }
 
@@ -287,7 +214,10 @@ try {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
     } else if (result.temporary) {
-      console.log(`  ⏸️  ${result.status} - Temporarily unavailable (maintenance page)`);
+      const temporaryMsg = result.maintenanceSignals && result.maintenanceSignals.length > 0
+        ? 'Temporarily unavailable (maintenance page)'
+        : 'Temporarily unavailable (server error)';
+      console.log(`  ⏸️  ${result.status} - ${temporaryMsg}`);
       if (result.retryAfter) {
         console.log(`  → Retry-After: ${result.retryAfter}`);
       }
@@ -295,7 +225,13 @@ try {
         console.log(`  → Redirects to: ${result.finalUrl}`);
       }
     } else {
-      console.log(`  ❌ Failed in browser`);
+      // Print the status: a bare "Failed in browser" gives no way to tell link
+      // rot (404) from a server-side or transport failure, which is what made
+      // the GitHub 503s in issue #391 so hard to diagnose from the report
+      // alone. The catch path in verifyUrl returns no status at all, so name
+      // that case rather than printing "undefined".
+      const brokenStatus = result.status === undefined ? 'no response' : result.status;
+      console.log(`  ❌ ${brokenStatus} - Failed in browser`);
       if (result.error) {
         console.log(`  → ${result.error}`);
       }
@@ -313,7 +249,7 @@ console.log('FINAL REPORT');
 console.log('━'.repeat(60));
 
 // notBrokenResults includes reachable (2xx), withheld (403/429/999), and
-// temporary maintenance (503 with strong maintenance signals) URLs.
+// temporary (any 5xx — the host answered but could not serve) URLs.
 // kept as a single set for sectioning logic that doesn't care which flavor.
 const notBrokenResults = results.filter(r => r.success);
 const reachableResults = results.filter(r => r.reachable);
@@ -354,7 +290,7 @@ if (isManualMode) {
   console.log(`   URLs checked: ${failedUrls.length}`);
   console.log(`   ✅ Reachable: ${reachableResults.length}`);
   console.log(`   ℹ️  Withheld (gated): ${withheldResults.length}`);
-  console.log(`   ⏸️  Temporarily unavailable (maintenance): ${temporaryResults.length}`);
+  console.log(`   ⏸️  Temporarily unavailable (5xx server error): ${temporaryResults.length}`);
   console.log(`   ❌ Broken: ${trulyBroken.length}`);
   if (unverifiable.length > 0) {
     console.log(`   ⚠️  Unverifiable (requires auth — manual review): ${unverifiable.length}`);
@@ -366,7 +302,7 @@ if (isManualMode) {
   if (withheld429Count > 0) {
     console.log(`   🚫 Rate-limited / bot-gated (browser 429): ${withheld429Count}`);
   }
-  console.log(`   ⏸️  Temporarily unavailable (503 maintenance): ${temporaryResults.length}`);
+  console.log(`   ⏸️  Temporarily unavailable (5xx server error): ${temporaryResults.length}`);
   console.log(`   ❌ Actually broken: ${trulyBroken.length}`);
   if (unverifiable.length > 0) {
     console.log(`   ⚠️  Unverifiable (requires auth — manual review): ${unverifiable.length}`);
@@ -384,7 +320,7 @@ if (isManualMode) {
 let ignoreCandidates = [];
 let htmltest403s = [];
 let htmltest999s = [];
-let htmltest503Temporaries = [];
+let htmltest5xxTemporaries = [];
 let browserWithheldOther = [];
 let browserTemporaryOther = [];
 let connectionErrors = [];
@@ -407,7 +343,12 @@ if (!isManualMode) {
   });
   htmltest403s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 403 && !r.temporary);
   htmltest999s = notBrokenResults.filter(r => statusByUrl.get(r.url) === 999 && !r.temporary);
-  htmltest503Temporaries = temporaryResults.filter(r => statusByUrl.get(r.url) === 503);
+  // Any 5xx, not only 503: hosts shed load with whatever code they favour
+  // (500, 502, 503, 504) and all of them mean the same thing here.
+  htmltest5xxTemporaries = temporaryResults.filter(r => {
+    const status = statusByUrl.get(r.url);
+    return typeof status === 'number' && status >= 500 && status <= 599;
+  });
   connectionErrors = notBrokenResults.filter(r => statusByUrl.get(r.url) === null || statusByUrl.get(r.url) === undefined);
   // Catch browser-withheld URLs whose htmltest status doesn't match any policy
   // bucket above, so every URL counted in the withheld summary appears in some
@@ -419,7 +360,8 @@ if (!isManualMode) {
   });
   browserTemporaryOther = temporaryResults.filter(r => {
     const status = statusByUrl.get(r.url);
-    return status !== 503 && status !== null && status !== undefined;
+    if (status === null || status === undefined) return false;
+    return !(typeof status === 'number' && status >= 500 && status <= 599);
   });
 }
 
@@ -467,11 +409,15 @@ if (notBrokenResults.length > 0 && !isManualMode) {
     });
   }
 
-  if (htmltest503Temporaries.length > 0) {
-    console.log('\nℹ️  htmltest reported 503 — temporary maintenance page (not added to IgnoreURLs):');
+  if (htmltest5xxTemporaries.length > 0) {
+    console.log('\nℹ️  htmltest reported 5xx — server error, treated as temporary (not added to IgnoreURLs):');
     console.log('━'.repeat(60));
-    htmltest503Temporaries.forEach(r => {
-      console.log(`  - ${r.url}  (browser: ${r.status} maintenance page)`);
+    htmltest5xxTemporaries.forEach(r => {
+      const htmltestStatus = statusByUrl.get(r.url);
+      const browserDetail = r.maintenanceSignals && r.maintenanceSignals.length > 0
+        ? `${r.status} maintenance page`
+        : `${r.status} server error`;
+      console.log(`  - ${r.url}  (htmltest: ${htmltestStatus}, browser: ${browserDetail})`);
       if (r.retryAfter) {
         console.log(`    → Retry-After: ${r.retryAfter}`);
       }
@@ -479,6 +425,8 @@ if (notBrokenResults.length > 0 && !isManualMode) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
       }
     });
+    console.log('  ℹ️  A 5xx means the host answered but could not serve the page — that is not link rot, so these do not fail the check.');
+    console.log('     Watch for repeats: a URL listed here on several consecutive runs needs a manual look, because a permanent 5xx will never fail CI on its own.');
   }
 
   if (browserWithheldOther.length > 0) {
@@ -494,11 +442,11 @@ if (notBrokenResults.length > 0 && !isManualMode) {
   }
 
   if (browserTemporaryOther.length > 0) {
-    console.log('\nℹ️  Browser showed a temporary maintenance page (503) but htmltest reported a different status:');
+    console.log('\nℹ️  Browser returned a 5xx server error but htmltest reported a non-5xx status:');
     console.log('━'.repeat(60));
     browserTemporaryOther.forEach(r => {
       const htmltestStatus = statusByUrl.get(r.url);
-      console.log(`  - ${r.url}  (htmltest: ${htmltestStatus}, browser: ${r.status} maintenance page)`);
+      console.log(`  - ${r.url}  (htmltest: ${htmltestStatus}, browser: ${r.status} server error)`);
       if (r.retryAfter) {
         console.log(`    → Retry-After: ${r.retryAfter}`);
       }
@@ -516,7 +464,7 @@ if (notBrokenResults.length > 0 && !isManualMode) {
         ? `${r.status} reachable`
         : r.withheld
           ? `${r.status} gated`
-          : `${r.status} temporary`;
+          : `${r.status} server error`;
       console.log(`  - ${r.url}  (browser: ${browserState})`);
       if (r.redirected) {
         console.log(`    → Redirects to: ${r.finalUrl}`);
@@ -581,11 +529,17 @@ if (trulyBroken.length > 0) {
 console.log('\n' + '━'.repeat(60));
 
 // Exit with appropriate code
-// Note: 403/429/999 withheld, 503 maintenance, and auth-required unverifiable
+// Note: 403/429/999 withheld, 5xx server errors, and auth-required unverifiable
 // URLs stay visible in the report but do not trigger exit(1).
-// Only genuinely broken links fail.
-if (trulyBroken.length > 0) {
-  console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention\n`);
+// Genuinely broken links and non-network diagnostics fail; nothing else does.
+if (trulyBroken.length > 0 || nonNetworkFailures.length > 0) {
+  if (trulyBroken.length > 0) {
+    console.log(`\n⚠️  ${trulyBroken.length} link(s) need manual attention`);
+  }
+  if (nonNetworkFailures.length > 0) {
+    console.log(`⚠️  ${nonNetworkFailures.length} markup/accessibility failure(s) listed above`);
+  }
+  console.log('');
   process.exit(1);
 }
 

@@ -25,19 +25,37 @@ export async function verifyUrl(page, url) {
     //   reachable: 2xx — the page actually loaded for the browser
     //   withheld: 403/999 — the resource exists but gates automated clients;
     //             429 — rate-limited/bot-gated (does NOT imply resource exists)
-    //   temporary: 503 maintenance page requiring explicit maintenance-mode
-    //     page content; Retry-After treated as corroborating evidence only.
+    //   temporary: any 5xx — the host answered but could not serve the page.
+    //     Link rot is a 4xx condition; a 5xx says the server is unwell, not
+    //     that the link is wrong, so it never counts as broken.
     // success keeps the broad "not broken" meaning so callers that only
     // care about pass/fail don't have to inspect both flags.
+    //
+    // This bucket previously required explicit maintenance-page content to
+    // admit a 503, which made overload and abuse-mitigation 503s — the kind
+    // GitHub returns to CI runner IPs — report as permanently broken and
+    // demand manual fixes that could not be made. Maintenance markers are
+    // still collected below, as reporting detail rather than the entry
+    // condition.
     const reachable = !!(response && response.ok());
     const withheld = !!(response && (status === 403 || status === 429 || status === 999));
+    // Only a numeric status can be a 5xx: `status` is the string 'NO_RESPONSE'
+    // when the browser got no response object at all, which stays broken.
+    const temporary = typeof status === 'number' && status >= 500 && status <= 599;
     let maintenanceSignals = [];
     if (status === 503) {
-      // Require explicit maintenance-mode page content as the primary signal.
-      // Retry-After alone is too broad — servers also send it for overload,
-      // abuse mitigation, and transient outages. Only treat it as corroborating
-      // evidence when page content already confirms a maintenance window.
-      const pageHtml = (await page.content()).toLowerCase();
+      // Distinguishes a declared maintenance window from generic overload.
+      // Both are temporary, so this only enriches the report. Retry-After
+      // stays corroborating evidence — servers also send it for overload and
+      // abuse mitigation, so it is never a primary signal.
+      let pageHtml = '';
+      try {
+        pageHtml = (await page.content()).toLowerCase();
+      } catch {
+        // Content unavailable (frame detached, navigation raced). The 5xx
+        // classification above already stands; markers are optional detail,
+        // so swallow this rather than demoting the URL to broken.
+      }
       const maintenanceMarkers = [
         'scheduled maintenance',
         'under maintenance',
@@ -51,7 +69,6 @@ export async function verifyUrl(page, url) {
         }
       }
     }
-    const temporary = status === 503 && maintenanceSignals.length > 0;
 
     return {
       url,
