@@ -3,6 +3,15 @@ CheckExternal: true
 CheckInternal: true
 IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
+# alt="" is the correct markup for a decorative or placeholder image, and this
+# site has three: the lightbox <img> placeholder (script sets alt on open), the
+# hidden microformats u-photo in PostDetails, and the homepage footer h-card
+# photo. htmltest counts every one as "alt text empty", which put 99 errors in
+# every run and made tier 1 structurally unpassable — the early-exit fast path
+# in check-links.js was dead code and each run paid the full external sweep.
+# This flag permits an intentional empty alt while a genuinely MISSING alt
+# attribute is still an error (verified), so no real defect class is lost.
+IgnoreAltEmpty: true
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers

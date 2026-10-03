@@ -172,6 +172,7 @@ CheckExternal: true
 CheckInternal: true
 IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
+IgnoreAltEmpty: true   # intentional alt="" on decorative/placeholder images
 IgnoreDirectoryMissingTrailingSlash: true
 IgnoreURLs:
   - "onedrive.live.com"  # Bot detection, works in real browsers
@@ -179,6 +180,8 @@ IgnoreURLs:
   - "windowsupdate.microsoft.com"  # Windows Update client endpoint, not web-accessible
   # ... etc
 ```
+
+**Why `IgnoreAltEmpty`**: `alt=""` is the correct markup for a decorative or placeholder image, and this site has three — the lightbox `<img>` placeholder (the script sets `alt` when the dialog opens), the hidden microformats `u-photo` in `PostDetails.astro`, and the homepage footer `h-card` photo. htmltest counts each one as `alt text empty`, which produced 99 errors on every run. Together with 49 `src attribute missing` errors from the lightbox placeholder, tier 1 could never exit 0: the early-return fast path below was dead code, and every run paid the full external sweep plus a Chromium launch. `IgnoreAltEmpty` permits an intentional empty alt while a genuinely *missing* alt attribute remains an error, so no real defect class is suppressed. `IgnoreAltMissing` stays `false` for that reason — it is the blunter flag and would hide actual omissions.
 
 **Note**: 403 responses and 999 responses (LinkedIn-style anti-bot) are automatically withheld from IgnoreURLs suggestions. 429 responses where the browser is also gated are similarly withheld. Connection/TLS errors are kept visible for investigation — they are not withheld and will fail the run if the browser confirms the URL is unreachable.
 
@@ -230,8 +233,10 @@ The URL does not fail CI. The script distinguishes four outcomes — three where
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
-- **Temporary** — browser returned 503 with explicit maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"). A `Retry-After` header is treated as corroborating evidence but is not sufficient alone. The site is undergoing maintenance; the link is not broken. The script does NOT suggest adding these to `IgnoreURLs`.
-- **Unverifiable** — Browser verification returned a failure (`success: false`) *and* the effective URL (original URL or redirect destination) is on a domain that requires authentication (e.g. `linkedin.com`). Because unauthenticated responses on these domains are unreliable — valid profiles and deleted ones can produce the same error — the failure is treated as non-fatal. If the browser succeeds for a LinkedIn URL (2xx → **Reachable**; 403/429/999 → **Withheld**; 503 maintenance page → **Temporary**), it lands in the appropriate bucket instead; this bucket only applies when `success: false`. Reported for manual review but does NOT fail CI.
+- **Temporary** — browser returned any 5xx (500, 502, 503, 504, …). The host answered but could not serve the page. Link rot is a 4xx condition, so a 5xx means the server is unwell, not that the link is wrong; it never counts as broken. A 503 is additionally checked for maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"), with a `Retry-After` header as corroborating evidence — but that only enriches the report label, it is not required to enter this bucket. The script does NOT suggest adding these to `IgnoreURLs`.
+
+  **Why the whole 5xx range:** this bucket originally admitted a 503 only when the page carried maintenance-mode text. Hosts that shed load from CI runner IPs — GitHub among them — return a bare 503 with no such text, so those URLs were classified as permanently broken and the nightly job filed issues demanding manual fixes for links that were never broken (issue #391). Broad 5xx acceptance is the correct trade: the cost is that a *permanently* 5xx URL will not fail CI on its own, which is why the report tells you to watch for the same URL recurring across runs.
+- **Unverifiable** — Browser verification returned a failure (`success: false`) *and* the effective URL (original URL or redirect destination) is on a domain that requires authentication (e.g. `linkedin.com`). Because unauthenticated responses on these domains are unreliable — valid profiles and deleted ones can produce the same error — the failure is treated as non-fatal. If the browser succeeds for a LinkedIn URL (2xx → **Reachable**; 403/429/999 → **Withheld**; any 5xx → **Temporary**), it lands in the appropriate bucket instead; this bucket only applies when `success: false`. Reported for manual review but does NOT fail CI.
 
 Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
 
@@ -323,7 +328,7 @@ Do NOT add to ignore list when:
   - 403 responses: withheld by policy (not added even if browser works)
   - 429 responses: withheld (rate-limited/bot-gated; not added even if browser is also gated)
   - 999 responses: withheld by policy (LinkedIn-style anti-bot; not added even if browser works)
-  - 503 maintenance pages: temporary (not added; maintenance-mode page content required; `Retry-After` header used as corroborating evidence only)
+  - 5xx responses: temporary (not added; the whole 500–599 range qualifies. A 503 is also probed for maintenance-mode page content, with `Retry-After` as corroborating evidence, to label the report — not to qualify)
   - Connection/TLS errors (no status code): not suggested (real issues to investigate)
   - 404 in both htmltest and browser: genuinely broken (don't ignore)
 
@@ -342,6 +347,7 @@ Sites may report different errors to bots vs real browsers:
 | **Genuinely broken** | 404 | 404 | Do NOT add (link needs fixing) |
 | **Proxy issues** | 503 | 200 OK | May add to ignore list |
 | **Maintenance page** | 503 | 503 maintenance | Temporary (not added; re-check after maintenance) |
+| **Load shedding against CI IPs** | 5xx | 5xx server error | Temporary (not added; re-checked next run) |
 
 **Key Rule**: Only add to ignore list if the URL **works in browser verification**. If browser also fails, the link is genuinely broken and should be fixed, not ignored.
 

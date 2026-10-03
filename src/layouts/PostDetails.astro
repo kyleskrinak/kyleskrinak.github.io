@@ -263,7 +263,14 @@ const nextPost =
     <form method="dialog">
       <button type="submit" aria-label="Close lightbox">✕</button>
     </form>
-    <img alt="" />
+    {/* Placeholder src/alt: the lightbox script overwrites both from the
+        clicked image when the dialog opens. A 1x1 transparent GIF keeps the
+        element valid before then — htmltest flags a src-less img, and an
+        empty src would make the browser re-request the page. No width/height
+        here on purpose: real dimensions vary per image and CSS sizes the
+        dialog, so declaring 1x1 would fight the actual layout. The dialog is
+        closed until opened, so it contributes nothing to page CLS. */}
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" />
   </dialog>
   <Footer />
 </Layout>
