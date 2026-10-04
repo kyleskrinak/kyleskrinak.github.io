@@ -99,7 +99,7 @@ See `/docs/testing/` for detailed guides.
 
 Layered dependency hardening to limit exposure from compromised or malicious packages:
 
-- **Renovate** (npm only) with a 7-day cooling-off on routine bumps; security alerts fast-tracked
+- **Renovate** (npm only) with a 7-day cooling-off on routine bumps and weekly lockfile maintenance; security alerts fast-tracked (requires the repo's Dependabot alerts to stay on, plus OSV as a second source for direct dependencies)
 - **`ignore-scripts=true`** — no package lifecycle scripts run on install
 - **`npm run audit:deps`** — local pre-install audit: lockfile diff, publish-age, dormant-revival detection, and signature verification with a GO / REVIEW / BLOCK verdict
 - **CI gates** — `npm audit signatures` and the helper unit suite run on PRs and pushes to deploy branches

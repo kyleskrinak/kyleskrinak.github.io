@@ -284,7 +284,8 @@ PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=your_token_here    # Cloudflare Web Analytics
 
 ### Adding New Blog Posts
 
-1. Create `src/content/blog/YYYY-MM-DD-slug.md`
+1. Create `src/content/blog/YYYY-MM-DD-slug/index.md`, with any post images co-located in that
+   directory (or scaffold it: `npm run new-post -- YYYY-MM-DD-slug`)
 2. Include required front matter (title, pubDate, description)
 3. Optional: categories, tags
 4. Build: `npm run build`

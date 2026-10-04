@@ -142,7 +142,8 @@ When instructions appear to conflict:
 # Blog Writing Rules
 
 ## Filename Convention
-- Blog post files: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug.md`
+- Blog posts are co-located directories: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug/index.md`, with the post's images beside that `index.md` and referenced as `./image.webp`.
+- Scaffold with `npm run new-post -- <slug>`; add `--images <dir>` to convert a folder of images to WebP and co-locate them.
 - `getPath()` uses `post.id` directly (no lowercasing) — wrong case causes 404s on Linux CI even if macOS hides it.
 
 ## Voice & Prose

@@ -42,7 +42,8 @@ npm run check:live-weight   # Real uncompressed-bytes check against production, 
 **Monthly**:
 - Review GitHub Issues for automated link check failures
 - Check Cloudflare Analytics for traffic patterns
-- Review dependency updates (Renovate PRs and the Dependency Dashboard issue)
+- Review dependency updates (Renovate PRs, the weekly lock file maintenance PR, and the Dependency Dashboard issue)
+- Confirm Renovate's security path is live: Dependabot alerts on, Dependabot security updates off, and the latest Mend job log does not say `No vulnerability alerts enabled for repo`. See [Supply-Chain Security → Required GitHub settings](./supply-chain.md#required-github-settings)
 
 ### Pre-install supply-chain audit (`npm run audit:deps`)
 
