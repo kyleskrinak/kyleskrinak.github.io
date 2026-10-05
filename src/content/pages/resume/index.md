@@ -1,15 +1,151 @@
 ---
 title: Kyle Skrinak — Resume
-description: "Senior IT Systems Engineering Manager. Platform operations, web technology leadership, and team management from Gilead Sciences to Duke University."
+# The role sentence is NOT repeated here — resumeMetaDescription() prefixes
+# current_role.title. This field carries only the career summary.
+description: "Platform operations, web technology leadership, and team management from Gilead Sciences to Duke University."
 contactEmail: kyle.skrinak@gmail.com
 contactWebsite: https://kyle.skrinak.com
 contactLinkedin: https://www.linkedin.com/in/kyleskrinak/
 contactAddress: "309 Sir Brennan Court, Apex, NC 27523"
+current_role:
+  title: Senior IT Systems Engineering Manager, Digital Experience
+  employer: Gilead Sciences
+  location: Raleigh, NC
+  start_date: 2022-06-01
+skills_inventory:
+  last_reviewed: 2026-07-06
+  categories:
+    - name: Leadership & Team Development
+      id: leadership
+      skills:
+        - Technical Leadership
+        - Team Management
+        - Vendor Management
+        - Contractor Leadership
+        - Delegation Frameworks
+        - Cross-Functional Alignment
+        - Stakeholder Management
+        - Mentoring
+    - name: Platform Operations
+      id: platform-ops
+      skills:
+        - Site Reliability
+        - Incident Management
+        - Production Operations
+        - Change Management
+        - Release Management
+        - Service Delivery
+        - Operational Governance
+        - Runbook Development
+    - name: Cloud & Infrastructure
+      id: cloud-infrastructure
+      skills:
+        - Microsoft Azure
+        - Amazon Web Services (AWS)
+        - AKS
+        - ECS
+        - Cloud Architecture
+        - Infrastructure Modernization
+        - SSL Certificate Management
+        - DNS Management
+    - name: DevOps & Automation
+      id: devops-automation
+      skills:
+        - Azure DevOps
+        - CI/CD
+        - Git
+        - Infrastructure as Code
+        - Terraform
+        - Automation Design
+        - Workflow Optimization
+        - Deployment Engineering
+    - name: Cost Optimization & FinOps
+      id: cost-optimization
+      skills:
+        - FinOps
+        - Azure Cost Management
+        - Reserved Instances
+        - Resource Optimization
+        - Cloud Financial Governance
+        - Capacity Planning
+        - Cost Reporting
+    - name: Search & Content Platforms
+      id: search-content-platforms
+      skills:
+        - Sitecore
+        - Solr
+        - SolrCloud
+        - Content Delivery Platforms
+        - Search Architecture
+        - CMS Operations
+    - name: Security & Compliance
+      id: security-compliance
+      skills:
+        - Security Reviews
+        - Risk Assessment
+        - Compliance Governance
+        - Crown Jewels Assessments
+        - Privacy Controls
+        - Audit Support
+        - Certificate Governance
+    - name: Documentation & Process Excellence
+      id: documentation-process
+      skills:
+        - Technical Documentation
+        - SOP Development
+        - Knowledge Management
+        - Process Improvement
+        - Governance Frameworks
+        - Operational Standards
+    - name: AI & Productivity Enablement
+      id: ai-productivity
+      skills:
+        - Microsoft Copilot
+        - AI Adoption
+        - Prompt Engineering
+        - AIOps
+        - Process Automation
+        - Productivity Engineering
+education:
+  items:
+    - degree: Master of Science, Information Technology
+      degree_abbr: M.S. I.T.
+      institution: Rochester Institute of Technology
+      location: Rochester, NY
+      years: "1998 – 2001"
+      honors: With highest honors
+      render: true
+    - degree: Bachelor of Fine Arts, Illustration
+      degree_abbr: B.F.A, Illustration
+      institution: University of the Arts
+      location: Philadelphia, PA
+      years: "1980 – 1984"
+      render: true
+changelog:
+  - date: 2026-07-03
+    entry: Initial migration from Google Doc snapshot
+  - date: 2026-07-06
+    entry: >-
+      Migration complete — this file is the canonical resume source. The web
+      page (/resume/), the print route (/resume/print/), and the
+      build-generated PDF all render from it; the Google Doc is retired as a
+      source and is no longer maintained.
+  - date: 2026-07-06
+    entry: Populated skills inventory (9 categories), certifications, and education metadata
+  - date: 2026-07-06
+    entry: >-
+      Phase B — facet tagging: added <!-- f: … --> comments to all 10 bullets and 5 scope
+      paragraphs; wired remark-facets plugin; migrated remark/rehype plugins to unified()
+      processor in astro.config.ts.
+  - date: 2026-10-05
+    entry: >-
+      Restored current_role, skills_inventory, education, and this change log.
+      Commit dc8069e removed all four while moving certifications to
+      scripts/data/certifications.json; only the certifications move was
+      intended. Certifications stay in that file.
 ---
 
-## Senior IT Systems Engineering Manager, Digital Experience
-
-**Gilead Sciences** — Raleigh, NC | June 2022 – Present
+<!-- current-role -->
 
 Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sitecore CMS platforms powering ~200 highly visible, policy-sensitive pharmaceutical websites, maintaining team continuity through structured onboarding, clear platform ownership, and regular syncs. Own platform operations across infrastructure, CI/CD, monitoring, incident response, and reliability, partnering with Architecture, Development, Security, and Cloud DevOps. Own standard operating procedures for deployment, monitoring, disaster recovery, and change management, aligned with Gilead's IT governance requirements. Govern a deployment calendar averaging 30 releases per week across UAT and production, and lead incident response and security hardening across the platform. Continuously harden the platform against a high-volume, iterative stream of security findings across ~200 sites built and maintained by a mix of contributing agencies and contractors, without compromising uptime or deployment velocity. <!-- f: leadership, platform-ops, security -->
 
@@ -56,12 +192,4 @@ Managed the Pre-press department for a $26M/year commercial printer, with duties
 
 Supervised a small, 30-person graphic arts shop <!-- f: creative, leadership -->
 
-## M.S. I.T.
-
-**Rochester Institute of Technology** — Rochester, NY | 1998 – 2001
-
-With highest honors
-
-## B.F.A, Illustration
-
-**University of the Arts** — Philadelphia, PA | 1980 – 1984
+<!-- education -->

@@ -4,16 +4,37 @@ import { Script, createContext } from 'node:vm';
 import { parseHTML } from 'linkedom';
 import {
 	validateIncludeCertsShape,
+	validateIncludeSkillsShape,
+	includeSkillsRequestsSkills,
 	validateConfig,
 	validateBulletOrderRange,
 	validateCertificationsData,
 	resolveCerts,
+	resolveSkills,
 	injectCerts,
+	certDateSuffix,
+	injectSkills,
 	parseResumePreviewPort,
 	buildTransform,
 } from '../../scripts/build-resume-variant.mjs';
 
 const knownCertIds = new Set(['aiops-foundation', 'az-104']);
+const knownSkillIds = new Set(['leadership', 'platform-ops']);
+
+// Two categories are enough to prove order and rendering; the real inventory
+// lives in the resume frontmatter.
+const skillCategories = [
+	{
+		id: 'leadership',
+		name: 'Leadership & Team Development',
+		skills: ['Technical Leadership', 'Team Management'],
+	},
+	{
+		id: 'platform-ops',
+		name: 'Platform Operations',
+		skills: ['Site Reliability', 'Incident Management'],
+	},
+];
 const knownEntryIds = new Set([
 	'ms-it',
 	'senior-it-systems-engineering-manager-digital-experience',
@@ -210,6 +231,47 @@ describe('validateCertificationsData', () => {
 				validateCertificationsData(
 					{
 						...certData,
+						certifications: [{ id: 'az-104', name: 'Azure Administrator', expires: '2029-00' }],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must match YYYY-MM/,
+		);
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
+						certifications: [
+							{ id: 'az-104', name: 'Azure Administrator', issued: '2026-01', expires: '2025-06' },
+						],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must be after issued \(2026-01\), got 2025-06/,
+		);
+		// Equal months are a data error, not a zero-length validity window.
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
+						certifications: [
+							{ id: 'az-104', name: 'Azure Administrator', issued: '2026-01', expires: '2026-01' },
+						],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must be after issued/,
+		);
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
 						certifications: [{ id: 'az-104', name: 'Azure Administrator', issuer: '' }],
 					},
 					'certifications.json',
@@ -260,7 +322,58 @@ describe('resolveCerts', () => {
 	});
 });
 
+describe('certDateSuffix', () => {
+	it('renders a range when both dates are present', () => {
+		assert.equal(certDateSuffix({ issued: '2026-01', expires: '2029-01' }), ' (2026-01 – 2029-01)');
+	});
+
+	it('leaves the issued-only form byte-identical to the pre-expiry output', () => {
+		assert.equal(certDateSuffix({ issued: '2026-01' }), ' (2026-01)');
+	});
+
+	it('labels a lone expiry so it cannot read as an issue month', () => {
+		assert.equal(certDateSuffix({ expires: '2029-01' }), ' (expires 2029-01)');
+	});
+
+	it('returns an empty string for a credential with no dates', () => {
+		assert.equal(certDateSuffix({ id: 'az-104', name: 'Azure Administrator' }), '');
+	});
+});
+
 describe('injectCerts', () => {
+	it('renders an expiry range in the injected list item', () => {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<article class="resume-content">
+						<h2 id="ms-it">M.S. I.T.</h2>
+					</article>
+				</body>
+			</html>
+		`);
+		const content = document.querySelector('.resume-content');
+
+		injectCerts(
+			content,
+			[
+				{
+					id: 'aiops-foundation',
+					name: 'AIOps Foundation',
+					issuer: 'PeopleCert',
+					issued: '2026-01',
+					expires: '2029-01',
+				},
+			],
+			'ms-it',
+		);
+
+		assert.equal(
+			content.querySelector('h2.cert-heading').nextElementSibling.querySelector('li').textContent,
+			'AIOps Foundation — PeopleCert (2026-01 – 2029-01)',
+		);
+	});
+
 	it('injects the cert heading and list before the scoped anchor', () => {
 		const { document } = parseHTML(`
 			<html>
@@ -311,6 +424,192 @@ describe('injectCerts', () => {
 		assert.throws(
 			() => injectCerts(document.querySelector('.resume-content'), certData.certifications, 'ms-it'),
 			/Certification anchor not found: ms-it/,
+		);
+	});
+});
+
+describe('validateIncludeSkillsShape', () => {
+	it('accepts omitted and "all" include_skills values', () => {
+		assert.deepEqual(validateIncludeSkillsShape(undefined), []);
+		assert.deepEqual(validateIncludeSkillsShape('all'), []);
+		assert.deepEqual(validateIncludeSkillsShape(['leadership']), []);
+	});
+
+	it('rejects a non-array, non-"all" value', () => {
+		assert.deepEqual(validateIncludeSkillsShape('leadership'), [
+			'include_skills: must be an array of skill category ids or "all"',
+		]);
+	});
+
+	it('rejects empty strings and duplicates', () => {
+		assert.deepEqual(validateIncludeSkillsShape(['  ']), [
+			'include_skills: must contain only non-empty strings',
+		]);
+		assert.deepEqual(validateIncludeSkillsShape(['leadership', 'leadership']), [
+			'include_skills: duplicate id(s): leadership',
+		]);
+	});
+});
+
+describe('includeSkillsRequestsSkills', () => {
+	it('distinguishes a request for skills from an opt-out', () => {
+		assert.equal(includeSkillsRequestsSkills('all'), true);
+		assert.equal(includeSkillsRequestsSkills(['leadership']), true);
+		assert.equal(includeSkillsRequestsSkills([]), false);
+		assert.equal(includeSkillsRequestsSkills(undefined), false);
+	});
+});
+
+describe('validateConfig include_skills', () => {
+	it('accepts known skill ids with a skills anchor', () => {
+		assert.doesNotThrow(() => {
+			validateConfig(
+				{ include_skills: ['leadership'], skills_anchor_before_id: 'ms-it' },
+				'variant.json',
+				knownCertIds,
+				knownSkillIds,
+			);
+		});
+	});
+
+	it('rejects unknown skill category ids', () => {
+		assert.throws(
+			() =>
+				validateConfig(
+					{ include_skills: ['missing-skill'], skills_anchor_before_id: 'ms-it' },
+					'variant.json',
+					knownCertIds,
+					knownSkillIds,
+				),
+			/include_skills: unknown skill category id\(s\): missing-skill/,
+		);
+	});
+
+	it('requires an anchor when skills are requested', () => {
+		assert.throws(
+			() => validateConfig({ include_skills: 'all' }, 'variant.json', knownCertIds, knownSkillIds),
+			/include_skills: requires skills_anchor_before_id/,
+		);
+	});
+
+	it('lets a skills request inherit the cert anchor', () => {
+		assert.doesNotThrow(() => {
+			validateConfig(
+				{ include_skills: 'all', anchor_before_id: 'ms-it' },
+				'variant.json',
+				knownCertIds,
+				knownSkillIds,
+			);
+		});
+	});
+
+	it('rejects an unknown skills_anchor_before_id', () => {
+		assert.throws(
+			() =>
+				validateConfig(
+					{ include_skills: 'all', skills_anchor_before_id: 'missing-entry' },
+					'variant.json',
+					knownCertIds,
+					knownSkillIds,
+				),
+			/skills_anchor_before_id: unknown entry key "missing-entry"/,
+		);
+	});
+});
+
+describe('resolveSkills', () => {
+	it('keeps source order for "all"', () => {
+		assert.deepEqual(
+			resolveSkills('all', skillCategories).map(c => c.id),
+			['leadership', 'platform-ops'],
+		);
+	});
+
+	it('keeps config order for an explicit list', () => {
+		assert.deepEqual(
+			resolveSkills(['platform-ops', 'leadership'], skillCategories).map(c => c.id),
+			['platform-ops', 'leadership'],
+		);
+	});
+
+	it('returns nothing when skills are not requested', () => {
+		assert.deepEqual(resolveSkills([], skillCategories), []);
+		assert.deepEqual(resolveSkills(undefined, skillCategories), []);
+	});
+
+	it('throws on an unknown id', () => {
+		assert.throws(
+			() => resolveSkills(['missing'], skillCategories),
+			/include_skills: unknown skill category id "missing"/,
+		);
+	});
+});
+
+describe('injectSkills', () => {
+	function fixture() {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<article class="resume-content">
+						<h2 id="ms-it">M.S. I.T.</h2>
+					</article>
+				</body>
+			</html>
+		`);
+		return document;
+	}
+
+	it('inserts a Skills heading and one list item per category before the anchor', () => {
+		const document = fixture();
+		injectSkills(document.querySelector('.resume-content'), skillCategories, 'ms-it');
+
+		const headings = Array.from(document.querySelectorAll('.resume-content h2')).map(h => h.textContent);
+		assert.deepEqual(headings, ['Skills', 'M.S. I.T.']);
+
+		const items = Array.from(document.querySelectorAll('.resume-content ul li')).map(li => li.textContent);
+		assert.deepEqual(items, [
+			'Leadership & Team Development: Technical Leadership, Team Management',
+			'Platform Operations: Site Reliability, Incident Management',
+		]);
+	});
+
+	it('adds the print exemption the injected heading needs exactly once', () => {
+		const document = fixture();
+		const content = document.querySelector('.resume-content');
+		injectSkills(content, skillCategories, 'ms-it');
+		injectSkills(content, skillCategories, 'ms-it');
+		assert.equal(document.querySelectorAll('#resume-variant-skills-heading-style').length, 1);
+	});
+
+	it('returns null without touching the document when no categories are selected', () => {
+		const document = fixture();
+		const content = document.querySelector('.resume-content');
+		assert.equal(injectSkills(content, [], 'ms-it'), null);
+		assert.equal(content.querySelector('h2.skills-heading'), null);
+	});
+
+	it('throws when the anchor is missing from the resume content', () => {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<h2 id="ms-it">Outside resume</h2>
+					<article class="resume-content"><h2 id="other">Other</h2></article>
+				</body>
+			</html>
+		`);
+		assert.throws(
+			() => injectSkills(document.querySelector('.resume-content'), skillCategories, 'ms-it'),
+			/Skills anchor not found: ms-it/,
+		);
+	});
+
+	it('throws when no anchor id is supplied', () => {
+		const document = fixture();
+		assert.throws(
+			() => injectSkills(document.querySelector('.resume-content'), skillCategories, ''),
+			/skills_anchor_before_id is required/,
 		);
 	});
 });

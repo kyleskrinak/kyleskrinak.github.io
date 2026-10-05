@@ -25,7 +25,8 @@ Then restructure the resume with this workflow:
 3. Use `max_bullets_per_entry` to keep the PDF to one page. Trim weakest job bullets first.
 4. Use `bullet_order` only when the best bullet for a role is not already first after filtering.
 5. Add `include_certs` when certifications strengthen the role match.
-6. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly.
+6. Add `include_skills` when the role screens on named technologies or competencies.
+7. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly.
 
 ## Variant config example
 
@@ -34,7 +35,9 @@ Then restructure the resume with this workflow:
   "title": "Kyle Skrinak - Platform Operations Leader",
   "include_facets": ["platform-ops", "leadership", "cost"],
   "max_bullets_per_entry": 3,
-  "include_certs": ["az-104", "aiops-foundation"]
+  "include_certs": ["az-104", "aiops-foundation"],
+  "include_skills": ["platform-ops", "cloud-infrastructure", "cost-optimization"],
+  "skills_anchor_before_id": "ms-it"
 }
 ```
 
@@ -49,6 +52,27 @@ Supported fields:
 | `bullet_order` | Reorder kept bullets by post-filter index for a specific entry id. |
 | `include_certs` | Add certifications by id, or use `"all"` for file order. Omitted or `[]` means no cert section. |
 | `anchor_before_id` | Optional per-variant cert placement override. Must match a rendered resume `h2` id. |
+| `include_skills` | Add skill categories by id, or use `"all"` for source order. Omitted or `[]` means no skills section. |
+| `skills_anchor_before_id` | Skills placement. Falls back to `anchor_before_id`. Must match a rendered resume `h2` id. |
+
+## Skills data
+
+Skill categories live in the resume frontmatter under `skills_inventory.categories` — nine categories, each with an `id`, a `name`, and a `skills` list. They do **not** render on the published resume; they are the reservoir a variant draws from. See [Resume Source and Data Flow](./resume-source.md).
+
+```json
+{
+  "include_skills": "all",
+  "skills_anchor_before_id": "ms-it"
+}
+```
+
+Rules:
+
+- `include_skills` is an array of category ids or the string `"all"`. An array selects in **config order**; `"all"` keeps source order.
+- Requesting skills requires an anchor. Certs default theirs from `certifications.json`; skills have no data file to default from, so the config must supply `skills_anchor_before_id` or `anchor_before_id`, or validation fails.
+- Duplicate or unknown category ids fail validation.
+- When skills and certs share an anchor, skills are injected first, so the Skills section sits above Certifications.
+- Category ids are **not** facets. `include_facets` filters bullets from the 7-item `FACETS` vocabulary; `include_skills` selects from the 9 category ids. The two lists overlap in wording and are deliberately separate.
 
 ## Certification data
 
@@ -62,7 +86,8 @@ Certification metadata lives in `scripts/data/certifications.json`:
       "id": "aiops-foundation",
       "name": "AIOps Foundation",
       "issuer": "PeopleCert",
-      "issued": "2026-01"
+      "issued": "2026-01",
+      "expires": "2029-01"
     },
     {
       "id": "az-104",
@@ -78,6 +103,8 @@ Rules:
 - `id` and `name` are required and must be non-empty.
 - `issuer` is optional but must be non-empty when present.
 - `issued` is optional and must use `YYYY-MM`.
+- `expires` is optional, must use `YYYY-MM`, and must fall **after** `issued` when both are present. Equal months fail validation. Omit it for a credential that does not lapse.
+- Rendering follows what is present: both dates give `Name — Issuer (2026-01 – 2029-01)`, `issued` alone gives `(2026-01)`, and `expires` alone gives `(expires 2029-01)` so a lone date is never mistaken for an issue month.
 - Duplicate certification ids fail validation.
 - `anchor_before_id` sets the default insertion point for the Certifications section.
 - A variant config can override placement with its own `anchor_before_id`.
@@ -108,13 +135,15 @@ Use `--base-url` only when the remote page matches the local resume source. The 
 The builder fails before writing a PDF when:
 
 - The variant config has unknown keys or malformed values.
-- A facet id, cert id, entry id, or cert anchor is unknown.
+- A facet id, cert id, skill category id, entry id, or section anchor is unknown.
 - `certifications.json` is missing or malformed when certs are requested.
-- The cert section cannot be injected at the requested anchor.
-- A requested certification name is missing from the rendered cert list.
+- `skills_inventory.categories` is absent or empty when skills are requested.
+- Skills are requested without an anchor to insert before.
+- The cert or skills section cannot be injected at the requested anchor.
+- A requested certification name or skill category name is missing from the rendered list.
 - The rendered resume is not exactly one page.
 
-If the one-page gate fails, reduce job bullets first with `max_bullets_per_entry`, `include_facets`, or `exclude_facets`. If certs caused the overflow, reduce `include_certs`.
+If the one-page gate fails, reduce job bullets first with `max_bullets_per_entry`, `include_facets`, or `exclude_facets`. If certs or skills caused the overflow, reduce `include_certs` or `include_skills`.
 
 ## Operational notes
 

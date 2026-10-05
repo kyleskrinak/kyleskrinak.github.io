@@ -13,15 +13,15 @@
  *     injected by a transform (e.g. variant certifications)
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { startPreview, stopPreview, waitForServer } from "./pdf-helpers.mjs";
+import { RESUME_SOURCE, readResumeSource } from "./resume-source.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const RESUME_SOURCE = path.join(ROOT, "src/content/pages/resume/index.md");
 
 // Analytics endpoints the print route's full Layout would otherwise hit in
 // production builds: aborted so CI regeneration never registers pageviews
@@ -45,30 +45,28 @@ export function normalizeTypography(s) {
 // against the page before rendering guarantees the PDF carries the real
 // resume content, not a blank/partial/stale render.
 export function readExpectedContent() {
-  // Normalize line endings up front — CRLF checkouts must parse identically.
-  const raw = readFileSync(RESUME_SOURCE, "utf8").replace(/\r\n/g, "\n");
-  const fm = /^---\n([\s\S]*?)\n---/.exec(raw);
-  if (!fm) throw new Error(`No frontmatter found in ${RESUME_SOURCE}`);
-  // Contact fields are optional in the content schema; the check mirrors
-  // that — verify them when present, never require what the schema doesn't.
-  const field = name => {
-    const m = new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, "m").exec(fm[1]);
-    return m ? m[1].trim() : null;
-  };
-  const body = raw.slice(fm[0].length);
-  const headings = [...body.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
+  // The EXPANDED body: section placeholders already replaced by the markdown
+  // resume-sections.mjs builds from frontmatter. Parsing the raw body instead
+  // would drop every data-driven heading and employer from the expectations,
+  // and because the check below is an includes() test, that loss would weaken
+  // verification silently rather than failing.
+  const { data, expandedBody } = readResumeSource(RESUME_SOURCE);
+  const headings = [...expandedBody.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
   // Employer lines follow the "**Employer** — location | dates" convention;
   // anchoring on the separator avoids matching arbitrary bold-led paragraphs.
-  const employers = [...body.matchAll(/^\*\*(.+?)\*\* — /gm)].map(m => m[1].trim());
+  const employers = [...expandedBody.matchAll(/^\*\*(.+?)\*\* — /gm)].map(m => m[1].trim());
   if (headings.length === 0 || employers.length === 0) {
     throw new Error(`No section headings/employers parsed from ${RESUME_SOURCE}`);
   }
-  const title = field("title");
+  const title = typeof data.title === "string" ? data.title.trim() : null;
   if (!title) throw new Error(`Frontmatter field 'title' missing in ${RESUME_SOURCE}`);
+  // Contact fields are optional in the content schema; the check mirrors
+  // that — verify them when present, never require what the schema doesn't.
+  const optionalField = name => (typeof data[name] === "string" ? data[name].trim() : null);
   return {
     title,
-    email: field("contactEmail"),
-    address: field("contactAddress"),
+    email: optionalField("contactEmail"),
+    address: optionalField("contactAddress"),
     headings,
     employers,
   };
@@ -88,7 +86,9 @@ async function verifyRenderedContent(page, expectedOverrides = {}) {
     ["address", expected.address],
     ...expected.headings.map(h => ["heading", h]),
     ...expected.employers.map(e => ["employer", e]),
-    ...(expectedOverrides.requireText ?? []).map(t => ["cert", t]),
+    // Text a transform injected (variant certifications, skill categories):
+    // the source cannot predict it, so the caller declares it.
+    ...(expectedOverrides.requireText ?? []).map(t => ["required", t]),
   ]
     .filter(([, text]) => text != null)
     .filter(([, text]) => !haystack.includes(normalizeTypography(text)));

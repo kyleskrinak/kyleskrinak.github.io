@@ -32,8 +32,7 @@ Brief summary of the changes in this PR.
 - [ ] CI build passes without errors.
 - [ ] No TypeScript or linting errors.
 
-### Documentation & Changelog
-- [ ] `CHANGELOG.md` updated (for user-facing changes).
+### Documentation
 - [ ] Inline code comments or README updated (if needed).
 - [ ] Deployment or setup impact documented (if applicable).
 

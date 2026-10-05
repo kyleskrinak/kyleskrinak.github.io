@@ -22,6 +22,7 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 
 **Understanding project capabilities:**
 - [Special Implementations](./features/special-implementations.md) - Custom features and why they exist
+- [Resume Source and Data Flow](./features/resume-source.md) - Which resume frontmatter field populates which output
 - [Resume Variants](./features/resume-variants.md) - Tailor a one-page resume PDF for a specific job role
 - [Architecture Overview](./features/architecture.md) - How it all fits together
 
@@ -57,8 +58,9 @@ Welcome! This directory contains all documentation for the Astro blog project. U
 1. [Local Setup](./getting-started/)
 2. [File Structure](./getting-started/file-structure.md)
 3. [Special Features](./features/special-implementations.md)
-4. [Resume Variants](./features/resume-variants.md)
-5. [Testing](./testing/)
+4. [Resume Source and Data Flow](./features/resume-source.md)
+5. [Resume Variants](./features/resume-variants.md)
+6. [Testing](./testing/)
 
 ### 🚀 DevOps/Deployment
 1. [Deployment Guide](./operations/deployment.md)
@@ -99,6 +101,7 @@ docs/
 ├── features/                          # Understanding capabilities
 │   ├── index.md
 │   ├── architecture.md
+│   ├── resume-source.md
 │   ├── resume-variants.md
 │   └── special-implementations.md
 │

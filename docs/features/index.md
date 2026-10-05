@@ -7,6 +7,7 @@ This section explains what makes this project unique and how everything works to
 This project has several custom features that go beyond a standard Astro blog:
 
 - **[Special Implementations](./special-implementations.md)** - Detailed explanation of custom features and why they exist
+- **[Resume Source and Data Flow](./resume-source.md)** - Which resume frontmatter field populates which output
 - **[Resume Variants](./resume-variants.md)** - How to tailor a one-page resume PDF for a specific job role
 
 Key features include:

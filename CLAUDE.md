@@ -17,7 +17,7 @@ Tech stack: Astro, TypeScript, Tailwind CSS, Pagefind, Playwright
 DO NOT read or reference files in:
 - `node_modules/`, `vendor/`, `.git/`
 - `dist/`, `build/`, `coverage/`
-- `docs/` (unless specifically requested)
+- `docs/` (unless specifically requested — exception: the resume reads named under "Resume Source" below are always in scope)
 - `*.log`, `*.lock`, package-lock.json
 
 ---
@@ -94,6 +94,15 @@ After any code change:
 2. **Check docs and interacting systems** — read implementation first, not docs. Verify docs match code. Changed code → check docs/tests/configs; removed tool → grep all files.
 3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual:docker` (all must pass). Run visual tests via the Docker variant, never the bare `test:visual` — baselines are Docker/CI-rendered, and running natively on macOS produces systematic font-rendering diffs (near-universal 1–2px height mismatches) that look like regressions but aren't. New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline:docker` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits. Page weight is monitored nightly against production (real uncompressed bytes, 512KB Club methodology, including third-party trackers; transfer bytes also reported) via `weightwatch.yml` — not a push gate; see `scripts/check-live-weight.mjs`.
 4. Before committing, report a one-line summary of what you searched and what you fixed.
+
+## Resume Source
+
+**Before editing `src/content/pages/resume/index.md`, any `src/lib/resume-*`, `scripts/*resume*`, `src/pages/resume*`, or `src/pages/about.astro`, read `docs/features/resume-source.md`.** It records which frontmatter field populates which output. Do not infer that architecture from the code, and do not propose deleting a structured field as a duplicate of the body text — the resume is revised quarterly, and those fields exist so one edit reaches every render.
+
+Three facts that have been guessed wrong before:
+- `current_role` populates the resume's lead heading, both meta descriptions, and the About page sentence. None of those are hand-typed.
+- `skills_inventory` (9 category ids) and `FACETS` (7 bullet tags, `src/lib/remark-facets.mjs`) are **separate vocabularies**. Do not reconcile or cross-validate them.
+- Certifications live in `scripts/data/certifications.json` by decision. Keep certification data out of the resume source.
 
 ## Coding Rules
 

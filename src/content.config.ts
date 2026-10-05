@@ -102,9 +102,16 @@ const pages = defineCollection({
 		contactWebsite: httpUrl.optional(),
 		contactLinkedin: httpUrl.optional(),
 		contactAddress: z.string().trim().min(1).optional(),
+		// Source of truth for the resume's lead heading and employer line (both
+		// injected into the body at <!-- current-role -->), the page meta
+		// description, and the About page's current-position sentence.
+		// `location` is required because the employer-line convention
+		// ("**Employer** — Location | Dates") is what resume-render.mjs and
+		// lint-resume.mjs use to recognize the line at all.
 		current_role: z.object({
 			title: z.string().trim().min(1),
 			employer: z.string().trim().min(1),
+			location: z.string().trim().min(1),
 			start_date: z.coerce.date(),
 		}).optional(),
 		skills_inventory: z.object({
@@ -124,9 +131,16 @@ const pages = defineCollection({
 				render: z.boolean().default(true),
 			})),
 		}).optional(),
+		// Injected into the body at <!-- education -->, one section per item with
+		// render: true. `degree` holds the formal name for data reuse;
+		// `degree_abbr` is what the one-page resume prints as its heading.
+		// location/years stay optional for an unrendered item, but a rendered
+		// one without them fails the build (resume-sections.mjs) — the employer
+		// line cannot be recognized without both.
 		education: z.object({
 			items: z.array(z.object({
 				degree: z.string().trim().min(1),
+				degree_abbr: z.string().trim().min(1).optional(),
 				institution: z.string().trim().min(1),
 				location: z.string().trim().min(1).optional(),
 				years: z.string().trim().min(1).optional(),
