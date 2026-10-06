@@ -223,6 +223,46 @@ describe('renderEducation', () => {
 	it('throws when education itself is missing', () => {
 		assert.throws(() => renderEducation(undefined), /`education` is missing/);
 	});
+
+	// src/content.config.ts requires `education.items`, so only this module's raw
+	// frontmatter callers can reach a missing one. A `?? []` default would read
+	// that absence as the authored empty array above and expand to nothing: PDF
+	// verification would then expect no education heading and pass.
+	it('throws on a missing items key rather than reading it as an authored empty array', () => {
+		assert.throws(() => renderEducation({}), /education\.items must be an array/);
+	});
+
+	it('throws on a null items value', () => {
+		assert.throws(() => renderEducation({ items: null }), /education\.items must be an array/);
+	});
+
+	it('still returns empty for the authored empty array, which is a deliberate choice', () => {
+		assert.equal(renderEducation({ items: [] }), '');
+	});
+
+	// The producer has to agree with the recognizer: readExpectedContent maps
+	// every body line through employerLineText and filters the nulls, so a line
+	// EMPLOYER_LINE_RE rejects leaves PDF verification silently — the heading
+	// keeps passing while the institution, location and dates stop being checked.
+	it('throws when years carry no digit, which the employer-line recognizer rejects', () => {
+		for (const years of ['Ongoing', 'In progress', 'Present']) {
+			const items = [{ ...education.items[0], years }];
+			assert.throws(
+				() => renderEducation({ items }),
+				/is not a recognized employer line/,
+				`years: ${years} should be rejected`
+			);
+		}
+	});
+
+	it('accepts years the recognizer reads, including an expected graduation', () => {
+		for (const years of ['2019', 'expected 2027', '1998 – 2001']) {
+			const items = [{ ...education.items[0], years }];
+			const out = renderEducation({ items });
+			const line = out.split('\n')[2];
+			assert.ok(isEmployerLine(line), `years: ${years} should produce a recognized line`);
+		}
+	});
 });
 
 describe('resumeMetaDescription', () => {

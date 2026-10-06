@@ -149,7 +149,20 @@ function employerLine(employer, location, dates, label) {
   if (!employer?.trim()) fail(`${label}: employer is required`);
   if (!location?.trim()) fail(`${label}: location is required to build the employer line`);
   if (!dates?.trim()) fail(`${label}: dates are required to build the employer line`);
-  return `**${employer.trim()}** ${EMPLOYER_DASH} ${location.trim()} | ${dates.trim()}`;
+  const line = `**${employer.trim()}** ${EMPLOYER_DASH} ${location.trim()} | ${dates.trim()}`;
+  // The producer checks its own output against the recognizer below it. Three
+  // non-empty fields are not sufficient: EMPLOYER_LINE_RE requires a digit after
+  // the pipe, so `years: "Ongoing"` builds a line resume-render.mjs drops from
+  // its PDF expectations — `readExpectedContent` maps every body line through
+  // `employerLineText` and filters the nulls, and its `length === 0` guard
+  // cannot fire while other employer lines survive. The institution, location
+  // and dates would stop being verified while the heading kept passing.
+  if (!EMPLOYER_LINE_RE.test(line)) {
+    fail(
+      `${label}: "${line}" is not a recognized employer line — dates must contain a digit, as in "2019" or "expected 2027"`,
+    );
+  }
+  return line;
 }
 
 /**
@@ -224,10 +237,16 @@ function renderEducationItem(item, idx) {
  * zero-item expansion is therefore the author's explicit choice and expands to
  * nothing. A missing `education` object, by contrast, means the placeholder
  * points at data that does not exist — that throws.
+ *
+ * `items` carries no fallback, for that same distinction: the schema requires
+ * the key, so only the raw-YAML callers can reach a missing or null `items`, and
+ * a default of `[]` would read that absence as the authored empty array. PDF
+ * generation would then expect no education heading and no employer line and
+ * pass, which is the failure this module exists to make loud.
  */
 export function renderEducation(education) {
   if (!education) fail("<!-- education --> is present but `education` is missing from the frontmatter");
-  const items = education.items ?? [];
+  const items = education.items;
   if (!Array.isArray(items)) fail("education.items must be an array");
   return items
     .map((item, idx) => [item, idx])

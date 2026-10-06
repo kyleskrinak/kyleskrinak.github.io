@@ -327,6 +327,11 @@ export function validateCertificationsData(data, sourcePath, knownEntryIds) {
       if (typeof cert.id !== "string" || cert.id.trim().length === 0) {
         errors.push(`${prefix}.id: must be a non-empty string`);
       } else {
+        // Same normalization as the skill categories above, for the same reason:
+        // duplicate detection here and resolveCerts's lookup both key off this
+        // value, so an untrimmed id makes `include_certs: ["az-104"]` fail
+        // against a source id of `" az-104 "`.
+        cert.id = cert.id.trim();
         ids.push(cert.id);
       }
 
@@ -433,6 +438,14 @@ export function loadSkillCategories(sourcePath = RESUME_SOURCE) {
     if (typeof cat.id !== "string" || cat.id.trim().length === 0) {
       errors.push(`${prefix}.id: must be a non-empty string`);
     } else {
+      // Normalized in place, not merely recorded: src/content.config.ts trims the
+      // id before its pattern test, so the page path reads `leadership` where this
+      // raw parse would keep `" leadership "`. Every consumer of the returned
+      // categories keys off this value — duplicate detection here, the
+      // knownSkillIds set and resolveSkills — so trimming once makes all three
+      // agree with the schema instead of rejecting a config that names the id as
+      // the schema would normalize it.
+      cat.id = cat.id.trim();
       ids.push(cat.id);
     }
     if (typeof cat.name !== "string" || cat.name.trim().length === 0) {

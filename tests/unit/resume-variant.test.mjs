@@ -395,6 +395,38 @@ describe('validateCertificationsData', () => {
 	});
 });
 
+describe('certification id normalization', () => {
+	// Same class as the skill category ids: duplicate detection here and
+	// resolveCerts's lookup both key off cert.id, so a padded source id makes a
+	// config that names the id plainly fail the unknown-id check.
+	it('trims a padded cert id, so resolveCerts finds it by its plain name', () => {
+		const padded = {
+			...certData,
+			certifications: [{ ...certData.certifications[0], id: '  aiops-foundation  ' }],
+		};
+		const validated = validateCertificationsData(padded, 'certifications.json', knownEntryIds);
+		assert.deepEqual(validated.certifications.map(cert => cert.id), ['aiops-foundation']);
+		assert.deepEqual(
+			resolveCerts(['aiops-foundation'], validated).map(cert => cert.id),
+			['aiops-foundation'],
+		);
+	});
+
+	it('detects duplicate cert ids that differ only in padding', () => {
+		const padded = {
+			...certData,
+			certifications: [
+				certData.certifications[0],
+				{ ...certData.certifications[1], id: ' aiops-foundation ' },
+			],
+		};
+		assert.throws(
+			() => validateCertificationsData(padded, 'certifications.json', knownEntryIds),
+			/duplicate id\(s\): aiops-foundation/,
+		);
+	});
+});
+
 describe('resolveCerts', () => {
 	it('resolves explicit cert ids in requested order', () => {
 		assert.deepEqual(
@@ -761,5 +793,29 @@ describe('loadSkillCategories', () => {
 	it('still rejects an empty skills array', () => {
 		const file = sourceWithSkills('    - id: leadership\n      name: Leadership\n      skills: []\n');
 		assert.throws(() => loadSkillCategories(file), /\.skills: must be a non-empty array/);
+	});
+
+	// src/content.config.ts trims the id before its `^[a-z0-9-]+$` test, so the
+	// page path reads `leadership` from a padded source id. This loader has to
+	// normalize the same way or the two paths disagree about what the id IS: the
+	// variant config names it as the schema would, and the unknown-id check here
+	// rejects it.
+	it('trims a padded category id so the config can name it as the schema normalizes it', () => {
+		const file = sourceWithSkills(
+			'    - id: "  leadership  "\n      name: Leadership\n      skills: ["Mentoring"]\n',
+		);
+		const categories = loadSkillCategories(file);
+		assert.deepEqual(categories.map(cat => cat.id), ['leadership']);
+		// The returned objects carry the normalized id, not just the ids array —
+		// resolveSkills and the knownSkillIds set both key off these.
+		assert.deepEqual(resolveSkills(['leadership'], categories).map(cat => cat.id), ['leadership']);
+	});
+
+	it('detects duplicates that differ only in padding', () => {
+		const file = sourceWithSkills(
+			'    - id: leadership\n      name: Leadership\n      skills: ["Mentoring"]\n'
+				+ '    - id: " leadership "\n      name: Leadership Again\n      skills: ["Coaching"]\n',
+		);
+		assert.throws(() => loadSkillCategories(file), /duplicate id\(s\): leadership/);
 	});
 });
