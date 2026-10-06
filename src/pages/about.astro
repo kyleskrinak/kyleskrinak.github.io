@@ -7,8 +7,9 @@ import { linkWithBase } from "@/utils/linkWithBase";
 import { SITE } from "@/config";
 import { getEntry } from "astro:content";
 
-// The current position is stated once, in the resume's current_role, and read
-// here. Hand-typing it on this page is what let the two drift apart.
+// The current position — title, employer, and the employer's URL — is stated
+// once, in the resume's current_role, and read here. Hand-typing it on this page
+// is what let the two drift apart.
 const resume = await getEntry("pages", "resume");
 if (!resume) throw new Error("Resume page not found — about page reads current_role from it");
 const currentRole = resume.data.current_role;
@@ -48,7 +49,7 @@ if (!currentRole) throw new Error("Resume frontmatter is missing current_role �
 			</p>
 
 			<p>
-				Currently, I am the {currentRole.title} for <a href="https://www.gilead.com/">{currentRole.employer}</a>. Our team is responsible for the reliable hosting and management of Gilead's websites, supporting systems like Sitecore, Azure, and AWS.
+				Currently, I am the {currentRole.title} for <a href={currentRole.employer_url}>{currentRole.employer}</a>. Our team is responsible for the reliable hosting and management of Gilead's websites, supporting systems like Sitecore, Azure, and AWS.
 			</p>
 
 			<h2>Technologies & Topics</h2>

@@ -10,6 +10,8 @@ contactAddress: "309 Sir Brennan Court, Apex, NC 27523"
 current_role:
   title: Senior IT Systems Engineering Manager, Digital Experience
   employer: Gilead Sciences
+  # The About page links the employer name to this URL.
+  employer_url: https://www.gilead.com/
   location: Raleigh, NC
   start_date: 2022-06-01
 skills_inventory:
@@ -116,7 +118,7 @@ education:
       honors: With highest honors
       render: true
     - degree: Bachelor of Fine Arts, Illustration
-      degree_abbr: B.F.A, Illustration
+      degree_abbr: B.F.A., Illustration
       institution: University of the Arts
       location: Philadelphia, PA
       years: "1980 – 1984"

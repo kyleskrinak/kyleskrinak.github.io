@@ -37,6 +37,8 @@ Lead a team of 12 offshore IT contractors… <!-- f: leadership, platform-ops --
 
 **One expansion, four consumers.** Both paths run the same renderer over the same markdown string, so the page, the PDF verifier, the linter, and the variant builder's anchor ids cannot disagree about what a section says. A consumer that read the raw `body` instead of `expandedBody` would lose headings silently — PDF verification is inclusion-based (`haystack.includes(text)`), so a missing expectation weakens the check without failing it.
 
+`build-resume-variant.mjs` derives its entry ids **lazily**, on the first `validateConfig()` call that needs them, and memoizes the result. Importing the module therefore reads no file: a unit test can import it without the resume source on disk, and `validateConfig()` accepts an injected entry-id set so a test's expectations do not move when a heading in the live resume changes.
+
 The remark plugin runs **first** in `astro.config.ts`'s `remarkPlugins`, before `remarkDirective`, and is inert on every other page.
 
 ### Adding a placeholder section
@@ -45,9 +47,11 @@ The remark plugin runs **first** in `astro.config.ts`'s `remarkPlugins`, before 
 2. Write its renderer, returning markdown. Throw on missing required data rather than returning a partial section.
 3. Register it in `RENDERERS` and extend `renderResumeSection()`'s dispatch.
 4. Add the field to the `pages` schema in `src/content.config.ts`.
-5. Add tests to `tests/unit/resume-sections.test.mjs`.
+5. Add tests to `tests/unit/resume-sections.test.mjs` (the renderer) and `tests/unit/remark-resume-sections.test.mjs` (the page path and the parity between the two).
 
-A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws**, so a typo fails the build instead of rendering nothing. Facet tags (`<!-- f: … -->`) and prose comments stay inert.
+A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws on both paths**, so a typo fails the build instead of rendering nothing. The page path scopes that guard to `src/content/pages/resume/index.md`, so the same comment shape stays inert in every other document — `<!-- more -->` in a blog post is an ordinary comment. Facet tags (`<!-- f: … -->`) and prose comments stay inert in the resume too.
+
+**A placeholder is a top-level node.** The remark plugin walks `tree.children` only, so a comment nested inside a list item is not a placeholder on the page path even though the line-based `expandResumePlaceholders()` would expand it. Top-level is the contract; `tests/unit/remark-resume-sections.test.mjs` records it.
 
 ## Field-by-field: what populates what
 
@@ -59,16 +63,19 @@ A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educa
 | The `/resume/` meta description | `resumeMetaDescription()` in `src/pages/resume.astro` |
 | The `/resume/print/` meta description | the same function in `src/pages/resume/print/index.astro` |
 | The About page's current-position sentence | `src/pages/about.astro` reads the resume entry via `getEntry("pages", "resume")` |
+| The employer link in that sentence (`<a href>`) | `current_role.employer_url`, read by the same `about.astro` sentence |
 
 Changing the job title in frontmatter changes all four. Before this wiring, `about.astro` carried its own hand-typed copy, and the two drifted.
 
-`location` and `start_date` are required: the employer-line convention is `**Employer** — Location | Dates`, and both `resume-render.mjs` (which matches employers on the em dash) and `lint-resume.mjs` (which identifies the line by its pipe and digits) stop recognizing a line that is missing either.
+`location`, `start_date`, and `employer_url` are all required, for two different reasons. The employer-line convention is `**Employer** — Location | Dates`, and a line missing either tail field stops being recognized as one (see below). `employer_url` is required because the About page links the employer name: an optional field there would render a silently unlinked name rather than fail the build.
+
+**One recognizer, two consumers.** `src/lib/resume-sections.mjs` exports `isEmployerLine(line)` and `employerLineText(line)` beside the function that *builds* the line, so the convention is written down once. `lint-resume.mjs` skips the line through `isEmployerLine` when it collects scope prose; `resume-render.mjs` turns it into a PDF content expectation through `employerLineText`, which strips the bold markers so the string matches rendered text. Both previously carried their own regex and could drift. The shared regex deliberately has no `/g` flag — a global regex carries `lastIndex` between callers, so a `.test()` and a `matchAll()` on one object silently skip matches.
 
 ### `education` — injected
 
 `<!-- education -->` renders one section per item whose `render` flag is `true`. The heading uses `degree_abbr` when present, falling back to the formal `degree` — so `M.S. I.T.` prints on the resume while the full degree name stays available in the data.
 
-`render` defaults to `false` in the schema, so an item is opt-in. Zero rendered items expands to nothing (an explicit opt-out). A **missing `education` object** throws, because the placeholder then points at data that does not exist.
+An item is opt-in: the renderer prints it only when `render: true` is written in the file. **The schema default does not supply that opt-out** — both renderers read raw frontmatter, before Zod runs, so an item carrying no `render` key at all is skipped by the renderer's own `=== true` check, not by `z.boolean().default(false)`. The schema default governs only the typed collection entry that `getEntry()` consumers see. Zero rendered items expands to nothing (an explicit opt-out). A **missing `education` object** throws, because the placeholder then points at data that does not exist.
 
 The opt-in default is deliberate, and it is why the field is a boolean rather than an implicit "render everything present." Kyle pursues ongoing coursework, and whether a given item *belongs* on the resume is a judgment call raised during a revision — not a settled property of the data. `render: false` records an item without printing it, so the metadata stays complete while the rendered resume stays selective.
 
@@ -91,6 +98,8 @@ Nothing renders it. It documents what changed and why, which is how the `dc8069e
 ### Certifications — deliberately not in this file
 
 Certification data lives in `scripts/data/certifications.json`, by decision. **Keep certification information out of the resume source.** Variants inject certs from that file; the published resume shows none.
+
+`src/content.config.ts` carries **no `certifications` block**, and that absence is deliberate. One was added and then deleted: it validated nothing, because the resume frontmatter has no such key, and its presence made `validateCertificationsData()` in `build-resume-variant.mjs` look like a secondary check rather than the only one. The JSON file's validator is the contract.
 
 ## Two vocabularies, deliberately separate
 

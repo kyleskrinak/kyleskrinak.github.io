@@ -15,13 +15,11 @@
  * Exit 0 and print a summary line on success.
  */
 import { fileURLToPath } from 'node:url';
+import { isEmployerLine } from '../src/lib/resume-sections.mjs';
 import { RESUME_SOURCE, readResumeSource } from './lib/resume-source.mjs';
 
 // Matches a trailing <!-- f: ... --> facet comment (the remark-facets format).
 const FACET_TAG_RE = /\s*<!--\s*f:[\s\S]*?-->\s*$/;
-
-// Employer line: bold name followed by em-dash, location pipe, and year digits.
-const EMPLOYER_LINE_RE = /^\*\*.+\*\*\s+—.*\|.*\d/;
 
 // Bullet line
 const BULLET_RE = /^- /;
@@ -84,7 +82,9 @@ export function parseSections(source) {
 			continue;
 		}
 
-		if (EMPLOYER_LINE_RE.test(line)) continue; // skip employer/date line
+		// Recognized through the shared convention in src/lib/resume-sections.mjs,
+		// beside the function that writes these lines.
+		if (isEmployerLine(line)) continue; // skip employer/date line
 
 		const text = stripFacetTag(line).trim();
 		if (text) current.proseLines.push(text);

@@ -13,9 +13,15 @@ import {
 	resolveSkills,
 	injectCerts,
 	certDateSuffix,
+	certListItemText,
 	injectSkills,
 	parseResumePreviewPort,
 	buildTransform,
+	injectorScript,
+	certInjectorScript,
+	skillsInjectorScript,
+	CERT_INJECTOR_GLOBAL,
+	SKILLS_INJECTOR_GLOBAL,
 } from '../../scripts/build-resume-variant.mjs';
 
 const knownCertIds = new Set(['aiops-foundation', 'az-104']);
@@ -40,6 +46,14 @@ const knownEntryIds = new Set([
 	'senior-it-systems-engineering-manager-digital-experience',
 ]);
 
+// Passed to every validateConfig call so no test derives entry ids from the live
+// resume: a heading edit there must not be able to fail these assertions.
+const vocabularies = {
+	certIds: knownCertIds,
+	skillIds: knownSkillIds,
+	entryIds: knownEntryIds,
+};
+
 const certData = {
 	anchor_before_id: 'ms-it',
 	certifications: [
@@ -57,31 +71,49 @@ const certData = {
 	],
 };
 
-async function runSerializedTransform(config) {
-	const { document, window } = parseHTML(`
-		<html>
-			<head></head>
-			<body>
-				<article class="resume-content">
-					<h2 id="entry-one">Entry One</h2>
-					<p><strong>Employer</strong> — Location | Dates</p>
-					<ul>
-						<li data-facets="leadership">First bullet</li>
-						<li data-facets="platform-ops">Second bullet</li>
-					</ul>
-				</article>
-			</body>
-		</html>
-	`);
-	const page = {
-		async evaluate(fn, payload) {
-			return new Script(`(${fn.toString()})(payload)`).runInContext(
-				createContext({ document, window, payload, console }),
-			);
+const SERIALIZED_FIXTURE = `
+	<html>
+		<head></head>
+		<body>
+			<article class="resume-content">
+				<h2 id="entry-one">Entry One</h2>
+				<p><strong>Employer</strong> — Location | Dates</p>
+				<ul>
+					<li data-facets="leadership">First bullet</li>
+					<li data-facets="platform-ops">Second bullet</li>
+				</ul>
+				<h2 id="ms-it">M.S. I.T.</h2>
+			</article>
+		</body>
+	</html>
+`;
+
+// The page object the transform talks to, backed by ONE persistent vm context so
+// addScriptTag and evaluate share a global scope the way a real page does: a
+// script tag's `const` lands in that context's global lexical environment, and an
+// injector assigned to `window` there closes over it. A helper the builder failed
+// to declare is a free identifier here exactly as it is in Chromium, so it throws
+// a ReferenceError in this harness instead of only in a browser.
+function createSerializedPage(html = SERIALIZED_FIXTURE) {
+	const { document, window } = parseHTML(html);
+	const context = createContext({ document, window, console });
+	return {
+		document,
+		page: {
+			async addScriptTag({ content }) {
+				new Script(content).runInContext(context);
+			},
+			async evaluate(fn, payload) {
+				context.payload = payload;
+				return new Script(`(${fn.toString()})(payload)`).runInContext(context);
+			},
 		},
 	};
+}
 
-	await buildTransform(config)(page);
+async function runSerializedTransform(config, injections) {
+	const { document, page } = createSerializedPage();
+	await buildTransform(config, injections)(page);
 	return document;
 }
 
@@ -116,38 +148,38 @@ describe('validateConfig', () => {
 					anchor_before_id: 'senior-it-systems-engineering-manager-digital-experience',
 				},
 				'variant.json',
-				knownCertIds,
+				vocabularies,
 			);
 		});
 	});
 
-	it('rejects unknown cert ids when knownCertIds is provided', () => {
+	it('rejects unknown cert ids when a certIds vocabulary is provided', () => {
 		assert.throws(
-			() => validateConfig({ include_certs: ['missing-cert'] }, 'variant.json', knownCertIds),
+			() => validateConfig({ include_certs: ['missing-cert'] }, 'variant.json', vocabularies),
 			/unknown cert id\(s\): missing-cert/,
 		);
 	});
 
 	it('rejects unknown anchor_before_id overrides', () => {
 		assert.throws(
-			() => validateConfig({ anchor_before_id: 'missing-entry' }, 'variant.json', knownCertIds),
+			() => validateConfig({ anchor_before_id: 'missing-entry' }, 'variant.json', vocabularies),
 			/anchor_before_id: unknown entry key "missing-entry"/,
 		);
 	});
 
 	it('rejects empty and whitespace-only title overrides', () => {
 		assert.throws(
-			() => validateConfig({ title: '' }, 'variant.json', knownCertIds),
+			() => validateConfig({ title: '' }, 'variant.json', vocabularies),
 			/title: must be a non-empty string/,
 		);
 		assert.throws(
-			() => validateConfig({ title: '   ' }, 'variant.json', knownCertIds),
+			() => validateConfig({ title: '   ' }, 'variant.json', vocabularies),
 			/title: must be a non-empty string/,
 		);
 	});
 
 	it('accepts title overrides with surrounding whitespace so rendering can trim them', () => {
-		assert.doesNotThrow(() => validateConfig({ title: '  Platform Leader  ' }, 'variant.json', knownCertIds));
+		assert.doesNotThrow(() => validateConfig({ title: '  Platform Leader  ' }, 'variant.json', vocabularies));
 	});
 });
 
@@ -176,6 +208,71 @@ describe('buildTransform bullet_order', () => {
 		await assert.rejects(
 			() => runSerializedTransform({ bullet_order: { 'entry-one': [2] } }),
 			/bullet_order\.entry-one: index 2 out of range for 2 kept bullet\(s\) after filtering/,
+		);
+	});
+});
+
+describe('injector serialization', () => {
+	it('injects skills and certs through the serialized injector scripts', async () => {
+		const document = await runSerializedTransform({}, {
+			certs: [certData.certifications[0]],
+			certAnchorId: 'ms-it',
+			skills: skillCategories,
+			skillsAnchorId: 'ms-it',
+		});
+
+		// The full list item proves certListItemText — and certDateSuffix inside it —
+		// crossed into the page: either helper left out of the script would throw.
+		assert.equal(
+			document.querySelector('h2.cert-heading').nextElementSibling.querySelector('li').textContent,
+			certListItemText(certData.certifications[0]),
+		);
+		// Skills land above certs because both insert immediately before the anchor.
+		assert.deepEqual(
+			Array.from(document.querySelectorAll('.resume-content h2')).map(h => h.textContent),
+			['Entry One', 'Skills', 'Certifications', 'M.S. I.T.'],
+		);
+	});
+
+	it('defines each injector under its exported global name', async () => {
+		const { page } = createSerializedPage();
+		await page.addScriptTag({ content: certInjectorScript() });
+		await page.addScriptTag({ content: skillsInjectorScript() });
+		// Destructured, not deep-equalled: an array built inside the vm context has
+		// that realm's Array prototype, so deepStrictEqual fails on identity alone.
+		const [certType, skillsType] = await page.evaluate(() => [
+			typeof window.__resumeVariantInjectCerts,
+			typeof window.__resumeVariantInjectSkills,
+		]);
+		assert.equal(certType, 'function');
+		assert.equal(skillsType, 'function');
+	});
+
+	// The in-page body cannot reference the exported constants — a constant does not
+	// cross into the page either — so it spells the globals literally. Renaming a
+	// constant without editing that body would silently stop finding the injector.
+	it('spells the injector globals in the page body exactly as the exported constants', () => {
+		const source = buildTransform({}).toString();
+		assert.match(source, new RegExp(`window\\.${CERT_INJECTOR_GLOBAL}\\b`));
+		assert.match(source, new RegExp(`window\\.${SKILLS_INJECTOR_GLOBAL}\\b`));
+	});
+
+	it('fails on a helper the script does not declare, the way Chromium would', async () => {
+		const { page } = createSerializedPage();
+		// injectCerts calls certListItemText; omitting it from the dependency list is
+		// the exact defect certInjectorScript's list exists to prevent. Asserting the
+		// failure here is what makes the harness a guard rather than a courtesy.
+		await page.addScriptTag({ content: injectorScript('__missingDepInjector', injectCerts, []) });
+		await assert.rejects(
+			() =>
+				page.evaluate(() =>
+					window.__missingDepInjector(
+						document.querySelector('.resume-content'),
+						[{ id: 'az-104', name: 'Azure Administrator' }],
+						'ms-it',
+					),
+				),
+			/certListItemText is not defined/,
 		);
 	});
 });
@@ -466,8 +563,7 @@ describe('validateConfig include_skills', () => {
 			validateConfig(
 				{ include_skills: ['leadership'], skills_anchor_before_id: 'ms-it' },
 				'variant.json',
-				knownCertIds,
-				knownSkillIds,
+				vocabularies,
 			);
 		});
 	});
@@ -478,8 +574,7 @@ describe('validateConfig include_skills', () => {
 				validateConfig(
 					{ include_skills: ['missing-skill'], skills_anchor_before_id: 'ms-it' },
 					'variant.json',
-					knownCertIds,
-					knownSkillIds,
+					vocabularies,
 				),
 			/include_skills: unknown skill category id\(s\): missing-skill/,
 		);
@@ -487,7 +582,7 @@ describe('validateConfig include_skills', () => {
 
 	it('requires an anchor when skills are requested', () => {
 		assert.throws(
-			() => validateConfig({ include_skills: 'all' }, 'variant.json', knownCertIds, knownSkillIds),
+			() => validateConfig({ include_skills: 'all' }, 'variant.json', vocabularies),
 			/include_skills: requires skills_anchor_before_id/,
 		);
 	});
@@ -497,8 +592,7 @@ describe('validateConfig include_skills', () => {
 			validateConfig(
 				{ include_skills: 'all', anchor_before_id: 'ms-it' },
 				'variant.json',
-				knownCertIds,
-				knownSkillIds,
+				vocabularies,
 			);
 		});
 	});
@@ -509,8 +603,7 @@ describe('validateConfig include_skills', () => {
 				validateConfig(
 					{ include_skills: 'all', skills_anchor_before_id: 'missing-entry' },
 					'variant.json',
-					knownCertIds,
-					knownSkillIds,
+					vocabularies,
 				),
 			/skills_anchor_before_id: unknown entry key "missing-entry"/,
 		);

@@ -43,7 +43,7 @@ const CERT_MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 // Valid bullet_order entry keys are the resume's rendered h2 ids. Derive them
 // from the source headings with the same slugger Astro uses (github-slugger),
 // so adding or renaming a section can never leave a hardcoded list silently
-// stale. One slugger instance in document order matches Astro's dedup exactly.
+// stale.
 function deriveEntryIds() {
   // The EXPANDED body — placeholders replaced by their frontmatter-built
   // markdown. Reading the raw body would omit every data-driven section's id
@@ -52,11 +52,32 @@ function deriveEntryIds() {
   const { expandedBody } = readResumeSource(RESUME_SOURCE);
   const slugger = new GithubSlugger();
   const ids = new Set();
-  for (const m of expandedBody.matchAll(/^## (.+)$/gm)) ids.add(slugger.slug(m[1].trim()));
+  // Every ATX heading feeds the one slugger, in document order, because Astro's
+  // duplicate counter is shared across heading levels: skipping the other levels
+  // could hand an h2 a different id than the page renders. Only h2 ids are
+  // collected — a bullet_order key names an entry, and an entry is an h2.
+  for (const m of expandedBody.matchAll(/^(#{1,6})[ \t]+(.+)$/gm)) {
+    const slug = slugger.slug(m[2].trim());
+    if (m[1].length === 2) ids.add(slug);
+  }
   if (ids.size === 0) throw new Error(`No section headings found in ${RESUME_SOURCE}`);
   return ids;
 }
-const KNOWN_ENTRY_IDS = deriveEntryIds();
+
+let cachedEntryIds = null;
+
+/**
+ * The entry-id vocabulary, derived once per process on first use.
+ *
+ * Lazy rather than a module-load constant: importing this module must not read
+ * and parse the resume source. The unit tests import it for the pure validators
+ * and pass their own vocabulary, and a module-load derivation both slowed every
+ * import and silently coupled those tests to live resume content.
+ */
+export function getKnownEntryIds() {
+  cachedEntryIds ??= deriveEntryIds();
+  return cachedEntryIds;
+}
 
 const FLAGS = {
   "--variant": { key: "variant", value: true },
@@ -158,7 +179,19 @@ export function includeSkillsRequestsSkills(includeSkills) {
   return includeSkills === "all" || (Array.isArray(includeSkills) && includeSkills.length > 0);
 }
 
-export function validateConfig(cfg, configPath, knownCertIds, knownSkillIds) {
+/**
+ * Validate a variant config against the vocabularies it names.
+ *
+ * `vocabularies` carries the three id sets: `certIds` and `skillIds` are the
+ * second-pass cross-checks (absent on the first pass, which validates shape
+ * before the data files load), and `entryIds` overrides the resume-derived entry
+ * ids. A caller supplying `entryIds` — every unit test does — keeps this function
+ * pure: nothing reads the resume source.
+ */
+export function validateConfig(cfg, configPath, vocabularies = {}) {
+  const { certIds: knownCertIds, skillIds: knownSkillIds, entryIds } = vocabularies;
+  // Resolved on demand, so a config naming no entry id never triggers a read.
+  const knownEntryIds = () => entryIds ?? getKnownEntryIds();
   const errors = [];
 
   if (!isObject(cfg)) {
@@ -196,7 +229,7 @@ export function validateConfig(cfg, configPath, knownCertIds, knownSkillIds) {
       errors.push("bullet_order: must be an object");
     } else {
       for (const [key, val] of Object.entries(cfg.bullet_order)) {
-        if (!KNOWN_ENTRY_IDS.has(key)) {
+        if (!knownEntryIds().has(key)) {
           errors.push(`bullet_order: unknown entry key "${key}"`);
         } else if (!Array.isArray(val) || !val.every(n => Number.isInteger(n) && n >= 0)) {
           errors.push(`bullet_order.${key}: must be an array of non-negative integers`);
@@ -221,7 +254,7 @@ export function validateConfig(cfg, configPath, knownCertIds, knownSkillIds) {
     if (cfg[field] === undefined) continue;
     if (typeof cfg[field] !== "string" || cfg[field].trim().length === 0) {
       errors.push(`${field}: must be a non-empty string`);
-    } else if (!KNOWN_ENTRY_IDS.has(cfg[field])) {
+    } else if (!knownEntryIds().has(cfg[field])) {
       errors.push(`${field}: unknown entry key "${cfg[field]}"`);
     }
   }
@@ -347,10 +380,7 @@ export function validateCertificationsData(data, sourcePath, knownEntryIds) {
   return data;
 }
 
-export function loadCertifications(
-  sourcePath = CERTIFICATIONS_SOURCE,
-  knownEntryIds = KNOWN_ENTRY_IDS
-) {
+export function loadCertifications(sourcePath = CERTIFICATIONS_SOURCE, knownEntryIds) {
   if (!existsSync(sourcePath)) {
     throw new Error(`Certification data file not found: ${sourcePath}`);
   }
@@ -362,7 +392,9 @@ export function loadCertifications(
     throw new Error(`Failed to parse certification data ${sourcePath}: ${err.message}`);
   }
 
-  return validateCertificationsData(data, sourcePath, knownEntryIds);
+  // The resume-derived vocabulary unless a caller supplies its own, resolved
+  // here rather than as a default so the derivation stays lazy.
+  return validateCertificationsData(data, sourcePath, knownEntryIds ?? getKnownEntryIds());
 }
 
 export function resolveCerts(includeCerts, certData) {
@@ -505,6 +537,15 @@ export function certDateSuffix(cert) {
   return "";
 }
 
+/**
+ * One certification as its list item reads. The injected DOM and the PDF content
+ * expectation both come from here, so verification covers the issuer and the
+ * dates instead of only the name.
+ */
+export function certListItemText(cert) {
+  return cert.name + (cert.issuer ? ` — ${cert.issuer}` : "") + certDateSuffix(cert);
+}
+
 export function injectCerts(content, certs, anchorId) {
   if (!content) throw new Error("Certification injection failed: .resume-content not found");
   if (!Array.isArray(certs)) throw new Error("Certification injection failed: certs must be an array");
@@ -542,8 +583,7 @@ export function injectCerts(content, certs, anchorId) {
   const list = doc.createElement("ul");
   for (const cert of certs) {
     const li = doc.createElement("li");
-    li.textContent =
-      cert.name + (cert.issuer ? ` — ${cert.issuer}` : "") + certDateSuffix(cert);
+    li.textContent = certListItemText(cert);
     list.appendChild(li);
   }
 
@@ -565,6 +605,43 @@ export function injectCerts(content, certs, anchorId) {
   return { heading, list };
 }
 
+/*
+ * Injector serialization.
+ *
+ * page.addScriptTag sends a function's OWN source and nothing else: a
+ * module-scope helper the function calls does NOT travel with it, and the free
+ * identifier throws a ReferenceError in the browser that no Node-side unit test
+ * of the same function would ever see. So every helper an injector depends on is
+ * declared in the same script, as `const <name> = <source>` — a form that keeps
+ * binding the name if the helper is later refactored into an arrow function.
+ *
+ * The script's own body must spell these global names literally, for the same
+ * reason: a constant below would not cross either.
+ *
+ * tests/unit/resume-variant.test.mjs evaluates the exact strings these builders
+ * return, so a missing dependency fails there the way it would in Chromium. It
+ * imports injectorScript itself to assert that failure mode directly — hence the
+ * export on a function nothing else outside this module calls.
+ */
+export const CERT_INJECTOR_GLOBAL = "__resumeVariantInjectCerts";
+export const SKILLS_INJECTOR_GLOBAL = "__resumeVariantInjectSkills";
+
+export function injectorScript(globalName, fn, deps) {
+  return [
+    ...deps.map(dep => `const ${dep.name} = ${dep.toString()};`),
+    `window.${globalName} = ${fn.toString()};`,
+  ].join("\n");
+}
+
+/** Dependency order matters only for readability; each is a function expression. */
+export function certInjectorScript() {
+  return injectorScript(CERT_INJECTOR_GLOBAL, injectCerts, [certDateSuffix, certListItemText]);
+}
+
+export function skillsInjectorScript() {
+  return injectorScript(SKILLS_INJECTOR_GLOBAL, injectSkills, []);
+}
+
 export function buildTransform(config, injections = {}) {
   const {
     certs: resolvedCerts = [],
@@ -576,14 +653,10 @@ export function buildTransform(config, injections = {}) {
     const certsRequested = resolvedCerts.length > 0;
     const skillsRequested = resolvedSkills.length > 0;
     if (certsRequested) {
-      await page.addScriptTag({
-        content: `window.__resumeVariantInjectCerts = ${injectCerts.toString()};`,
-      });
+      await page.addScriptTag({ content: certInjectorScript() });
     }
     if (skillsRequested) {
-      await page.addScriptTag({
-        content: `window.__resumeVariantInjectSkills = ${injectSkills.toString()};`,
-      });
+      await page.addScriptTag({ content: skillsInjectorScript() });
     }
 
     const emptied = await page.evaluate((payload) => {
@@ -798,7 +871,7 @@ async function main() {
     // Second pass, now that the id vocabularies are known: a config naming an
     // id that does not exist must fail before any rendering starts.
     if (knownCertIds || knownSkillIds) {
-      validateConfig(config, configPath, knownCertIds, knownSkillIds);
+      validateConfig(config, configPath, { certIds: knownCertIds, skillIds: knownSkillIds });
     }
 
     if (certData) {
@@ -823,10 +896,12 @@ async function main() {
 
   console.log(`→ Variant config: ${configPath}`);
 
-  // Title and injected cert names are the only fields that change verification
+  // Title and the injected content are the only fields that change verification
   // expectations; headings and employers are never removed by the transform.
+  // A certification is required as its whole list item — name, issuer and dates —
+  // so a suffix the injector built wrong cannot pass on the name alone.
   const requireText = [
-    ...resolvedCerts.map(cert => cert.name),
+    ...resolvedCerts.map(cert => certListItemText(cert)),
     ...resolvedSkills.map(cat => cat.name),
   ];
   const expectedOverrides = {

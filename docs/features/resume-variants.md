@@ -140,7 +140,7 @@ The builder fails before writing a PDF when:
 - `skills_inventory.categories` is absent or empty when skills are requested.
 - Skills are requested without an anchor to insert before.
 - The cert or skills section cannot be injected at the requested anchor.
-- A requested certification name or skill category name is missing from the rendered list.
+- A requested certification's **whole list item** — name, issuer, and date suffix — or a requested skill category name is missing from the rendered list. The cert check is deliberately the full line rather than the name alone, so a date suffix the injector built wrong cannot pass on the name.
 - The rendered resume is not exactly one page.
 
 If the one-page gate fails, reduce job bullets first with `max_bullets_per_entry`, `include_facets`, or `exclude_facets`. If certs or skills caused the overflow, reduce `include_certs` or `include_skills`.

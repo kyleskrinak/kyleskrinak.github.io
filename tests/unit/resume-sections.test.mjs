@@ -8,6 +8,8 @@ import {
 	renderResumeSection,
 	resumeMetaDescription,
 	expandResumePlaceholders,
+	isEmployerLine,
+	employerLineText,
 } from '../../src/lib/resume-sections.mjs';
 
 const currentRole = {
@@ -93,6 +95,48 @@ describe('renderCurrentRole', () => {
 	});
 });
 
+describe('isEmployerLine and employerLineText', () => {
+	// Recognizer tested against the producer's own output: lint-resume.mjs and
+	// resume-render.mjs both find employer lines through these two, so a change to
+	// employerLine's format that broke recognition has to fail here.
+	const line = renderCurrentRole(currentRole).split('\n').at(-1);
+
+	it('recognizes the line renderCurrentRole produces', () => {
+		assert.equal(isEmployerLine(line), true);
+	});
+
+	it('returns the same answer on a second call', () => {
+		// The regex carries no /g flag, so no lastIndex survives between callers.
+		assert.equal(isEmployerLine(line), true);
+		assert.equal(employerLineText(line), employerLineText(line));
+	});
+
+	it('tolerates leading and trailing whitespace', () => {
+		assert.equal(isEmployerLine(`   ${line}   `), true);
+		assert.equal(employerLineText(`   ${line}   `), employerLineText(line));
+	});
+
+	it('strips the bold markers so the text matches DOM and PDF rendering', () => {
+		assert.equal(employerLineText(line), 'Gilead Sciences — Raleigh, NC | June 2022 – Present');
+	});
+
+	it('rejects a line missing the location/dates tail', () => {
+		assert.equal(isEmployerLine('**Gilead Sciences** — Raleigh, NC'), false);
+		assert.equal(employerLineText('**Gilead Sciences** — Raleigh, NC'), null);
+	});
+
+	it('rejects a tail carrying no digits', () => {
+		assert.equal(isEmployerLine('**Gilead Sciences** — Raleigh, NC | Present'), false);
+	});
+
+	it('rejects headings, bullets and prose', () => {
+		assert.equal(isEmployerLine('## M.S. I.T.'), false);
+		assert.equal(isEmployerLine('- Ran the 2022 migration'), false);
+		assert.equal(isEmployerLine('Lead a team of 6 engineers.'), false);
+		assert.equal(employerLineText('Lead a team of 6 engineers.'), null);
+	});
+});
+
 describe('renderEducation', () => {
 	it('renders only items whose render flag is true', () => {
 		const out = renderEducation(education);
@@ -113,8 +157,15 @@ describe('renderEducation', () => {
 		assert.ok(renderEducation(education).endsWith('\n\nWith highest honors'));
 	});
 
-	it('expands to nothing when no item opts in — the schema default is an opt-out', () => {
+	it('expands to nothing when no item opts in', () => {
 		const items = education.items.map(item => ({ ...item, render: false }));
+		assert.equal(renderEducation({ items }), '');
+	});
+
+	// This module reads raw frontmatter, so the schema's `render: false` default
+	// never runs before it: the opt-in has to be the literal flag in the file.
+	it('skips an item carrying no render flag at all', () => {
+		const items = education.items.map(({ render, ...item }) => item);
 		assert.equal(renderEducation({ items }), '');
 	});
 

@@ -18,6 +18,7 @@ import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { employerLineText } from "../../src/lib/resume-sections.mjs";
 import { startPreview, stopPreview, waitForServer } from "./pdf-helpers.mjs";
 import { RESUME_SOURCE, readResumeSource } from "./resume-source.mjs";
 
@@ -52,9 +53,16 @@ export function readExpectedContent() {
   // verification silently rather than failing.
   const { data, expandedBody } = readResumeSource(RESUME_SOURCE);
   const headings = [...expandedBody.matchAll(/^## (.+)$/gm)].map(m => m[1].trim());
-  // Employer lines follow the "**Employer** — location | dates" convention;
-  // anchoring on the separator avoids matching arbitrary bold-led paragraphs.
-  const employers = [...expandedBody.matchAll(/^\*\*(.+?)\*\* — /gm)].map(m => m[1].trim());
+  // The WHOLE employer line, not just the employer's name: the line renders as
+  // one paragraph, so the DOM carries it as a single run and verifying all of it
+  // proves the location and the dates printed too. Recognized through
+  // resume-sections.mjs, beside the function that writes these lines.
+  // normalizeTypography runs on both sides of the comparison, folding dashes and
+  // collapsing whitespace, so spacing differences cannot fail this.
+  const employers = expandedBody
+    .split("\n")
+    .map(line => employerLineText(line))
+    .filter(Boolean);
   if (headings.length === 0 || employers.length === 0) {
     throw new Error(`No section headings/employers parsed from ${RESUME_SOURCE}`);
   }
@@ -132,17 +140,25 @@ export async function renderResumePdf({
   // A Ctrl-C / SIGTERM mid-render bypasses the finally block below, which would
   // otherwise leak the detached `astro preview` process group (spawned with
   // detached:true, it outlives this process). Tear it down on a signal, then exit.
-  const cleanupAndExit = code => {
+  const cleanupAndExit = async code => {
     try {
       stopPreview(preview);
     } catch {
       /* best effort — the port matters more than a clean message */
     }
-    if (browser) browser.close().catch(() => {});
+    // Awaited: process.exit() runs synchronously, so an unawaited close() never
+    // finishes and every interrupted render leaks its Chromium process.
+    if (browser) {
+      try {
+        await browser.close();
+      } catch {
+        /* the exit code below still reports the interrupt */
+      }
+    }
     process.exit(code);
   };
-  const onSigint = () => cleanupAndExit(130);
-  const onSigterm = () => cleanupAndExit(143);
+  const onSigint = () => void cleanupAndExit(130);
+  const onSigterm = () => void cleanupAndExit(143);
   process.once("SIGINT", onSigint);
   process.once("SIGTERM", onSigterm);
 
