@@ -58,7 +58,10 @@ function markdownHeadings(markdown) {
 describe('expansion parity between the two paths', () => {
 	// One body exercising every position CommonMark distinguishes: a plain
 	// top-level placeholder, one indented 3 spaces (still an HTML block), one
-	// inside a fence, and one indented 4 spaces (both code, both inert).
+	// inside a fence, one indented 4 spaces, and three reaching column four
+	// through a tab — bare, after one space, and after three. A tab advances to
+	// the next multiple of four columns, so all three are code, like the four
+	// spaces above them, and all are inert.
 	const body = [
 		'<!-- current-role -->',
 		'',
@@ -71,6 +74,12 @@ describe('expansion parity between the two paths', () => {
 		'```',
 		'',
 		'    <!-- education -->',
+		'',
+		'\t<!-- education -->',
+		'',
+		' \t<!-- education -->',
+		'',
+		'   \t<!-- education -->',
 		'',
 	].join('\n');
 
@@ -92,6 +101,12 @@ describe('expansion parity between the two paths', () => {
 		const expanded = expandResumePlaceholders(body, data);
 		assert.ok(expanded.includes('```markdown\n<!-- education -->\n```'));
 		assert.ok(expanded.includes('\n    <!-- education -->'));
+		for (const indent of ['\t', ' \t', '   \t']) {
+			assert.ok(
+				expanded.includes(`\n${indent}<!-- education -->`),
+				`tab-indented placeholder "${JSON.stringify(indent)}" should survive verbatim`,
+			);
+		}
 	});
 
 	it('drops the placeholder on both paths when a section expands to empty', () => {

@@ -440,6 +440,17 @@ export function loadSkillCategories(sourcePath = RESUME_SOURCE) {
     }
     if (!Array.isArray(cat.skills) || cat.skills.length === 0) {
       errors.push(`${prefix}.skills: must be a non-empty array`);
+    } else {
+      // Members, not just the array. readResumeSource is a raw YAML parse, so
+      // the content-collection schema's z.array(z.string().trim().min(1)) never
+      // runs on this path; without this, `[null]`, `[123]` or `["   "]` reach
+      // the injected list as blank or numeric skill text, and PDF verification
+      // checks only the category name, so the variant still passes.
+      cat.skills.forEach((skill, skillIdx) => {
+        if (typeof skill !== "string" || skill.trim().length === 0) {
+          errors.push(`${prefix}.skills[${skillIdx}]: must be a non-empty string`);
+        }
+      });
     }
   });
   const duplicateIds = findDuplicates(ids);

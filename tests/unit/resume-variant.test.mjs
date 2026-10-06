@@ -1,8 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Script, createContext } from 'node:vm';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import {
+	loadSkillCategories,
 	validateIncludeCertsShape,
 	validateIncludeSkillsShape,
 	includeSkillsRequestsSkills,
@@ -718,5 +722,44 @@ describe('parseResumePreviewPort', () => {
 			() => parseResumePreviewPort({ RESUME_PREVIEW_PORT: 'abc' }),
 			/Invalid RESUME_PREVIEW_PORT/,
 		);
+	});
+});
+
+describe('loadSkillCategories', () => {
+	// readResumeSource is a raw YAML parse, so src/content.config.ts's Zod schema
+	// never runs on this path — the validator here is the only thing standing
+	// between malformed YAML and the injected skills list. A temp source file is
+	// what lets these cases reach it.
+	function sourceWithSkills(yaml) {
+		const dir = mkdtempSync(path.join(tmpdir(), 'resume-skills-'));
+		const file = path.join(dir, 'index.md');
+		writeFileSync(file, `---\nskills_inventory:\n  categories:\n${yaml}---\n\nBody.\n`);
+		return file;
+	}
+
+	it('accepts a category whose skills are all non-empty strings', () => {
+		const file = sourceWithSkills(
+			'    - id: leadership\n      name: Leadership\n      skills: ["Technical Leadership"]\n',
+		);
+		assert.deepEqual(loadSkillCategories(file).map(cat => cat.id), ['leadership']);
+	});
+
+	for (const [label, yaml] of [
+		['a null member', '      skills: [null]\n'],
+		['a numeric member', '      skills: [123]\n'],
+		['a whitespace-only member', '      skills: ["   "]\n'],
+	]) {
+		it(`rejects ${label}, which would otherwise join() into blank or numeric skill text`, () => {
+			const file = sourceWithSkills(`    - id: leadership\n      name: Leadership\n${yaml}`);
+			assert.throws(
+				() => loadSkillCategories(file),
+				/skills_inventory\.categories\[0\]\.skills\[0\]: must be a non-empty string/,
+			);
+		});
+	}
+
+	it('still rejects an empty skills array', () => {
+		const file = sourceWithSkills('    - id: leadership\n      name: Leadership\n      skills: []\n');
+		assert.throws(() => loadSkillCategories(file), /\.skills: must be a non-empty array/);
 	});
 });

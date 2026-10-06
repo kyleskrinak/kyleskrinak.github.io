@@ -240,8 +240,13 @@ export function renderResumeSection(name, data) {
 
 /** Opens or closes a fenced code block: up to three spaces, then the fence. */
 const FENCE_RE = /^ {0,3}(`{3,}|~{3,})/;
-/** Four spaces or a tab starts an indented code block in CommonMark. */
-const CODE_INDENT_RE = /^(?: {4}|\t)/;
+/**
+ * Four columns of indentation start an indented code block in CommonMark. Four
+ * spaces reach it, and so does a tab — including a tab after one, two or three
+ * spaces, since a tab advances to the next multiple of four columns and any tab
+ * inside the first four columns lands on column four.
+ */
+const CODE_INDENT_RE = /^(?: {4}| {0,3}\t)/;
 
 /**
  * Replace every placeholder line in the resume body with its expanded markdown.

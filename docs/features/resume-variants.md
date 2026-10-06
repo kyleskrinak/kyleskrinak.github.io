@@ -137,7 +137,10 @@ The builder fails before writing a PDF when:
 - The variant config has unknown keys or malformed values.
 - A facet id, cert id, skill category id, entry id, or section anchor is unknown.
 - `certifications.json` is missing or malformed when certs are requested.
-- `skills_inventory.categories` is absent or empty when skills are requested.
+- `skills_inventory.categories` is absent or empty when skills are requested, or a category's
+  `skills` list is empty or holds a non-string or blank member. The members are checked because
+  the Node path parses the frontmatter as raw YAML, so the content-collection schema never runs
+  on it, and a blank or numeric entry would reach the injected list as skill text.
 - Skills are requested without an anchor to insert before.
 - The cert or skills section cannot be injected at the requested anchor.
 - A requested certification's **whole list item** — name, issuer, and date suffix — or a requested skill category name is missing from the rendered list. The cert check is deliberately the full line rather than the name alone, so a date suffix the injector built wrong cannot pass on the name.
