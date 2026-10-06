@@ -124,6 +124,18 @@ describe('the unknown-placeholder guard', () => {
 		assert.equal(tree.children[0].value, '<!-- more -->');
 	});
 
+	it('leaves a known section name inert in any other document too', () => {
+		// Scope covers expansion, not just the typo guard. A post's frontmatter
+		// carries no `education`, so expanding here would fail the build on a page
+		// that never asked for a resume section.
+		const tree = runPlugin('intro\n\n<!-- education -->', {
+			path: BLOG_PATH,
+			frontmatter: { title: 'A post' },
+		});
+		assert.deepEqual(treeHeadings(tree), []);
+		assert.equal(tree.children.at(-1).value, '<!-- education -->');
+	});
+
 	it('leaves a prose comment inert in the resume itself', () => {
 		const tree = runPlugin('<!-- TODO revisit -->');
 		assert.equal(tree.children[0].value, '<!-- TODO revisit -->');

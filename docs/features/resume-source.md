@@ -49,7 +49,9 @@ The remark plugin runs **first** in `astro.config.ts`'s `remarkPlugins`, before 
 4. Add the field to the `pages` schema in `src/content.config.ts`.
 5. Add tests to `tests/unit/resume-sections.test.mjs` (the renderer) and `tests/unit/remark-resume-sections.test.mjs` (the page path and the parity between the two).
 
-A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws on both paths**, so a typo fails the build instead of rendering nothing. The page path scopes that guard to `src/content/pages/resume/index.md`, so the same comment shape stays inert in every other document — `<!-- more -->` in a blog post is an ordinary comment. Facet tags (`<!-- f: … -->`) and prose comments stay inert in the resume too.
+A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws on both paths**, so a typo fails the build instead of rendering nothing. The page path scopes the whole plugin to `src/content/pages/resume/index.md` and returns before touching any other document, so both the guard and the expansion stay inside this one file — `<!-- more -->` *and* `<!-- education -->` are ordinary comments in a blog post.
+
+Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comments stay inert. A single lowercase kebab-case word is the placeholder shape, so `<!-- draft -->` in the resume throws as an unknown section; write `<!-- TODO revisit -->` or any multi-word form for a note that should survive.
 
 **A placeholder is a top-level node.** The remark plugin walks `tree.children` only, so a comment nested inside a list item is not a placeholder on the page path even though the line-based `expandResumePlaceholders()` would expand it. Top-level is the contract; `tests/unit/remark-resume-sections.test.mjs` records it.
 

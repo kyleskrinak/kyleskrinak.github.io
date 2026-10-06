@@ -42,8 +42,11 @@ export const PLACEHOLDER_RE = new RegExp(
 /**
  * Catches a placeholder-shaped comment whose name is NOT in RESUME_SECTIONS,
  * so a typo (`<!-- educaton -->`) fails the build instead of rendering nothing.
- * Deliberately narrow: only single-word, hyphenated lowercase comment bodies
- * look like a placeholder; prose comments and facet tags never match.
+ * Deliberately narrow: only a single hyphenated lowercase word looks like a
+ * placeholder, so facet tags (`<!-- f: … -->`) and multi-word notes
+ * (`<!-- TODO revisit -->`) never match. A single-word note does — `<!-- draft -->`
+ * in the resume throws. That is the cost of catching the typo, and it only
+ * applies inside the resume source; see remark-resume-sections.mjs.
  */
 const PLACEHOLDER_SHAPED_RE = /^<!--\s*([a-z][a-z0-9-]*)\s*-->$/;
 
