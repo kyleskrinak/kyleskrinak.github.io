@@ -67,7 +67,7 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 
 | Output | Where |
 |---|---|
-| The resume's lead `## ` heading and employer line | `<!-- current-role -->` |
+| The resume's lead `##` heading and employer line | `<!-- current-role -->` |
 | The `/resume/` meta description | `resumeMetaDescription()` in `src/pages/resume.astro` |
 | The `/resume/print/` meta description | the same function in `src/pages/resume/print/index.astro` |
 | The About page's current-position sentence | `src/pages/about.astro` reads the resume entry via `getEntry("pages", "resume")` |
