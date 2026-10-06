@@ -58,10 +58,13 @@ function markdownHeadings(markdown) {
 describe('expansion parity between the two paths', () => {
 	// One body exercising every position CommonMark distinguishes: a plain
 	// top-level placeholder, one indented 3 spaces (still an HTML block), one
-	// inside a fence, one indented 4 spaces, and three reaching column four
-	// through a tab — bare, after one space, and after three. A tab advances to
-	// the next multiple of four columns, so all three are code, like the four
-	// spaces above them, and all are inert.
+	// inside a fence, one indented 4 spaces, three reaching column four through a
+	// tab — bare, after one space, and after three — and one split across lines.
+	// A tab advances to the next multiple of four columns, so all three are code,
+	// like the four spaces above them. The multiline comment is one HTML block to
+	// mdast and three unrecognizable lines to the string path, so it is inert on
+	// both only because classifyPlaceholder rejects embedded line breaks. All are
+	// inert.
 	const body = [
 		'<!-- current-role -->',
 		'',
@@ -80,6 +83,10 @@ describe('expansion parity between the two paths', () => {
 		' \t<!-- education -->',
 		'',
 		'   \t<!-- education -->',
+		'',
+		'<!--',
+		'education',
+		'-->',
 		'',
 	].join('\n');
 
@@ -107,6 +114,19 @@ describe('expansion parity between the two paths', () => {
 				`tab-indented placeholder "${JSON.stringify(indent)}" should survive verbatim`,
 			);
 		}
+		assert.ok(expanded.includes('\n<!--\neducation\n-->'));
+	});
+
+	it('leaves a multiline placeholder inert on the page path too', () => {
+		// mdast hands the plugin the whole comment as one html node, so without the
+		// line-break guard this one expands into headings the string path cannot
+		// produce — the string path splits on newlines and sees `<!--`,
+		// `education` and `-->`, none of which is placeholder-shaped.
+		const tree = runPlugin('<!--\neducation\n-->');
+		assert.deepEqual(treeHeadings(tree), []);
+		assert.equal(tree.children.length, 1);
+		assert.equal(tree.children[0].type, 'html');
+		assert.equal(tree.children[0].value, '<!--\neducation\n-->');
 	});
 
 	it('drops the placeholder on both paths when a section expands to empty', () => {
@@ -151,6 +171,16 @@ describe('the unknown-placeholder guard', () => {
 		});
 		assert.deepEqual(treeHeadings(tree), []);
 		assert.equal(tree.children.at(-1).value, '<!-- education -->');
+	});
+
+	it('does not fire for a multiline placeholder-shaped typo', () => {
+		// `\s*` in the shaped regex matches a newline, so this throws on the page
+		// path and passes silently on the string path unless the line-break guard
+		// rejects it first. Inert on both is the agreement; the typo guard only
+		// ever covered the single-line form the convention actually uses.
+		const body = '<!--\neducaton\n-->';
+		assert.deepEqual(treeHeadings(runPlugin(body)), []);
+		assert.equal(expandResumePlaceholders(body, data), body);
 	});
 
 	it('leaves a prose comment inert in the resume itself', () => {

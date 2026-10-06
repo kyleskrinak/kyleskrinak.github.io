@@ -49,11 +49,13 @@ The remark plugin runs **first** in `astro.config.ts`'s `remarkPlugins`, before 
 4. Add the field to the `pages` schema in `src/content.config.ts`.
 5. Add tests to `tests/unit/resume-sections.test.mjs` (the renderer) and `tests/unit/remark-resume-sections.test.mjs` (the page path and the parity between the two).
 
-A placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws on both paths**, so a typo fails the build instead of rendering nothing. The page path scopes the whole plugin to `src/content/pages/resume/index.md` and returns before touching any other document, so both the guard and the expansion stay inside this one file — `<!-- more -->` *and* `<!-- education -->` are ordinary comments in a blog post.
+A **single-line** placeholder-shaped comment whose name is not in `RESUME_SECTIONS` (`<!-- educaton -->`) **throws on both paths**, so a typo fails the build instead of rendering nothing. The page path scopes the whole plugin to `src/content/pages/resume/index.md` and returns before touching any other document, so both the guard and the expansion stay inside this one file — `<!-- more -->` *and* `<!-- education -->` are ordinary comments in a blog post.
 
 Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comments stay inert. A single lowercase kebab-case word is the placeholder shape, so `<!-- draft -->` in the resume throws as an unknown section; write `<!-- TODO revisit -->` or any multi-word form for a note that should survive.
 
 **A placeholder is a top-level node.** The remark plugin walks `tree.children` only, so a comment nested inside a list item is not a placeholder on the page path even though the line-based `expandResumePlaceholders()` would expand it. Top-level is the contract; `tests/unit/remark-resume-sections.test.mjs` records it.
+
+**A placeholder also occupies one line.** `classifyPlaceholder()` rejects an embedded line break before either regex runs, so a comment split across lines — `<!--`, `education`, `-->` — is an ordinary comment on both paths, the unknown-name form included: that one does *not* throw. The two paths do not receive the same unit. mdast hands the plugin that whole comment as a single HTML block, and both regexes spell their padding `\s*`, which matches a newline; `expandResumePlaceholders()` splits the body on newlines and sees three lines, none of them placeholder-shaped. Rejecting the line break is what keeps the two answers identical.
 
 ## Field-by-field: what populates what
 
@@ -70,6 +72,8 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 Changing the job title in frontmatter changes all four. Before this wiring, `about.astro` carried its own hand-typed copy, and the two drifted.
 
 `location`, `start_date`, and `employer_url` are all required, for two different reasons. The employer-line convention is `**Employer** — Location | Dates`, and a line missing either tail field stops being recognized as one (see below). `employer_url` is required because the About page links the employer name: an optional field there would render a silently unlinked name rather than fail the build.
+
+`start_date` is `YYYY-MM` or `YYYY-MM-DD`, and `formatMonthYear()` anchors the match at **both** ends. Trailing text throws instead of rendering the prefix: both renderers read raw frontmatter, so the schema's `z.coerce.date()` has never run by the time a value arrives, and `2022-060` or `2022-06-not-a-date` would otherwise print as June 2022 with nothing downstream to catch it — PDF verification compares the printed page against the same wrong month it rendered from. A `Date` is accepted too and read in UTC.
 
 **One recognizer, two consumers.** `src/lib/resume-sections.mjs` exports `isEmployerLine(line)` and `employerLineText(line)` beside the function that *builds* the line, so the convention is written down once. `lint-resume.mjs` skips the line through `isEmployerLine` when it collects scope prose; `resume-render.mjs` turns it into a PDF content expectation through `employerLineText`, which strips the bold markers so the string matches rendered text. Both previously carried their own regex and could drift. The shared regex deliberately has no `/g` flag — a global regex carries `lastIndex` between callers, so a `.test()` and a `matchAll()` on one object silently skip matches.
 

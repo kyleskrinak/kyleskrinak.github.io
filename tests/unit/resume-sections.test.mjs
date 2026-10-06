@@ -62,6 +62,30 @@ describe('formatMonthYear', () => {
 		assert.throws(() => formatMonthYear('2022-13', 'x'), /month out of range/);
 	});
 
+	// The match is anchored at both ends. Unanchored, every string below reads as
+	// June 2022: the prefix matches and the rest is discarded. Nothing downstream
+	// would catch it — both callers hand over raw YAML, so the collection
+	// schema's z.coerce.date() never runs, and PDF verification compares the
+	// printed page against the same wrong month it rendered from.
+	for (const malformed of [
+		'2022-060',
+		'2022-06-not-a-date',
+		'2022-06-1',
+		'2022-06-01-02',
+		// A time-bearing string reaches here only if a parser changes behavior:
+		// both real paths yield the date-only "2022-06-01", verified against the
+		// yaml package and an instrumented astro build. A Date object still works
+		// through the branch above; a surprise string should fail loudly.
+		'2022-06-01T00:00:00.000Z',
+	]) {
+		it(`throws on "${malformed}" rather than discarding the trailing text`, () => {
+			assert.throws(
+				() => formatMonthYear(malformed, 'current_role.start_date'),
+				/expected YYYY-MM or YYYY-MM-DD/,
+			);
+		});
+	}
+
 	it('throws on a non-date value', () => {
 		assert.throws(() => formatMonthYear(undefined, 'x'), /expected a date string or Date/);
 	});

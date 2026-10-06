@@ -33,7 +33,9 @@ export const RESUME_SECTIONS = ["current-role", "education"];
 
 /**
  * A placeholder occupies a whole line: `<!-- education -->`. Anchored and
- * name-restricted so an unrelated HTML comment in the body stays inert.
+ * name-restricted so an unrelated HTML comment in the body stays inert. The
+ * padding is `\s*`, which matches a newline — `classifyPlaceholder` enforces the
+ * single-line half of the contract, for the reason stated there.
  */
 export const PLACEHOLDER_RE = new RegExp(
   `^<!--\\s*(${RESUME_SECTIONS.join("|")})\\s*-->$`,
@@ -76,6 +78,16 @@ function fail(message) {
  */
 export function classifyPlaceholder(value) {
   const trimmed = String(value).trim();
+  // A placeholder occupies one line, and the two callers do not hand over the
+  // same unit: mdast gives a whole HTML block, so `<!--\neducation\n-->` arrives
+  // as one value, while expandResumePlaceholders splits the body on newlines and
+  // can never assemble it. Both regexes below spell their padding `\s*`, which
+  // matches a newline, so without this guard the mdast path expands a multiline
+  // comment into headings the string path leaves alone — and a multiline typo
+  // throws on one path and passes on the other. Returning null is what makes
+  // them agree: an ordinary comment on both, which is already the string path's
+  // answer. Throwing here would invert the divergence instead of closing it.
+  if (/[\r\n]/.test(trimmed)) return null;
   const match = PLACEHOLDER_RE.exec(trimmed);
   if (match) return match[1];
   const shaped = PLACEHOLDER_SHAPED_RE.exec(trimmed);
@@ -89,7 +101,11 @@ export function classifyPlaceholder(value) {
 
 /**
  * "2022-06-01" | Date → "June 2022". Throws rather than returning a partial
- * date: a silently wrong month on the resume is worse than a failed build.
+ * date: a silently wrong month on the resume is worse than a failed build. The
+ * string match is anchored at BOTH ends for that reason — a prefix match reads
+ * "2022-060" and "2022-06-not-a-date" as June 2022, and neither caller would
+ * notice, since both read raw YAML with the collection schema's date coercion
+ * never applied and PDF verification compares against whatever got rendered.
  */
 export function formatMonthYear(value, label) {
   if (value instanceof Date) {
@@ -97,7 +113,7 @@ export function formatMonthYear(value, label) {
     return `${MONTHS[value.getUTCMonth()]} ${value.getUTCFullYear()}`;
   }
   if (typeof value === "string") {
-    const m = /^(\d{4})-(\d{2})(?:-\d{2})?/.exec(value.trim());
+    const m = /^(\d{4})-(\d{2})(?:-\d{2})?$/.exec(value.trim());
     if (!m) fail(`${label}: expected YYYY-MM or YYYY-MM-DD, got "${value}"`);
     const month = Number(m[2]);
     if (month < 1 || month > 12) fail(`${label}: month out of range in "${value}"`);
