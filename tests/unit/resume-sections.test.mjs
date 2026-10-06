@@ -255,6 +255,41 @@ describe('renderEducation', () => {
 		}
 	});
 
+	// The opt-in filter asks only whether `render` is literally true, so a
+	// malformed item reads as a deliberate opt-out: the section leaves the PDF
+	// content expectations and resume-render.mjs verifies a page that never
+	// carried it. The schema rejects all of these, and both callers read raw
+	// frontmatter, so this is the only check there is.
+	it('throws on an item that is not a mapping, instead of skipping it', () => {
+		for (const item of [null, undefined, 'a string', 42, []]) {
+			assert.throws(
+				() => renderEducation({ items: [item] }),
+				/education\.items\[0\]: must be a mapping/,
+				`item ${JSON.stringify(item) ?? typeof item} should be rejected`
+			);
+		}
+	});
+
+	it('throws on a non-boolean render flag, instead of reading it as an opt-out', () => {
+		for (const render of ['true', 1, null, 'yes', 0]) {
+			const items = [{ ...education.items[0], render }];
+			assert.throws(
+				() => renderEducation({ items }),
+				/education\.items\[0\]\.render: must be true or false when present/,
+				`render: ${JSON.stringify(render)} should be rejected`
+			);
+		}
+	});
+
+	// `z.boolean().default(false)` defaults `undefined` only, so an omitted flag
+	// is the schema's own opt-out and has to stay one here. These two cases are
+	// what the validation above must not catch.
+	it('still treats an omitted flag and a literal false as deliberate opt-outs', () => {
+		const { render, ...noFlag } = education.items[0];
+		assert.equal(renderEducation({ items: [noFlag] }), '');
+		assert.equal(renderEducation({ items: [{ ...education.items[0], render: false }] }), '');
+	});
+
 	it('accepts years the recognizer reads, including an expected graduation', () => {
 		for (const years of ['2019', 'expected 2027', '1998 – 2001']) {
 			const items = [{ ...education.items[0], years }];

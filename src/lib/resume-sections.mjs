@@ -243,14 +243,37 @@ function renderEducationItem(item, idx) {
  * a default of `[]` would read that absence as the authored empty array. PDF
  * generation would then expect no education heading and no employer line and
  * pass, which is the failure this module exists to make loud.
+ *
+ * Every item is validated before the opt-in filter runs, for the same reason:
+ * the filter cannot tell a malformed item from a deliberate opt-out, so a
+ * non-mapping item or a non-boolean `render` throws rather than silently
+ * removing its section. An omitted flag and a literal `false` stay opt-outs.
  */
 export function renderEducation(education) {
   if (!education) fail("<!-- education --> is present but `education` is missing from the frontmatter");
   const items = education.items;
   if (!Array.isArray(items)) fail("education.items must be an array");
+  // Validate every item, including the ones about to be filtered out. The filter
+  // below asks only whether `render` is literally true, so a malformed item is
+  // indistinguishable from the two deliberate opt-outs — an omitted flag and a
+  // literal `false`. `items: [null]`, a bare string, and `render: "true"`, `1` or
+  // `null` all read as "skip": the section leaves the PDF content expectations
+  // and `resume-render.mjs` verifies a page that never carried it. The schema
+  // rejects all of these (`z.boolean().default(false)` defaults `undefined`
+  // only, never `null`), and both callers here read raw frontmatter, so nothing
+  // else checks them.
+  items.forEach((item, idx) => {
+    const label = `education.items[${idx}]`;
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      fail(`${label}: must be a mapping, not ${JSON.stringify(item) ?? typeof item}`);
+    }
+    if (item.render !== undefined && typeof item.render !== "boolean") {
+      fail(`${label}.render: must be true or false when present, not ${JSON.stringify(item.render)}`);
+    }
+  });
   return items
     .map((item, idx) => [item, idx])
-    .filter(([item]) => item?.render === true)
+    .filter(([item]) => item.render === true)
     .map(([item, idx]) => renderEducationItem(item, idx))
     .join("\n\n");
 }

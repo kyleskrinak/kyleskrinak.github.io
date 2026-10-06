@@ -91,6 +91,8 @@ An item is opt-in: the renderer prints it only when `render: true` is written in
 
 `items` carries **no default**, for the same raw-frontmatter reason. The schema makes the key required, so only the Node callers that parse the YAML directly can reach a missing or null `items` — and a default of `[]` would read that absence as the authored empty array above. PDF generation would then expect no education heading and no employer line, and pass. A missing or non-array `items` throws; an authored `items: []` still expands to nothing, because that one is a choice.
 
+Every item is validated **before** the opt-in filter runs, and that ordering is the point. The filter asks only whether `render` is literally `true`, so it cannot tell a malformed item from a deliberate opt-out: `items: [null]`, a bare string, and `render: "true"`, `1` or `null` would all read as "skip" and quietly drop the section from the PDF content expectations, leaving `resume-render.mjs` verifying a page that never carried it. A non-mapping item and a non-boolean `render` both throw. An omitted flag and a literal `false` remain opt-outs — `z.boolean().default(false)` defaults `undefined` only, never `null`, so rejecting `render: null` is what matches the schema.
+
 The opt-in default is deliberate, and it is why the field is a boolean rather than an implicit "render everything present." Kyle pursues ongoing coursework, and whether a given item *belongs* on the resume is a judgment call raised during a revision — not a settled property of the data. `render: false` records an item without printing it, so the metadata stays complete while the rendered resume stays selective.
 
 github-slugger derives variant entry ids from these headings, which is why `ms-it` is a valid `anchor_before_id`.
