@@ -98,7 +98,10 @@ jobs:
 
       # The resume hash list includes the shared rendering inputs the print
       # route renders through (Layout, global CSS, site config, content
-      # schema) — a change to any of these alters the printed page.
+      # schema) — a change to any of these alters the printed page. It also
+      # includes the placeholder expanders, which build the lead heading,
+      # employer lines and education section out of the frontmatter: a change
+      # there rewrites the printed text even when the resume source is untouched.
       # astro.config.ts churns ~monthly → ~one spurious regen/month; accepted tradeoff.
       - name: Ensure resume PDF
         uses: ./.github/actions/ensure-release-pdfs
@@ -112,8 +115,11 @@ jobs:
             src/styles/resume.css
             scripts/print-resume-pdf.mjs
             scripts/lib/resume-render.mjs
+            scripts/lib/resume-source.mjs
             scripts/lib/pdf-helpers.mjs
             src/lib/remark-facets.mjs
+            src/lib/remark-resume-sections.mjs
+            src/lib/resume-sections.mjs
             src/components/ResumeHeader.astro
             src/layouts/Layout.astro
             src/styles/global.css

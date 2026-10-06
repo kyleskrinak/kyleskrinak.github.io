@@ -1,5 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { remarkResumeSections } from '../../src/lib/remark-resume-sections.mjs';
 import { expandResumePlaceholders } from '../../src/lib/resume-sections.mjs';
@@ -146,6 +148,27 @@ describe('the unknown-placeholder guard', () => {
 			() => runPlugin('<!-- current-role -->', { frontmatter: {} }),
 			/\[remark-resume-sections\].*`current_role` is missing/s,
 		);
+	});
+});
+
+describe('the matcher and the resume file on disk', () => {
+	// Every other scoping test hardcodes RESUME_PATH, so they pin the matcher's
+	// logic and say nothing about the file Astro actually hands it. These two read
+	// the resume's real location: move the file or drift the suffix constant and
+	// they fail here, at unit-test speed, instead of shipping a page whose
+	// placeholders silently never expanded.
+	const REAL_RESUME = fileURLToPath(
+		new URL('../../src/content/pages/resume/index.md', import.meta.url),
+	);
+
+	it('finds the resume source where the plugin expects it', () => {
+		assert.ok(existsSync(REAL_RESUME), `${REAL_RESUME} does not exist`);
+	});
+
+	it('expands for that file at its real absolute path', () => {
+		assert.deepEqual(treeHeadings(runPlugin('<!-- education -->', { path: REAL_RESUME })), [
+			'M.S. I.T.',
+		]);
 	});
 });
 
