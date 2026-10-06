@@ -86,6 +86,33 @@ describe('formatMonthYear', () => {
 		});
 	}
 
+	// The optional day is validated against the month and the year, even though it
+	// never reaches the output. A renderer that accepts "2023-02-29" is the one
+	// place a typo in the source survives every check downstream: the day is
+	// absent from the rendered text, so PDF verification cannot see it, and both
+	// callers read raw YAML with the schema's coercion never applied.
+	for (const impossible of [
+		'2022-06-00',
+		'2022-06-99',
+		'2022-06-31',
+		'2022-04-31',
+		'2023-02-29', // not a leap year
+		'1900-02-29', // divisible by 100, so not a leap year either
+	]) {
+		it(`throws on the impossible day in "${impossible}"`, () => {
+			assert.throws(
+				() => formatMonthYear(impossible, 'current_role.start_date'),
+				/day out of range for that month/,
+			);
+		});
+	}
+
+	for (const valid of ['2024-02-29', '2000-02-29', '2022-06-30', '2022-01-31']) {
+		it(`accepts the real date "${valid}"`, () => {
+			assert.match(formatMonthYear(valid, 'x'), /^[A-Z][a-z]+ \d{4}$/);
+		});
+	}
+
 	it('throws on a non-date value', () => {
 		assert.throws(() => formatMonthYear(undefined, 'x'), /expected a date string or Date/);
 	});

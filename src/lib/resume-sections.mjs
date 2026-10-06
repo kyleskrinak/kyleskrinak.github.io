@@ -106,6 +106,11 @@ export function classifyPlaceholder(value) {
  * "2022-060" and "2022-06-not-a-date" as June 2022, and neither caller would
  * notice, since both read raw YAML with the collection schema's date coercion
  * never applied and PDF verification compares against whatever got rendered.
+ *
+ * The optional day is validated against the month and the year for the same
+ * reason, even though it never reaches the output: "2023-02-29" and "2022-06-00"
+ * are not dates, and a renderer that accepts them is the one place a typo in the
+ * source could survive every check downstream.
  */
 export function formatMonthYear(value, label) {
   if (value instanceof Date) {
@@ -113,10 +118,19 @@ export function formatMonthYear(value, label) {
     return `${MONTHS[value.getUTCMonth()]} ${value.getUTCFullYear()}`;
   }
   if (typeof value === "string") {
-    const m = /^(\d{4})-(\d{2})(?:-\d{2})?$/.exec(value.trim());
+    const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(value.trim());
     if (!m) fail(`${label}: expected YYYY-MM or YYYY-MM-DD, got "${value}"`);
     const month = Number(m[2]);
     if (month < 1 || month > 12) fail(`${label}: month out of range in "${value}"`);
+    if (m[3] !== undefined) {
+      const day = Number(m[3]);
+      // Day 0 of the following month is the last day of this one, which settles
+      // February in a leap year without a rule of its own.
+      const lastDay = new Date(Date.UTC(Number(m[1]), month, 0)).getUTCDate();
+      if (day < 1 || day > lastDay) {
+        fail(`${label}: day out of range for that month in "${value}"`);
+      }
+    }
     return `${MONTHS[month - 1]} ${m[1]}`;
   }
   return fail(`${label}: expected a date string or Date, got ${typeof value}`);
@@ -257,6 +271,18 @@ export function renderResumeSection(name, data) {
 /** Opens or closes a fenced code block: up to three spaces, then the fence. */
 const FENCE_RE = /^ {0,3}(`{3,}|~{3,})/;
 /**
+ * Opens a CommonMark HTML block of the comment kind: up to three spaces, then
+ * `<!--`. The block runs to the first line containing `-->`, and nothing inside
+ * it opens anything else — a fence least of all, which is the whole reason this
+ * state exists. Without it, three backticks inside a multiline comment opened a
+ * fence the string path never closed, so every placeholder after that comment
+ * looked like sample text while remark, reading the comment as one HTML block,
+ * expanded them.
+ */
+const COMMENT_OPEN_RE = /^ {0,3}<!--/;
+/** Ends that block, on the same line it started or any line after. */
+const COMMENT_CLOSE = "-->";
+/**
  * Four columns of indentation start an indented code block in CommonMark. Four
  * spaces reach it, and so does a tab — including a tab after one, two or three
  * spaces, since a tab advances to the next multiple of four columns and any tab
@@ -275,14 +301,26 @@ const CODE_INDENT_RE = /^(?: {4}| {0,3}\t)/;
  * The lines this skips are the ones remark would not treat as an HTML block
  * either, so the string form and the rendered form select the same placeholders:
  * a comment inside a fenced or indented code block is sample text in both, and
- * only 0–3 leading spaces still leave an HTML block at the top level.
+ * only 0–3 leading spaces still leave an HTML block at the top level. A comment
+ * spanning several lines is one HTML block to both, so this scanner consumes it
+ * whole rather than reading the markdown inside it.
  */
 export function expandResumePlaceholders(body, data) {
   const lines = body.split("\n");
   const out = [];
   /** The open fence's character and length while inside a fenced block. */
   let fence = null;
+  /** True while inside a multiline HTML comment block. */
+  let comment = false;
   for (const line of lines) {
+    if (comment) {
+      // The block ends on the first line carrying the closing delimiter; an
+      // unclosed comment runs to the end of the body, which is how remark reads
+      // it too.
+      if (line.includes(COMMENT_CLOSE)) comment = false;
+      out.push(line);
+      continue;
+    }
     const fenceMatch = FENCE_RE.exec(line);
     if (fence) {
       // A closing fence repeats the opening character at least as many times
@@ -303,6 +341,13 @@ export function expandResumePlaceholders(body, data) {
       continue;
     }
     if (CODE_INDENT_RE.test(line)) {
+      out.push(line);
+      continue;
+    }
+    // Checked after the indent test on purpose: four columns of indentation make
+    // `<!--` indented code rather than an HTML block, and remark agrees.
+    if (COMMENT_OPEN_RE.test(line) && !line.includes(COMMENT_CLOSE)) {
+      comment = true;
       out.push(line);
       continue;
     }

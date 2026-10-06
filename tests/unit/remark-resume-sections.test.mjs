@@ -63,8 +63,11 @@ describe('expansion parity between the two paths', () => {
 	// A tab advances to the next multiple of four columns, so all three are code,
 	// like the four spaces above them. The multiline comment is one HTML block to
 	// mdast and three unrecognizable lines to the string path, so it is inert on
-	// both only because classifyPlaceholder rejects embedded line breaks. All are
-	// inert.
+	// both only because classifyPlaceholder rejects embedded line breaks. Every
+	// placeholder above is inert. The last pair is not: a comment carrying three
+	// backticks is one HTML block to mdast, so the placeholder after it expands —
+	// and the string path only agrees because it consumes the comment whole
+	// instead of reading a fence inside it.
 	const body = [
 		'<!-- current-role -->',
 		'',
@@ -88,6 +91,12 @@ describe('expansion parity between the two paths', () => {
 		'education',
 		'-->',
 		'',
+		'<!-- TODO',
+		'```',
+		'-->',
+		'',
+		'<!-- education -->',
+		'',
 	].join('\n');
 
 	it('selects the same placeholders on the markdown path and the page path', () => {
@@ -97,9 +106,11 @@ describe('expansion parity between the two paths', () => {
 		);
 	});
 
-	it('expands the two top-level placeholders and leaves both code blocks alone', () => {
+	it('expands the three top-level placeholders and leaves both code blocks alone', () => {
 		assert.deepEqual(treeHeadings(runPlugin(body)), [
 			'Senior IT Systems Engineering Manager, Digital Experience',
+			'M.S. I.T.',
+			// The one after the comment that carries a fence.
 			'M.S. I.T.',
 		]);
 	});
@@ -127,6 +138,34 @@ describe('expansion parity between the two paths', () => {
 		assert.equal(tree.children.length, 1);
 		assert.equal(tree.children[0].type, 'html');
 		assert.equal(tree.children[0].value, '<!--\neducation\n-->');
+	});
+
+	it('reads a fence inside an HTML comment as comment text on both paths', () => {
+		// A comment is one HTML block in CommonMark, and nothing inside it opens
+		// anything else. Reading those three backticks as a fence left the string
+		// path inside a code block that never closed, so every later placeholder
+		// looked like sample text while the page expanded it — education missing
+		// from the PDF expectations and its variant anchors unknown.
+		const body = '<!-- TODO\n```\n-->\n\n<!-- education -->';
+		assert.deepEqual(treeHeadings(runPlugin(body)), ['M.S. I.T.']);
+		assert.deepEqual(
+			markdownHeadings(expandResumePlaceholders(body, data)),
+			['M.S. I.T.'],
+		);
+	});
+
+	it('keeps a real fence opaque and an unclosed comment open, on both paths', () => {
+		// The two sides of the same boundary: a fence outside a comment still hides
+		// a placeholder, and a comment with no closing delimiter runs to the end of
+		// the body — which is how remark reads it too.
+		for (const body of [
+			'```\n<!-- education -->\n```',
+			'<!-- TODO\n\n<!-- education -->',
+			'<!-- TODO -->\n\n```\n<!-- education -->\n```',
+		]) {
+			assert.deepEqual(treeHeadings(runPlugin(body)), [], body);
+			assert.deepEqual(markdownHeadings(expandResumePlaceholders(body, data)), [], body);
+		}
 	});
 
 	it('drops the placeholder on both paths when a section expands to empty', () => {

@@ -57,6 +57,10 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 
 **A placeholder also occupies one line.** `classifyPlaceholder()` rejects an embedded line break before either regex runs, so a comment split across lines — `<!--`, `education`, `-->` — is an ordinary comment on both paths, the unknown-name form included: that one does *not* throw. The two paths do not receive the same unit. mdast hands the plugin that whole comment as a single HTML block, and both regexes spell their padding `\s*`, which matches a newline; `expandResumePlaceholders()` splits the body on newlines and sees three lines, none of them placeholder-shaped. Rejecting the line break is what keeps the two answers identical.
 
+**A comment is one block, and nothing inside it counts as markdown.** `expandResumePlaceholders()` consumes a multiline HTML comment whole rather than reading the lines inside it, because CommonMark treats `<!-- … -->` as a single HTML block and nothing inside it can open anything else. Three backticks inside such a comment are comment text, not a fence. Reading them as a fence left the string path inside a code block that never closed, so every placeholder after that comment looked like sample text while remark — reading the comment as one block — expanded them: `education` absent from the PDF content expectations and its variant entry ids reported as unknown. The scanner checks for a comment opener *after* its indent test, since four columns of indentation make `<!--` indented code instead, and remark agrees.
+
+**What the scanner still approximates.** It models fenced code, indented code and comment blocks, which is every container the resume convention uses. It does not model raw HTML block containers: a placeholder inside `<pre>`, `<div>`, `<script>` or `<table>` expands on the string path while the page path leaves it alone, because mdast folds the whole container into one HTML node. The resume source carries no raw HTML, so nothing reaches that gap today — but a body that grows one needs the selection logic shared rather than reimplemented. See the note at the end of this file.
+
 ## Field-by-field: what populates what
 
 ### `current_role` — injected, four consumers
@@ -74,6 +78,8 @@ Changing the job title in frontmatter changes all four. Before this wiring, `abo
 `location`, `start_date`, and `employer_url` are all required, for two different reasons. The employer-line convention is `**Employer** — Location | Dates`, and a line missing either tail field stops being recognized as one (see below). `employer_url` is required because the About page links the employer name: an optional field there would render a silently unlinked name rather than fail the build.
 
 `start_date` is `YYYY-MM` or `YYYY-MM-DD`, and `formatMonthYear()` anchors the match at **both** ends. Trailing text throws instead of rendering the prefix: both renderers read raw frontmatter, so the schema's `z.coerce.date()` has never run by the time a value arrives, and `2022-060` or `2022-06-not-a-date` would otherwise print as June 2022 with nothing downstream to catch it — PDF verification compares the printed page against the same wrong month it rendered from. A `Date` is accepted too and read in UTC.
+
+The optional day is validated against the month and the year, so `2022-06-31`, `2022-06-00` and `2023-02-29` all throw while `2024-02-29` passes. The day never reaches the rendered text, which is exactly why it is checked here: PDF verification cannot see a wrong day, and no other validator runs on this path.
 
 **One recognizer, two consumers.** `src/lib/resume-sections.mjs` exports `isEmployerLine(line)` and `employerLineText(line)` beside the function that *builds* the line, so the convention is written down once. `lint-resume.mjs` skips the line through `isEmployerLine` when it collects scope prose; `resume-render.mjs` turns it into a PDF content expectation through `employerLineText`, which strips the bold markers so the string matches rendered text. Both previously carried their own regex and could drift. The shared regex deliberately has no `/g` flag — a global regex carries `lastIndex` between callers, so a `.test()` and a `matchAll()` on one object silently skip matches.
 
@@ -136,3 +142,11 @@ npm run test:unit    # resume-sections and resume-variant suites
 ```
 
 A frontmatter change that should not alter the rendered text can be proved byte-for-byte by diffing `readResumeSource().expandedBody` against the committed body.
+
+## Known gap: the two paths select placeholders with different machinery
+
+The page path asks remark for the parse tree and walks `tree.children`. The Node path scans lines and models the three containers that can hide a placeholder: fenced code, indented code and HTML comment blocks. Three review rounds have now found a case where that model and CommonMark disagreed — a tab inside the first four columns, a comment split across lines, and a fence written inside a comment — and each was closed in `src/lib/resume-sections.mjs` with a test in `tests/unit/remark-resume-sections.test.mjs`.
+
+One gap is left open deliberately: a placeholder inside a raw HTML container (`<pre>`, `<div>`, `<script>`, `<table>`) expands on the string path and not on the page path. Closing it by hand would be a fourth approximation of the same parser. The root-cause fix is to select placeholders from one parse — have `expandResumePlaceholders()` parse the body with `fromMarkdown`, take the top-level HTML nodes, and splice the string by their `position.offset` ranges — so the two paths cannot disagree by construction and line-based replacement still keeps the surrounding offsets intact.
+
+That change is not free: `mdast-util-from-markdown` is currently a **devDependency**, and this module runs in the production Astro build, so the fix promotes it to a runtime dependency. The resume source carries no raw HTML, so nothing reaches the gap today. Revisit when either changes.
