@@ -1,23 +1,62 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Script, createContext } from 'node:vm';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import {
+	loadSkillCategories,
 	validateIncludeCertsShape,
+	validateIncludeSkillsShape,
+	includeSkillsRequestsSkills,
 	validateConfig,
 	validateBulletOrderRange,
 	validateCertificationsData,
 	resolveCerts,
+	resolveSkills,
 	injectCerts,
+	certDateSuffix,
+	certListItemText,
+	injectSkills,
 	parseResumePreviewPort,
 	buildTransform,
+	injectorScript,
+	certInjectorScript,
+	skillsInjectorScript,
+	CERT_INJECTOR_GLOBAL,
+	SKILLS_INJECTOR_GLOBAL,
 } from '../../scripts/build-resume-variant.mjs';
 
 const knownCertIds = new Set(['aiops-foundation', 'az-104']);
+const knownSkillIds = new Set(['leadership', 'platform-ops']);
+
+// Two categories are enough to prove order and rendering; the real inventory
+// lives in the resume frontmatter.
+const skillCategories = [
+	{
+		id: 'leadership',
+		name: 'Leadership & Team Development',
+		skills: ['Technical Leadership', 'Team Management'],
+	},
+	{
+		id: 'platform-ops',
+		name: 'Platform Operations',
+		skills: ['Site Reliability', 'Incident Management'],
+	},
+];
 const knownEntryIds = new Set([
 	'ms-it',
 	'senior-it-systems-engineering-manager-digital-experience',
 ]);
+
+// Passed to every validateConfig call so no test derives entry ids from the live
+// resume: a heading edit there must not be able to fail these assertions.
+const vocabularies = {
+	certIds: knownCertIds,
+	skillIds: knownSkillIds,
+	entryIds: knownEntryIds,
+};
 
 const certData = {
 	anchor_before_id: 'ms-it',
@@ -36,31 +75,49 @@ const certData = {
 	],
 };
 
-async function runSerializedTransform(config) {
-	const { document, window } = parseHTML(`
-		<html>
-			<head></head>
-			<body>
-				<article class="resume-content">
-					<h2 id="entry-one">Entry One</h2>
-					<p><strong>Employer</strong> — Location | Dates</p>
-					<ul>
-						<li data-facets="leadership">First bullet</li>
-						<li data-facets="platform-ops">Second bullet</li>
-					</ul>
-				</article>
-			</body>
-		</html>
-	`);
-	const page = {
-		async evaluate(fn, payload) {
-			return new Script(`(${fn.toString()})(payload)`).runInContext(
-				createContext({ document, window, payload, console }),
-			);
+const SERIALIZED_FIXTURE = `
+	<html>
+		<head></head>
+		<body>
+			<article class="resume-content">
+				<h2 id="entry-one">Entry One</h2>
+				<p><strong>Employer</strong> — Location | Dates</p>
+				<ul>
+					<li data-facets="leadership">First bullet</li>
+					<li data-facets="platform-ops">Second bullet</li>
+				</ul>
+				<h2 id="ms-it">M.S. I.T.</h2>
+			</article>
+		</body>
+	</html>
+`;
+
+// The page object the transform talks to, backed by ONE persistent vm context so
+// addScriptTag and evaluate share a global scope the way a real page does: a
+// script tag's `const` lands in that context's global lexical environment, and an
+// injector assigned to `window` there closes over it. A helper the builder failed
+// to declare is a free identifier here exactly as it is in Chromium, so it throws
+// a ReferenceError in this harness instead of only in a browser.
+function createSerializedPage(html = SERIALIZED_FIXTURE) {
+	const { document, window } = parseHTML(html);
+	const context = createContext({ document, window, console });
+	return {
+		document,
+		page: {
+			async addScriptTag({ content }) {
+				new Script(content).runInContext(context);
+			},
+			async evaluate(fn, payload) {
+				context.payload = payload;
+				return new Script(`(${fn.toString()})(payload)`).runInContext(context);
+			},
 		},
 	};
+}
 
-	await buildTransform(config)(page);
+async function runSerializedTransform(config, injections) {
+	const { document, page } = createSerializedPage();
+	await buildTransform(config, injections)(page);
 	return document;
 }
 
@@ -95,38 +152,38 @@ describe('validateConfig', () => {
 					anchor_before_id: 'senior-it-systems-engineering-manager-digital-experience',
 				},
 				'variant.json',
-				knownCertIds,
+				vocabularies,
 			);
 		});
 	});
 
-	it('rejects unknown cert ids when knownCertIds is provided', () => {
+	it('rejects unknown cert ids when a certIds vocabulary is provided', () => {
 		assert.throws(
-			() => validateConfig({ include_certs: ['missing-cert'] }, 'variant.json', knownCertIds),
+			() => validateConfig({ include_certs: ['missing-cert'] }, 'variant.json', vocabularies),
 			/unknown cert id\(s\): missing-cert/,
 		);
 	});
 
 	it('rejects unknown anchor_before_id overrides', () => {
 		assert.throws(
-			() => validateConfig({ anchor_before_id: 'missing-entry' }, 'variant.json', knownCertIds),
+			() => validateConfig({ anchor_before_id: 'missing-entry' }, 'variant.json', vocabularies),
 			/anchor_before_id: unknown entry key "missing-entry"/,
 		);
 	});
 
 	it('rejects empty and whitespace-only title overrides', () => {
 		assert.throws(
-			() => validateConfig({ title: '' }, 'variant.json', knownCertIds),
+			() => validateConfig({ title: '' }, 'variant.json', vocabularies),
 			/title: must be a non-empty string/,
 		);
 		assert.throws(
-			() => validateConfig({ title: '   ' }, 'variant.json', knownCertIds),
+			() => validateConfig({ title: '   ' }, 'variant.json', vocabularies),
 			/title: must be a non-empty string/,
 		);
 	});
 
 	it('accepts title overrides with surrounding whitespace so rendering can trim them', () => {
-		assert.doesNotThrow(() => validateConfig({ title: '  Platform Leader  ' }, 'variant.json', knownCertIds));
+		assert.doesNotThrow(() => validateConfig({ title: '  Platform Leader  ' }, 'variant.json', vocabularies));
 	});
 });
 
@@ -155,6 +212,71 @@ describe('buildTransform bullet_order', () => {
 		await assert.rejects(
 			() => runSerializedTransform({ bullet_order: { 'entry-one': [2] } }),
 			/bullet_order\.entry-one: index 2 out of range for 2 kept bullet\(s\) after filtering/,
+		);
+	});
+});
+
+describe('injector serialization', () => {
+	it('injects skills and certs through the serialized injector scripts', async () => {
+		const document = await runSerializedTransform({}, {
+			certs: [certData.certifications[0]],
+			certAnchorId: 'ms-it',
+			skills: skillCategories,
+			skillsAnchorId: 'ms-it',
+		});
+
+		// The full list item proves certListItemText — and certDateSuffix inside it —
+		// crossed into the page: either helper left out of the script would throw.
+		assert.equal(
+			document.querySelector('h2.cert-heading').nextElementSibling.querySelector('li').textContent,
+			certListItemText(certData.certifications[0]),
+		);
+		// Skills land above certs because both insert immediately before the anchor.
+		assert.deepEqual(
+			Array.from(document.querySelectorAll('.resume-content h2')).map(h => h.textContent),
+			['Entry One', 'Skills', 'Certifications', 'M.S. I.T.'],
+		);
+	});
+
+	it('defines each injector under its exported global name', async () => {
+		const { page } = createSerializedPage();
+		await page.addScriptTag({ content: certInjectorScript() });
+		await page.addScriptTag({ content: skillsInjectorScript() });
+		// Destructured, not deep-equalled: an array built inside the vm context has
+		// that realm's Array prototype, so deepStrictEqual fails on identity alone.
+		const [certType, skillsType] = await page.evaluate(() => [
+			typeof window.__resumeVariantInjectCerts,
+			typeof window.__resumeVariantInjectSkills,
+		]);
+		assert.equal(certType, 'function');
+		assert.equal(skillsType, 'function');
+	});
+
+	// The in-page body cannot reference the exported constants — a constant does not
+	// cross into the page either — so it spells the globals literally. Renaming a
+	// constant without editing that body would silently stop finding the injector.
+	it('spells the injector globals in the page body exactly as the exported constants', () => {
+		const source = buildTransform({}).toString();
+		assert.match(source, new RegExp(`window\\.${CERT_INJECTOR_GLOBAL}\\b`));
+		assert.match(source, new RegExp(`window\\.${SKILLS_INJECTOR_GLOBAL}\\b`));
+	});
+
+	it('fails on a helper the script does not declare, the way Chromium would', async () => {
+		const { page } = createSerializedPage();
+		// injectCerts calls certListItemText; omitting it from the dependency list is
+		// the exact defect certInjectorScript's list exists to prevent. Asserting the
+		// failure here is what makes the harness a guard rather than a courtesy.
+		await page.addScriptTag({ content: injectorScript('__missingDepInjector', injectCerts, []) });
+		await assert.rejects(
+			() =>
+				page.evaluate(() =>
+					window.__missingDepInjector(
+						document.querySelector('.resume-content'),
+						[{ id: 'az-104', name: 'Azure Administrator' }],
+						'ms-it',
+					),
+				),
+			/certListItemText is not defined/,
 		);
 	});
 });
@@ -210,6 +332,47 @@ describe('validateCertificationsData', () => {
 				validateCertificationsData(
 					{
 						...certData,
+						certifications: [{ id: 'az-104', name: 'Azure Administrator', expires: '2029-00' }],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must match YYYY-MM/,
+		);
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
+						certifications: [
+							{ id: 'az-104', name: 'Azure Administrator', issued: '2026-01', expires: '2025-06' },
+						],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must be after issued \(2026-01\), got 2025-06/,
+		);
+		// Equal months are a data error, not a zero-length validity window.
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
+						certifications: [
+							{ id: 'az-104', name: 'Azure Administrator', issued: '2026-01', expires: '2026-01' },
+						],
+					},
+					'certifications.json',
+					knownEntryIds,
+				),
+			/expires: must be after issued/,
+		);
+		assert.throws(
+			() =>
+				validateCertificationsData(
+					{
+						...certData,
 						certifications: [{ id: 'az-104', name: 'Azure Administrator', issuer: '' }],
 					},
 					'certifications.json',
@@ -228,6 +391,38 @@ describe('validateCertificationsData', () => {
 					knownEntryIds,
 				),
 			/facets: not supported/,
+		);
+	});
+});
+
+describe('certification id normalization', () => {
+	// Same class as the skill category ids: duplicate detection here and
+	// resolveCerts's lookup both key off cert.id, so a padded source id makes a
+	// config that names the id plainly fail the unknown-id check.
+	it('trims a padded cert id, so resolveCerts finds it by its plain name', () => {
+		const padded = {
+			...certData,
+			certifications: [{ ...certData.certifications[0], id: '  aiops-foundation  ' }],
+		};
+		const validated = validateCertificationsData(padded, 'certifications.json', knownEntryIds);
+		assert.deepEqual(validated.certifications.map(cert => cert.id), ['aiops-foundation']);
+		assert.deepEqual(
+			resolveCerts(['aiops-foundation'], validated).map(cert => cert.id),
+			['aiops-foundation'],
+		);
+	});
+
+	it('detects duplicate cert ids that differ only in padding', () => {
+		const padded = {
+			...certData,
+			certifications: [
+				certData.certifications[0],
+				{ ...certData.certifications[1], id: ' aiops-foundation ' },
+			],
+		};
+		assert.throws(
+			() => validateCertificationsData(padded, 'certifications.json', knownEntryIds),
+			/duplicate id\(s\): aiops-foundation/,
 		);
 	});
 });
@@ -260,7 +455,58 @@ describe('resolveCerts', () => {
 	});
 });
 
+describe('certDateSuffix', () => {
+	it('renders a range when both dates are present', () => {
+		assert.equal(certDateSuffix({ issued: '2026-01', expires: '2029-01' }), ' (2026-01 – 2029-01)');
+	});
+
+	it('leaves the issued-only form byte-identical to the pre-expiry output', () => {
+		assert.equal(certDateSuffix({ issued: '2026-01' }), ' (2026-01)');
+	});
+
+	it('labels a lone expiry so it cannot read as an issue month', () => {
+		assert.equal(certDateSuffix({ expires: '2029-01' }), ' (expires 2029-01)');
+	});
+
+	it('returns an empty string for a credential with no dates', () => {
+		assert.equal(certDateSuffix({ id: 'az-104', name: 'Azure Administrator' }), '');
+	});
+});
+
 describe('injectCerts', () => {
+	it('renders an expiry range in the injected list item', () => {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<article class="resume-content">
+						<h2 id="ms-it">M.S. I.T.</h2>
+					</article>
+				</body>
+			</html>
+		`);
+		const content = document.querySelector('.resume-content');
+
+		injectCerts(
+			content,
+			[
+				{
+					id: 'aiops-foundation',
+					name: 'AIOps Foundation',
+					issuer: 'PeopleCert',
+					issued: '2026-01',
+					expires: '2029-01',
+				},
+			],
+			'ms-it',
+		);
+
+		assert.equal(
+			content.querySelector('h2.cert-heading').nextElementSibling.querySelector('li').textContent,
+			'AIOps Foundation — PeopleCert (2026-01 – 2029-01)',
+		);
+	});
+
 	it('injects the cert heading and list before the scoped anchor', () => {
 		const { document } = parseHTML(`
 			<html>
@@ -315,6 +561,188 @@ describe('injectCerts', () => {
 	});
 });
 
+describe('validateIncludeSkillsShape', () => {
+	it('accepts omitted and "all" include_skills values', () => {
+		assert.deepEqual(validateIncludeSkillsShape(undefined), []);
+		assert.deepEqual(validateIncludeSkillsShape('all'), []);
+		assert.deepEqual(validateIncludeSkillsShape(['leadership']), []);
+	});
+
+	it('rejects a non-array, non-"all" value', () => {
+		assert.deepEqual(validateIncludeSkillsShape('leadership'), [
+			'include_skills: must be an array of skill category ids or "all"',
+		]);
+	});
+
+	it('rejects empty strings and duplicates', () => {
+		assert.deepEqual(validateIncludeSkillsShape(['  ']), [
+			'include_skills: must contain only non-empty strings',
+		]);
+		assert.deepEqual(validateIncludeSkillsShape(['leadership', 'leadership']), [
+			'include_skills: duplicate id(s): leadership',
+		]);
+	});
+});
+
+describe('includeSkillsRequestsSkills', () => {
+	it('distinguishes a request for skills from an opt-out', () => {
+		assert.equal(includeSkillsRequestsSkills('all'), true);
+		assert.equal(includeSkillsRequestsSkills(['leadership']), true);
+		assert.equal(includeSkillsRequestsSkills([]), false);
+		assert.equal(includeSkillsRequestsSkills(undefined), false);
+	});
+});
+
+describe('validateConfig include_skills', () => {
+	it('accepts known skill ids with a skills anchor', () => {
+		assert.doesNotThrow(() => {
+			validateConfig(
+				{ include_skills: ['leadership'], skills_anchor_before_id: 'ms-it' },
+				'variant.json',
+				vocabularies,
+			);
+		});
+	});
+
+	it('rejects unknown skill category ids', () => {
+		assert.throws(
+			() =>
+				validateConfig(
+					{ include_skills: ['missing-skill'], skills_anchor_before_id: 'ms-it' },
+					'variant.json',
+					vocabularies,
+				),
+			/include_skills: unknown skill category id\(s\): missing-skill/,
+		);
+	});
+
+	it('requires an anchor when skills are requested', () => {
+		assert.throws(
+			() => validateConfig({ include_skills: 'all' }, 'variant.json', vocabularies),
+			/include_skills: requires skills_anchor_before_id/,
+		);
+	});
+
+	it('lets a skills request inherit the cert anchor', () => {
+		assert.doesNotThrow(() => {
+			validateConfig(
+				{ include_skills: 'all', anchor_before_id: 'ms-it' },
+				'variant.json',
+				vocabularies,
+			);
+		});
+	});
+
+	it('rejects an unknown skills_anchor_before_id', () => {
+		assert.throws(
+			() =>
+				validateConfig(
+					{ include_skills: 'all', skills_anchor_before_id: 'missing-entry' },
+					'variant.json',
+					vocabularies,
+				),
+			/skills_anchor_before_id: unknown entry key "missing-entry"/,
+		);
+	});
+});
+
+describe('resolveSkills', () => {
+	it('keeps source order for "all"', () => {
+		assert.deepEqual(
+			resolveSkills('all', skillCategories).map(c => c.id),
+			['leadership', 'platform-ops'],
+		);
+	});
+
+	it('keeps config order for an explicit list', () => {
+		assert.deepEqual(
+			resolveSkills(['platform-ops', 'leadership'], skillCategories).map(c => c.id),
+			['platform-ops', 'leadership'],
+		);
+	});
+
+	it('returns nothing when skills are not requested', () => {
+		assert.deepEqual(resolveSkills([], skillCategories), []);
+		assert.deepEqual(resolveSkills(undefined, skillCategories), []);
+	});
+
+	it('throws on an unknown id', () => {
+		assert.throws(
+			() => resolveSkills(['missing'], skillCategories),
+			/include_skills: unknown skill category id "missing"/,
+		);
+	});
+});
+
+describe('injectSkills', () => {
+	function fixture() {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<article class="resume-content">
+						<h2 id="ms-it">M.S. I.T.</h2>
+					</article>
+				</body>
+			</html>
+		`);
+		return document;
+	}
+
+	it('inserts a Skills heading and one list item per category before the anchor', () => {
+		const document = fixture();
+		injectSkills(document.querySelector('.resume-content'), skillCategories, 'ms-it');
+
+		const headings = Array.from(document.querySelectorAll('.resume-content h2')).map(h => h.textContent);
+		assert.deepEqual(headings, ['Skills', 'M.S. I.T.']);
+
+		const items = Array.from(document.querySelectorAll('.resume-content ul li')).map(li => li.textContent);
+		assert.deepEqual(items, [
+			'Leadership & Team Development: Technical Leadership, Team Management',
+			'Platform Operations: Site Reliability, Incident Management',
+		]);
+	});
+
+	it('adds the print exemption the injected heading needs exactly once', () => {
+		const document = fixture();
+		const content = document.querySelector('.resume-content');
+		injectSkills(content, skillCategories, 'ms-it');
+		injectSkills(content, skillCategories, 'ms-it');
+		assert.equal(document.querySelectorAll('#resume-variant-skills-heading-style').length, 1);
+	});
+
+	it('returns null without touching the document when no categories are selected', () => {
+		const document = fixture();
+		const content = document.querySelector('.resume-content');
+		assert.equal(injectSkills(content, [], 'ms-it'), null);
+		assert.equal(content.querySelector('h2.skills-heading'), null);
+	});
+
+	it('throws when the anchor is missing from the resume content', () => {
+		const { document } = parseHTML(`
+			<html>
+				<head></head>
+				<body>
+					<h2 id="ms-it">Outside resume</h2>
+					<article class="resume-content"><h2 id="other">Other</h2></article>
+				</body>
+			</html>
+		`);
+		assert.throws(
+			() => injectSkills(document.querySelector('.resume-content'), skillCategories, 'ms-it'),
+			/Skills anchor not found: ms-it/,
+		);
+	});
+
+	it('throws when no anchor id is supplied', () => {
+		const document = fixture();
+		assert.throws(
+			() => injectSkills(document.querySelector('.resume-content'), skillCategories, ''),
+			/skills_anchor_before_id is required/,
+		);
+	});
+});
+
 describe('parseResumePreviewPort', () => {
 	it('parses default and explicit valid ports without process exit side effects', () => {
 		assert.equal(parseResumePreviewPort({}), 4323);
@@ -326,5 +754,68 @@ describe('parseResumePreviewPort', () => {
 			() => parseResumePreviewPort({ RESUME_PREVIEW_PORT: 'abc' }),
 			/Invalid RESUME_PREVIEW_PORT/,
 		);
+	});
+});
+
+describe('loadSkillCategories', () => {
+	// readResumeSource is a raw YAML parse, so src/content.config.ts's Zod schema
+	// never runs on this path — the validator here is the only thing standing
+	// between malformed YAML and the injected skills list. A temp source file is
+	// what lets these cases reach it.
+	function sourceWithSkills(yaml) {
+		const dir = mkdtempSync(path.join(tmpdir(), 'resume-skills-'));
+		const file = path.join(dir, 'index.md');
+		writeFileSync(file, `---\nskills_inventory:\n  categories:\n${yaml}---\n\nBody.\n`);
+		return file;
+	}
+
+	it('accepts a category whose skills are all non-empty strings', () => {
+		const file = sourceWithSkills(
+			'    - id: leadership\n      name: Leadership\n      skills: ["Technical Leadership"]\n',
+		);
+		assert.deepEqual(loadSkillCategories(file).map(cat => cat.id), ['leadership']);
+	});
+
+	for (const [label, yaml] of [
+		['a null member', '      skills: [null]\n'],
+		['a numeric member', '      skills: [123]\n'],
+		['a whitespace-only member', '      skills: ["   "]\n'],
+	]) {
+		it(`rejects ${label}, which would otherwise join() into blank or numeric skill text`, () => {
+			const file = sourceWithSkills(`    - id: leadership\n      name: Leadership\n${yaml}`);
+			assert.throws(
+				() => loadSkillCategories(file),
+				/skills_inventory\.categories\[0\]\.skills\[0\]: must be a non-empty string/,
+			);
+		});
+	}
+
+	it('still rejects an empty skills array', () => {
+		const file = sourceWithSkills('    - id: leadership\n      name: Leadership\n      skills: []\n');
+		assert.throws(() => loadSkillCategories(file), /\.skills: must be a non-empty array/);
+	});
+
+	// src/content.config.ts trims the id before its `^[a-z0-9-]+$` test, so the
+	// page path reads `leadership` from a padded source id. This loader has to
+	// normalize the same way or the two paths disagree about what the id IS: the
+	// variant config names it as the schema would, and the unknown-id check here
+	// rejects it.
+	it('trims a padded category id so the config can name it as the schema normalizes it', () => {
+		const file = sourceWithSkills(
+			'    - id: "  leadership  "\n      name: Leadership\n      skills: ["Mentoring"]\n',
+		);
+		const categories = loadSkillCategories(file);
+		assert.deepEqual(categories.map(cat => cat.id), ['leadership']);
+		// The returned objects carry the normalized id, not just the ids array —
+		// resolveSkills and the knownSkillIds set both key off these.
+		assert.deepEqual(resolveSkills(['leadership'], categories).map(cat => cat.id), ['leadership']);
+	});
+
+	it('detects duplicates that differ only in padding', () => {
+		const file = sourceWithSkills(
+			'    - id: leadership\n      name: Leadership\n      skills: ["Mentoring"]\n'
+				+ '    - id: " leadership "\n      name: Leadership Again\n      skills: ["Coaching"]\n',
+		);
+		assert.throws(() => loadSkillCategories(file), /duplicate id\(s\): leadership/);
 	});
 });

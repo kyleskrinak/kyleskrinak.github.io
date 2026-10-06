@@ -102,9 +102,19 @@ const pages = defineCollection({
 		contactWebsite: httpUrl.optional(),
 		contactLinkedin: httpUrl.optional(),
 		contactAddress: z.string().trim().min(1).optional(),
+		// Source of truth for the resume's lead heading and employer line (both
+		// injected into the body at <!-- current-role -->), the page meta
+		// description, and the About page's current-position sentence and its
+		// employer link. `location` is required because the employer-line
+		// convention ("**Employer** — Location | Dates") is what
+		// resume-sections.mjs uses to recognize the line at all.
+		// `employer_url` is required with it: the About page links the employer
+		// name, and an optional field there would mean a silently unlinked name.
 		current_role: z.object({
 			title: z.string().trim().min(1),
 			employer: z.string().trim().min(1),
+			employer_url: httpUrl,
+			location: z.string().trim().min(1),
 			start_date: z.coerce.date(),
 		}).optional(),
 		skills_inventory: z.object({
@@ -115,18 +125,22 @@ const pages = defineCollection({
 				skills: z.array(z.string().trim().min(1)).min(1),
 			})),
 		}).optional(),
-		certifications: z.object({
-			items: z.array(z.object({
-				name: z.string().trim().min(1),
-				issuer: z.string().trim().min(1).optional(),
-				issued: z.coerce.date().optional(),
-				expires: z.coerce.date().optional(),
-				render: z.boolean().default(true),
-			})),
-		}).optional(),
+		// No `certifications` here by decision: certification data lives in
+		// scripts/data/certifications.json, validated by build-resume-variant.mjs
+		// (validateCertificationsData). A schema block here validated nothing —
+		// the resume frontmatter carries no such key — and reading it as the
+		// contract is what made the JSON validator look optional.
+		// See docs/features/resume-source.md.
+		// Injected into the body at <!-- education -->, one section per item with
+		// render: true. `degree` holds the formal name for data reuse;
+		// `degree_abbr` is what the one-page resume prints as its heading.
+		// location/years stay optional for an unrendered item, but a rendered
+		// one without them fails the build (resume-sections.mjs) — the employer
+		// line cannot be recognized without both.
 		education: z.object({
 			items: z.array(z.object({
 				degree: z.string().trim().min(1),
+				degree_abbr: z.string().trim().min(1).optional(),
 				institution: z.string().trim().min(1),
 				location: z.string().trim().min(1).optional(),
 				years: z.string().trim().min(1).optional(),

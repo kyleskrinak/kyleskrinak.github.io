@@ -2,13 +2,16 @@
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import ResumeHeader from "@/components/ResumeHeader.astro";
+import { resumeMetaDescription } from "@/lib/resume-sections.mjs";
 import "@/styles/resume.css";
 
 const page = await getEntry("pages", "resume");
 if (!page) throw new Error("Resume page not found");
 
 const { Content } = await render(page);
-const { title, description, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+const { title, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+// Same composed description as the public route — see src/pages/resume.astro.
+const description = resumeMetaDescription(page.data);
 ---
 
 {/* Canonical points at the public /resume/ page: this route is a noindex

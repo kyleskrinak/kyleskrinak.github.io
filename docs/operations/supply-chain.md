@@ -22,12 +22,30 @@ Configured in `renovate.json`. Key posture:
 
 - **`enabledManagers: ["npm"]`** — Renovate manages **only** npm dependencies. It does **not** touch the `Dockerfile` base image or the SHA-pinned GitHub Actions; those are maintained manually (see "Manually pinned" below). This is deliberate — it keeps the supply-chain-critical pins under explicit human control.
 - **`minimumReleaseAge: "7 days"`** — a cooling-off window on all routine bumps so freshly published (potentially compromised) releases age before they can land. Security alerts override this with `minimumReleaseAge: "0 days"`.
-- **`baseBranches: ["develop"]`** + `useBaseBranchConfig: "merge"` — PRs open against `develop` and flow `develop → main`; for a critical CVE the operator fast-tracks promotion manually.
+- **`vulnerabilityAlerts`** — security fixes open immediately, outside the schedule, labelled `security`. Renovate gets these from **GitHub's Dependabot alerts**, so they depend on the repo settings below. Security PRs only open for packages Renovate manages: direct dependencies and npm `overrides`. Alerts on unpinned transitive packages get no PR; `lockFileMaintenance` picks those up, or you pin them by hand in `overrides`.
+- **`osvVulnerabilityAlerts: true`** — a second, independent vulnerability source (the OSV database). It covers **direct** dependencies only, so it does not replace Dependabot alerts for transitive packages.
+- **`lockFileMaintenance`** — a weekly PR (Monday, before 4am) that regenerates `package-lock.json` so transitive dependencies move to the newest versions their ranges allow. Because `minimumReleaseAge` is set, Renovate passes npm `--before=<now − 7 days>`, so the regenerated lockfile only resolves versions at least 7 days old. Review it with `npm run audit:deps -- --base develop` like any other Renovate PR.
+- **`baseBranchPatterns: ["develop"]`** + `useBaseBranchConfig: "merge"` — PRs open against `develop` and flow `develop → main`; for a critical CVE the operator fast-tracks promotion manually.
 - Updates are grouped by ecosystem (astro, testing, dev-tools, tailwind, markdown, build-tools, utilities); major bumps and minor TypeScript bumps open as individual PRs for explicit review.
 
 Review Renovate PRs and the **"Renovate Dependency Dashboard"** GitHub issue as part of the monthly cadence.
 
-> **Migration note:** Renovate replaced Dependabot (`.github/dependabot.yml` was removed). The Renovate GitHub App must be installed and have run at least once for automated monitoring to exist — confirm the Dependency Dashboard issue is present.
+### Required GitHub settings
+
+Renovate's security path silently does nothing unless these are set. Check them in **Settings → Advanced Security**:
+
+| Setting | Required state | Why |
+|---|---|---|
+| Dependency graph | **On** | Dependabot alerts need it |
+| Dependabot alerts | **On** | Renovate's `vulnerabilityAlerts` reads these. If they are off, Renovate opens no security PRs at all |
+| Dependabot security updates | **Off** | Otherwise Dependabot opens its own security PRs against `main`, bypassing `develop` |
+| Renovate GitHub App permissions | **Dependabot alerts: read** | Renovate cannot read the alerts without it |
+
+Turning off alert *emails* is fine; use notification settings (**Settings → Notifications** on your account), not the repo setting.
+
+**Verify:** in the [Mend Developer Portal](https://developer.mend.io/github/kyleskrinak/kyleskrinak.github.io), open the latest job log. `No vulnerability alerts enabled for repo` means the security path is off. From the CLI, `gh api repos/kyleskrinak/kyleskrinak.github.io/vulnerability-alerts` returns 204 when alerts are on and 404 when off.
+
+> **Migration note:** Renovate replaced Dependabot *version updates* (`.github/dependabot.yml` was removed). Dependabot *alerts* must stay on — they feed Renovate (see above). The Renovate GitHub App must be installed and have run at least once for automated monitoring to exist — confirm the Dependency Dashboard issue is present.
 
 ## Install-time isolation
 

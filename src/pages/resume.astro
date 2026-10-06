@@ -7,13 +7,17 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import ResumeHeader from "@/components/ResumeHeader.astro";
 import { RESUME_PDF_PATH } from "@/config";
 import { linkWithBase } from "@/utils/linkWithBase";
+import { resumeMetaDescription } from "@/lib/resume-sections.mjs";
 import "@/styles/resume.css";
 
 const page = await getEntry("pages", "resume");
 if (!page) throw new Error("Resume page not found");
 
 const { Content } = await render(page);
-const { title, description, contactEmail, contactWebsite, contactLinkedin } = page.data;
+const { title, contactEmail, contactWebsite, contactLinkedin } = page.data;
+// Composed, not hand-typed: the role sentence comes from current_role, which
+// is also what the body's lead heading renders from.
+const description = resumeMetaDescription(page.data);
 ---
 
 {/* Content title already carries the site owner's name — no SITE.title

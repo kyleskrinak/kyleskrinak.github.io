@@ -41,6 +41,7 @@ All project documentation is organized in the `/docs` directory. Start here:
 - [Deployment Guide](./docs/operations/deployment.md) - How to deploy
 - [Supply-Chain Security](./docs/operations/supply-chain.md) - Dependency hardening, audit tooling, and pin policy
 - [Special Features](./docs/features/special-implementations.md) - Custom implementations
+- [Resume Source and Data Flow](./docs/features/resume-source.md) - Which resume frontmatter field populates which output
 - [Resume Variants](./docs/features/resume-variants.md) - Tailor a one-page resume PDF for a specific job role
 - [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch)
 
@@ -99,7 +100,7 @@ See `/docs/testing/` for detailed guides.
 
 Layered dependency hardening to limit exposure from compromised or malicious packages:
 
-- **Renovate** (npm only) with a 7-day cooling-off on routine bumps; security alerts fast-tracked
+- **Renovate** (npm only) with a 7-day cooling-off on routine bumps and weekly lockfile maintenance; security alerts fast-tracked (requires the repo's Dependabot alerts to stay on, plus OSV as a second source for direct dependencies)
 - **`ignore-scripts=true`** — no package lifecycle scripts run on install
 - **`npm run audit:deps`** — local pre-install audit: lockfile diff, publish-age, dormant-revival detection, and signature verification with a GO / REVIEW / BLOCK verdict
 - **CI gates** — `npm audit signatures` and the helper unit suite run on PRs and pushes to deploy branches

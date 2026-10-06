@@ -8,6 +8,7 @@ import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import remarkDirective from "remark-directive";
 import { remarkFacets } from "./src/lib/remark-facets.mjs";
+import { remarkResumeSections } from "./src/lib/remark-resume-sections.mjs";
 import { remarkCards } from "./src/lib/remark-cards.mjs";
 import {
   transformerNotationDiff,
@@ -38,6 +39,9 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [
+        // First: expands the resume's frontmatter-driven sections into real
+        // headings, so every later plugin sees the finished document.
+        remarkResumeSections,
         remarkDirective,
         remarkCards, // before remarkToc so card titles don't pollute TOCs
         remarkToc,

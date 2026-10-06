@@ -1,10 +1,12 @@
 {
-  "alwaysThinkingEnabled": true,
-  "autoCompactWindow": 170000,
-  "autoCompactEnabled": true,
   "permissions": {
     "allow": [
-      "Bash(gh repo view *)"
+      "Bash(gh repo view *)",
+      "Bash(ls -1 ~/.claude/projects/-Users-kyleskrinak-Documents-astro-blog/memory/ 2>&1 *)",
+      "Read(//Users/kyleskrinak/.claude/**)"
     ]
-  }
+  },
+  "alwaysThinkingEnabled": true,
+  "autoCompactWindow": 170000,
+  "autoCompactEnabled": true
 }

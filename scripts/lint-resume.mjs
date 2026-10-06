@@ -14,18 +14,12 @@
  * Exit 1 and print violations to stderr if any check fails.
  * Exit 0 and print a summary line on success.
  */
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RESUME_SOURCE = join(ROOT, 'src/content/pages/resume/index.md');
+import { isEmployerLine } from '../src/lib/resume-sections.mjs';
+import { RESUME_SOURCE, readResumeSource } from './lib/resume-source.mjs';
 
 // Matches a trailing <!-- f: ... --> facet comment (the remark-facets format).
 const FACET_TAG_RE = /\s*<!--\s*f:[\s\S]*?-->\s*$/;
-
-// Employer line: bold name followed by em-dash, location pipe, and year digits.
-const EMPLOYER_LINE_RE = /^\*\*.+\*\*\s+—.*\|.*\d/;
 
 // Bullet line
 const BULLET_RE = /^- /;
@@ -88,7 +82,9 @@ export function parseSections(source) {
 			continue;
 		}
 
-		if (EMPLOYER_LINE_RE.test(line)) continue; // skip employer/date line
+		// Recognized through the shared convention in src/lib/resume-sections.mjs,
+		// beside the function that writes these lines.
+		if (isEmployerLine(line)) continue; // skip employer/date line
 
 		const text = stripFacetTag(line).trim();
 		if (text) current.proseLines.push(text);
@@ -146,9 +142,11 @@ export function checkPronouns(text, heading) {
 }
 
 function main() {
-	const raw = readFileSync(RESUME_SOURCE, 'utf8').replace(/\r\n/g, '\n');
-	const body = raw.replace(/^---\n[\s\S]*?\n---/, '');
-	const sections = parseSections(body);
+	// Lint the EXPANDED body so data-driven sections are checked by the same
+	// rubric as hand-written ones, and so the section count reported here
+	// matches what the page actually renders.
+	const { expandedBody } = readResumeSource(RESUME_SOURCE);
+	const sections = parseSections(expandedBody);
 
 	if (sections.length === 0) {
 		process.stderr.write(`lint-resume: no ## sections found in ${RESUME_SOURCE} — wrong file or empty resume.\n`);

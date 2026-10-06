@@ -1,0 +1,388 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+	RESUME_SECTIONS,
+	formatMonthYear,
+	renderCurrentRole,
+	renderEducation,
+	renderResumeSection,
+	resumeMetaDescription,
+	expandResumePlaceholders,
+	isEmployerLine,
+	employerLineText,
+} from '../../src/lib/resume-sections.mjs';
+
+const currentRole = {
+	title: 'Senior IT Systems Engineering Manager, Digital Experience',
+	employer: 'Gilead Sciences',
+	location: 'Raleigh, NC',
+	start_date: '2022-06-01',
+};
+
+const education = {
+	items: [
+		{
+			degree: 'Master of Science, Information Technology',
+			degree_abbr: 'M.S. I.T.',
+			institution: 'Rochester Institute of Technology',
+			location: 'Rochester, NY',
+			years: '1998 – 2001',
+			honors: 'With highest honors',
+			render: true,
+		},
+		{
+			degree: 'Bachelor of Fine Arts, Illustration',
+			institution: 'University of the Arts',
+			location: 'Philadelphia, PA',
+			years: '1980 – 1984',
+			render: false,
+		},
+	],
+};
+
+describe('formatMonthYear', () => {
+	it('formats a YYYY-MM-DD string', () => {
+		assert.equal(formatMonthYear('2022-06-01', 'x'), 'June 2022');
+	});
+
+	it('formats a YYYY-MM string', () => {
+		assert.equal(formatMonthYear('2022-06', 'x'), 'June 2022');
+	});
+
+	it('reads a Date in UTC so a local timezone cannot shift the month', () => {
+		// 2022-06-01T00:00:00Z is May 31 in every negative-offset timezone.
+		assert.equal(formatMonthYear(new Date('2022-06-01T00:00:00.000Z'), 'x'), 'June 2022');
+	});
+
+	it('throws on a malformed string rather than printing a partial date', () => {
+		assert.throws(() => formatMonthYear('June 2022', 'current_role.start_date'), /current_role\.start_date/);
+	});
+
+	it('throws on an out-of-range month', () => {
+		assert.throws(() => formatMonthYear('2022-13', 'x'), /month out of range/);
+	});
+
+	// The match is anchored at both ends. Unanchored, every string below reads as
+	// June 2022: the prefix matches and the rest is discarded. Nothing downstream
+	// would catch it — both callers hand over raw YAML, so the collection
+	// schema's z.coerce.date() never runs, and PDF verification compares the
+	// printed page against the same wrong month it rendered from.
+	for (const malformed of [
+		'2022-060',
+		'2022-06-not-a-date',
+		'2022-06-1',
+		'2022-06-01-02',
+		// A time-bearing string reaches here only if a parser changes behavior:
+		// both real paths yield the date-only "2022-06-01", verified against the
+		// yaml package and an instrumented astro build. A Date object still works
+		// through the branch above; a surprise string should fail loudly.
+		'2022-06-01T00:00:00.000Z',
+	]) {
+		it(`throws on "${malformed}" rather than discarding the trailing text`, () => {
+			assert.throws(
+				() => formatMonthYear(malformed, 'current_role.start_date'),
+				/expected YYYY-MM or YYYY-MM-DD/,
+			);
+		});
+	}
+
+	// The optional day is validated against the month and the year, even though it
+	// never reaches the output. A renderer that accepts "2023-02-29" is the one
+	// place a typo in the source survives every check downstream: the day is
+	// absent from the rendered text, so PDF verification cannot see it, and both
+	// callers read raw YAML with the schema's coercion never applied.
+	for (const impossible of [
+		'2022-06-00',
+		'2022-06-99',
+		'2022-06-31',
+		'2022-04-31',
+		'2023-02-29', // not a leap year
+		'1900-02-29', // divisible by 100, so not a leap year either
+	]) {
+		it(`throws on the impossible day in "${impossible}"`, () => {
+			assert.throws(
+				() => formatMonthYear(impossible, 'current_role.start_date'),
+				/day out of range for that month/,
+			);
+		});
+	}
+
+	for (const valid of ['2024-02-29', '2000-02-29', '2022-06-30', '2022-01-31']) {
+		it(`accepts the real date "${valid}"`, () => {
+			assert.match(formatMonthYear(valid, 'x'), /^[A-Z][a-z]+ \d{4}$/);
+		});
+	}
+
+	it('throws on a non-date value', () => {
+		assert.throws(() => formatMonthYear(undefined, 'x'), /expected a date string or Date/);
+	});
+});
+
+describe('renderCurrentRole', () => {
+	it('renders the heading and the employer line convention', () => {
+		assert.equal(
+			renderCurrentRole(currentRole),
+			[
+				'## Senior IT Systems Engineering Manager, Digital Experience',
+				'',
+				'**Gilead Sciences** — Raleigh, NC | June 2022 – Present',
+			].join('\n')
+		);
+	});
+
+	it('throws when current_role is absent', () => {
+		assert.throws(() => renderCurrentRole(undefined), /`current_role` is missing/);
+	});
+
+	it('throws when location is absent, since the employer line needs it', () => {
+		assert.throws(
+			() => renderCurrentRole({ ...currentRole, location: undefined }),
+			/location is required/
+		);
+	});
+
+	it('throws when the title is blank', () => {
+		assert.throws(() => renderCurrentRole({ ...currentRole, title: '  ' }), /title is required/);
+	});
+});
+
+describe('isEmployerLine and employerLineText', () => {
+	// Recognizer tested against the producer's own output: lint-resume.mjs and
+	// resume-render.mjs both find employer lines through these two, so a change to
+	// employerLine's format that broke recognition has to fail here.
+	const line = renderCurrentRole(currentRole).split('\n').at(-1);
+
+	it('recognizes the line renderCurrentRole produces', () => {
+		assert.equal(isEmployerLine(line), true);
+	});
+
+	it('returns the same answer on a second call', () => {
+		// The regex carries no /g flag, so no lastIndex survives between callers.
+		assert.equal(isEmployerLine(line), true);
+		assert.equal(employerLineText(line), employerLineText(line));
+	});
+
+	it('tolerates leading and trailing whitespace', () => {
+		assert.equal(isEmployerLine(`   ${line}   `), true);
+		assert.equal(employerLineText(`   ${line}   `), employerLineText(line));
+	});
+
+	it('strips the bold markers so the text matches DOM and PDF rendering', () => {
+		assert.equal(employerLineText(line), 'Gilead Sciences — Raleigh, NC | June 2022 – Present');
+	});
+
+	it('rejects a line missing the location/dates tail', () => {
+		assert.equal(isEmployerLine('**Gilead Sciences** — Raleigh, NC'), false);
+		assert.equal(employerLineText('**Gilead Sciences** — Raleigh, NC'), null);
+	});
+
+	it('rejects a tail carrying no digits', () => {
+		assert.equal(isEmployerLine('**Gilead Sciences** — Raleigh, NC | Present'), false);
+	});
+
+	it('rejects headings, bullets and prose', () => {
+		assert.equal(isEmployerLine('## M.S. I.T.'), false);
+		assert.equal(isEmployerLine('- Ran the 2022 migration'), false);
+		assert.equal(isEmployerLine('Lead a team of 6 engineers.'), false);
+		assert.equal(employerLineText('Lead a team of 6 engineers.'), null);
+	});
+});
+
+describe('renderEducation', () => {
+	it('renders only items whose render flag is true', () => {
+		const out = renderEducation(education);
+		assert.match(out, /^## M\.S\. I\.T\./);
+		assert.ok(!out.includes('University of the Arts'));
+	});
+
+	it('prefers degree_abbr over the formal degree name for the heading', () => {
+		assert.ok(renderEducation(education).startsWith('## M.S. I.T.'));
+	});
+
+	it('falls back to degree when degree_abbr is absent', () => {
+		const items = [{ ...education.items[1], render: true }];
+		assert.ok(renderEducation({ items }).startsWith('## Bachelor of Fine Arts, Illustration'));
+	});
+
+	it('appends honors as its own paragraph', () => {
+		assert.ok(renderEducation(education).endsWith('\n\nWith highest honors'));
+	});
+
+	it('expands to nothing when no item opts in', () => {
+		const items = education.items.map(item => ({ ...item, render: false }));
+		assert.equal(renderEducation({ items }), '');
+	});
+
+	// This module reads raw frontmatter, so the schema's `render: false` default
+	// never runs before it: the opt-in has to be the literal flag in the file.
+	it('skips an item carrying no render flag at all', () => {
+		const items = education.items.map(({ render, ...item }) => item);
+		assert.equal(renderEducation({ items }), '');
+	});
+
+	it('throws when education itself is missing', () => {
+		assert.throws(() => renderEducation(undefined), /`education` is missing/);
+	});
+
+	// src/content.config.ts requires `education.items`, so only this module's raw
+	// frontmatter callers can reach a missing one. A `?? []` default would read
+	// that absence as the authored empty array above and expand to nothing: PDF
+	// verification would then expect no education heading and pass.
+	it('throws on a missing items key rather than reading it as an authored empty array', () => {
+		assert.throws(() => renderEducation({}), /education\.items must be an array/);
+	});
+
+	it('throws on a null items value', () => {
+		assert.throws(() => renderEducation({ items: null }), /education\.items must be an array/);
+	});
+
+	it('still returns empty for the authored empty array, which is a deliberate choice', () => {
+		assert.equal(renderEducation({ items: [] }), '');
+	});
+
+	// The producer has to agree with the recognizer: readExpectedContent maps
+	// every body line through employerLineText and filters the nulls, so a line
+	// EMPLOYER_LINE_RE rejects leaves PDF verification silently — the heading
+	// keeps passing while the institution, location and dates stop being checked.
+	it('throws when years carry no digit, which the employer-line recognizer rejects', () => {
+		for (const years of ['Ongoing', 'In progress', 'Present']) {
+			const items = [{ ...education.items[0], years }];
+			assert.throws(
+				() => renderEducation({ items }),
+				/is not a recognized employer line/,
+				`years: ${years} should be rejected`
+			);
+		}
+	});
+
+	// The opt-in filter asks only whether `render` is literally true, so a
+	// malformed item reads as a deliberate opt-out: the section leaves the PDF
+	// content expectations and resume-render.mjs verifies a page that never
+	// carried it. The schema rejects all of these, and both callers read raw
+	// frontmatter, so this is the only check there is.
+	it('throws on an item that is not a mapping, instead of skipping it', () => {
+		for (const item of [null, undefined, 'a string', 42, []]) {
+			assert.throws(
+				() => renderEducation({ items: [item] }),
+				/education\.items\[0\]: must be a mapping/,
+				`item ${JSON.stringify(item) ?? typeof item} should be rejected`
+			);
+		}
+	});
+
+	it('throws on a non-boolean render flag, instead of reading it as an opt-out', () => {
+		for (const render of ['true', 1, null, 'yes', 0]) {
+			const items = [{ ...education.items[0], render }];
+			assert.throws(
+				() => renderEducation({ items }),
+				/education\.items\[0\]\.render: must be true or false when present/,
+				`render: ${JSON.stringify(render)} should be rejected`
+			);
+		}
+	});
+
+	// `z.boolean().default(false)` defaults `undefined` only, so an omitted flag
+	// is the schema's own opt-out and has to stay one here. These two cases are
+	// what the validation above must not catch.
+	it('still treats an omitted flag and a literal false as deliberate opt-outs', () => {
+		const { render, ...noFlag } = education.items[0];
+		assert.equal(renderEducation({ items: [noFlag] }), '');
+		assert.equal(renderEducation({ items: [{ ...education.items[0], render: false }] }), '');
+	});
+
+	it('accepts years the recognizer reads, including an expected graduation', () => {
+		for (const years of ['2019', 'expected 2027', '1998 – 2001']) {
+			const items = [{ ...education.items[0], years }];
+			const out = renderEducation({ items });
+			const line = out.split('\n')[2];
+			assert.ok(isEmployerLine(line), `years: ${years} should produce a recognized line`);
+		}
+	});
+});
+
+describe('resumeMetaDescription', () => {
+	it('joins the role title and the career summary', () => {
+		assert.equal(
+			resumeMetaDescription({ current_role: currentRole, description: 'Platform operations.' }),
+			'Senior IT Systems Engineering Manager, Digital Experience. Platform operations.'
+		);
+	});
+
+	it('strips a trailing period from the title so the join never doubles it', () => {
+		assert.equal(
+			resumeMetaDescription({ current_role: { title: 'Manager.' }, description: 'Summary.' }),
+			'Manager. Summary.'
+		);
+	});
+
+	it('returns either part alone', () => {
+		assert.equal(resumeMetaDescription({ current_role: currentRole }), currentRole.title);
+		assert.equal(resumeMetaDescription({ description: 'Summary.' }), 'Summary.');
+	});
+
+	it('returns undefined when neither part exists', () => {
+		assert.equal(resumeMetaDescription({}), undefined);
+	});
+});
+
+describe('renderResumeSection', () => {
+	it('dispatches every name in RESUME_SECTIONS', () => {
+		for (const name of RESUME_SECTIONS) {
+			assert.equal(
+				typeof renderResumeSection(name, { current_role: currentRole, education }),
+				'string'
+			);
+		}
+	});
+
+	it('throws on an unknown section name', () => {
+		assert.throws(() => renderResumeSection('experience', {}), /unknown resume section/);
+	});
+});
+
+describe('expandResumePlaceholders', () => {
+	const data = { current_role: currentRole, education };
+
+	it('replaces a placeholder line in place, leaving surrounding body text intact', () => {
+		const body = ['<!-- current-role -->', '', 'Lead a team.', ''].join('\n');
+		const out = expandResumePlaceholders(body, data);
+		assert.equal(
+			out,
+			[
+				'## Senior IT Systems Engineering Manager, Digital Experience',
+				'',
+				'**Gilead Sciences** — Raleigh, NC | June 2022 – Present',
+				'',
+				'Lead a team.',
+				'',
+			].join('\n')
+		);
+	});
+
+	it('expands tolerating surrounding whitespace on the placeholder line', () => {
+		assert.ok(expandResumePlaceholders('   <!-- education -->   ', data).startsWith('## M.S. I.T.'));
+	});
+
+	it('leaves facet comments and prose comments inert', () => {
+		const body = 'Scope text. <!-- f: leadership, platform-ops -->\n\n<!-- TODO revisit -->';
+		assert.equal(expandResumePlaceholders(body, data), body);
+	});
+
+	it('throws on a placeholder-shaped typo instead of rendering nothing', () => {
+		assert.throws(
+			() => expandResumePlaceholders('<!-- educaton -->', data),
+			/unknown section placeholder "<!-- educaton -->"/
+		);
+	});
+
+	it('drops the placeholder line when a section expands to empty', () => {
+		const items = education.items.map(item => ({ ...item, render: false }));
+		assert.equal(
+			expandResumePlaceholders('before\n<!-- education -->\nafter', {
+				...data,
+				education: { items },
+			}),
+			'before\nafter'
+		);
+	});
+});
