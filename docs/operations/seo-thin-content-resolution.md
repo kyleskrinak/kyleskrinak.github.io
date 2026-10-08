@@ -85,6 +85,7 @@ Rather than adding content to navigation pages or removing them entirely, we imp
      - Static pages: home, about, archives, lchf
      - Individual blog posts (35+)
      - Presentation HTML files (8)
+     - *Added after February 2026: the blog and presentations archive PDFs (2026-06-21), and the resume page and resume PDF (2026-07-05)*
      - *Since 2026-10-08: also stack, the presentations listing, and the presentation pages*
    - Excludes: tags, categories, pagination, search, 404 (presentations listing excluded until 2026-10-08)
    - **Important**: Sitemap and noindex directives must be consistent to avoid mixed signals to search engines
