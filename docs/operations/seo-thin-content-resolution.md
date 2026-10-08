@@ -67,7 +67,7 @@ Rather than adding content to navigation pages or removing them entirely, we imp
      )}
      ```
 
-2. **Page Templates** (7 files; 5 since the 2026-10-08 revision)
+2. **Page Templates** (8 files in February 2026; 6 since the 2026-10-08 revision)
    - `src/pages/tags/index.astro` - tag listing
    - `src/pages/tags/[tag].astro` - individual tag pages
    - `src/pages/categories/[category].astro` - category pages
@@ -77,7 +77,7 @@ Rather than adding content to navigation pages or removing them entirely, we imp
    - `src/pages/presentations/[id].astro` - presentation directory pages *(indexable since 2026-10-08)*
    - `src/pages/404.astro` - 404 error page
 
-   Each now passes `noindex={true}` to the Layout component.
+   In February 2026 each passed `noindex={true}` to the Layout component. Since the 2026-10-08 revision, the six non-presentation templates still do; the two presentation templates no longer pass it.
 
 3. **Sitemap Configuration** (`src/pages/sitemap.xml.ts`)
    - Removed all noindex pages from sitemap
