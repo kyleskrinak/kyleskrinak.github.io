@@ -224,8 +224,8 @@ test.describe('Sitemap Validation', () => {
 
 	test.describe('Sitemap completeness', () => {
 		test('contains expected number of URLs', async () => {
-			// 7 static pages + 35+ posts + 8 presentation pages + 8 decks = ~58+ URLs
-			expect(sitemapUrls.length).toBeGreaterThanOrEqual(47);
+			// 7 static pages + 35+ posts + 8 presentation pages + 8 decks + 3 PDFs = 61+ URLs
+			expect(sitemapUrls.length).toBeGreaterThanOrEqual(61);
 			expect(sitemapUrls.length).toBeLessThan(100); // Sanity check
 		});
 
