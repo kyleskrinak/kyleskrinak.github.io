@@ -62,8 +62,6 @@ jobs:
       # Runs AFTER the build: renders the PDFs from the built dist/ and writes
       # them into dist/ so the S3 sync picks them up. Production uses the
       # archive-pdfs / resume-pdf release tags as its backing stores.
-      # bundle-test.html is excluded from the presentations PDF (it's a build
-      # test artifact, not a deck), so it must not feed the hash either.
       - name: Ensure archive PDFs
         uses: ./.github/actions/ensure-release-pdfs
         # SITE_URL comes from the job-level env above. The presentations PDF
@@ -87,8 +85,6 @@ jobs:
             scripts/build-presentations-pdf.mjs
             scripts/lib/pdf-helpers.mjs
             src/config
-          hash-exclude-names: |
-            bundle-test.html
           assets: |
             blog-archive.pdf dist
             presentations-archive.pdf dist
