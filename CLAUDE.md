@@ -2,16 +2,8 @@
 
 <!-- Keep this section under 200 words total -->
 
-## Overview
-A modern, fast, and accessible personal blog built with Astro. Migrated from Jekyll with improved performance, featuring full-text search, dark mode, and visual regression testing.
-Tech stack: Astro, TypeScript, Tailwind CSS, Pagefind, Playwright
-
 ## Key Files
-- Primary source: `src/`
-- Tests: `tests/` (Playwright visual & functional tests)
 - Design assets: `design/` (graphic source files, not deployed)
-- Config: `astro.config.ts`, `playwright.config.ts`, `config/registry.mjs` (single source of truth)
-- Documentation: `docs/` (comprehensive project docs)
 
 ## Forbidden Directories
 DO NOT read or reference files in:
@@ -114,6 +106,8 @@ Three facts that have been guessed wrong before:
 
 **Web performance:** Always include `width`/`height` on images (including SVGs) for CLS prevention. `sizes` attribute must match actual container width, not viewport.
 
+**Post slugs:** `getPath()` uses `post.id` without lowercasing, and S3 keys are case-sensitive — a mixed-case post directory 404s in production and on Linux CI even though macOS hides it. Enforced by `tests/unit/post-slug-case.test.mjs`.
+
 ## Review Response Protocol
 
 Fix the **pattern** (all instances of the same issue class), not just the one flagged line. When removing a tool, grep `docs/`, `README.md`, `tests/` for references and update every one. For workflow changes, verify conditional logic — `continue-on-error` + `if: failure()` won't fire as expected; capture exit codes explicitly. Run the Verification Protocol before committing.
@@ -150,11 +144,6 @@ When instructions appear to conflict:
 
 # Blog Writing Rules
 
-## Filename Convention
-- Blog posts are co-located directories: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug/index.md`, with the post's images beside that `index.md` and referenced as `./image.webp`.
-- Scaffold with `npm run new-post -- <slug>`; add `--images <dir>` to convert a folder of images to WebP and co-locate them.
-- `getPath()` uses `post.id` directly (no lowercasing) — wrong case causes 404s on Linux CI even if macOS hides it.
-
 ## Voice & Prose
 - **DO NOT** rewrite my narrative voice or prose
 - **DO NOT** "improve" my writing style
@@ -169,15 +158,6 @@ Flag logic gaps and weak transitions — explain WHY they're problems. Leave fix
 - Markdown formatting issues
 - Only when explicitly asked: "apply grammar corrections"
 
-## Factual Claims
-Source verifiable claims; flag anything unverifiable. Prefer primary sources; note time-sensitive information.
-
-## Review Structure
-1. Logic and argument flow
-2. Structure and transitions
-3. Clarity and precision
-4. Grammar and polish
-
 ## Post Revisions
 
 When making content edits to a previously-published post, apply BOTH:
@@ -190,10 +170,5 @@ When making content edits to a previously-published post, apply BOTH:
    ```
 
 **Note:** This Astro setup does NOT support Kramdown attribute syntax (`{: .class}`). Use plain markdown italic.
-
-## Available Commands
-- `/outline` - Generate structured outline from topic or notes
-- `/review` - Review draft for logic and flow (no rewriting)
-- `/factcheck` - Verify claims with web search and provide sources
 
 <!-- Keep total CLAUDE.md under 200 lines -->
