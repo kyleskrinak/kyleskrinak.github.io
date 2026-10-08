@@ -147,10 +147,8 @@ async function main() {
   });
   const outputPath = resolve(ROOT, args.output);
 
-  // Exclude bundle-test.html — a build test artifact, not a real deck.
-  const EXCLUDE = new Set(["bundle-test.html"]);
   const files = (await readdir(DECKS_DIR))
-    .filter(f => f.endsWith(".html") && !EXCLUDE.has(f))
+    .filter(f => f.endsWith(".html"))
     .sort();
   if (files.length === 0) {
     console.error(`✘ No decks found in ${DECKS_DIR}`);

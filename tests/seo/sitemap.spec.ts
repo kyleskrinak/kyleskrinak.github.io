@@ -74,6 +74,25 @@ test.describe('Sitemap Validation', () => {
 			expect(presentationUrls.length).toBeGreaterThan(5); // We have 8 presentation HTML files
 		});
 
+		test('includes stack page', async () => {
+			const productionDomain = 'https://kyle.skrinak.com';
+			expect(sitemapUrls).toContain(`${productionDomain}/stack/`);
+		});
+
+		test('includes /presentations/ listing page', async () => {
+			const productionDomain = 'https://kyle.skrinak.com';
+			expect(sitemapUrls).toContain(`${productionDomain}/presentations/`);
+		});
+
+		test('includes presentation pages', async () => {
+			const productionDomain = 'https://kyle.skrinak.com';
+			expect(sitemapUrls).toContain(`${productionDomain}/presentations/wohd/`);
+
+			// Presentation pages have format /presentations/wohd/ (not .html)
+			const pageUrls = sitemapUrls.filter(url => url.match(/\/presentations\/[^/]+\/$/));
+			expect(pageUrls.length).toBeGreaterThan(5);
+		});
+
 		test('includes archive PDF downloads', async () => {
 			const productionDomain = 'https://kyle.skrinak.com';
 			expect(sitemapUrls).toContain(`${productionDomain}/blog-archive.pdf`);
@@ -114,18 +133,6 @@ test.describe('Sitemap Validation', () => {
 			// Pagination pages have format /posts/2/, /posts/3/, etc.
 			const paginationUrls = sitemapUrls.filter(url => url.match(/\/posts\/\d+\/$/));
 			expect(paginationUrls.length).toBe(0);
-		});
-
-		test('excludes /presentations/ listing page', async () => {
-			const productionDomain = 'https://kyle.skrinak.com';
-			const presentationsListingUrl = `${productionDomain}/presentations/`;
-			expect(sitemapUrls).not.toContain(presentationsListingUrl);
-		});
-
-		test('excludes presentation directory pages', async () => {
-			// Directory pages have format /presentations/wohd/ (not .html)
-			const directoryUrls = sitemapUrls.filter(url => url.includes('/presentations/') && !url.endsWith('.html') && url !== 'https://kyle.skrinak.com/presentations/');
-			expect(directoryUrls.length).toBe(0);
 		});
 
 		test('excludes /search/ page', async () => {
@@ -217,8 +224,8 @@ test.describe('Sitemap Validation', () => {
 
 	test.describe('Sitemap completeness', () => {
 		test('contains expected number of URLs', async () => {
-			// 4 static pages + 35+ posts + 8 presentations = ~47+ URLs
-			expect(sitemapUrls.length).toBeGreaterThanOrEqual(47);
+			// 7 static pages + 35+ posts + 8 presentation pages + 8 decks + 3 PDFs = 61+ URLs
+			expect(sitemapUrls.length).toBeGreaterThanOrEqual(61);
 			expect(sitemapUrls.length).toBeLessThan(100); // Sanity check
 		});
 

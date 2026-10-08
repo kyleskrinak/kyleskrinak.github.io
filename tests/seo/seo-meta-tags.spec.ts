@@ -69,20 +69,6 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 			expect(robotsContent, 'Expected /posts/2/ to have noindex,follow').toBe('noindex,follow');
 		});
 
-		test('presentations index has noindex,follow', async ({ page }) => {
-			await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
-			const robotsContent = await getRobotsMetaTag(page);
-
-			expect(robotsContent).toBe('noindex,follow');
-		});
-
-		test('presentation directory pages have noindex,follow', async ({ page }) => {
-			await page.goto(resolveUrl('/presentations/wohd/'), { waitUntil: 'networkidle' });
-			const robotsContent = await getRobotsMetaTag(page);
-
-			expect(robotsContent).toBe('noindex,follow');
-		});
-
 	// NOTE: Category pages test removed because no categories currently exist.
 	// The template at src/pages/categories/[category].astro is configured with
 	// noindex={true} for when categories are used. Add test when categories are
@@ -116,6 +102,20 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 
 		test('about page has no robots meta tag', async ({ page }) => {
 			await page.goto(resolveUrl('/about/'), { waitUntil: 'networkidle' });
+			const robotsContent = await getRobotsMetaTag(page);
+
+			expect(robotsContent).toBeNull();
+		});
+
+		test('presentations index has no robots meta tag', async ({ page }) => {
+			await page.goto(resolveUrl('/presentations/'), { waitUntil: 'networkidle' });
+			const robotsContent = await getRobotsMetaTag(page);
+
+			expect(robotsContent).toBeNull();
+		});
+
+		test('presentation pages have no robots meta tag', async ({ page }) => {
+			await page.goto(resolveUrl('/presentations/wohd/'), { waitUntil: 'networkidle' });
 			const robotsContent = await getRobotsMetaTag(page);
 
 			expect(robotsContent).toBeNull();

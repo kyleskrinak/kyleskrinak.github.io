@@ -62,13 +62,5 @@
     "description": "Presentation at SLG meeting in February 2019",
     "type": "meeting",
     "tags": ["slg"]
-  },
-  {
-    "id": "bundle-test",
-    "title": "Bundle Test",
-    "date": "2018-12-28",
-    "description": "Testing bundle configurations",
-    "type": "technical",
-    "tags": ["testing"]
   }
 ]
