@@ -4,6 +4,8 @@
 **Issue**: Low word-count pages flagged as thin content
 **Resolution**: Implemented targeted noindex strategy
 
+> **Revised 2026-10-08:** `/presentations/` and the presentation pages (`/presentations/<id>/`) are indexable again and listed in the sitemap, alongside the HTML decks. `/stack/` was added to the sitemap. The sections below record the February 2026 state; entries affected by this revision are marked.
+
 ---
 
 ## Problem Statement
@@ -65,14 +67,14 @@ Rather than adding content to navigation pages or removing them entirely, we imp
      )}
      ```
 
-2. **Page Templates** (7 files)
+2. **Page Templates** (7 files; 5 since the 2026-10-08 revision)
    - `src/pages/tags/index.astro` - tag listing
    - `src/pages/tags/[tag].astro` - individual tag pages
    - `src/pages/categories/[category].astro` - category pages
    - `src/pages/search.astro` - search functionality
    - `src/pages/posts/[...page].astro` - pagination
-   - `src/pages/presentations/index.astro` - presentations listing
-   - `src/pages/presentations/[id].astro` - presentation directory pages
+   - `src/pages/presentations/index.astro` - presentations listing *(indexable since 2026-10-08)*
+   - `src/pages/presentations/[id].astro` - presentation directory pages *(indexable since 2026-10-08)*
    - `src/pages/404.astro` - 404 error page
 
    Each now passes `noindex={true}` to the Layout component.
@@ -83,7 +85,8 @@ Rather than adding content to navigation pages or removing them entirely, we imp
      - Static pages: home, about, archives, lchf
      - Individual blog posts (35+)
      - Presentation HTML files (8)
-   - Excludes: tags, categories, pagination, presentations listing, search, 404
+     - *Since 2026-10-08: also stack, the presentations listing, and the presentation pages*
+   - Excludes: tags, categories, pagination, search, 404 (presentations listing excluded until 2026-10-08)
    - **Important**: Sitemap and noindex directives must be consistent to avoid mixed signals to search engines
 
 ### Test Coverage
@@ -136,7 +139,7 @@ npm run test:production   # All test suites against production
 - `/posts/2/` through `/posts/8/` - paginated post listings
 
 **Directories** (2 pages)
-- `/presentations/` - presentations index (de-indexed)
+- `/presentations/` - presentations index (de-indexed; indexable again since 2026-10-08)
 - `/posts/` - posts index (de-indexed)
 
 **Note**: `/archives/` is intentionally kept indexed (not de-indexed). While it's a directory page, it provides a unique chronological view of all posts that offers different value from simple paginated listings.
@@ -145,6 +148,7 @@ npm run test:production   # All test suites against production
 - `/presentations/wohd/`, `/presentations/code-presentation/`, etc.
 - These are landing pages with "View Presentation" button
 - The actual presentation HTML files remain indexed
+- *Revised 2026-10-08: these pages are indexable again and listed in the sitemap.*
 
 **Search** (1 page)
 - `/search/` - functional page with no content

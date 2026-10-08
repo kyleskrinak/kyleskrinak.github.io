@@ -3,6 +3,7 @@ import { getBlogPosts } from "@/utils/getBlogPosts";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { getPath } from "@/utils/getPath";
 import { RESUME_PDF_PATH, SITE } from "@/config";
+import presentations from "@/data/presentations.json";
 
 /**
  * Generates sitemap.xml containing only indexable pages.
@@ -10,15 +11,14 @@ import { RESUME_PDF_PATH, SITE } from "@/config";
  *
  * Pages included:
  * - Home page
- * - Static content pages (about, archives, lchf, resume)
+ * - Static content pages (about, archives, lchf, resume, stack, presentations)
  * - Individual blog posts
- * - Individual presentation HTML files
+ * - Presentation pages (/presentations/<id>/) and their HTML decks
  *
  * Pages excluded (have noindex):
  * - /tags/ and individual tag pages
  * - /categories/ and individual category pages
  * - /posts/ and pagination pages (/posts/2/, etc.)
- * - /presentations/ listing and directory pages
  * - /search/
  * - /404/
  *
@@ -67,6 +67,8 @@ export const GET: APIRoute = async ({ site }) => {
     { path: "about/" },    // About page
     { path: "lchf/" },     // LCHF content page
     { path: "resume/" },   // Resume page (/resume/print/ is noindex and intentionally NOT listed)
+    { path: "stack/" },    // Technology stack page
+    { path: "presentations/" }, // Presentations listing
   ];
 
   // Conditionally add archives if enabled
@@ -107,7 +109,13 @@ export const GET: APIRoute = async ({ site }) => {
     RESUME_PDF_PATH,
   ].map(path => ({ path }));
 
-  const entries = [...staticPages, ...postPages, ...presentationFiles, ...archiveFiles];
+  // Presentation pages, one per presentations.json entry — the same data
+  // src/pages/presentations/[id].astro builds its routes from.
+  const presentationPages: SitemapEntry[] = presentations.map(pres => ({
+    path: `presentations/${pres.id}/`,
+  }));
+
+  const entries = [...staticPages, ...postPages, ...presentationPages, ...presentationFiles, ...archiveFiles];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
