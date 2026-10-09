@@ -1,7 +1,5 @@
 # Project Context
 
-<!-- Keep this section under 200 words total -->
-
 ## Key Files
 - Design assets: `design/` (graphic source files, not deployed)
 
@@ -125,6 +123,9 @@ If stuck in 10+ rounds of similar fixes or environment-specific drift: STOP. Pro
 - Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
 - **Exception:** Blocker reporting requires verbose detail (state, options, consequences) per Blocker Resolution Protocol
 
+## Blog Prose
+- Do not rewrite my narrative voice or "improve" my style.
+
 ## Instruction Precedence
 
 When instructions appear to conflict:
@@ -139,36 +140,5 @@ When instructions appear to conflict:
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
 **Approval gates are hard stops.** Bias-to-action, autonomy/autopilot mode, and end-to-end completion drive do not override them. Re-check before each gated action. Missing approval means do not execute. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
-
----
-
-# Blog Writing Rules
-
-## Voice & Prose
-- **DO NOT** rewrite my narrative voice or prose
-- **DO NOT** "improve" my writing style
-- Your job is to identify problems, not fix my voice
-- No truncated sentence fragments (e.g., "Not misplaced, lost." or "Best guess now: X.") — every sentence needs a subject and a verb, even the short punchy ones
-
-## Feedback Approach
-Flag logic gaps and weak transitions — explain WHY they're problems. Leave fixing to me. Be specific about locations (paragraph numbers, sections).
-
-## What You Can Edit Directly
-- Grammar corrections (typos, punctuation, subject-verb agreement)
-- Markdown formatting issues
-- Only when explicitly asked: "apply grammar corrections"
-
-## Post Revisions
-
-When making content edits to a previously-published post, apply BOTH:
-
-1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC). Drives the "Revised on:" label and RSS `pubDate` update; does NOT affect sort order (original `pubDate` controls ordering).
-
-2. **Inline marker at each change point** — plain italic line directly after the affected paragraph:
-   ```markdown
-   *Revised YYYY-MM-DD: brief description of what changed.*
-   ```
-
-**Note:** This Astro setup does NOT support Kramdown attribute syntax (`{: .class}`). Use plain markdown italic.
 
 <!-- Keep total CLAUDE.md under 200 lines -->

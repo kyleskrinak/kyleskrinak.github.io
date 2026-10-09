@@ -34,21 +34,19 @@ Draft one section at a time. After each section, Kyle reviews and proposes tweak
 
 ## Phase Four: End-to-End Review
 
-On request, fetch the document fresh and read it through for consistency, flow, grammar, and active voice throughout. No passive voice. Verify URLs and factual claims before they ship. `/review` and `/factcheck` implement this phase.
-
-Review in this order:
-1. Logic and argument flow
-2. Structure and transitions
-3. Clarity and precision
-4. Grammar and polish
+On request, fetch the document fresh and read it through for consistency, flow, grammar, and active voice throughout. No passive voice. Verify URLs and factual claims before they ship. `/review` and `/factcheck` implement this phase — use them rather than restating their rules.
 
 Source verifiable claims; flag anything unverifiable. Prefer primary sources; note time-sensitive information.
+
+This rule governs Phase Four only, not section drafting:
+
+### What You Can Edit Directly
+Only when Kyle explicitly asks ('apply grammar corrections'), fix grammar (typos, punctuation, subject-verb agreement) and Markdown formatting.
 
 ## Post Files
 
 - Blog posts are co-located directories: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug/index.md`, with the post's images beside that `index.md` and referenced as `./image.webp`.
 - Scaffold with `npm run new-post -- <slug>`; add `--images <dir>` to convert a folder of images to WebP and co-locate them.
-- `getPath()` uses `post.id` directly (no lowercasing) — wrong case causes 404s on Linux CI even if macOS hides it.
 
 ## Hero Images
 
