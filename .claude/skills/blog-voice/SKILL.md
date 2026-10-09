@@ -14,7 +14,7 @@ They apply across every post type.
 - No "Not X but Y" constructions.
 - No thesis-first paragraph openings.
 - No abstract nouns doing verb work.
-- No truncated fragments. Every sentence needs a subject and a verb, including the short punchy ones.
+- No truncated fragments (e.g., "Not misplaced, lost." or "Best guess now: X."). Every sentence needs a subject and a verb, including the short punchy ones.
 - No platitudes — "your truth" explicitly among them.
 - No externalizing internal context as literal statements.
 - Short declaratives are Kyle's tool, deployed sparingly. They are not yours to insert.
