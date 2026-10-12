@@ -57,7 +57,16 @@ Two branches (never delete): `develop` → `main`. All changes via pull requests
 
 **To advance `main`:** open a develop → main promotion PR. `main` never receives direct commits.
 
-**If `develop` is behind `main`** (a hotfix landed on `main` directly, or a promotion PR was merged with a merge commit): `git fetch origin && git checkout develop && git pull --ff-only origin develop && git merge --ff-only origin/main && git push origin develop`
+**Aligned** means `develop`, `origin/develop`, `main`, and `origin/main` all resolve to the same SHA. **Sync** means make them aligned; a sync request pre-approves every step of the sequence below, including the `develop` checkout and push and the local `main` update.
+
+**After a promotion PR merges into main:** the merge commit leaves `develop` one commit behind. Sync (Docker must be running: the `develop` push runs the push hooks), then verify:
+```
+git fetch origin
+git checkout develop && git pull --ff-only origin develop
+git merge --ff-only origin/main && git push origin develop
+git fetch origin main:main
+git rev-parse develop origin/develop main origin/main   # all four must match; any mismatch is a blocker
+```
 
 **If `--ff-only` fails:** `git log --oneline HEAD..origin/<branch>` (what origin has, not you) and `git log --oneline origin/<branch>..HEAD` (what you have, not origin) to diagnose divergence, then `git merge origin/<branch> --no-edit && git push`.
 
