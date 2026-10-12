@@ -78,6 +78,7 @@ npm run test:visual:report
 
 ### Features
 - ✓ Hero image rendering
+- ✓ OG images: the satori-rendered site card (`/og.png`) and two post cards (a wrapping title and a non-ASCII title), fetched through each page's `og:image` tag (desktop project only, since they don't vary by device)
 - ✓ Image optimization validation
 - ✓ Responsive design at all breakpoints
 - ✓ Layout consistency
