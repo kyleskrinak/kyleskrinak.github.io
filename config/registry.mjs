@@ -154,6 +154,19 @@ export const ConfigRegistry = {
           '301 legacy Jekyll and pre-rename URLs to their current locations'
         ],
         notes: 'Vendored into the repo so the function is not console-only. CloudFront allows one function per event type, so legacy redirects live inside this function rather than a second one. Published source is capped at 10 KB including comments; deploy.sh enforces that before staging. Runs ahead of the cache, so publishing takes effect with no invalidation.'
+      },
+      // Sibling of `variables` for the same reason as edgeFunction: managed by
+      // hand from a developer machine, not by production-deploy.yml.
+      accessLogging: {
+        type: 'CloudFront standard logging (legacy, S3 delivery)',
+        distributionId: 'E1YF7GVLAW8XON',
+        bucket: 'kyle-skrinak-com-cf-logs',
+        region: 'us-east-1',
+        prefix: 'kyle.skrinak.com/',
+        retentionDays: 30,
+        manageWith: 'infra/cloudfront/enable-logging.sh (--apply to enable, --disable to turn off, --verify to check)',
+        tests: 'tests/unit/cloudfront-enable-logging.test.mjs',
+        notes: 'Temporary. Enabled 2026-10-12 to give a server-side record of Googlebot requests after Search Console failed validation of "Redirect error" for five legacy 301s (listed in the script header); turn off with --disable once the cause is found. Issue #376 is background on the earlier redirect work and does not track this logging. Dedicated bucket, never the site bucket: the deploy sync would delete or publish log files. Logs hold visitor IPs and user agents. Disable logging before deleting the bucket, or a third party could claim the bucket name and receive the logs.'
       }
     },
   },
