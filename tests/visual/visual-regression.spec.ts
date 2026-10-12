@@ -258,6 +258,61 @@ test.describe('Visual Regression - Card Layout', () => {
   });
 });
 
+// OG images are PNGs that satori renders at build time and only meta tags
+// reference, so no page screenshot shows them. Each test reads the page's
+// og:image tag, which also checks that the page still points at the satori
+// route, then compares the fetched PNG with a baseline. The tag holds the
+// production URL, so only its path is fetched against the server under test.
+// Satori renders in Node with bundled fonts, so the image is the same under
+// every project; the desktop project alone keeps one baseline per image.
+// The limit is an absolute pixel count, not a ratio: 1% of a 1200x630 card is
+// about 7,500 pixels, more than a whole 28px byline, so a ratio would let a
+// changed or missing line of text pass.
+const OG_MAX_DIFF_PIXELS = 100;
+
+async function ogImageFromPage(page: Page, path: string): Promise<{ pathname: string; body: Buffer }> {
+  await page.goto(path);
+  const content = await page.locator('meta[property="og:image"]').getAttribute('content');
+  if (!content) {
+    throw new Error(`${path} has no og:image meta tag`);
+  }
+  const { pathname } = new URL(content);
+  const response = await page.request.get(pathname);
+  expect(response.status(), `GET ${pathname}`).toBe(200);
+  expect(response.headers()['content-type']).toBe('image/png');
+  return { pathname, body: await response.body() };
+}
+
+test.describe('Visual Regression - OG Images', () => {
+  test.beforeEach(({}, testInfo) => {
+    test.skip(testInfo.project.name !== 'visual-desktop', 'OG images do not vary by device');
+  });
+
+  test('site OG image should match baseline', async ({ page }) => {
+    const { pathname, body } = await ogImageFromPage(page, '/');
+    expect(pathname).toBe('/og.png');
+    expect(body).toMatchSnapshot('og-site.png', { maxDiffPixels: OG_MAX_DIFF_PIXELS });
+  });
+
+  // These posts have no hero or ogImage, so their cards come from satori. Posts
+  // set no author, so both baselines show "by" with an empty name; fixing that
+  // changes them on purpose.
+  // The only satori-rendered title with a non-ASCII character (an em dash), so
+  // the card covers glyph lookup beyond ASCII.
+  test('non-ASCII-title post OG image should match baseline', async ({ page }) => {
+    const { pathname, body } = await ogImageFromPage(page, '/posts/2021-01-19-my-hero-karen/');
+    expect(pathname).toBe('/posts/2021-01-19-my-hero-karen/index.png');
+    expect(body).toMatchSnapshot('og-post-2021-01-19.png', { maxDiffPixels: OG_MAX_DIFF_PIXELS });
+  });
+
+  // The longest satori-rendered title, so the card covers line wrapping.
+  test('long-title post OG image should match baseline', async ({ page }) => {
+    const { pathname, body } = await ogImageFromPage(page, '/posts/2016-10-31-first-blog-post/');
+    expect(pathname).toBe('/posts/2016-10-31-first-blog-post/index.png');
+    expect(body).toMatchSnapshot('og-post-2016-10-31.png', { maxDiffPixels: OG_MAX_DIFF_PIXELS });
+  });
+});
+
 test.describe('Visual Regression - Responsive Design', () => {
   const viewports = [
     { name: 'mobile-small', width: 320, height: 568 },    // iPhone SE
