@@ -5,17 +5,83 @@
  */
 
 /**
+ * Navigation failures that mean the host never answered in time. Like a 5xx,
+ * a timeout says the server or the network path is unwell, not that the link
+ * is wrong, so it counts as temporary. Other thrown errors stay broken: a DNS
+ * failure (ERR_NAME_NOT_RESOLVED) is how a dead domain shows up, and refused
+ * connections and TLS errors need a person to look.
+ */
+const TIMEOUT_ERROR_PATTERNS = [
+  /Timeout \d+ms exceeded/,   // Playwright's own navigation timeout
+  /net::ERR_TIMED_OUT\b/,
+  /net::ERR_CONNECTION_TIMED_OUT\b/
+];
+
+export function isTimeoutError(error) {
+  if (!error) return false;
+  if (error.name === 'TimeoutError') return true;
+  const message = String(error.message ?? '');
+  return TIMEOUT_ERROR_PATTERNS.some(pattern => pattern.test(message));
+}
+
+const NAVIGATION_TIMEOUT_MS = 30000;
+
+// One retry separates a one-off stall (issue #412) from a host that never
+// answers, at the cost of another 30s only for URLs that time out.
+export const TIMEOUT_RETRIES = 1;
+
+const isRedirectStatus = status => status >= 300 && status <= 399;
+
+/**
  * Verify a URL by navigating to it with a real browser
  * @param {import('playwright').Page} page - Playwright page instance
  * @param {string} url - URL to verify
- * @returns {Promise<Object>} Verification result
+ * @param {{ timeoutRetries?: number }} [options]
+ * @returns {Promise<Object>} Verification result; `attempts` counts navigations
  */
-export async function verifyUrl(page, url) {
+export async function verifyUrl(page, url, { timeoutRetries = TIMEOUT_RETRIES } = {}) {
+  let result;
+  for (let attempt = 1; attempt <= timeoutRetries + 1; attempt++) {
+    result = await attemptVerify(page, url);
+    result.attempts = attempt;
+    if (!result.timedOut) break;
+  }
+  return result;
+}
+
+async function attemptVerify(page, url) {
+  // waitUntil 'load' also waits on every subresource, so one hanging tracker
+  // script makes goto() throw a timeout after the server has already sent the
+  // document — 200 or 404. Keep the main frame's last navigation response so
+  // that status still decides the bucket; only a host that never sent the
+  // document counts as timed out. A 3xx as the last response means the
+  // redirect target never answered, which is a real timeout.
+  let documentResponse = null;
+  const onResponse = response => {
+    try {
+      if (response.request().isNavigationRequest() && response.frame() === page.mainFrame()) {
+        documentResponse = response;
+      }
+    } catch {
+      // Frame detached mid-navigation; nothing to record.
+    }
+  };
+  page.on('response', onResponse);
+
   try {
-    const response = await page.goto(url, {
-      waitUntil: 'load',
-      timeout: 30000
-    });
+    let response;
+    let loadTimedOut = false;
+    try {
+      response = await page.goto(url, {
+        waitUntil: 'load',
+        timeout: NAVIGATION_TIMEOUT_MS
+      });
+    } catch (error) {
+      const answered = documentResponse && !isRedirectStatus(documentResponse.status());
+      if (!(isTimeoutError(error) && answered)) throw error;
+      response = documentResponse;
+      loadTimedOut = true;
+    }
 
     const status = response ? response.status() : 'NO_RESPONSE';
     const headers = response ? response.headers() : {};
@@ -27,7 +93,8 @@ export async function verifyUrl(page, url) {
     //             429 — rate-limited/bot-gated (does NOT imply resource exists)
     //   temporary: any 5xx — the host answered but could not serve the page.
     //     Link rot is a 4xx condition; a 5xx says the server is unwell, not
-    //     that the link is wrong, so it never counts as broken.
+    //     that the link is wrong, so it never counts as broken. A navigation
+    //     timeout (catch path below) is temporary for the same reason.
     // success keeps the broad "not broken" meaning so callers that only
     // care about pass/fail don't have to inspect both flags.
     //
@@ -78,6 +145,8 @@ export async function verifyUrl(page, url) {
       reachable,
       withheld,
       temporary,
+      timedOut: false,
+      loadTimedOut,
       retryAfter,
       maintenanceSignals,
       success: reachable || withheld || temporary
@@ -89,6 +158,7 @@ export async function verifyUrl(page, url) {
     // Playwright hasn't navigated yet (page.url() returns 'about:blank').
     const currentUrl = page.url();
     const finalUrl = (currentUrl && currentUrl !== 'about:blank') ? currentUrl : url;
+    const timedOut = isTimeoutError(error);
     return {
       url,
       finalUrl,
@@ -96,8 +166,12 @@ export async function verifyUrl(page, url) {
       error: error.message,
       reachable: false,
       withheld: false,
-      temporary: false,
-      success: false
+      temporary: timedOut,
+      timedOut,
+      loadTimedOut: false,
+      success: timedOut
     };
+  } finally {
+    page.off('response', onResponse);
   }
 }

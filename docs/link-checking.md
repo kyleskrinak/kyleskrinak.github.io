@@ -233,12 +233,12 @@ The URL does not fail CI. The script distinguishes four outcomes — three where
 
 - **Reachable** — browser returned HTTP 2xx (or a redirect to a 2xx). The URL is reachable in a real browser even though htmltest flagged it. No action needed — the two-tier check has confirmed it works.
 - **Withheld** — browser returned 403, 429 (rate-limited/bot-gated), or 999 (LinkedIn-style anti-bot). For 403/999 the resource exists but is gated against automated clients; for 429 the server is rate-limiting and existence of the resource is unconfirmed. The script does NOT suggest adding these to `IgnoreURLs` — leave them in content; the policy treats them as non-broken without permanently skipping them.
-- **Temporary** — browser returned any 5xx (500, 502, 503, 504, …). The host answered but could not serve the page. Link rot is a 4xx condition, so a 5xx means the server is unwell, not that the link is wrong; it never counts as broken. A 503 is additionally checked for maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"), with a `Retry-After` header as corroborating evidence — but that only enriches the report label, it is not required to enter this bucket. The script does NOT suggest adding these to `IgnoreURLs`.
+- **Temporary** — browser returned any 5xx (500, 502, 503, 504, …). The host answered but could not serve the page. Link rot is a 4xx condition, so a 5xx means the server is unwell, not that the link is wrong; it never counts as broken. A 503 is additionally checked for maintenance-mode page content ("scheduled maintenance", "under maintenance", or "maintenance mode"), with a `Retry-After` header as corroborating evidence — but that only enriches the report label, it is not required to enter this bucket. A navigation timeout also lands here (Playwright's 30s `Timeout … exceeded`, `net::ERR_TIMED_OUT`, `net::ERR_CONNECTION_TIMED_OUT`): a host that never answers is unwell in the same way, and one gnu.org timeout filed issue #412 as broken. Three guards keep this from hiding link rot: a timed-out URL is retried once before it counts (at most 10 retries per run, so a batch of hanging hosts cannot push the job past its time limit; later timeouts get one attempt); if the server sent the document but the page's `load` event never fired (a hanging tracker script, say), that document's status decides the bucket, so a slow 404 page stays broken; and in automated mode a timeout stays broken when htmltest already got a 404 or 410 for the same URL. Only those two codes count: every other 4xx (401/403/429 gates, 405 method, 408 htmltest's own timeout, and so on) describes the request, not the link. Other thrown errors stay broken — DNS failure (`ERR_NAME_NOT_RESOLVED`) is how a dead domain shows up, and refused connections and TLS errors need a person to look. The script does NOT suggest adding these to `IgnoreURLs`.
 
-  **Why the whole 5xx range:** this bucket originally admitted a 503 only when the page carried maintenance-mode text. Hosts that shed load from CI runner IPs — GitHub among them — return a bare 503 with no such text, so those URLs were classified as permanently broken and the nightly job filed issues demanding manual fixes for links that were never broken (issue #391). Broad 5xx acceptance is the correct trade: the cost is that a *permanently* 5xx URL will not fail CI on its own, which is why the report tells you to watch for the same URL recurring across runs.
+  **Why the whole 5xx range:** this bucket originally admitted a 503 only when the page carried maintenance-mode text. Hosts that shed load from CI runner IPs — GitHub among them — return a bare 503 with no such text, so those URLs were classified as permanently broken and the nightly job filed issues demanding manual fixes for links that were never broken (issue #391). Broad 5xx acceptance is the correct trade: the cost is that a *permanently* 5xx (or permanently timing-out) URL will not fail CI on its own, which is why the report tells you to watch for the same URL recurring across runs.
 - **Unverifiable** — Browser verification returned a failure (`success: false`) *and* the effective URL (original URL or redirect destination) is on a domain that requires authentication (e.g. `linkedin.com`). Because unauthenticated responses on these domains are unreliable — valid profiles and deleted ones can produce the same error — the failure is treated as non-fatal. If the browser succeeds for a LinkedIn URL (2xx → **Reachable**; 403/429/999 → **Withheld**; any 5xx → **Temporary**), it lands in the appropriate bucket instead; this bucket only applies when `success: false`. Reported for manual review but does NOT fail CI.
 
-Do NOT add domains for permanent failures (404s, TLS certificate errors, timeout issues).
+Do NOT add domains to `AUTH_REQUIRED_DOMAINS` for permanent failures (404s, TLS certificate errors, DNS failures). Timeouts need no entry: they already count as temporary.
 
 #### If Browser Verification Fails ❌
 
@@ -320,7 +320,8 @@ Note: `IgnoreURLs` is optional for browser-reachable URLs. The two-tier check al
 **Coverage tradeoff:** an `IgnoreURLs` entry suppresses tier-1 htmltest checks for those URLs entirely, not just the tier-2 Playwright overhead. If the URL later 404s or otherwise breaks, neither tier will catch it. Keep the list minimal, prefer scoping to the most-specific URL pattern that resolves the noise, and revisit periodically to confirm entries are still needed.
 
 Do NOT add to ignore list when:
-- ❌ URL fails browser verification (genuinely broken - timeout, TLS error, connection refused, etc.)
+- ❌ URL fails browser verification (genuinely broken - DNS failure, TLS error, connection refused, etc.)
+- ❌ URL times out in browser verification (temporary — re-checked next run)
 - ❌ Content has moved to new URL
 - ❌ Site is permanently offline
 - ❌ The failure is transient (intermittent) — tier-2 already handles one-off htmltest failures correctly
@@ -348,6 +349,7 @@ Sites may report different errors to bots vs real browsers:
 | **Proxy issues** | 503 | 200 OK | May add to ignore list |
 | **Maintenance page** | 503 | 503 maintenance | Temporary (not added; re-check after maintenance) |
 | **Load shedding against CI IPs** | 5xx | 5xx server error | Temporary (not added; re-checked next run) |
+| **Host not answering** | timeout | navigation timeout | Temporary (not added; re-checked next run) |
 
 **Key Rule**: Only add to ignore list if the URL **works in browser verification**. If browser also fails, the link is genuinely broken and should be fixed, not ignored.
 
@@ -407,7 +409,7 @@ Run browser verification. If URL works, add to ignore list.
 
 ### Browser verification times out
 
-Increase timeout in `scripts/lib/verify-url.js` (default: 30s).
+A timeout (after one automatic retry, while the run's budget of 10 retries lasts) counts as temporary and does not fail CI. If the same URL times out on several consecutive runs, check it by hand; to give slow hosts longer, increase the timeout in `scripts/lib/verify-url.js` (default: 30s).
 
 ### Too many link errors after migration
 
