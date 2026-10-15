@@ -7,6 +7,8 @@
  * which belongs in a unit test.
  */
 
+import { isLinkRotStatus } from './bucket-link-results.js';
+
 // htmltest prints every failure as:
 //
 //   <message> --- <document> --> <target>
@@ -53,6 +55,22 @@ const NETWORK_MESSAGES = [
  */
 function isNetworkMessage(message) {
   return NETWORK_MESSAGES.some(pattern => pattern.test(message));
+}
+
+/**
+ * How much a status says about the link, for choosing between two diagnostics
+ * of the same URL: a 404/410 (the resource is gone) outranks any other status,
+ * which outranks none at all (a timeout, DNS or TLS error).
+ *
+ * Link rot has to win outright, not just beat null: check-links.js fails a
+ * browser timeout only when htmltest saw a 404 or 410, so a 403 or 503 that
+ * happened to print first must not hide one.
+ * @param {number|null|undefined} status
+ * @returns {number}
+ */
+function statusRank(status) {
+  if (status == null) return 0;
+  return isLinkRotStatus(status) ? 2 : 1;
 }
 
 /**
@@ -105,7 +123,8 @@ export function getCanonicalUrl(url) {
  * @param {string} output - combined stdout+stderr from htmltest
  * @returns {{failedUrls: string[], statusByUrl: Map<string, number|null>, totalFailures: number, skippedCount: number, nonNetworkFailures: string[]}}
  *   failedUrls is one representative URL per canonical group. statusByUrl maps
- *   every URL seen to its status, or null when the failure carried no status (a
+ *   every URL seen to its most telling status (404/410 over any other status,
+ *   any status over none), or null when no failure carried a status (a
  *   timeout, DNS or TLS error). nonNetworkFailures holds the verbatim lines that
  *   tier 2 cannot adjudicate — markup, accessibility and internal references —
  *   which the caller must treat as fatal regardless of what tier 2 concludes.
@@ -133,20 +152,20 @@ export function parseHtmltestFailures(output) {
 
     const statusMatch = message.match(/Non-OK status:\s*(\d{3})/);
     const newStatus = statusMatch ? Number(statusMatch[1]) : null;
-    const existingStatus = statusByUrl.has(url) ? statusByUrl.get(url) : undefined;
 
-    // First encounter wins, except that a concrete status always replaces a
-    // null one — the same URL can fail on one page with a status and on
-    // another with a timeout, and the status is the more useful of the two.
-    if (!statusByUrl.has(url) || (existingStatus == null && newStatus != null)) {
+    // The same URL can fail differently on different pages (a status on one,
+    // a timeout on another; a 403 on one, a 404 on another). Keep the
+    // highest-ranked status; on a tie the first encounter wins.
+    if (!statusByUrl.has(url) || statusRank(newStatus) > statusRank(statusByUrl.get(url))) {
       statusByUrl.set(url, newStatus);
     }
 
     allUrls.push(url);
   }
 
-  // Collapse to one representative per canonical URL, preferring a
-  // representative that carries a concrete status so the report can show it.
+  // Collapse to one representative per canonical URL, preferring the
+  // highest-ranked status so the report can show it and a 404/410 anywhere in
+  // the group still reaches check-links.js's timeout guard.
   const canonicalToRepUrl = new Map();
 
   for (const url of allUrls) {
@@ -159,7 +178,7 @@ export function parseHtmltestFailures(output) {
       const existingUrl = canonicalToRepUrl.get(canonical);
       const existingStatus = statusByUrl.get(existingUrl);
 
-      if ((existingStatus == null) && (currentStatus != null)) {
+      if (statusRank(currentStatus) > statusRank(existingStatus)) {
         canonicalToRepUrl.set(canonical, url);
       }
     }

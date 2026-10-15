@@ -10,19 +10,57 @@ import { verifyUrl } from "../../scripts/lib/verify-url.js";
  * and lets us exercise paths a real browser makes hard to reach on demand —
  * a null response, a thrown navigation, a content() call that fails.
  */
+const MAIN_FRAME = { name: "main" };
+const CHILD_FRAME = { name: "iframe" };
+
+function makeResponse(status, headers = {}, frame = MAIN_FRAME) {
+  return {
+    status: () => status,
+    ok: () => typeof status === "number" && status >= 200 && status <= 299,
+    headers: () => headers,
+    frame: () => frame,
+    request: () => ({ isNavigationRequest: () => true }),
+  };
+}
+
+/**
+ * gotoError throws on the first `failTimes` navigations (all of them by
+ * default), then navigates normally. documentResponses are emitted as
+ * `response` events before the throw, modelling a server that sent the
+ * document while the load event never fired.
+ */
 function makePage({
   status,
   headers = {},
   body = "",
   finalUrl,
   gotoError,
+  failTimes = Infinity,
+  documentResponses = [],
   contentError,
   nullResponse = false,
 } = {}) {
   let current = "about:blank";
+  let listeners = [];
+  let calls = 0;
   return {
+    get gotoCalls() {
+      return calls;
+    },
+    get listenerCount() {
+      return listeners.length;
+    },
+    on(event, fn) {
+      if (event === "response") listeners.push(fn);
+    },
+    off(event, fn) {
+      listeners = listeners.filter(l => l !== fn);
+    },
+    mainFrame: () => MAIN_FRAME,
     async goto(url) {
-      if (gotoError) {
+      calls += 1;
+      if (gotoError && calls <= failTimes) {
+        for (const response of documentResponses) listeners.forEach(fn => fn(response));
         // A real browser leaves page.url() at about:blank when navigation fails
         // before anything commits, which is the case verifyUrl's fallback exists
         // for. Only an explicit finalUrl models a failure part-way through a
@@ -34,11 +72,7 @@ function makePage({
       }
       current = finalUrl ?? url;
       if (nullResponse) return null;
-      return {
-        status: () => status,
-        ok: () => typeof status === "number" && status >= 200 && status <= 299,
-        headers: () => headers,
-      };
+      return makeResponse(status, headers);
     },
     async content() {
       if (contentError) throw new Error(contentError);
@@ -174,6 +208,79 @@ describe("verifyUrl redirect and error reporting", () => {
     assert.equal(r.temporary, false);
     assert.equal(r.success, false);
     assert.equal(r.status, undefined, "no status to report");
+    assert.equal(r.timedOut, false);
+  });
+
+  // The issue #412 case: a host that never answers in 30s is unwell, like a
+  // 5xx, and must not fail the gate as link rot.
+  it("treats a navigation timeout as temporary", async () => {
+    for (const message of [
+      "page.goto: Timeout 30000ms exceeded.",
+      "net::ERR_TIMED_OUT at https://example.com/",
+      "net::ERR_CONNECTION_TIMED_OUT at https://example.com/",
+    ]) {
+      const r = await verifyUrl(makePage({ gotoError: message }), "https://example.com/");
+      assert.equal(bucketOf(r), "temporary", message);
+      assert.equal(r.timedOut, true, message);
+      assert.equal(r.success, true, `${message} should not fail the gate`);
+      assert.equal(r.error, message);
+      assert.equal(r.status, undefined);
+      assert.equal(r.attempts, 2, "a timeout is retried once before it counts");
+    }
+  });
+
+  it("recognises Playwright's TimeoutError by name", async () => {
+    const page = makePage({ status: 200 });
+    page.goto = async () => {
+      const error = new Error("navigation stalled");
+      error.name = "TimeoutError";
+      throw error;
+    };
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(bucketOf(r), "temporary");
+    assert.equal(r.timedOut, true);
+  });
+
+  it("keeps DNS, refused-connection and TLS failures broken", async () => {
+    // A dead domain surfaces as ERR_NAME_NOT_RESOLVED; that is link rot.
+    for (const message of [
+      "net::ERR_NAME_NOT_RESOLVED at https://gone.example/",
+      "net::ERR_CONNECTION_REFUSED at https://example.com/",
+      "net::ERR_CERT_DATE_INVALID at https://example.com/",
+    ]) {
+      const r = await verifyUrl(makePage({ gotoError: message }), "https://example.com/");
+      assert.equal(bucketOf(r), "broken", message);
+      assert.equal(r.timedOut, false, message);
+      assert.equal(r.success, false, `${message} must fail the gate`);
+    }
+  });
+
+  it("retries a timeout once and uses the second answer", async () => {
+    const page = makePage({ gotoError: "page.goto: Timeout 30000ms exceeded.", failTimes: 1, status: 200 });
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(bucketOf(r), "reachable");
+    assert.equal(r.attempts, 2);
+    assert.equal(page.gotoCalls, 2);
+  });
+
+  it("does not retry errors other than timeouts", async () => {
+    const page = makePage({ gotoError: "net::ERR_NAME_NOT_RESOLVED at https://gone.example/" });
+    const r = await verifyUrl(page, "https://gone.example/");
+    assert.equal(bucketOf(r), "broken");
+    assert.equal(r.attempts, 1);
+    assert.equal(page.gotoCalls, 1);
+  });
+
+  it("honours timeoutRetries: 0", async () => {
+    const page = makePage({ gotoError: "page.goto: Timeout 30000ms exceeded." });
+    const r = await verifyUrl(page, "https://example.com/", { timeoutRetries: 0 });
+    assert.equal(r.attempts, 1);
+    assert.equal(page.gotoCalls, 1);
+  });
+  it("does not mark a 5xx as timed out", async () => {
+    const r = await verifyUrl(makePage({ status: 504 }), "https://example.com/");
+    assert.equal(bucketOf(r), "temporary");
+    assert.equal(r.timedOut, false);
   });
 
   it("falls back to the original URL when goto throws before navigating", async () => {
@@ -194,5 +301,78 @@ describe("verifyUrl redirect and error reporting", () => {
     const r = await verifyUrl(page, "https://www.linkedin.com/in/someone");
     assert.equal(r.finalUrl, "https://www.linkedin.com/login");
     assert.equal(r.redirected, true);
+  });
+});
+
+// waitUntil 'load' waits on subresources too, so goto() can time out after the
+// server already sent the document. That status must decide the bucket.
+describe("verifyUrl when the load event times out after the document arrived", () => {
+  const TIMEOUT = "page.goto: Timeout 30000ms exceeded.";
+
+  it("classifies a 200 document as reachable, without retrying", async () => {
+    const page = makePage({ gotoError: TIMEOUT, documentResponses: [makeResponse(200)] });
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(bucketOf(r), "reachable");
+    assert.equal(r.status, 200);
+    assert.equal(r.loadTimedOut, true);
+    assert.equal(r.timedOut, false);
+    assert.equal(page.gotoCalls, 1);
+  });
+
+  it("classifies a 404 document as broken rather than temporary", async () => {
+    const page = makePage({ gotoError: TIMEOUT, documentResponses: [makeResponse(404)] });
+    const r = await verifyUrl(page, "https://example.com/gone");
+    assert.equal(bucketOf(r), "broken");
+    assert.equal(r.status, 404);
+    assert.equal(r.success, false);
+  });
+
+  it("classifies a 503 document as temporary by status, not as a timeout", async () => {
+    const page = makePage({ gotoError: TIMEOUT, documentResponses: [makeResponse(503)] });
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(bucketOf(r), "temporary");
+    assert.equal(r.status, 503);
+    assert.equal(r.timedOut, false);
+  });
+
+  it("uses the last main-frame response in a redirect chain", async () => {
+    const page = makePage({
+      gotoError: TIMEOUT,
+      documentResponses: [makeResponse(301), makeResponse(404)],
+    });
+    const r = await verifyUrl(page, "https://example.com/old");
+    assert.equal(r.status, 404);
+    assert.equal(bucketOf(r), "broken");
+  });
+
+  it("treats a redirect whose target never answered as a timeout", async () => {
+    const page = makePage({ gotoError: TIMEOUT, documentResponses: [makeResponse(302)] });
+    const r = await verifyUrl(page, "https://example.com/old");
+    assert.equal(r.timedOut, true);
+    assert.equal(bucketOf(r), "temporary");
+  });
+
+  it("ignores navigation responses from child frames", async () => {
+    const page = makePage({
+      gotoError: TIMEOUT,
+      documentResponses: [makeResponse(200, {}, CHILD_FRAME)],
+    });
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(r.timedOut, true);
+  });
+
+  it("does not use a document response when the error is not a timeout", async () => {
+    const page = makePage({
+      gotoError: "net::ERR_CONNECTION_RESET at https://example.com/",
+      documentResponses: [makeResponse(200)],
+    });
+    const r = await verifyUrl(page, "https://example.com/");
+    assert.equal(bucketOf(r), "broken");
+  });
+
+  it("removes its response listener after every attempt", async () => {
+    const page = makePage({ gotoError: TIMEOUT });
+    await verifyUrl(page, "https://example.com/");
+    assert.equal(page.listenerCount, 0);
   });
 });

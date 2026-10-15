@@ -81,7 +81,7 @@ import loadFonts from "../loadFonts";
 //                 "
 //               </span>
 //               <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-//                 {post.data.author}
+//                 {post.data.author || SITE.author}
 //               </span>
 //             </span>
 
@@ -193,7 +193,7 @@ export default async post => {
                                       overflow: "hidden",
                                       fontWeight: "bold",
                                     },
-                                    children: post.data.author,
+                                    children: post.data.author || SITE.author,
                                   },
                                 },
                               ],

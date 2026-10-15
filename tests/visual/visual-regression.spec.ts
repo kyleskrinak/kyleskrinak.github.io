@@ -295,8 +295,7 @@ test.describe('Visual Regression - OG Images', () => {
   });
 
   // These posts have no hero or ogImage, so their cards come from satori. Posts
-  // set no author, so both baselines show "by" with an empty name; fixing that
-  // changes them on purpose.
+  // set no author, so the byline falls back to SITE.author.
   // The only satori-rendered title with a non-ASCII character (an em dash), so
   // the card covers glyph lookup beyond ASCII.
   test('non-ASCII-title post OG image should match baseline', async ({ page }) => {
