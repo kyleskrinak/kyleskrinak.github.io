@@ -60,14 +60,7 @@ echo "main:" && git rev-parse origin/main
 echo "develop:" && git rev-parse origin/develop
 ```
 
-If `develop` is behind `main` (e.g. after a hotfix landed directly on `main`), sync it:
-
-```bash
-git checkout develop
-git pull --ff-only origin develop
-git merge --ff-only origin/main
-git push origin develop
-```
+If `develop` is behind `main`, a sync is pending: run the sequence in [Sync Branches After Release](#sync-branches-after-release).
 
 ## Optional: Feature Branch Workflow
 
@@ -130,7 +123,7 @@ Opening the PR triggers the build, config-validate, and visual-regression checks
 
 ## Merge to Main & Tag Release
 
-Once approved and CI passes, merge via GitHub UI. Then tag:
+Once approved and CI passes, merge via GitHub UI with **Create a merge commit** (squash or rebase breaks the fast-forward sync). Then tag:
 
 ```bash
 git checkout main
@@ -145,16 +138,19 @@ git push origin vX.Y.Z
 
 ## Sync Branches After Release
 
-After the release merge, if there are any commits on `main` that aren't on `develop`, sync them:
+Every promotion merge commit leaves `develop` one commit behind `main`, so a sync is pending after each release. Claude runs it automatically when it is on `develop` (CLAUDE.md, Git Workflow). To run it by hand (Docker must be running; the push runs the push hooks):
 
 ```bash
+git fetch origin
 git checkout develop
-git pull origin develop
-git merge main
+git pull --ff-only origin develop
+git merge --ff-only origin/main
 git push origin develop
+git fetch origin main:main
+git rev-parse develop origin/develop main origin/main
 ```
 
-Typically this isn't needed if all changes flow through `develop` first, but do this if hotfixes are applied directly to `main`.
+Any failure, including an `--ff-only` divergence, stops the sync for a person to resolve.
 
 ## Branch Cleanup & Maintenance
 

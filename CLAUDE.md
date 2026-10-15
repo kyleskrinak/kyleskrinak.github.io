@@ -29,7 +29,7 @@ When I say:
 - **Hard gate for sensitive actions:** use deny-by-default for `commit`, `push`, branch-changing git actions, and destructive actions.
 - **Exact approval required per action:** "fix" ≠ "commit" ≠ "push". Do not infer one from another.
 - **Fail closed:** if explicit approval for the exact action is missing or ambiguous, STOP.
-- **Workflow exception:** when the user requests a workflow that inherently includes commit/push steps (e.g., "fix and update branches", "apply the fix and push"), those steps are pre-approved by the workflow request. The gate blocks uninstructed ad-hoc actions, not steps implied by an explicitly requested workflow.
+- **Workflow exception:** when the user requests a workflow that inherently includes commit/push steps (e.g., "fix and update branches", "apply the fix and push"), those steps are pre-approved by the workflow request. The gate blocks uninstructed ad-hoc actions, not steps implied by an explicitly requested workflow. Standing exception: the post-promotion sync (Git Workflow) runs automatically, without a request, whenever a sync is pending and the current branch is `develop`.
 
 **Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
 
@@ -51,22 +51,26 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 Two branches (never delete): `develop` → `main`. All changes via pull requests.
 
-**Before changes:** Docker must be running (push hooks require it). Always `git fetch origin` first, then sync: `git pull --ff-only origin develop` (fails fast on divergence; diagnose per `--ff-only` block below). In comparisons name the **base** with its remote-tracking ref, not a local mirror: `git log origin/main..develop` (what your local develop carries that main lacks) or `git log origin/main..origin/develop` (the same for what is already pushed). `origin/main` is accurate the moment you fetch; a local `main` mirror silently goes stale.
+**Before changes:** Docker must be running (push hooks require it). Always `git fetch origin` first. On `develop`, if a sync is pending (see below), run it before anything else. Then pull: `git pull --ff-only origin develop` (fails fast on divergence; diagnose per `--ff-only` block below). In comparisons name the **base** with its remote-tracking ref, not a local mirror: `git log origin/main..develop` (what your local develop carries that main lacks) or `git log origin/main..origin/develop` (the same for what is already pushed). `origin/main` is accurate the moment you fetch; a local `main` mirror silently goes stale.
 
 **After a PR merges into develop:** nothing to reconcile — `main` has not moved. Just `git fetch origin && git checkout develop && git pull --ff-only origin develop`.
 
-**To advance `main`:** open a develop → main promotion PR. `main` never receives direct commits.
+**To advance `main`:** open a develop → main promotion PR. `main` never receives direct commits. Merge promotion PRs with **Create a merge commit**: a squash or rebase merge takes `develop` out of `main`'s history, and the fast-forward sync below then fails.
 
-**Aligned** means `develop`, `origin/develop`, `main`, and `origin/main` all resolve to the same SHA. **Sync** means make them aligned; a sync request pre-approves every step of the sequence below, including the `develop` checkout and push and the local `main` update.
+**Aligned** means `develop`, `origin/develop`, `main`, and `origin/main` all resolve to the same SHA. **Sync** means make them aligned; a sync request pre-approves every step of the sequence below, including the `develop` checkout and push and the local `main` update. A pending sync — after `git fetch origin`, `git log --oneline origin/develop..origin/main` prints any commit — is itself a standing sync request, because `main` only receives promotion merges.
 
-**After a promotion PR merges into main:** the merge commit leaves `develop` one commit behind. Sync (Docker must be running: the `develop` push runs the push hooks), then verify:
+**After a promotion PR merges into main:** the merge commit leaves `develop` one commit behind, so a sync is pending. **Sync automatically — do not ask** — whenever a sync is pending and the current branch is `develop`. Check at every "Before changes" fetch and whenever Kyle says a promotion PR merged; act on the branch state, not the report. On any other branch, say "sync pending" in one line and continue the task. Preconditions (if any fails, stop and report): `docker info` succeeds (the push runs the push hooks), `git status --porcelain` prints nothing, and `git log origin/develop..develop` prints nothing. Run each command on its own. Run the push in the background and wait for it to finish before any edits, because the push hook builds the working tree. Then verify:
 ```
 git fetch origin
-git checkout develop && git pull --ff-only origin develop
-git merge --ff-only origin/main && git push origin develop
+git checkout develop
+git pull --ff-only origin develop
+git merge --ff-only origin/main
+git push origin develop        # background; wait for it to finish
 git fetch origin main:main
 git rev-parse develop origin/develop main origin/main   # all four must match; any mismatch is a blocker
 ```
+
+Automatic mode covers only this fast-forward sequence. Any failure, including an `--ff-only` divergence (develop gained commits after the promotion merge), is a blocker: stop per the Blocker Resolution Protocol and wait for direction.
 
 **If `--ff-only` fails:** `git log --oneline HEAD..origin/<branch>` (what origin has, not you) and `git log --oneline origin/<branch>..HEAD` (what you have, not origin) to diagnose divergence, then `git merge origin/<branch> --no-edit && git push`.
 
@@ -148,6 +152,6 @@ When instructions appear to conflict:
 4. **User authority:** User explicit instructions override general written rules — approval gates are satisfied by explicit per-action user instruction (which is the override mechanism, not a bypass)
 5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
 
-**Approval gates are hard stops.** Bias-to-action, autonomy/autopilot mode, and end-to-end completion drive do not override them. Re-check before each gated action. Missing approval means do not execute. (Exception: steps implied by an explicitly requested workflow are pre-approved — see workflow exception above.)
+**Approval gates are hard stops.** Bias-to-action, autonomy/autopilot mode, and end-to-end completion drive do not override them. Re-check before each gated action. Missing approval means do not execute. (Exceptions: steps implied by an explicitly requested workflow are pre-approved, and so is the automatic post-promotion sync — see workflow exception above.)
 
 <!-- Keep total CLAUDE.md under 200 lines -->
