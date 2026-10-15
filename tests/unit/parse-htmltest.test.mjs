@@ -190,6 +190,24 @@ describe("parseHtmltestFailures — status capture", () => {
     );
     assert.equal(parseHtmltestFailures(output).statusByUrl.get(url), 403);
   });
+
+  it("lets a 404 or 410 replace any other status, in either order", () => {
+    // check-links.js fails a browser timeout only on htmltest 404/410 evidence,
+    // so an earlier 403 or 5xx for the same URL must not hide it.
+    const url = "https://flaky.example.com/x";
+    for (const [first, second, expected] of [
+      [403, 404, 404],
+      [404, 403, 404],
+      [503, 410, 410],
+      [410, 503, 410],
+    ]) {
+      const output = outputOf(
+        `  Non-OK status: ${first} --- a/index.html --> ${url}`,
+        `  Non-OK status: ${second} --- b/index.html --> ${url}`
+      );
+      assert.equal(parseHtmltestFailures(output).statusByUrl.get(url), expected, `${first} then ${second}`);
+    }
+  });
 });
 
 describe("parseHtmltestFailures — deduplication", () => {
@@ -219,6 +237,17 @@ describe("parseHtmltestFailures — deduplication", () => {
     const { failedUrls, statusByUrl } = parseHtmltestFailures(output);
     assert.equal(failedUrls.length, 1);
     assert.equal(statusByUrl.get(failedUrls[0]), 403, "the one with a status represents the group");
+  });
+
+  it("prefers a representative that carries a 404 or 410 over another status", () => {
+    for (const order of [["403", "404"], ["404", "403"]]) {
+      const output = outputOf(
+        ...order.map(s => `  Non-OK status: ${s} --- ${s}/index.html --> https://wa.me/?text=${s}`)
+      );
+      const { failedUrls, statusByUrl } = parseHtmltestFailures(output);
+      assert.equal(failedUrls.length, 1);
+      assert.equal(statusByUrl.get(failedUrls[0]), 404, `order ${order.join(" then ")}`);
+    }
   });
 
   it("keeps distinct non-share URLs separate even on the same host", () => {

@@ -25,6 +25,8 @@ export const isAuthRequiredDomain = url => {
 // codes rather than the exceptions keeps an unlisted code from failing CI.
 const LINK_ROT_STATUSES = new Set([404, 410]);
 
+export const isLinkRotStatus = status => LINK_ROT_STATUSES.has(status);
+
 const is5xx = status => typeof status === 'number' && status >= 500 && status <= 599;
 
 /**
@@ -39,7 +41,7 @@ const is5xx = status => typeof status === 'number' && status >= 500 && status <=
  */
 export function applyHtmltestEvidence(result, htmltestStatus) {
   if (!result.timedOut) return result;
-  if (!LINK_ROT_STATUSES.has(htmltestStatus)) return result;
+  if (!isLinkRotStatus(htmltestStatus)) return result;
   return {
     ...result,
     temporary: false,

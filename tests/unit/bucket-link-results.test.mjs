@@ -6,6 +6,7 @@ import {
   bucketLinkResults,
   isAuthRequiredDomain,
 } from "../../scripts/lib/bucket-link-results.js";
+import { parseHtmltestFailures } from "../../scripts/lib/parse-htmltest.js";
 
 // Minimal verifyUrl-shaped results; only the fields bucketing reads.
 const reachable = (url, status = 200) => ({ url, status, reachable: true, withheld: false, temporary: false, timedOut: false, success: true });
@@ -132,6 +133,45 @@ describe("bucketLinkResults", () => {
       assert.deepEqual(b[key], [], key);
     }
     assert.equal(b.notBrokenResults.length, 3);
+  });
+});
+
+describe("parser to bucketing", () => {
+  // The path check-links.js takes: parse htmltest output, look up the
+  // representative URL's status, apply it to a browser timeout, bucket.
+  const run = output => {
+    const { failedUrls, statusByUrl } = parseHtmltestFailures(output);
+    const results = failedUrls.map(url => applyHtmltestEvidence(timedOut(url), statusByUrl.get(url)));
+    return bucket(results, Object.fromEntries(statusByUrl));
+  };
+
+  it("fails a timed-out URL when any repeated diagnostic was a 404 or 410, in either order", () => {
+    const url = "https://gone.example/x";
+    for (const [first, second] of [[403, 404], [404, 403], [503, 410], [410, 503]]) {
+      const b = run(
+        `  Non-OK status: ${first} --- a/index.html --> ${url}\n` +
+        `  Non-OK status: ${second} --- b/index.html --> ${url}\n`
+      );
+      assert.deepEqual(urls(b.trulyBroken), [url], `${first} then ${second}`);
+      assert.deepEqual(b.timedOutResults, [], `${first} then ${second}`);
+    }
+  });
+
+  it("fails a timed-out share URL when another member of its group saw a 404", () => {
+    for (const order of [["403", "404"], ["404", "403"]]) {
+      const b = run(order.map(s => `  Non-OK status: ${s} --- ${s}/index.html --> https://wa.me/?text=${s}\n`).join(""));
+      assert.equal(b.trulyBroken.length, 1, `order ${order.join(" then ")}`);
+    }
+  });
+
+  it("keeps a timed-out URL temporary when no diagnostic was a 404 or 410", () => {
+    const url = "https://slow.example/x";
+    const b = run(
+      `  Non-OK status: 403 --- a/index.html --> ${url}\n` +
+      `  Non-OK status: 503 --- b/index.html --> ${url}\n`
+    );
+    assert.deepEqual(urls(b.timedOutResults), [url]);
+    assert.deepEqual(b.trulyBroken, []);
   });
 });
 
