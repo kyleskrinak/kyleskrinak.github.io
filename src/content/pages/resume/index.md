@@ -6,7 +6,7 @@ description: "Platform operations, web technology leadership, and team managemen
 contactEmail: kyle.skrinak@gmail.com
 contactWebsite: https://kyle.skrinak.com
 contactLinkedin: https://www.linkedin.com/in/kyleskrinak/
-contactAddress: "309 Sir Brennan Court, Apex, NC 27523"
+contactAddress: "Apex, NC"
 current_role:
   title: Senior IT Systems Engineering Manager, Digital Experience
   employer: Gilead Sciences
