@@ -14,6 +14,7 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 | `fast-xml-parser` | 5.7.0 | GHSA-gh4j-gqv2-49f6 (XML comment / CDATA injection) | moderate |
 | `flatted` | 3.4.2 | GHSA-25h7-pfq9-p65f, GHSA-rf6f-7fwh-wjgh (DoS, prototype pollution) | high |
 | `brace-expansion` | 5.0.6 | GHSA-jxxr-4gwj-5jf2 (DoS via large numeric range) | moderate |
+| `markdown-it` (under `markdownlint-cli2` only) | 15.0.3 | GHSA-r7fv-28h4-cvq7, GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q (quadratic-time DoS: smartquotes, link reference definitions, inline HTML) | high |
 | `postcss` | 8.5.10 | GHSA-qx2v-qp2m-jg93 (XSS via stringify) | moderate |
 
 Each pin is set to the **oldest** version that satisfies the advisory, minimizing supply-chain exposure from freshly-published packages.
@@ -21,6 +22,7 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 ### Per-pin API-risk notes
 
 - **`brace-expansion`** — v5 is a recent major across the npm ecosystem (long-stable v1/v2 lineage broken by v5's API changes). Our pin is a patch bump within v5 (`5.0.5` → `5.0.6`), not a cross-major jump, because the dep tree was already resolving to v5 before the pin. No additional consumer-side API risk introduced by the pin itself. During quarterly review, verify no consumer in the tree has regressed to a v4 expectation.
+- **`markdown-it`** — nested carve-out: the pin applies only inside `markdownlint-cli2`, which resolves the 15.x line. The top-level copy (used by `scripts/build-presentations.js`) stays on 14.x, which carries its own fixes (14.3.3); 15.x would change presentation output because linkify-it 6 drops fuzzy links. `markdownlint-cli2` 0.24.0 pins `markdown-it` 15.0.3 itself — remove this override when that upgrade lands, and do not leave it in place past a later `markdownlint-cli2` that needs a newer 15.x, or the exact pin silently downgrades it.
 
 ## Deliberately deferred
 
