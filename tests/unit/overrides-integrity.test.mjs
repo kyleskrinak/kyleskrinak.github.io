@@ -24,6 +24,11 @@ import { dirname, join } from 'node:path';
  *
  *   - a5e5a21 walked the fast-uri pin across a major boundary with no human review.
  *
+ *   - Astro 7.4 moved to devalue ^6.0.2 while the tree-wide pin held 5.9.4. npm
+ *     reports a forced copy as "overridden", never "invalid", so the build stayed
+ *     green while Astro's `uneval` replacers -- written for v6's `js` tag -- received
+ *     v5's nested `uneval` and serialized a `URL` as `["new URL(",")"]`.
+ *
  * package.json cannot carry comments, which is what made the carve-out easy to
  * clobber by accident. This file is where that rationale lives.
  */
@@ -45,9 +50,11 @@ const lock = readJson('package-lock.json');
  *   fast-xml-builder (XML injection), fast-xml-parser, flatted,
  *   brace-expansion, postcss (XSS).
  * 7568222 -- js-yaml, GHSA-5p4m-2wfm-xmqj.
+ *
+ * PR #425 dropped devalue's floor (5.8.1) along with its pin: Astro 7.4, its only
+ * dependent, declares ^6.0.2, which excludes the advisory's range on its own.
  */
 const ADVISORY_FLOORS = {
-	devalue: '5.8.1',
 	'fast-uri': '3.1.2',
 	'fast-xml-builder': '1.1.7',
 	'fast-xml-parser': '5.7.0',
@@ -78,6 +85,45 @@ const isAtLeast = (version, floor, label) => {
 		if (a[i] !== b[i]) return a[i] > b[i];
 	}
 	return true;
+};
+
+/**
+ * Whether `version` satisfies `range`, for the range forms dependents of the pinned
+ * packages actually declare: exact, caret, tilde, `*`, and `||` unions of those.
+ * Anything else throws, for the same reason `parseExact` does.
+ */
+const satisfies = (version, range, label) =>
+	range.split('||').some((alternative) => {
+		const spec = alternative.trim();
+		if (spec === '*' || spec === '') return true;
+		const match = /^([\^~]?)(\d+\.\d+\.\d+)$/.exec(spec);
+		assert.ok(
+			match,
+			`${label} declares range "${range}", which this check cannot evaluate. Extend satisfies().`,
+		);
+		const [, op, base] = match;
+		if (!isAtLeast(version, base, label)) return false;
+		if (op === '') return version === base;
+		const [major, minor, patch] = parseExact(version, label);
+		const [baseMajor, baseMinor, basePatch] = parseExact(base, label);
+		if (op === '~') return major === baseMajor && minor === baseMinor;
+		// Caret: the leftmost non-zero component must not change.
+		if (baseMajor > 0) return major === baseMajor;
+		if (baseMinor > 0) return major === 0 && minor === baseMinor;
+		return major === 0 && minor === 0 && patch === basePatch;
+	});
+
+/**
+ * Overrides that deliberately force a version outside a dependent's declared range,
+ * keyed `"<dependent> > <dependency>"`. Anything not listed here fails.
+ */
+const OUT_OF_RANGE_EXCEPTIONS = {
+	'ajv > fast-uri':
+		'a5e5a21 took fast-uri to 4.x. 4.0.0 only removed deprecated types and fixed an escaping bug, ' +
+		'and this ajv copy runs in IDE tooling (yaml-language-server via @astrojs/check), not the build.',
+	'markdownlint-cli2 > markdown-it':
+		'0.23.3 pins 15.0.1 exactly; 15.0.3 is the patch release that fixes GHSA-gfr2-rv44-r23c and ' +
+		'GHSA-vfgh-jcmw-g37q. markdownlint-cli2 0.24.0 pins 15.0.3 itself.',
 };
 
 /**
@@ -119,6 +165,56 @@ const lockEntriesFor = (name) => {
 			parent: segments.length > 2 ? segments.at(-2) : null,
 			version: entry.version,
 		});
+	}
+	return found;
+};
+
+/**
+ * The lockfile path that `name` resolves to from the package at `fromPath`, walking
+ * up through enclosing `node_modules` the way Node does, or null if none resolves.
+ */
+const resolveFrom = (fromPath, name) => {
+	let base = fromPath;
+	for (;;) {
+		const candidate = base ? `${base}/node_modules/${name}` : `node_modules/${name}`;
+		if (lockPackages[candidate]?.version) return candidate;
+		if (!base) return null;
+		const cut = base.lastIndexOf('/node_modules/');
+		base = cut === -1 ? '' : base.slice(0, cut);
+	}
+};
+
+/**
+ * Every place a package declares a range for an overridden dependency that the
+ * resolved copy does not satisfy, as `{ key, path, range, resolvedPath, version }`.
+ * Only the root project's devDependencies are installed, so only its are checked.
+ */
+const findOutOfRange = () => {
+	const pinnedNames = new Set([
+		...topLevel.map(([name]) => name),
+		...nested.flatMap(([, block]) => Object.keys(block)),
+	]);
+	const found = [];
+	for (const [path, entry] of Object.entries(lockPackages)) {
+		const fields = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+		if (!path) fields.push('devDependencies');
+		const dependent = path ? `/${path}`.split('/node_modules/').at(-1) : '(root)';
+		for (const field of fields) {
+			for (const [name, range] of Object.entries(entry?.[field] ?? {})) {
+				if (!pinnedNames.has(name)) continue;
+				const resolvedPath = resolveFrom(path, name);
+				if (!resolvedPath) continue; // an optional or peer dependency left uninstalled
+				const { version } = lockPackages[resolvedPath];
+				if (satisfies(version, range, `${path || '(root)'} > ${name}`)) continue;
+				found.push({
+					key: `${dependent} > ${name}`,
+					path: path || '(root)',
+					range,
+					resolvedPath,
+					version,
+				});
+			}
+		}
 	}
 	return found;
 };
@@ -266,5 +362,30 @@ test('lockfile resolves each tree-wide pin everywhere it is not carved out', () 
 					'`npm install` -- or this copy needs a deliberate nested carve-out.',
 			);
 		}
+	}
+});
+
+test('no override forces a version outside a range its dependent declares', () => {
+	for (const { key, path, range, resolvedPath, version } of findOutOfRange()) {
+		assert.ok(
+			OUT_OF_RANGE_EXCEPTIONS[key],
+			`${path} declares "${range}", but the overrides force ${resolvedPath} to ${version}. ` +
+				'npm applies an override silently, so nothing else catches this. Move the pin into the ' +
+				"dependent's range, drop it if the range already excludes the advisory, or record a " +
+				`reviewed reason under OUT_OF_RANGE_EXCEPTIONS["${key}"].`,
+		);
+	}
+});
+
+test('every out-of-range exception is still exercised', () => {
+	// Guards the other direction: an exception left behind after its dependent moved
+	// into range would silently pre-approve the next out-of-range pin under that key.
+	const exercised = new Set(findOutOfRange().map(({ key }) => key));
+	for (const key of Object.keys(OUT_OF_RANGE_EXCEPTIONS)) {
+		assert.ok(
+			exercised.has(key),
+			`OUT_OF_RANGE_EXCEPTIONS["${key}"] no longer matches an out-of-range override. Remove it, ` +
+				'and drop the override too if nothing else needs it.',
+		);
 	}
 });

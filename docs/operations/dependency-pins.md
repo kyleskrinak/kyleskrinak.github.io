@@ -8,7 +8,6 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 
 | Package | Pinned version | Advisory | Severity |
 |---|---|---|---|
-| `devalue` | 5.8.1 | GHSA-77vg-94rm-hx3p (DoS via sparse array deserialization) | high |
 | `fast-uri` | 3.1.2 | GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc (path traversal, host confusion) | high |
 | `fast-xml-builder` | 1.1.7 | GHSA-5wm8-gmm8-39j9 (XML injection via unwanted quotes) | high |
 | `fast-xml-parser` | 5.7.0 | GHSA-gh4j-gqv2-49f6 (XML comment / CDATA injection) | moderate |
@@ -34,6 +33,9 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 
 ### Exact-version pins do not self-update
 These are pinned without `^`/`~`, so `npm update` will not advance them. Future security patches must be applied manually.
+
+### Pins must stay inside their dependents' ranges
+npm applies an override even when it violates the range a dependent declares, and `npm ls` reports the copy as "overridden", not "invalid". `tests/unit/overrides-integrity.test.mjs` fails on any such override unless `OUT_OF_RANGE_EXCEPTIONS` records a reviewed reason for it. The check exists because the `devalue` 5.x pin outlived Astro 7.4's move to `devalue` ^6.0.2 and broke Astro's content serializer without failing the build. PR #425 removed that pin, because Astro's own range excludes the advisory.
 
 ### Sibling packages must stay in sync
 `fast-xml-builder` and `fast-xml-parser` are co-released by the same maintainer (`amitgupta`, NaturalIntelligence). When bumping one, bump both, and check that the new versions are still released together upstream.
