@@ -23,6 +23,12 @@ import { dirname, join } from 'node:path';
  *     value, recreating the exact breakage the carve-out was written to prevent.
  *
  *   - a5e5a21 walked the fast-uri pin across a major boundary with no human review.
+ *     PR #425 moved it back to 3.x, inside ajv's ^3.0.1.
+ *
+ *   - Astro 7.4 moved to devalue ^6.0.2 while the tree-wide pin held 5.9.4. npm
+ *     reports a forced copy as "overridden", never "invalid", so the build stayed
+ *     green while Astro's `uneval` replacers -- written for v6's `js` tag -- received
+ *     v5's nested `uneval` and serialized a `URL` as `["new URL(",")"]`.
  *
  * package.json cannot carry comments, which is what made the carve-out easy to
  * clobber by accident. This file is where that rationale lives.
@@ -45,15 +51,22 @@ const lock = readJson('package-lock.json');
  *   fast-xml-builder (XML injection), fast-xml-parser, flatted,
  *   brace-expansion, postcss (XSS).
  * 7568222 -- js-yaml, GHSA-5p4m-2wfm-xmqj.
+ *
+ * PR #425 dropped devalue's floor (5.8.1) along with its pin: Astro 7.4, its only
+ * dependent, declares ^6.0.2, which excludes the advisory's range on its own.
+ * PR #425 also raised fast-uri's floor to 3.1.9 (GHSA-w74x-v6f9-j3xg,
+ * GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp) and added
+ * markdown-it's, which only the nested markdownlint-cli2 override carries
+ * (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q).
  */
 const ADVISORY_FLOORS = {
-	devalue: '5.8.1',
-	'fast-uri': '3.1.2',
+	'fast-uri': '3.1.9',
 	'fast-xml-builder': '1.1.7',
 	'fast-xml-parser': '5.7.0',
 	flatted: '3.4.2',
 	'brace-expansion': '5.0.6',
 	'js-yaml': '4.3.1',
+	'markdown-it': '15.0.3',
 	postcss: '8.5.10',
 };
 
@@ -78,6 +91,48 @@ const isAtLeast = (version, floor, label) => {
 		if (a[i] !== b[i]) return a[i] > b[i];
 	}
 	return true;
+};
+
+/**
+ * Whether `version` satisfies `range`, for the range forms dependents of the pinned
+ * packages actually declare: exact, caret, tilde, `*`, and `||` unions of those.
+ * Anything else throws, for the same reason `parseExact` does.
+ */
+const satisfies = (version, range, label) =>
+	range.split('||').some((alternative) => {
+		const spec = alternative.trim();
+		if (spec === '*' || spec === '') return true;
+		const match = /^([\^~]?)(\d+\.\d+\.\d+)$/.exec(spec);
+		assert.ok(
+			match,
+			`${label} declares range "${range}", which this check cannot evaluate. Extend satisfies().`,
+		);
+		const [, op, base] = match;
+		if (!isAtLeast(version, base, label)) return false;
+		if (op === '') return version === base;
+		const [major, minor, patch] = parseExact(version, label);
+		const [baseMajor, baseMinor, basePatch] = parseExact(base, label);
+		if (op === '~') return major === baseMajor && minor === baseMinor;
+		// Caret: the leftmost non-zero component must not change.
+		if (baseMajor > 0) return major === baseMajor;
+		if (baseMinor > 0) return major === 0 && minor === baseMinor;
+		return major === 0 && minor === 0 && patch === basePatch;
+	});
+
+/**
+ * Overrides that deliberately force a version outside a dependent's declared range,
+ * keyed `"<dependent> > <dependency>"`. Each records the declared `range` and the
+ * forced `version` its reason reviewed; a different range or version under the
+ * same key fails until someone reviews that mismatch. Anything not listed here fails.
+ */
+const OUT_OF_RANGE_EXCEPTIONS = {
+	'markdownlint-cli2 > markdown-it': {
+		range: '15.0.1',
+		version: '15.0.3',
+		reason:
+			'0.23.3 pins 15.0.1 exactly; 15.0.3 is the patch release that fixes GHSA-gfr2-rv44-r23c and ' +
+			'GHSA-vfgh-jcmw-g37q. markdownlint-cli2 0.24.0 pins 15.0.3 itself.',
+	},
 };
 
 /**
@@ -119,6 +174,56 @@ const lockEntriesFor = (name) => {
 			parent: segments.length > 2 ? segments.at(-2) : null,
 			version: entry.version,
 		});
+	}
+	return found;
+};
+
+/**
+ * The lockfile path that `name` resolves to from the package at `fromPath`, walking
+ * up through enclosing `node_modules` the way Node does, or null if none resolves.
+ */
+const resolveFrom = (fromPath, name) => {
+	let base = fromPath;
+	for (;;) {
+		const candidate = base ? `${base}/node_modules/${name}` : `node_modules/${name}`;
+		if (lockPackages[candidate]?.version) return candidate;
+		if (!base) return null;
+		const cut = base.lastIndexOf('/node_modules/');
+		base = cut === -1 ? '' : base.slice(0, cut);
+	}
+};
+
+/**
+ * Every place a package declares a range for an overridden dependency that the
+ * resolved copy does not satisfy, as `{ key, path, range, resolvedPath, version }`.
+ * Only the root project's devDependencies are installed, so only its are checked.
+ */
+const findOutOfRange = () => {
+	const pinnedNames = new Set([
+		...topLevel.map(([name]) => name),
+		...nested.flatMap(([, block]) => Object.keys(block)),
+	]);
+	const found = [];
+	for (const [path, entry] of Object.entries(lockPackages)) {
+		const fields = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+		if (!path) fields.push('devDependencies');
+		const dependent = path ? `/${path}`.split('/node_modules/').at(-1) : '(root)';
+		for (const field of fields) {
+			for (const [name, range] of Object.entries(entry?.[field] ?? {})) {
+				if (!pinnedNames.has(name)) continue;
+				const resolvedPath = resolveFrom(path, name);
+				if (!resolvedPath) continue; // an optional or peer dependency left uninstalled
+				const { version } = lockPackages[resolvedPath];
+				if (satisfies(version, range, `${path || '(root)'} > ${name}`)) continue;
+				found.push({
+					key: `${dependent} > ${name}`,
+					path: path || '(root)',
+					range,
+					resolvedPath,
+					version,
+				});
+			}
+		}
 	}
 	return found;
 };
@@ -176,7 +281,10 @@ test('every override sits at or above its advisory floor', () => {
 test('every known advisory floor still has a matching override', () => {
 	// Guards the other direction: a pin silently deleted would otherwise leave this
 	// suite green while the advisory went unpinned.
-	const pinned = new Set(topLevel.map(([name]) => name));
+	const pinned = new Set([
+		...topLevel.map(([name]) => name),
+		...nested.flatMap(([, block]) => Object.keys(block)),
+	]);
 	for (const name of Object.keys(ADVISORY_FLOORS)) {
 		assert.ok(
 			pinned.has(name),
@@ -266,5 +374,37 @@ test('lockfile resolves each tree-wide pin everywhere it is not carved out', () 
 					'`npm install` -- or this copy needs a deliberate nested carve-out.',
 			);
 		}
+	}
+});
+
+test('no override forces a version outside a range its dependent declares', () => {
+	for (const { key, path, range, resolvedPath, version } of findOutOfRange()) {
+		const exception = OUT_OF_RANGE_EXCEPTIONS[key];
+		assert.ok(
+			exception,
+			`${path} declares "${range}", but the overrides force ${resolvedPath} to ${version}. ` +
+				'npm applies an override silently, so nothing else catches this. Move the pin into the ' +
+				"dependent's range, drop it if the range already excludes the advisory, or record a " +
+				`reviewed reason under OUT_OF_RANGE_EXCEPTIONS["${key}"].`,
+		);
+		assert.ok(
+			exception.range === range && exception.version === version,
+			`${path} declares "${range}" and the overrides force ${resolvedPath} to ${version}, but ` +
+				`OUT_OF_RANGE_EXCEPTIONS["${key}"] reviewed "${exception.range}" forced to ${exception.version}. ` +
+				'Review this mismatch and update the exception, or move the pin back into range.',
+		);
+	}
+});
+
+test('every out-of-range exception is still exercised', () => {
+	// Guards the other direction: an exception left behind after its dependent moved
+	// into range would pre-approve that exact mismatch if it ever came back unreviewed.
+	const found = findOutOfRange();
+	for (const [key, { range, version }] of Object.entries(OUT_OF_RANGE_EXCEPTIONS)) {
+		assert.ok(
+			found.some((f) => f.key === key && f.range === range && f.version === version),
+			`OUT_OF_RANGE_EXCEPTIONS["${key}"] ("${range}" forced to ${version}) no longer matches an ` +
+				'out-of-range override. Remove it, and drop the override too if nothing else needs it.',
+		);
 	}
 });
