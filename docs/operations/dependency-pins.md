@@ -8,7 +8,7 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 
 | Package | Pinned version | Advisory | Severity |
 |---|---|---|---|
-| `fast-uri` | 3.1.2 | GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc (path traversal, host confusion) | high |
+| `fast-uri` | 3.1.9 | GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc (path traversal, host confusion); GHSA-w74x-v6f9-j3xg, GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp (scheme spoofing, path equivalence, host confusion, scheme injection) | high |
 | `fast-xml-builder` | 1.1.7 | GHSA-5wm8-gmm8-39j9 (XML injection via unwanted quotes) | high |
 | `fast-xml-parser` | 5.7.0 | GHSA-gh4j-gqv2-49f6 (XML comment / CDATA injection) | moderate |
 | `flatted` | 3.4.2 | GHSA-25h7-pfq9-p65f, GHSA-rf6f-7fwh-wjgh (DoS, prototype pollution) | high |
@@ -21,6 +21,7 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 ### Per-pin API-risk notes
 
 - **`brace-expansion`** — v5 is a recent major across the npm ecosystem (long-stable v1/v2 lineage broken by v5's API changes). Our pin is a patch bump within v5 (`5.0.5` → `5.0.6`), not a cross-major jump, because the dep tree was already resolving to v5 before the pin. No additional consumer-side API risk introduced by the pin itself. During quarterly review, verify no consumer in the tree has regressed to a v4 expectation.
+- **`fast-uri`** — stays on the 3.x line because `ajv` 8, its only dependent, declares `^3.0.1`. 4.2.3 fixes the same advisories, but pinning it would force `ajv` out of range, so decline a Renovate PR that moves this pin to 4.x unless `ajv` itself moves.
 - **`markdown-it`** — nested carve-out: the pin applies only inside `markdownlint-cli2`, which resolves the 15.x line. The top-level copy (used by `scripts/build-presentations.js`) stays on 14.x, which carries its own fixes (14.3.3); 15.x would change presentation output because linkify-it 6 drops fuzzy links. `markdownlint-cli2` 0.24.0 pins `markdown-it` 15.0.3 itself — remove this override when that upgrade lands, and do not leave it in place past a later `markdownlint-cli2` that needs a newer 15.x, or the exact pin silently downgrades it.
 
 ## Deliberately deferred
@@ -35,7 +36,7 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 These are pinned without `^`/`~`, so `npm update` will not advance them. Future security patches must be applied manually.
 
 ### Pins must stay inside their dependents' ranges
-npm applies an override even when it violates the range a dependent declares, and `npm ls` reports the copy as "overridden", not "invalid". `tests/unit/overrides-integrity.test.mjs` fails on any such override unless `OUT_OF_RANGE_EXCEPTIONS` records a reviewed reason for it. The check exists because the `devalue` 5.x pin outlived Astro 7.4's move to `devalue` ^6.0.2 and broke Astro's content serializer without failing the build. PR #425 removed that pin, because Astro's own range excludes the advisory.
+npm applies an override even when it violates the range a dependent declares, and `npm ls` reports the copy as "overridden", not "invalid". `tests/unit/overrides-integrity.test.mjs` fails on any such override unless `OUT_OF_RANGE_EXCEPTIONS` records a reviewed reason for it, along with the exact declared range and forced version that the reason covers. A pin bump or a dependent's range change under the same key fails again until someone reviews the new mismatch and updates the entry. The check exists because the `devalue` 5.x pin outlived Astro 7.4's move to `devalue` ^6.0.2 and broke Astro's content serializer without failing the build. PR #425 removed that pin, because Astro's own range excludes the advisory.
 
 ### Sibling packages must stay in sync
 `fast-xml-builder` and `fast-xml-parser` are co-released by the same maintainer (`amitgupta`, NaturalIntelligence). When bumping one, bump both, and check that the new versions are still released together upstream.
