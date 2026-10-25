@@ -1,5 +1,8 @@
 ---
 title: Kyle Skrinak — Resume
+# The name line: the resume's h1, so the first line of the PDF, .docx and .txt.
+# `title` above feeds the /resume/ page's <title> and social-card titles only.
+name: Kyle Skrinak
 # The role sentence is NOT repeated here — resumeMetaDescription() prefixes
 # current_role.title. This field carries only the career summary.
 description: "Platform operations, web technology leadership, and team management from Gilead Sciences to Duke University."
@@ -145,6 +148,11 @@ changelog:
       Commit dc8069e removed all four while moving certifications to
       scripts/data/certifications.json; only the certifications move was
       intended. Certifications stay in that file.
+  - date: 2026-10-25
+    entry: >-
+      Removed certifications from the repo: Manager Tools puts none on a
+      resume, tailored variants included. scripts/data/certifications.json and
+      the variant builder's certification section are gone.
 ---
 
 <!-- current-role -->

@@ -2,14 +2,22 @@
 /**
  * Content-quality guard for the resume source file.
  *
- * Checks four Manager Tools rubric items:
- *   1. Measurable claims  — every bullet must contain at least one digit
+ * Rubric reference: docs/references/manager-tools-rubric.md
+ *
+ * Manager Tools checks [MT]:
+ *   1. Measurable claims  — every bullet carries a digit, or claims delivery on
+ *                           time, on budget, or in scope (MT counts each as a measure)
  *   2. Active voice       — flags was/were + regular -ed constructions
- *   3. Banned phrases     — resume jargon blocklist (leverage, synergy, …)
- *   4. Pronouns           — collective "we" hides individual contribution
+ *   3. Pronouns           — managers claim the team's results; no collective "we"
+ *
+ * House check [House] (MT doesn't address it):
+ *   4. Banned phrases     — resume jargon blocklist (leverage, synergy, …)
  *
  * Checks 1–2 apply to bullet lines only.
  * Checks 3–4 apply to bullet lines AND scope prose paragraphs.
+ *
+ * MT's one-line-per-bullet rule depends on where print wraps, which only a
+ * render can see, so scripts/lib/resume-render.mjs enforces it.
  *
  * Exit 1 and print violations to stderr if any check fails.
  * Exit 0 and print a summary line on success.
@@ -98,13 +106,19 @@ function finalize({ heading, proseLines, bullets }) {
 	return { heading, scopeText: proseLines.join(' '), bullets };
 }
 
+// Manager Tools counts a project delivered on time, on budget, or in scope as
+// measured without a digit; each phrase alone is enough. The space-or-hyphen
+// class also accepts the adjective form ("on-time delivery").
+const DELIVERY_MEASURE_RE = /\b(?:on[\s-]time|on[\s-]budget|in[\s-]scope)\b/i;
+
 /**
- * Flag bullets that contain no digit (no measurable quantity).
+ * Flag bullets that carry no measure: no digit and no on-time, on-budget, or
+ * in-scope claim.
  * Returns Array<{ bullet, heading }>.
  */
 export function checkMeasurableClaims(bullets, heading) {
 	return bullets
-		.filter(b => !/\d/.test(b))
+		.filter(b => !/\d/.test(b) && !DELIVERY_MEASURE_RE.test(b))
 		.map(bullet => ({ bullet, heading }));
 }
 

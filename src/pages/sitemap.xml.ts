@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getBlogPosts } from "@/utils/getBlogPosts";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { getPath } from "@/utils/getPath";
-import { RESUME_PDF_PATH, SITE } from "@/config";
+import { RESUME_DOCX_PATH, RESUME_PDF_PATH, SITE } from "@/config";
 import presentations from "@/data/presentations.json";
 
 /**
@@ -27,7 +27,7 @@ import presentations from "@/data/presentations.json";
  * previous behaviour) told crawlers that all 65 URLs changed on every deploy,
  * which is both false and self-defeating: a feed where everything always changes
  * carries no signal about what actually did. Static pages, presentation decks and
- * the archive PDFs have no per-entry date to draw on, so they omit the element
+ * the downloadable files have no per-entry date to draw on, so they omit the element
  * rather than invent one. Omission is valid per the sitemaps.org schema.
  */
 
@@ -105,8 +105,11 @@ export const GET: APIRoute = async ({ site }) => {
     "blog-archive.pdf",
     "presentations-archive.pdf",
     // Same pattern: built by the ensure-release-pdfs action. The /resume/print/
-    // HTML page that generates it is noindex and intentionally NOT listed.
+    // HTML page that generates them is noindex and intentionally NOT listed.
+    // The .docx is listed so recruiters' searches can find the editable copy;
+    // the .txt is not, since a plain-text duplicate adds nothing to an index.
     RESUME_PDF_PATH,
+    RESUME_DOCX_PATH,
   ].map(path => ({ path }));
 
   // Presentation pages, one per presentations.json entry — the same data

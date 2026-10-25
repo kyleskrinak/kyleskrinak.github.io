@@ -99,7 +99,7 @@ jobs:
       # employer lines and education section out of the frontmatter: a change
       # there rewrites the printed text even when the resume source is untouched.
       # astro.config.ts churns ~monthly → ~one spurious regen/month; accepted tradeoff.
-      - name: Ensure resume PDF
+      - name: Ensure resume files
         uses: ./.github/actions/ensure-release-pdfs
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -111,6 +111,8 @@ jobs:
             src/styles/resume.css
             scripts/print-resume-pdf.mjs
             scripts/lib/resume-render.mjs
+            scripts/lib/resume-formats.mjs
+            scripts/lib/resume-docx.mjs
             scripts/lib/resume-source.mjs
             scripts/lib/pdf-helpers.mjs
             src/lib/remark-facets.mjs
@@ -122,8 +124,12 @@ jobs:
             src/config
             src/content.config.ts
             astro.config.ts
+          # One render writes all three (print-resume-pdf.mjs defaults to
+          # --formats pdf,docx,txt), so they always carry the same content.
           assets: |
             kyle-skrinak-resume.pdf dist/resume
+            kyle-skrinak-resume.docx dist/resume
+            kyle-skrinak-resume.txt dist/resume
           regen-command: |
             node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf
 
@@ -146,6 +152,10 @@ jobs:
 
       # Step 2: push everything else (HTML + non-asset files) with a short cache
       # Excluding assets prevents this step from overwriting the long-lived headers from step 1.
+      # The resume's .docx and .txt are excluded too and copied after with an
+      # explicit Content-Type: the CLI guesses types from the runner's mime
+      # table, which can label a .docx application/octet-stream and gives a
+      # .txt no charset. An excluded key survives --delete.
       - name: Sync HTML to S3 (5m cache)
         run: |
           aws s3 sync "dist/" "s3://${{ vars.AWS_S3_BUCKET }}/" \
@@ -153,6 +163,18 @@ jobs:
             --only-show-errors \
             --exclude "_astro/*" \
             --exclude "_pagefind/*" \
+            --exclude "resume/kyle-skrinak-resume.docx" \
+            --exclude "resume/kyle-skrinak-resume.txt" \
+            --cache-control "max-age=300,public"
+          aws s3 cp "dist/resume/kyle-skrinak-resume.docx" \
+            "s3://${{ vars.AWS_S3_BUCKET }}/resume/kyle-skrinak-resume.docx" \
+            --only-show-errors \
+            --content-type "application/vnd.openxmlformats-officedocument.wordprocessingml.document" \
+            --cache-control "max-age=300,public"
+          aws s3 cp "dist/resume/kyle-skrinak-resume.txt" \
+            "s3://${{ vars.AWS_S3_BUCKET }}/resume/kyle-skrinak-resume.txt" \
+            --only-show-errors \
+            --content-type "text/plain; charset=utf-8" \
             --cache-control "max-age=300,public"
 
       - name: Invalidate CloudFront

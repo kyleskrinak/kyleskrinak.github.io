@@ -34,9 +34,12 @@ IgnoreURLs:
   - "xn--sr8hvo.ws/next"  # Webring: 302s to random member sites; dead members would fail CI nondeterministically
   - "webmention.io"  # Unclaimed until IndieAuth signup; also a POST-only receiver, so link-checker GET/HEAD requests will 4xx even once correctly configured
 IgnoreInternalURLs:
-  # These PDFs are .gitignored and absent from a plain `npm run build`; the
-  # deploy pipeline guarantees them via the ensure-release-pdfs action's
-  # presence guards, so ignoring them here cannot mask a production regression.
+  # These generated files are .gitignored and absent from a plain `npm run
+  # build`; the deploy pipeline guarantees them via the ensure-release-pdfs
+  # action's presence guards, so ignoring them here cannot mask a production
+  # regression.
   - "/blog-archive.pdf"
   - "/presentations-archive.pdf"
   - "/resume/kyle-skrinak-resume.pdf"
+  - "/resume/kyle-skrinak-resume.docx"
+  - "/resume/kyle-skrinak-resume.txt"

@@ -38,12 +38,14 @@ export const SITE = {
   timezone: "America/New_York", // Default global timezone (IANA format)
 } as const;
 
-// Root-relative path of the build-generated resume PDF. Single source for the
-// site code (download link, sitemap). The CI workflow stanzas
-// (.github/workflows/*-deploy.yml "Ensure resume PDF" steps) repeat this
-// literal because workflows cannot import TS — keep them in sync when
-// changing it.
+// Root-relative paths of the build-generated resume files, all written by one
+// render. Single source for the site code (download links, sitemap). The CI
+// workflow stanzas (.github/workflows/*-deploy.yml "Ensure resume files" step
+// and the S3 upload's excludes and content-typed copies) repeat these literals
+// because workflows cannot import TS — keep them in sync when changing them.
 export const RESUME_PDF_PATH = "/resume/kyle-skrinak-resume.pdf";
+export const RESUME_DOCX_PATH = "/resume/kyle-skrinak-resume.docx";
+export const RESUME_TXT_PATH = "/resume/kyle-skrinak-resume.txt";
 
 // Open Graph card dimensions (1.91:1, the ratio scrapers crop to). Single
 // source for every path that produces a social card: the Satori templates in

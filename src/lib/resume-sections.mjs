@@ -6,8 +6,15 @@
  * data-driven section belongs:
  *
  *   <!-- current-role -->   → the lead h2 + employer line, from `current_role`
- *   <!-- education -->      → one h2 + employer line (+ honors) per rendered
- *                             `education.items` entry
+ *   <!-- education -->      → one h2 (+ honors) per rendered `education.items`
+ *                             entry
+ *
+ * Every job entry's employer line then folds into its h2 as the Manager Tools
+ * admin line, `Dates: Title, Company — Location`, with the dates, title and
+ * company set off (docs/references/manager-tools-rubric.md). The markdown keeps
+ * the two lines apart, so the h2 still names only the title and its id stays
+ * stable when the dates change. The fold happens once, in
+ * remark-resume-sections.mjs, for the page and the PDF verifier alike.
  *
  * Everything that reads the resume expands these placeholders through this one
  * module, so the markdown source, the rendered page, the PDF verifier, the
@@ -27,6 +34,9 @@
  * schema-validated data may pass one; it is read in UTC so a local timezone can
  * never shift the rendered month.
  */
+
+import GithubSlugger from "github-slugger";
+import { visit } from "unist-util-visit";
 
 /** Placeholder names this module knows how to expand. */
 export const RESUME_SECTIONS = ["current-role", "education"];
@@ -137,13 +147,14 @@ export function formatMonthYear(value, label) {
 }
 
 /**
- * The employer line convention every resume section follows:
+ * The employer line convention every job entry follows, on the line below its
+ * `## Title` heading:
  *   **Employer** — Location | Dates
  *
  * Both tail fields are required: `isEmployerLine` below identifies the line by
- * its em dash, its pipe and its digits, and resume-render.mjs and
- * lint-resume.mjs both recognize employer lines through it — so a line missing
- * either field would silently stop being recognized as one.
+ * its em dash, its pipe and its digits, and the admin-line fold, the PDF
+ * verifier and lint-resume.mjs all recognize employer lines through it — so a
+ * line missing either field would silently stop being recognized as one.
  */
 function employerLine(employer, location, dates, label) {
   if (!employer?.trim()) fail(`${label}: employer is required`);
@@ -152,11 +163,9 @@ function employerLine(employer, location, dates, label) {
   const line = `**${employer.trim()}** ${EMPLOYER_DASH} ${location.trim()} | ${dates.trim()}`;
   // The producer checks its own output against the recognizer below it. Three
   // non-empty fields are not sufficient: EMPLOYER_LINE_RE requires a digit after
-  // the pipe, so `years: "Ongoing"` builds a line resume-render.mjs drops from
-  // its PDF expectations — `readExpectedContent` maps every body line through
-  // `employerLineText` and filters the nulls, and its `length === 0` guard
-  // cannot fire while other employer lines survive. The institution, location
-  // and dates would stop being verified while the heading kept passing.
+  // the pipe, and a line it rejects never folds into its heading — the page
+  // would print it as a stray bold paragraph under a title with no dates, and
+  // the PDF verifier would stop checking that entry's company and dates.
   if (!EMPLOYER_LINE_RE.test(line)) {
     fail(
       `${label}: "${line}" is not a recognized employer line — dates must contain a digit, as in "2019" or "expected 2027"`,
@@ -169,10 +178,11 @@ function employerLine(employer, location, dates, label) {
  * The recognizer for the line `employerLine` above produces, kept beside it so
  * the convention is written down once.
  *
- * Two consumers need it and need it to agree: lint-resume.mjs skips the line
- * when it collects scope prose, and resume-render.mjs turns it into a PDF
- * content expectation. The capture groups give the name and the location/dates
- * tail separately.
+ * Three consumers need it and need it to agree: remark-resume-sections.mjs
+ * folds the line into its heading, resume-render.mjs computes the folded text
+ * as a PDF content expectation, and lint-resume.mjs skips the line when it
+ * collects scope prose. The capture groups give the name and the
+ * location/dates tail separately.
  *
  * No `/g` flag, on purpose: a shared global regex carries `lastIndex` between
  * callers, so a `.test()` and a `matchAll()` on the same object silently skip
@@ -188,13 +198,63 @@ export function isEmployerLine(line) {
 }
 
 /**
- * The employer line as the page renders it — bold markers stripped, so a caller
- * can compare it against DOM or PDF text. Returns null for any other line.
+ * An employer line's fields: `{ employer, location, dates }`, or null for any
+ * other line. The tail splits on its first pipe, so dates may carry one and a
+ * location may not.
  */
-export function employerLineText(line) {
+export function parseEmployerLine(line) {
   const match = EMPLOYER_LINE_RE.exec(line.trim());
   if (!match) return null;
-  return `${match[1].trim()} ${EMPLOYER_DASH} ${match[2].trim()}`;
+  const tail = match[2];
+  const pipe = tail.indexOf("|");
+  return {
+    employer: match[1].trim(),
+    location: tail.slice(0, pipe).trim(),
+    dates: tail.slice(pipe + 1).trim(),
+  };
+}
+
+/**
+ * The Manager Tools admin line, `Dates: Title, Company — Location`, as ordered
+ * segments. `setOff` marks the three fields a reader scans first, which the page
+ * sets in bold; nothing else on the resume carries it.
+ * Manager Tools names no location, so it trails the company unmarked.
+ */
+export function adminLineSegments(title, { employer, location, dates }) {
+  const segments = [
+    { text: dates, setOff: true },
+    { text: ": ", setOff: false },
+    { text: title, setOff: true },
+    { text: ", ", setOff: false },
+    { text: employer, setOff: true },
+  ];
+  if (location) segments.push({ text: ` ${EMPLOYER_DASH} ${location}`, setOff: false });
+  return segments;
+}
+
+/** An mdast node's plain text: its text and inline-code values, in order. */
+export function mdastText(node) {
+  if (node.type === "text" || node.type === "inlineCode") return node.value;
+  return (node.children ?? []).map(mdastText).join("");
+}
+
+/**
+ * An id for every heading in an mdast tree, in document order:
+ * `[{ node, id }]`. One github-slugger instance runs across every level, as
+ * Astro's own heading ids do, so a duplicate title counts the same way.
+ *
+ * Both id consumers call this one function: remark-resume-sections.mjs sets the
+ * page's h2 ids from it before the admin-line fold, and build-resume-variant.mjs
+ * derives the entry ids that `bullet_order` items name. Running it before the fold keeps
+ * a job's id on its title alone, so a variant config survives a date change.
+ */
+export function headingIds(tree) {
+  const slugger = new GithubSlugger();
+  const ids = [];
+  visit(tree, "heading", node => {
+    ids.push({ node, id: slugger.slug(mdastText(node)) });
+  });
+  return ids;
 }
 
 /**
@@ -214,14 +274,28 @@ export function renderCurrentRole(currentRole) {
   ].join("\n");
 }
 
+/**
+ * One heading line per degree, in the Manager Tools sample's order — degree,
+ * school, dates — with the location beside the school:
+ *   ## Degree, Institution — Location | Years
+ *
+ * No employer line, so nothing folds into it: an education entry has no title
+ * or company for the admin line to set off. The years must carry a digit,
+ * because an entry with "Ongoing" or "In progress" states no date at all.
+ */
 function renderEducationItem(item, idx) {
   const label = `education.items[${idx}]`;
-  const heading = (item.degree_abbr ?? item.degree ?? "").trim();
-  if (!heading) fail(`${label}: degree is required`);
+  const degree = (item.degree_abbr ?? item.degree ?? "").trim();
+  if (!degree) fail(`${label}: degree is required`);
+  if (!item.institution?.trim()) fail(`${label}: institution is required`);
+  if (!item.location?.trim()) fail(`${label}: location is required`);
+  const years = item.years?.trim();
+  if (!years) fail(`${label}: years are required`);
+  if (!/\d/.test(years)) {
+    fail(`${label}: years "${years}" must contain a digit, as in "2019" or "expected 2027"`);
+  }
   const lines = [
-    `## ${heading}`,
-    "",
-    employerLine(item.institution, item.location, item.years, label),
+    `## ${degree}, ${item.institution.trim()} ${EMPLOYER_DASH} ${item.location.trim()} | ${years}`,
   ];
   if (item.honors?.trim()) lines.push("", item.honors.trim());
   return lines.join("\n");
@@ -241,8 +315,8 @@ function renderEducationItem(item, idx) {
  * `items` carries no fallback, for that same distinction: the schema requires
  * the key, so only the raw-YAML callers can reach a missing or null `items`, and
  * a default of `[]` would read that absence as the authored empty array. PDF
- * generation would then expect no education heading and no employer line and
- * pass, which is the failure this module exists to make loud.
+ * generation would then expect no education heading and pass, which is the
+ * failure this module exists to make loud.
  *
  * Every item is validated before the opt-in filter runs, for the same reason:
  * the filter cannot tell a malformed item from a deliberate opt-out, so a

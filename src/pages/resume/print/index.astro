@@ -9,23 +9,25 @@ const page = await getEntry("pages", "resume");
 if (!page) throw new Error("Resume page not found");
 
 const { Content } = await render(page);
-const { title, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+const { name, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+if (!name) throw new Error("Resume frontmatter has no name");
 // Same composed description as the public route — see src/pages/resume.astro.
 const description = resumeMetaDescription(page.data);
 ---
 
 {/* Canonical points at the public /resume/ page: this route is a noindex
-    PDF-rendering source and must not declare itself canonical. Title drops
-    the SITE.title suffix — the content title already carries the name. */}
+    PDF-rendering source and must not declare itself canonical. The title is
+    the name alone: Chromium copies it into the PDF's Title field, and the
+    .docx takes the same title from the h1. */}
 <Layout
-  title={title}
+  title={name}
   description={description}
   noindex={true}
   canonicalURL={new URL("/resume/", Astro.site).href}
 >
   <main id="main-content" class="app-layout pb-12">
     <ResumeHeader
-      title={title}
+      name={name}
       contactEmail={contactEmail}
       contactWebsite={contactWebsite}
       contactLinkedin={contactLinkedin}

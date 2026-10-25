@@ -1,6 +1,6 @@
 # Resume Source and Data Flow
 
-The resume lives in exactly one file: `src/content/pages/resume/index.md`. Its frontmatter holds structured career data; its body holds hand-written prose. Everything downstream — the web page, the print route, the canonical PDF, the content linter, and every tailored variant — reads that one file.
+The resume lives in exactly one file: `src/content/pages/resume/index.md`. Its frontmatter holds structured career data; its body holds hand-written prose. Everything downstream — the web page, the print route, the canonical PDF and its .docx and .txt copies, the content linter, and every tailored variant — reads that one file. One render of the print route writes all three files: the PDF prints the page, and `scripts/lib/resume-formats.mjs` reads the .docx and .txt content out of the same laid-out page, so the three cannot disagree.
 
 This document records **which field populates which output**, so a future edit does not have to infer the architecture from the code. For how a revision proceeds — editing cadence, register, the one-page constraint, and which calls are Kyle's — see the `resume-workflow` skill in `.claude/skills/`.
 
@@ -10,7 +10,7 @@ This document records **which field populates which output**, so a future edit d
 
 The resume gets revisited quarterly. Structured fields exist so a quarterly edit changes a fact in **one** place and every render follows. They are not a duplicate of the body text awaiting cleanup.
 
-Commit `dc8069e` deleted `current_role`, `skills_inventory`, `education`, and the change log while moving certifications out to `scripts/data/certifications.json`. **Only the certifications move was intended.** The other four deletions were accidental and were restored on 2026-10-05. Do not "clean up" these fields as redundant — the sections below are what reads them.
+Commit `dc8069e` deleted `current_role`, `skills_inventory`, `education`, and the change log while moving certifications out to `scripts/data/certifications.json`. **Only the certifications move was intended.** The other four deletions were accidental and were restored on 2026-10-05. Do not "clean up" these fields as redundant — the sections below are what reads them. Certifications have since left the repo altogether: Manager Tools puts none on a resume (see [Certifications](#certifications--on-no-resume) below).
 
 ## Placeholder expansion
 
@@ -61,13 +61,47 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 
 **What the scanner still approximates.** It models fenced code, indented code and comment blocks, which is every container the resume convention uses. It does not model raw HTML block containers: a placeholder inside `<pre>`, `<div>`, `<script>` or `<table>` expands on the string path while the page path leaves it alone, because mdast folds the whole container into one HTML node. The resume source carries no raw HTML, so nothing reaches that gap today — but a body that grows one needs the selection logic shared rather than reimplemented. See the note at the end of this file.
 
+## The admin line
+
+Manager Tools puts every role's dates, title, and company on one line and sets them off, because a reader scans those first ([rubric](../references/manager-tools-rubric.md)). The page prints `Dates: Title, Company — Location`: the dates, title, and company in bold, the separators and the location plain. Nothing else on the resume carries bold, and nothing on it carries an underline: Manager Tools adds one, and Kyle overrides it.
+
+The markdown keeps the two lines apart:
+
+```markdown
+## Senior Manager, IT
+
+**Duke University, Office of Information Technology** — Durham, NC | July 2013 – June 2022
+```
+
+`src/lib/remark-resume-sections.mjs` joins them after it expands the placeholders:
+
+1. It sets every heading's id first, through `headingIds()`: one github-slugger across every heading level, in document order. A job's id therefore comes from its title alone (`senior-manager-it`), and a date change never moves it. Astro keeps an id a heading already carries.
+2. It then replaces each employer-line paragraph and the `##` heading above it with one `h2` built from `adminLineSegments()`. The dates, title, and company become `strong`, which `src/styles/resume.css` bolds.
+
+The fold exists once. `renderedHeadings()`, exported from the same module, parses the expanded markdown with `fromMarkdown` and runs that fold over it, and `resume-render.mjs` checks the printed page for each heading it returns, so PDF verification covers every role's full admin line. The fold throws on an employer line that does not sit directly below a `##` heading (blank lines aside), so a misplaced line fails the build instead of printing a role with no dates.
+
+The fold reads only bold text followed by plain text as an employer line. A paragraph that reads as one once its markup is flattened — a link or emphasis in the tail, a line break inside the bold — fails the build too. Left unfolded, it would print as a stray paragraph under a heading with no dates, and PDF verification, running the same fold, would agree with the page and pass.
+
+Education has no admin line: each degree renders as a single heading (see `education` below).
+
 ## Field-by-field: what populates what
+
+### `name` — the name line
+
+| Output | Where |
+|---|---|
+| The h1 on `/resume/` and `/resume/print/` | `ResumeHeader.astro` |
+| The first line of the PDF, .docx and .txt | the print route's h1, read by `extractResumeBlocks()` |
+| The PDF's Title field | the print route's `<title>`, which Chromium copies |
+| The .docx's title and author | `buildResumeDocx()`, from the name block |
+
+`title` is a separate field: it feeds the `/resume/` page's `<title>` and its social-card titles ("Kyle Skrinak — Resume"), and no file. Both resume routes throw without `name`, and `resume-render.mjs` checks the rendered page for it.
 
 ### `current_role` — injected, four consumers
 
 | Output | Where |
 |---|---|
-| The resume's lead `##` heading and employer line | `<!-- current-role -->` |
+| The resume's lead admin line (its `##` heading and employer line) | `<!-- current-role -->` |
 | The `/resume/` meta description | `resumeMetaDescription()` in `src/pages/resume.astro` |
 | The `/resume/print/` meta description | the same function in `src/pages/resume/print/index.astro` |
 | The About page's current-position sentence | `src/pages/about.astro` reads the resume entry via `getEntry("pages", "resume")` |
@@ -75,33 +109,37 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 
 Changing the job title in frontmatter changes all four. Before this wiring, `about.astro` carried its own hand-typed copy, and the two drifted.
 
-`location`, `start_date`, and `employer_url` are all required, for two different reasons. The employer-line convention is `**Employer** — Location | Dates`, and a line missing either tail field stops being recognized as one (see below). `employer_url` is required because the About page links the employer name: an optional field there would render a silently unlinked name rather than fail the build.
+`location`, `start_date`, and `employer_url` are all required, for two different reasons. The employer-line convention is `**Employer** — Location | Dates`, and a line missing either tail field stops being recognized as one, so it never joins its heading (see below). `employer_url` is required because the About page links the employer name: an optional field there would render a silently unlinked name rather than fail the build.
 
 `start_date` is `YYYY-MM` or `YYYY-MM-DD`, and `formatMonthYear()` anchors the match at **both** ends. Trailing text throws instead of rendering the prefix: both renderers read raw frontmatter, so the schema's `z.coerce.date()` has never run by the time a value arrives, and `2022-060` or `2022-06-not-a-date` would otherwise print as June 2022 with nothing downstream to catch it — PDF verification compares the printed page against the same wrong month it rendered from. A `Date` is accepted too and read in UTC.
 
 The optional day is validated against the month and the year, so `2022-06-31`, `2022-06-00` and `2023-02-29` all throw while `2024-02-29` passes. The day never reaches the rendered text, which is exactly why it is checked here: PDF verification cannot see a wrong day, and no other validator runs on this path.
 
-**One recognizer, two consumers.** `src/lib/resume-sections.mjs` exports `isEmployerLine(line)` and `employerLineText(line)` beside the function that *builds* the line, so the convention is written down once. `lint-resume.mjs` skips the line through `isEmployerLine` when it collects scope prose; `resume-render.mjs` turns it into a PDF content expectation through `employerLineText`, which strips the bold markers so the string matches rendered text. Both previously carried their own regex and could drift. The producer also checks its own output against that recognizer before returning it, so the two cannot disagree: three non-empty fields are not sufficient, because the regex requires a **digit after the pipe**. `years: "Ongoing"` builds a line `employerLineText` returns null for, and `readExpectedContent` maps every body line through it and filters the nulls — so the institution, location and dates would quietly leave PDF verification while the heading kept passing. `"2019"`, `"expected 2027"` and `"1998 – 2001"` all pass; `"Ongoing"`, `"In progress"` and `"Present"` all throw. The shared regex deliberately has no `/g` flag — a global regex carries `lastIndex` between callers, so a `.test()` and a `matchAll()` on one object silently skip matches.
+**One recognizer, three consumers.** `src/lib/resume-sections.mjs` exports `isEmployerLine(line)` and `parseEmployerLine(line)` beside the function that *builds* the line, so the convention is written down once. The remark plugin's fold joins the line to its heading through `parseEmployerLine`, and `renderedHeadings()` runs that same fold to produce the PDF content expectations for `resume-render.mjs`; `lint-resume.mjs` skips the line through `isEmployerLine` when it collects scope prose. `parseEmployerLine` splits the tail on its first pipe, so dates may carry a pipe and a location may not. The producer also checks its own output against that recognizer before returning it: three non-empty fields are not sufficient, because the regex requires a **digit after the pipe**. A line the recognizer rejected would never join its heading, so the page would print it as a stray bold paragraph under a title with no dates, and PDF verification would stop checking that entry's company and dates. The shared regex deliberately has no `/g` flag — a global regex carries `lastIndex` between callers, so a `.test()` and a `matchAll()` on one object silently skip matches.
 
 ### `education` — injected
 
-`<!-- education -->` renders one section per item whose `render` flag is `true`. The heading uses `degree_abbr` when present, falling back to the formal `degree` — so `M.S. I.T.` prints on the resume while the full degree name stays available in the data.
+`<!-- education -->` renders one section per item whose `render` flag is `true`. Each item is a single heading in the Manager Tools sample's order — degree, school, dates — with the location beside the school:
+
+```markdown
+## M.S. I.T., Rochester Institute of Technology — Rochester, NY | 1998 – 2001
+```
+
+No employer line follows it, so nothing joins it: a degree has no title or company for an admin line to set off. The degree uses `degree_abbr` when present, falling back to the formal `degree` — so `M.S. I.T.` prints on the resume while the full degree name stays available in the data. `institution`, `location`, and `years` are required, and `years` must contain a digit, because an entry reading "Ongoing" states no date at all: `"2019"`, `"expected 2027"`, and `"1998 – 2001"` all pass; `"Ongoing"`, `"In progress"`, and `"Present"` all throw.
 
 An item is opt-in: the renderer prints it only when `render: true` is written in the file. **The schema default does not supply that opt-out** — both renderers read raw frontmatter, before Zod runs, so an item carrying no `render` key at all is skipped by the renderer's own `=== true` check, not by `z.boolean().default(false)`. The schema default governs only the typed collection entry that `getEntry()` consumers see. Zero rendered items expands to nothing (an explicit opt-out). A **missing `education` object** throws, because the placeholder then points at data that does not exist.
 
-`items` carries **no default**, for the same raw-frontmatter reason. The schema makes the key required, so only the Node callers that parse the YAML directly can reach a missing or null `items` — and a default of `[]` would read that absence as the authored empty array above. PDF generation would then expect no education heading and no employer line, and pass. A missing or non-array `items` throws; an authored `items: []` still expands to nothing, because that one is a choice.
+`items` carries **no default**, for the same raw-frontmatter reason. The schema makes the key required, so only the Node callers that parse the YAML directly can reach a missing or null `items` — and a default of `[]` would read that absence as the authored empty array above. PDF generation would then expect no education heading, and pass. A missing or non-array `items` throws; an authored `items: []` still expands to nothing, because that one is a choice.
 
 Every item is validated **before** the opt-in filter runs, and that ordering is the point. The filter asks only whether `render` is literally `true`, so it cannot tell a malformed item from a deliberate opt-out: `items: [null]`, a bare string, and `render: "true"`, `1` or `null` would all read as "skip" and quietly drop the section from the PDF content expectations, leaving `resume-render.mjs` verifying a page that never carried it. A non-mapping item and a non-boolean `render` both throw. An omitted flag and a literal `false` remain opt-outs — `z.boolean().default(false)` defaults `undefined` only, never `null`, so rejecting `render: null` is what matches the schema.
 
 The opt-in default is deliberate, and it is why the field is a boolean rather than an implicit "render everything present." Kyle pursues ongoing coursework, and whether a given item *belongs* on the resume is a judgment call raised during a revision — not a settled property of the data. `render: false` records an item without printing it, so the metadata stays complete while the rendered resume stays selective.
 
-github-slugger derives variant entry ids from these headings, which is why `ms-it` is a valid `anchor_before_id`.
+Each education heading gets its id from the same `headingIds()` pass as the job headings, so the id slugs the whole line (`ms-it-rochester-institute-of-technology--rochester-ny--1998--2001`). Education carries no bullets, so no variant config needs one.
 
-### `skills_inventory` — a reservoir, drawn on by variants
+### `skills_inventory` — a record, rendered nowhere
 
-The nine categories are **not** rendered on the public resume. They are the bank a tailored variant draws from: a variant config's `include_skills` selects categories by id and the builder injects a Skills section. See [Resume Variants](./resume-variants.md).
-
-The builder **trims each category id as it loads it**, matching the schema, which trims before its `^[a-z0-9-]+$` test. Without that, the page path would read `leadership` from a source id of `"  leadership  "` while a variant config naming `leadership` failed the builder's unknown-id check. The ids in `scripts/data/certifications.json` are trimmed the same way, for the same reason. Config-side `include_skills` and `include_certs` entries are **not** trimmed: a stray space in a hand-written variant config is an author error, and the schema normalizes only the source side.
+The nine categories render nowhere, a tailored variant included: Manager Tools puts no skills list on a resume and names a required technology inside an accomplishment instead. The inventory stays in the frontmatter as a record, and the quarterly review still checks it.
 
 `last_reviewed` is the quarterly-review marker, maintained by hand.
 
@@ -113,39 +151,41 @@ The builder **trims each category id as it loads it**, matching the schema, whic
 
 Nothing renders it. It documents what changed and why, which is how the `dc8069e` accident above is now traceable from the source file itself.
 
-### Certifications — deliberately not in this file
+### Certifications — on no resume
 
-Certification data lives in `scripts/data/certifications.json`, by decision. **Keep certification information out of the resume source.** Variants inject certs from that file; the published resume shows none.
+Manager Tools puts no certifications on a resume, tailored variants included; a certification a posting requires goes in the cover letter, which stays outside this repo. **Keep certification information out of the resume source.** `scripts/data/certifications.json` and the variant builder's certification section are gone.
 
-`src/content.config.ts` carries **no `certifications` block**, and that absence is deliberate. One was added and then deleted: it validated nothing, because the resume frontmatter has no such key, and its presence made `validateCertificationsData()` in `build-resume-variant.mjs` look like a secondary check rather than the only one. The JSON file's validator is the contract.
+`src/content.config.ts` carries **no `certifications` block**, and that absence is deliberate: the resume frontmatter has no such key, so a schema block would validate nothing.
 
 ## Two vocabularies, deliberately separate
 
 | Vocabulary | Where defined | Count | Purpose |
 |---|---|---|---|
 | `FACETS` | `src/lib/remark-facets.mjs` | 7 | Tags body bullets and scope paragraphs (`<!-- f: leadership, cost -->`) so variants can filter them. |
-| `skills_inventory.categories[].id` | the resume frontmatter | 9 | Names a block of skills a variant can inject. |
+| `skills_inventory.categories[].id` | the resume frontmatter | 9 | Names a block of the skills inventory, which renders nowhere. |
 
-These overlap in wording (`leadership`, `platform-ops`) and **are not the same list**. A facet answers "does this bullet belong in this variant?"; a category id answers "which skills block do I add?" Do not reconcile them, and do not validate one against the other.
+These overlap in wording (`leadership`, `platform-ops`) and **are not the same list**. A facet answers "does this bullet belong in this variant?"; a category id only labels part of the inventory. Do not reconcile them, and do not validate one against the other.
 
 ## Quarterly review
 
-A revision is warranted by a role or title change, a new certification, a completed project worth citing, or the quarterly staleness check. That last one is automated: `.github/workflows/resume-review-reminder.yml` opens an issue at each quarter start, and the issue is the trigger — a session should not also flag staleness on its own. Its checkboxes map to this file:
+A revision is warranted by a role or title change, a completed project worth citing, or the quarterly staleness check. That last one is automated: `.github/workflows/resume-review-reminder.yml` opens an issue at each quarter start, and the issue is the trigger — a session should not also flag staleness on its own. Its checkboxes map to this file:
 
 | Checkbox | What to edit |
 |---|---|
 | Update achievements and metrics | body bullets, with `<!-- f: … -->` tags |
 | Review skills inventory and last-reviewed date | `skills_inventory` |
-| Check certifications for expiry | `scripts/data/certifications.json` |
 | Verify the change log entry | `changelog` |
-| Confirm web and print renders match | `npm run build`, then review `/resume/` and the PDF |
+| Confirm web and print renders match | `npm run build`, then review `/resume/` and the PDF; check the .docx and .txt in an applicant tracking system's upload preview |
 
 ## Verifying a change
 
 ```bash
 npm run build        # runs lint-resume.mjs, then astro build
 npm run test:unit    # resume-sections and resume-variant suites
+node scripts/print-resume-pdf.mjs --output <path.pdf>   # one line per bullet, one page; writes .pdf, .docx, .txt
 ```
+
+The render writes no file of any format when a bullet runs past one printed line, the page runs past one, or the .docx or .txt fails to read back to the printed page's content. It also refuses when the contact separator the print stylesheet prints differs from `CONTACT_SEPARATOR` in `scripts/lib/resume-formats.mjs`, which the .docx and .txt print. `--formats pdf` (or any comma-separated subset of `pdf,docx,txt`) limits what it writes; the PDF renders regardless, because the one-page check runs on it. Tighten or cut the bullets it names; never shrink the type, since no print text goes below 11pt.
 
 A frontmatter change that should not alter the rendered text can be proved byte-for-byte by diffing `readResumeSource().expandedBody` against the committed body.
 
@@ -155,4 +195,4 @@ The page path asks remark for the parse tree and walks `tree.children`. The Node
 
 One gap is left open deliberately: a placeholder inside a raw HTML container (`<pre>`, `<div>`, `<script>`, `<table>`) expands on the string path and not on the page path. Closing it by hand would be a fourth approximation of the same parser. The root-cause fix is to select placeholders from one parse — have `expandResumePlaceholders()` parse the body with `fromMarkdown`, take the top-level HTML nodes, and splice the string by their `position.offset` ranges — so the two paths cannot disagree by construction and line-based replacement still keeps the surrounding offsets intact.
 
-That change is not free: `mdast-util-from-markdown` is currently a **devDependency**, and this module runs in the production Astro build, so the fix promotes it to a runtime dependency. The resume source carries no raw HTML, so nothing reaches the gap today. Revisit when either changes.
+The fix adds no package: `mdast-util-from-markdown` is already a runtime dependency, because `src/lib/remark-resume-sections.mjs` imports it in the production Astro build. The resume source carries no raw HTML, so nothing reaches the gap today. Revisit when that changes.

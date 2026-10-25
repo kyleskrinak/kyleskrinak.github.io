@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { fromMarkdown } from 'mdast-util-from-markdown';
 import {
 	RESUME_SECTIONS,
 	formatMonthYear,
@@ -9,7 +10,10 @@ import {
 	resumeMetaDescription,
 	expandResumePlaceholders,
 	isEmployerLine,
-	employerLineText,
+	parseEmployerLine,
+	adminLineSegments,
+	mdastText,
+	headingIds,
 } from '../../src/lib/resume-sections.mjs';
 
 const currentRole = {
@@ -146,11 +150,12 @@ describe('renderCurrentRole', () => {
 	});
 });
 
-describe('isEmployerLine and employerLineText', () => {
-	// Recognizer tested against the producer's own output: lint-resume.mjs and
-	// resume-render.mjs both find employer lines through these two, so a change to
-	// employerLine's format that broke recognition has to fail here.
+describe('isEmployerLine and parseEmployerLine', () => {
+	// Recognizer tested against the producer's own output: lint-resume.mjs, the
+	// remark fold and resume-render.mjs all find employer lines through these two,
+	// so a change to employerLine's format that broke recognition has to fail here.
 	const line = renderCurrentRole(currentRole).split('\n').at(-1);
+	const fields = { employer: 'Gilead Sciences', location: 'Raleigh, NC', dates: 'June 2022 – Present' };
 
 	it('recognizes the line renderCurrentRole produces', () => {
 		assert.equal(isEmployerLine(line), true);
@@ -159,21 +164,29 @@ describe('isEmployerLine and employerLineText', () => {
 	it('returns the same answer on a second call', () => {
 		// The regex carries no /g flag, so no lastIndex survives between callers.
 		assert.equal(isEmployerLine(line), true);
-		assert.equal(employerLineText(line), employerLineText(line));
+		assert.deepEqual(parseEmployerLine(line), parseEmployerLine(line));
 	});
 
 	it('tolerates leading and trailing whitespace', () => {
 		assert.equal(isEmployerLine(`   ${line}   `), true);
-		assert.equal(employerLineText(`   ${line}   `), employerLineText(line));
+		assert.deepEqual(parseEmployerLine(`   ${line}   `), fields);
 	});
 
-	it('strips the bold markers so the text matches DOM and PDF rendering', () => {
-		assert.equal(employerLineText(line), 'Gilead Sciences — Raleigh, NC | June 2022 – Present');
+	it('splits the line into employer, location and dates without the bold markers', () => {
+		assert.deepEqual(parseEmployerLine(line), fields);
+	});
+
+	it('splits the tail on its first pipe only', () => {
+		assert.deepEqual(parseEmployerLine('**Acme** — Durham, NC | 2019 | 2020'), {
+			employer: 'Acme',
+			location: 'Durham, NC',
+			dates: '2019 | 2020',
+		});
 	});
 
 	it('rejects a line missing the location/dates tail', () => {
 		assert.equal(isEmployerLine('**Gilead Sciences** — Raleigh, NC'), false);
-		assert.equal(employerLineText('**Gilead Sciences** — Raleigh, NC'), null);
+		assert.equal(parseEmployerLine('**Gilead Sciences** — Raleigh, NC'), null);
 	});
 
 	it('rejects a tail carrying no digits', () => {
@@ -184,7 +197,53 @@ describe('isEmployerLine and employerLineText', () => {
 		assert.equal(isEmployerLine('## M.S. I.T.'), false);
 		assert.equal(isEmployerLine('- Ran the 2022 migration'), false);
 		assert.equal(isEmployerLine('Lead a team of 6 engineers.'), false);
-		assert.equal(employerLineText('Lead a team of 6 engineers.'), null);
+		assert.equal(parseEmployerLine('Lead a team of 6 engineers.'), null);
+	});
+});
+
+describe('adminLineSegments', () => {
+	const fields = { employer: 'Gilead Sciences', location: 'Raleigh, NC', dates: 'June 2022 – Present' };
+	const adminLine = (title, lineFields) =>
+		adminLineSegments(title, lineFields)
+			.map(segment => segment.text)
+			.join('');
+
+	it('orders the admin line dates, title, company, then the location', () => {
+		assert.equal(
+			adminLine(currentRole.title, fields),
+			'June 2022 – Present: Senior IT Systems Engineering Manager, Digital Experience, Gilead Sciences — Raleigh, NC'
+		);
+	});
+
+	it('sets off the dates, title and company, and nothing else', () => {
+		const setOff = adminLineSegments(currentRole.title, fields)
+			.filter(segment => segment.setOff)
+			.map(segment => segment.text);
+		assert.deepEqual(setOff, ['June 2022 – Present', currentRole.title, 'Gilead Sciences']);
+	});
+
+	it('omits the location segment when the line carries none', () => {
+		assert.equal(adminLine('Owner', { ...fields, location: '' }), 'June 2022 – Present: Owner, Gilead Sciences');
+	});
+});
+
+describe('headingIds', () => {
+	it('slugs every heading level through one slugger, in document order', () => {
+		const tree = fromMarkdown(['## Owner', '', '### Owner', '', '## Owner'].join('\n'));
+		assert.deepEqual(
+			headingIds(tree).map(({ node, id }) => [node.depth, id]),
+			[
+				[2, 'owner'],
+				[3, 'owner-1'],
+				[2, 'owner-2'],
+			]
+		);
+	});
+
+	it('slugs a heading from its text alone, through inline markup', () => {
+		const tree = fromMarkdown('## Senior **IT** `Manager`');
+		assert.equal(mdastText(tree.children[0]), 'Senior IT Manager');
+		assert.equal(headingIds(tree)[0].id, 'senior-it-manager');
 	});
 });
 
@@ -193,6 +252,17 @@ describe('renderEducation', () => {
 		const out = renderEducation(education);
 		assert.match(out, /^## M\.S\. I\.T\./);
 		assert.ok(!out.includes('University of the Arts'));
+	});
+
+	it('renders degree, school, location and years as one heading line', () => {
+		assert.equal(
+			renderEducation(education).split('\n')[0],
+			'## M.S. I.T., Rochester Institute of Technology — Rochester, NY | 1998 – 2001'
+		);
+	});
+
+	it('writes no employer line, so nothing folds into the heading', () => {
+		assert.ok(!renderEducation(education).split('\n').some(isEmployerLine));
 	});
 
 	it('prefers degree_abbr over the formal degree name for the heading', () => {
@@ -240,16 +310,14 @@ describe('renderEducation', () => {
 		assert.equal(renderEducation({ items: [] }), '');
 	});
 
-	// The producer has to agree with the recognizer: readExpectedContent maps
-	// every body line through employerLineText and filters the nulls, so a line
-	// EMPLOYER_LINE_RE rejects leaves PDF verification silently — the heading
-	// keeps passing while the institution, location and dates stop being checked.
-	it('throws when years carry no digit, which the employer-line recognizer rejects', () => {
+	// An entry reading "Ongoing" or "In progress" states no date at all, and
+	// Manager Tools gives every education entry its dates.
+	it('throws when years carry no digit', () => {
 		for (const years of ['Ongoing', 'In progress', 'Present']) {
 			const items = [{ ...education.items[0], years }];
 			assert.throws(
 				() => renderEducation({ items }),
-				/is not a recognized employer line/,
+				/must contain a digit/,
 				`years: ${years} should be rejected`
 			);
 		}
@@ -290,12 +358,11 @@ describe('renderEducation', () => {
 		assert.equal(renderEducation({ items: [{ ...education.items[0], render: false }] }), '');
 	});
 
-	it('accepts years the recognizer reads, including an expected graduation', () => {
+	it('accepts years carrying a digit, including an expected graduation', () => {
 		for (const years of ['2019', 'expected 2027', '1998 – 2001']) {
 			const items = [{ ...education.items[0], years }];
-			const out = renderEducation({ items });
-			const line = out.split('\n')[2];
-			assert.ok(isEmployerLine(line), `years: ${years} should produce a recognized line`);
+			const heading = renderEducation({ items }).split('\n')[0];
+			assert.ok(heading.endsWith(`| ${years}`), `years: ${years} should end the heading`);
 		}
 	});
 });
