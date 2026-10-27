@@ -190,7 +190,7 @@ Managed a team of up to 7 developers and IT analysts supporting 150+ department,
 
 - Cut site launch time from 4 months to 1 week by standardizing accessible, responsive builds with automated deployment. <!-- f: web-dev, delivery -->
 - Maintained zero team turnover across 9 years at Duke through consistent one-on-ones and clear delivery expectations. <!-- f: leadership -->
-- Co-chaired Duke's annual cross-campus TechExpo in 2017 and 2018, drawing its highest registration on record. <!-- f: leadership -->
+- Co-chaired Duke's annual cross-campus TechExpo in 2017 and 2018, setting its registration record in 2018. <!-- f: leadership -->
 - Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms. <!-- f: leadership, delivery -->
 
 ## Team Lead

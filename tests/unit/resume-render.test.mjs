@@ -64,7 +64,7 @@ describe('countLineBoxes', () => {
 });
 
 describe('findWrappedLines', () => {
-	it('returns only the bullets that span more than one line, with their counts', () => {
+	it('returns only the bullets and admin lines that span more than one line, with their counts', () => {
 		assert.deepEqual(
 			findWrappedLines([
 				{ text: 'Fits', rects: [{ top: 100, bottom: 116 }] },

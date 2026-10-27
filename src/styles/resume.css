@@ -112,16 +112,17 @@
 
   /* One traditional proportional face for the page (Manager Tools) — the
      site's monospace --font-app is a web-only aesthetic and wastes print
-     space. Times matches the original GDoc/PDF resume face. */
+     space. Times matches the original GDoc/PDF resume face. Liberation
+     Serif and Liberation Sans are Times New Roman's and Arial's same-width
+     stand-ins on the Linux CI runner. */
   body,
   .resume-content,
   .contact-info {
-    font-family: "Times New Roman", Times, Georgia, serif;
+    font-family: "Times New Roman", "Liberation Serif", Times, Georgia, serif;
   }
 
   /* Kyle's exceptions to the one face: the name and the admin line's
-     set-off segments print in sans bold. Liberation Sans is Arial's
-     same-width stand-in on the Linux CI runner. */
+     set-off segments print in sans bold. */
   .resume-header h1,
   .resume-content h2 strong {
     font-family: Arial, "Liberation Sans", sans-serif;
