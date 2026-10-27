@@ -20,9 +20,9 @@
  * Before writing anything to disk the render is verified: the page must
  * contain every expectation derived from the resume source (name, contact
  * email/address when present, every heading with each role's full admin
- * line), every bullet must fit on one printed line, the PDF must be exactly
- * one page, and each .docx and .txt must read back to the printed page's
- * content. A failure exits non-zero with no file written.
+ * line), every bullet and admin line must fit on one printed line, the PDF
+ * must be exactly one page, and each .docx and .txt must read back to the
+ * printed page's content. A failure exits non-zero with no file written.
  *
  * Examples:
  *   node scripts/print-resume-pdf.mjs --output dist/resume/kyle-skrinak-resume.pdf

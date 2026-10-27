@@ -103,21 +103,34 @@
 
   /* All print sizes below are rem-based, so scaling the root scales the
      whole rendering. The root is the body size, 11pt — Kyle's floor: no
-     print text may be smaller, so no print rule below goes under 1rem.
-     Never shrink it to force one page; cut content instead. */
+     print text may be smaller, so no print rule below goes under 1rem,
+     except the admin line's sans bold (below). Never shrink it to force
+     one page; cut content instead. */
   html {
     font-size: 11pt;
   }
 
-  /* One traditional proportional face for the whole page, headings
-     included (Manager Tools) — the site's monospace --font-app is a
-     web-only aesthetic and wastes print space. Times matches the original
-     GDoc/PDF resume face. */
+  /* One traditional proportional face for the page (Manager Tools) — the
+     site's monospace --font-app is a web-only aesthetic and wastes print
+     space. Times matches the original GDoc/PDF resume face. */
   body,
   .resume-content,
-  .resume-header h1,
   .contact-info {
     font-family: "Times New Roman", Times, Georgia, serif;
+  }
+
+  /* Kyle's exceptions to the one face: the name and the admin line's
+     set-off segments print in sans bold. Liberation Sans is Arial's
+     same-width stand-in on the Linux CI runner. */
+  .resume-header h1,
+  .resume-content h2 strong {
+    font-family: Arial, "Liberation Sans", sans-serif;
+  }
+
+  /* And to the 11pt floor: half a point under the body, the size at which
+     sans matches 11pt Times */
+  .resume-content h2 strong {
+    font-size: calc(1rem - 0.5pt);
   }
 
   /* Pure white: the site's #fdfdfd background prints as faint shading.
@@ -144,10 +157,10 @@
     margin-bottom: 0.6rem;
   }
 
-  /* Regular weight: bold belongs to the admin line alone */
+  /* Sans bold, like the admin line's set-off segments */
   .resume-header h1 {
     font-size: 1.3rem;
-    font-weight: 400;
+    font-weight: 700;
     margin: 0 0 0.3rem 0;
   }
 

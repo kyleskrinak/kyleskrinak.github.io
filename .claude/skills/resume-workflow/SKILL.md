@@ -30,9 +30,9 @@ Professional and compressed. This is **not** the blog's reflective voice; do not
 
 ## The one-page constraint
 
-One page in print is a constraint, not a suggestion. When content exceeds the page, **propose cuts**, least relevant accomplishments first. When the page has room, propose adding an accomplishment; ask Kyle for it rather than writing one. No print text goes below 11pt, and type never shrinks to force a fit.
+One page in print is a constraint, not a suggestion. When content exceeds the page, **propose cuts**, least relevant accomplishments first. When the page has room, propose adding an accomplishment; ask Kyle for it rather than writing one. No print text goes below 11pt except the admin line's 10.5pt Arial Bold (Kyle's exception), and type never shrinks to force a fit.
 
-Each accomplishment fits on one printed line. `scripts/lib/resume-render.mjs` fails the render and writes no file when a bullet wraps or the page runs past one; tighten or cut the bullets it names.
+Each accomplishment and each admin line fits on one printed line. `scripts/lib/resume-render.mjs` fails the render and writes no file when a bullet or admin line wraps or the page runs past one; tighten or cut the lines it names.
 
 One render writes the PDF, .docx and .txt with identical content. Upload the .docx or .txt to an applicant tracking system, never the PDF, and check how the site renders what you upload.
 

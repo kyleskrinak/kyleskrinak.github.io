@@ -109,6 +109,18 @@ describe('extractResumeBlocks', () => {
 		]);
 	});
 
+	it('carries a face and size only where a run departs from its block', () => {
+		const html = PRINT_FIXTURE.replace(
+			'<strong style="text-decoration-line: underline">',
+			'<strong style="text-decoration-line: underline; font-family: Arial, sans-serif; font-size: 14px">',
+		);
+		const [, , heading] = extract(html).blocks;
+		assert.deepEqual(heading.runs, [
+			{ text: 'Senior Manager, IT', bold: true, underline: true, href: null, font: 'Arial', fontSize: 10.5 },
+			plain(', Duke University | 2019–2022'),
+		]);
+	});
+
 	it('collapses whitespace within and across runs and trims the block', () => {
 		const { blocks } = extract();
 		assert.deepEqual(blocks[3].runs, [plain('Led a team of eight engineers.')]);

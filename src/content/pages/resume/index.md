@@ -11,7 +11,7 @@ contactWebsite: https://kyle.skrinak.com
 contactLinkedin: https://www.linkedin.com/in/kyleskrinak/
 contactAddress: "Apex, NC"
 current_role:
-  title: Senior IT Systems Engineering Manager, Digital Experience
+  title: Senior Manager, Digital Experience Platform Operations
   employer: Gilead Sciences
   # The About page links the employer name to this URL.
   employer_url: https://www.gilead.com/
@@ -118,7 +118,6 @@ education:
       institution: Rochester Institute of Technology
       location: Rochester, NY
       years: "1998 – 2001"
-      honors: With highest honors
       render: true
     - degree: Bachelor of Fine Arts, Illustration
       degree_abbr: B.F.A., Illustration
@@ -153,34 +152,63 @@ changelog:
       Removed certifications from the repo: Manager Tools puts none on a
       resume, tailored variants included. scripts/data/certifications.json and
       the variant builder's certification section are gone.
+  - date: 2026-10-27
+    entry: >-
+      Manager Tools revision: retitled current_role; split Duke into three
+      roles; rewrote the Gilead scope paragraph and bullets to lead with
+      results, adding the Sectigo and SolrCloud bullets; added a Hachette
+      scope paragraph; rewrote the Skrinak Creative scope paragraph and the
+      Skrinak Creative, Litho and Hachette bullets; tightened The Stat Store
+      paragraph; dropped the M.S. honors line and restored the Manager, IT
+      bullet on 80+ concurrent projects in its place. In print, the name and the admin
+      line's bold segments now set in Arial Bold, the admin-line bold at
+      10.5pt (Kyle's exception to the 11pt floor), and the render gate now
+      covers admin lines as well as bullets.
 ---
 
 <!-- current-role -->
 
-Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sitecore CMS platforms powering ~200 highly visible, policy-sensitive pharmaceutical websites, maintaining team continuity through structured onboarding, clear platform ownership, and regular syncs. Own platform operations across infrastructure, CI/CD, monitoring, incident response, and reliability, partnering with Architecture, Development, Security, and Cloud DevOps. Own standard operating procedures for deployment, monitoring, disaster recovery, and change management, aligned with Gilead's IT governance requirements. Govern a deployment calendar averaging 30 releases per week across UAT and production, and lead incident response and security hardening across the platform. Continuously harden the platform against a high-volume, iterative stream of security findings across ~200 sites built and maintained by a mix of contributing agencies and contractors, without compromising uptime or deployment velocity. <!-- f: leadership, platform-ops, security -->
+Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sitecore CMS platforms for ~200 highly visible, policy-sensitive pharmaceutical websites. Own platform operations and the standard operating procedures for deployment, monitoring, disaster recovery, and change management, partnering with Architecture, Development, Security, and Cloud DevOps. Govern a deployment calendar averaging 30 releases per week across UAT and production. Continuously harden the platform against ~1,400 reported CVEs across ~30 domains built by a mix of agencies and contractors, using an AI agent on an automated weekly pipeline to find exposures before outside notification. <!-- f: leadership, platform-ops, security -->
 
-- Cut Azure hosting run-rate 24.5% (~$22.5K/month) through legacy infrastructure retirement, right-sizing, and reserved-capacity planning. <!-- f: cost, platform-ops -->
-- Maintained ~99.99% platform availability, averaging under five minutes of monthly downtime across ~200 production websites. <!-- f: platform-ops, delivery -->
-- Consolidated hosting by decommissioning a 9-site legacy environment and migrating the non-CMS application estate from EC2 to containerized AWS ECS/Fargate. <!-- f: platform-ops -->
+- Cut Azure hosting run-rate 28.7% (~$328K/year) by retiring legacy infrastructure, right-sizing, and reserving capacity. <!-- f: cost, platform-ops -->
+- Maintained ~99.99% availability across ~200 production websites by monitoring the stack ahead of issues. <!-- f: platform-ops, delivery -->
+- Migrated ~800 certificates to Sectigo on time against a 3-week deadline by coordinating cloud and application teams. <!-- f: security, delivery -->
+- Moved ~30 websites off a legacy EC2 environment to containerized AWS ECS/Fargate on schedule. <!-- f: platform-ops, delivery -->
+- Eliminated Sitecore search's single point of failure with clustered SolrCloud on AKS, load-tested to 500 users. <!-- f: platform-ops -->
 
-## Senior Manager, IT
+## Senior Manager, Web Development
 
-**Duke University, Office of Information Technology** — Durham, NC | July 2013 – June 2022
+**Duke University, Office of IT** — Durham, NC | November 2021 – May 2022
 
-Led a web technology team supporting 150+ university department, program, and administrative websites for Trinity College of Arts & Sciences. Managed developers and IT analysts across Drupal, PHP, DevOps, endpoint management, VM-based infrastructure, and package management. Oversaw development of a custom Drupal 8 theme and distribution used to support a major platform migration. Led cross-campus technology events and promoted reusable development patterns across distributed web teams. <!-- f: leadership, web-dev -->
+Led a consolidated team of 8 Drupal developers after Duke realigned web development into central IT. Ran two platforms: a self-serve, headless, containerized Drupal distribution and out-of-the-box Drupal with a highly customized theme. <!-- f: leadership, web-dev -->
 
-- Modernized website delivery, standardizing accessibility, responsive design, and automated deployment, cutting site launch timelines from 4 months to 1 week. <!-- f: web-dev, delivery -->
+## Manager, IT
+
+**Duke University, Trinity Technology Services** — Durham, NC | January 2016 – October 2021
+
+Managed a team of up to 7 developers and IT analysts supporting 150+ department, program, and administrative websites for Trinity College of Arts & Sciences across Drupal, PHP, DevOps, and VM-based infrastructure. <!-- f: leadership, web-dev -->
+
+- Cut site launch time from 4 months to 1 week by standardizing accessible, responsive builds with automated deployment. <!-- f: web-dev, delivery -->
+- Maintained zero team turnover across 9 years at Duke through consistent one-on-ones and clear delivery expectations. <!-- f: leadership -->
+- Co-chaired Duke's annual cross-campus TechExpo in 2017 and 2018, drawing its highest registration on record. <!-- f: leadership -->
 - Directed 80+ concurrent projects annually using cloud collaboration and code-sharing platforms. <!-- f: leadership, delivery -->
-- Maintained zero team turnover across a full 9-year tenure through consistent one-on-ones and clear delivery expectations. <!-- f: leadership -->
+
+## Team Lead
+
+**Duke University, Trinity Technology Services** — Durham, NC | July 2013 – December 2015
+
+Led two Drupal developers and a programmer supporting Trinity College of Arts & Sciences websites. <!-- f: leadership, web-dev -->
+
+- Migrated 100+ Trinity websites from Apostrophe CMS to Drupal, using drush and git for repeatable builds. <!-- f: web-dev, delivery -->
 
 ## Co-Owner and Technologist
 
 **Skrinak Creative, Inc.** — Apex, NC | January 2001 – July 2013
 
-Skrinak Creative (SCI) is a two-person, print- and web-media-based creative agency serving primarily B2B clients who outsource their creative services, with annual revenue of $150K-$200K and an average of 15 clients. Handled UI, jQuery, and theme development in LAMP and .NET stacks using designer-supplied source art, and designed, implemented, and maintained LAMP and .NET servers, including cloud-based SSL certificates and IMAP services. <!-- f: web-dev, creative -->
+Co-owned a two-person print and web creative agency with $150K–$200K in annual revenue and an average of 15 B2B clients. Built and hosted client sites on LAMP and .NET, from UI and theme development to server administration. <!-- f: web-dev, creative -->
 
-- Cut typical project delivery time from 3-6 months to 4-6 weeks by adopting Drupal and WordPress for client builds. <!-- f: web-dev, delivery -->
-- Implemented a rigorous QA process that cut validation errors on acquired sites from 200+ per page to below ten. <!-- f: web-dev -->
+- Cut typical project delivery time from 3–6 months to 4–6 weeks by adopting Drupal and WordPress for client builds. <!-- f: web-dev, delivery -->
+- Cut validation errors on acquired sites from 200+ per page to under 10 by implementing a QA process. <!-- f: web-dev -->
 
 ## Manager, Pre-press Department
 
@@ -188,18 +216,20 @@ Skrinak Creative (SCI) is a two-person, print- and web-media-based creative agen
 
 Managed the Pre-press department for a $26M/year commercial printer, with duties including design and oversight of web services. <!-- f: creative, leadership -->
 
-- Led the conversion from film-based to digital plate imaging, cutting production material costs ~50% while reducing staff through attrition. <!-- f: cost, creative -->
+- Cut production material costs ~50% by leading the conversion from film to digital plate imaging. <!-- f: cost, creative -->
 
 ## Desktop Publishing Manager
 
 **Hachette-Filipacchi Media** — New York, NY | September 1988 – June 1994
 
-- Led the $1.5M conversion of magazine workflows to a unified system, coordinating over 450 editors, art directors, and support staff across Elle, Car and Driver, and Road & Track. <!-- f: leadership, creative -->
+Started as Typesetter on Elle Decor, the workflow conversion's pilot title. Earned promotion to Desktop Publishing Manager, directing two page builders at Elle, then managing desktop publishing for all titles with their editors and art directors. <!-- f: creative, leadership -->
+
+- Delivered a $1.5M workflow conversion for 450+ staff at Elle, Car and Driver, and Road & Track on time and on budget. <!-- f: leadership, creative -->
 
 ## Supervisor
 
 **The Stat Store** — New York, NY | September 1984 – September 1988
 
-Supervised a small, 30-person graphic arts shop <!-- f: creative, leadership -->
+Supervised a 30-person graphic arts shop. <!-- f: creative, leadership -->
 
 <!-- education -->

@@ -16,9 +16,9 @@
  * one-page checks run on every render, whichever files it writes: they hold
  * for the content, and the content is the same in all three.
  *
- * Writes nothing unless every bullet fits on one printed line, the PDF is
- * exactly one page (docs/references/manager-tools-rubric.md), and each .docx
- * and .txt reads back to the printed page's content.
+ * Writes nothing unless every bullet and admin line fits on one printed line,
+ * the PDF is exactly one page (docs/references/manager-tools-rubric.md), and
+ * each .docx and .txt reads back to the printed page's content.
  */
 
 import { existsSync } from "node:fs";
@@ -122,11 +122,11 @@ async function verifyRenderedContent(page) {
   );
 }
 
-// Count the printed lines a bullet occupies from its text fragments' client
-// rects. Fragments on one line differ in top and height (a bold run, a link,
-// another face), so equal tops can't identify a line. A fragment joins the
-// current line when either one's vertical midpoint falls inside the other's
-// band; anything lower starts the next line.
+// Count the printed lines a bullet or admin line occupies from its text
+// fragments' client rects. Fragments on one line differ in top and height (a
+// bold run, a link, another face or size), so equal tops can't identify a
+// line. A fragment joins the current line when either one's vertical midpoint
+// falls inside the other's band; anything lower starts the next line.
 export function countLineBoxes(rects) {
   let lines = 0;
   let band = null;
@@ -140,20 +140,22 @@ export function countLineBoxes(rects) {
   return lines;
 }
 
-// The bullets that span more than one printed line, with their line counts.
-export function findWrappedBullets(items) {
+// The bullets and admin lines that span more than one printed line, with
+// their line counts.
+export function findWrappedLines(items) {
   return items
     .map(({ text, rects }) => ({ text, lines: countLineBoxes(rects) }))
-    .filter(b => b.lines > 1);
+    .filter(item => item.lines > 1);
 }
 
-// Manager Tools keeps each accomplishment to one line, and wraps exist only in
-// the print layout, so lay the page out as print does: print media, at the
-// width the stylesheet's @page box leaves for content. The width rounds down,
-// so a bullet within a fraction of a pixel of the margin fails here rather
-// than passing here and wrapping on paper. Returns the wrapped bullets and the
-// @page margins in points, which the .docx page setup copies. The page stays
-// in this layout afterwards, so block extraction reads the print layout too.
+// Manager Tools keeps each accomplishment to one line, Kyle each admin line,
+// and wraps exist only in the print layout, so lay the page out as print does:
+// print media, at the width the stylesheet's @page box leaves for content. The
+// width rounds down, so a line within a fraction of a pixel of the margin
+// fails here rather than passing here and wrapping on paper. Returns the
+// wrapped lines and the @page margins in points, which the .docx page setup
+// copies. The page stays in this layout afterwards, so block extraction reads
+// the print layout too.
 async function applyPrintLayout(page) {
   const { contentWidth, margins } = await page.evaluate(() => {
     const pageRules = [];
@@ -204,10 +206,10 @@ async function applyPrintLayout(page) {
 
   // Text nodes only: an element's own rect spans every line it wraps across.
   const items = await page.evaluate(() =>
-    Array.from(document.querySelectorAll(".resume-content li"), li => {
+    Array.from(document.querySelectorAll(".resume-content li, .resume-content h2"), el => {
       const rects = [];
       const range = document.createRange();
-      const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         if (!node.textContent.trim()) continue;
         range.selectNodeContents(node);
@@ -215,10 +217,10 @@ async function applyPrintLayout(page) {
           if (r.width > 0 && r.height > 0) rects.push({ top: r.top, bottom: r.bottom });
         }
       }
-      return { text: li.textContent.replace(/\s+/g, " ").trim(), rects };
+      return { text: el.textContent.replace(/\s+/g, " ").trim(), rects };
     })
   );
-  return { wrapped: findWrappedBullets(items), margins };
+  return { wrapped: findWrappedLines(items), margins };
 }
 
 // Page count from the PDF's page-tree root (/Type /Pages ... /Count N).
@@ -334,8 +336,8 @@ export async function renderResume({
     if (wrapped.length > 0) {
       const list = wrapped.map(b => `  - (${b.lines} lines) ${b.text}`).join("\n");
       problems.push(
-        `${wrapped.length} bullet(s) run past one printed line — each accomplishment ` +
-          `must fit on one. Tighten or cut these rather than shrinking type:\n${list}`
+        `${wrapped.length} bullet(s) or admin line(s) run past one printed line — ` +
+          `each must fit on one. Tighten or cut these rather than shrinking type:\n${list}`
       );
     }
     if (pages !== 1) {

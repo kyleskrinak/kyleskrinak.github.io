@@ -76,8 +76,8 @@ Illustrative shape (not an MT quote, not a real claim): *Reduced page weight 40%
 
 ## Formatting
 
-- Plain and professional: one font for the whole page, headings included. Bold sets off the admin line and appears nowhere else. No color, icons, images, graphs, shading, or borders. Use the full width of the page; empty space beside the text wastes it. [MT: Stinks, RU21, Myths, Mistakes] No underline anywhere on the page. [Kyle]
-- Type size never below 11pt, headings and contact line included. Never shrink type to force a fit. [Kyle]
+- Plain and professional: one font for the whole page, headings included. Bold sets off the admin line and appears nowhere else. No color, icons, images, graphs, shading, or borders. Use the full width of the page; empty space beside the text wastes it. [MT: Stinks, RU21, Myths, Mistakes] No underline anywhere on the page. The name and the admin line's bold segments print in Arial Bold; the rest of the page prints in Times. [Kyle]
+- Type size never below 11pt, headings and contact line included, except the admin line's Arial Bold at 10.5pt, the size at which it matches 11pt Times. Never shrink type to force a fit. [Kyle]
 - Body type no larger than 12pt. [House]
 
 ## Applying
@@ -97,6 +97,6 @@ Write the resume yourself. After that, AI can proofread (review each correction)
 
 Each job entry: admin line, responsibilities paragraph, then accomplishment bullets in verb/result/method form.
 
-`scripts/lint-resume.mjs` checks each bullet for a measure, active voice, and no "we", plus the house banned-phrase list. `scripts/lib/resume-render.mjs` fails a print render when any bullet runs past one line or the page runs past one, and writes the .docx and .txt for ATS uploads from the same render. `resume-workflow/SKILL.md` governs editing cadence and register. `docs/features/resume-source.md` maps frontmatter fields to outputs.
+`scripts/lint-resume.mjs` checks each bullet for a measure, active voice, and no "we", plus the house banned-phrase list. `scripts/lib/resume-render.mjs` fails a print render when any bullet or admin line runs past one line or the page runs past one, and writes the .docx and .txt for ATS uploads from the same render. `resume-workflow/SKILL.md` governs editing cadence and register. `docs/features/resume-source.md` maps frontmatter fields to outputs.
 
 Rules marked [MT] paraphrase Career Tools shownotes; this file doesn't reproduce them.

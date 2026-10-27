@@ -63,7 +63,7 @@ Inside the resume, facet tags (`<!-- f: … -->`) and **multi-word** prose comme
 
 ## The admin line
 
-Manager Tools puts every role's dates, title, and company on one line and sets them off, because a reader scans those first ([rubric](../references/manager-tools-rubric.md)). The page prints `Dates: Title, Company — Location`: the dates, title, and company in bold, the separators and the location plain. Nothing else on the resume carries bold, and nothing on it carries an underline: Manager Tools adds one, and Kyle overrides it.
+Manager Tools puts every role's dates, title, and company on one line and sets them off, because a reader scans those first ([rubric](../references/manager-tools-rubric.md)). The page prints `Dates: Title, Company — Location`: the dates, title, and company in bold, the separators and the location plain. In print, the bold segments are Arial Bold at 10.5pt, the size at which sans matches the 11pt Times body, and the name prints in Arial Bold at its heading size [Kyle]. Nothing else on the resume carries bold, and nothing on it carries an underline: Manager Tools adds one, and Kyle overrides it.
 
 The markdown keeps the two lines apart:
 
@@ -182,10 +182,10 @@ A revision is warranted by a role or title change, a completed project worth cit
 ```bash
 npm run build        # runs lint-resume.mjs, then astro build
 npm run test:unit    # resume-sections and resume-variant suites
-node scripts/print-resume-pdf.mjs --output <path.pdf>   # one line per bullet, one page; writes .pdf, .docx, .txt
+node scripts/print-resume-pdf.mjs --output <path.pdf>   # one line per bullet and admin line, one page; writes .pdf, .docx, .txt
 ```
 
-The render writes no file of any format when a bullet runs past one printed line, the page runs past one, or the .docx or .txt fails to read back to the printed page's content. It also refuses when the contact separator the print stylesheet prints differs from `CONTACT_SEPARATOR` in `scripts/lib/resume-formats.mjs`, which the .docx and .txt print. `--formats pdf` (or any comma-separated subset of `pdf,docx,txt`) limits what it writes; the PDF renders regardless, because the one-page check runs on it. Tighten or cut the bullets it names; never shrink the type, since no print text goes below 11pt.
+The render writes no file of any format when a bullet or admin line runs past one printed line, the page runs past one, or the .docx or .txt fails to read back to the printed page's content. It also refuses when the contact separator the print stylesheet prints differs from `CONTACT_SEPARATOR` in `scripts/lib/resume-formats.mjs`, which the .docx and .txt print. `--formats pdf` (or any comma-separated subset of `pdf,docx,txt`) limits what it writes; the PDF renders regardless, because the one-page check runs on it. Tighten or cut the lines it names; never shrink the type, since no print text goes below 11pt except the admin line's 10.5pt Arial Bold [Kyle].
 
 A frontmatter change that should not alter the rendered text can be proved byte-for-byte by diffing `readResumeSource().expandedBody` against the committed body.
 

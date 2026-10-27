@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
 	normalizeTypography,
 	countLineBoxes,
-	findWrappedBullets,
+	findWrappedLines,
 } from '../../scripts/lib/resume-render.mjs';
 
 describe('normalizeTypography', () => {
@@ -63,10 +63,10 @@ describe('countLineBoxes', () => {
 	});
 });
 
-describe('findWrappedBullets', () => {
+describe('findWrappedLines', () => {
 	it('returns only the bullets that span more than one line, with their counts', () => {
 		assert.deepEqual(
-			findWrappedBullets([
+			findWrappedLines([
 				{ text: 'Fits', rects: [{ top: 100, bottom: 116 }] },
 				{
 					text: 'Wraps',

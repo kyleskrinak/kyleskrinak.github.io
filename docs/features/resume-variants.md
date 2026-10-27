@@ -96,11 +96,11 @@ The builder writes no file of any format when:
 - A facet id or entry id is unknown.
 - A `bullet_order` item is malformed, listed twice, past the end of its entry, or names a bullet the facets exclude.
 - The rendered page is missing the title, the contact details, or any heading's full text. Each role's heading carries its whole admin line.
-- Any bullet runs past one printed line.
+- Any bullet or admin line runs past one printed line.
 - The rendered resume is not exactly one page.
 - The .docx or .txt does not read back to the printed page's text, bold, underline, links and bullets.
 
-If a bullet wraps, tighten it in the resume source or drop it from the variant. If the one-page gate fails, drop the last items from `bullet_order` or narrow the facets. Never shrink the type: no print text goes below 11pt.
+If a bullet wraps, tighten it in the resume source or drop it from the variant. If an admin line wraps, shorten its title or company in the resume source. If the one-page gate fails, drop the last items from `bullet_order` or narrow the facets. Never shrink the type: no print text goes below 11pt, except the admin line's 10.5pt Arial Bold [Kyle].
 
 ## Operational notes
 

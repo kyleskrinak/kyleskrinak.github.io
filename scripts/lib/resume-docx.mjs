@@ -49,8 +49,8 @@ function textRun(run, layout) {
     text: run.text,
     bold: run.bold,
     underline: run.underline ? {} : undefined,
-    font: layout.font,
-    size: halfPoints(layout.fontSize),
+    font: run.font ?? layout.font,
+    size: halfPoints(run.fontSize ?? layout.fontSize),
     color: "000000",
   });
 }

@@ -67,6 +67,21 @@ describe('buildResumeDocx', () => {
 		assert.deepEqual(paragraphs[3].runs, BLOCKS[3].runs);
 	});
 
+	it('gives a run its own face and size where it departs from its block', async () => {
+		const blocks = structuredClone(BLOCKS);
+		Object.assign(blocks[2].runs[0], { font: 'Arial', fontSize: 10.5 });
+		const buffer = await buildResumeDocx(blocks, { margins: MARGINS });
+		const xml = await documentXml(buffer);
+		const runXml = text => new RegExp(`<w:r>(?:(?!</w:r>).)*>${text}</w:t></w:r>`, 's').exec(xml)[0];
+		const own = runXml('Senior Manager, IT');
+		assert.match(own, /<w:rFonts\b[^>]*w:ascii="Arial"/);
+		assert.match(own, /<w:sz w:val="21"\/>/);
+		const inherited = runXml(', Duke University \\| 2019–2022');
+		assert.match(inherited, /<w:rFonts\b[^>]*w:ascii="Times New Roman"/);
+		assert.match(inherited, /<w:sz w:val="22"\/>/);
+		assert.deepEqual(await verifyResumeDocx(blocks, buffer), []);
+	});
+
 	it('sets a letter page with the print margins, in twips', async () => {
 		const xml = await documentXml(await buildResumeDocx(BLOCKS, { margins: MARGINS }));
 		assert.match(xml, /<w:pgSz\b[^>]*w:w="12240"[^>]*w:h="15840"/);

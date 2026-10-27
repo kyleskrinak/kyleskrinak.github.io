@@ -14,12 +14,14 @@
  *   { kind: "paragraph", runs }   a scope paragraph
  *   { kind: "bullet", runs }      an accomplishment
  *
- * A run is { text, bold, underline, href }, read from the computed print styles,
- * so bold and underline land where the PDF prints them. Each block also carries
- * its print layout in points (font, size, line height, space above, indent,
- * alignment), measured from the page, so the .docx spacing follows resume.css
- * without restating it. Nothing here reads the markdown: a file built from
- * blocks carries exactly what the page printed, variant transforms included.
+ * A run is { text, bold, underline, href }, plus font and fontSize (points)
+ * where its face or size departs from its block's, all read from the computed
+ * print styles, so formatting lands where the PDF prints it. Each block also
+ * carries its print layout in points (font, size, line height, space above,
+ * indent, alignment), measured from the page, so the .docx spacing follows
+ * resume.css without restating it. Nothing here reads the markdown: a file
+ * built from blocks carries exactly what the page printed, variant transforms
+ * included.
  *
  * Each file is checked before anything is written. The blocks must account for
  * every character the page prints (verifyBlocksCoverPage), and each file must
@@ -57,6 +59,9 @@ export function extractResumeBlocks() {
   // CSS px to points. Measured after the print layout is applied, so these are
   // the PDF's distances.
   const PT = 0.75;
+
+  // The face a style prints in: the first family in its stack, unquoted.
+  const familyOf = style => style.fontFamily.split(",")[0].trim().replace(/^["']|["']$/g, "");
   const pageLeft = header.getBoundingClientRect().left;
   let previousBottom = null;
 
@@ -68,7 +73,7 @@ export function extractResumeBlocks() {
     const style = getComputedStyle(el);
     const fontSize = parseFloat(style.fontSize);
     const layout = {
-      font: style.fontFamily.split(",")[0].trim().replace(/^["']|["']$/g, ""),
+      font: familyOf(style),
       fontSize: fontSize * PT,
       // "normal" parses as NaN; 1.2 is the usual browser value for it.
       lineHeight: (parseFloat(style.lineHeight) || fontSize * 1.2) * PT,
@@ -91,6 +96,7 @@ export function extractResumeBlocks() {
       }
     }
 
+    const blockStyle = getComputedStyle(block);
     const runs = [];
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
@@ -98,7 +104,8 @@ export function extractResumeBlocks() {
       const text = node.textContent.replace(/[ \t\n\r\f]+/g, " ");
       if (!text) continue;
       const parent = node.parentElement;
-      const weight = getComputedStyle(parent).fontWeight;
+      const style = getComputedStyle(parent);
+      const weight = style.fontWeight;
       const bold = weight === "bold" || Number(weight) >= 600;
       // text-decoration does not inherit as a computed value, but an ancestor's
       // underline still paints through its descendants, so walk up to the block.
@@ -111,7 +118,12 @@ export function extractResumeBlocks() {
       }
       const link = parent.closest("a");
       const href = link && block.contains(link) ? link.href : null;
-      runs.push({ text, bold, underline, href });
+      const run = { text, bold, underline, href };
+      // Face and size only where the run departs from its block; the .docx
+      // sets every other run from the block's layout.
+      if (style.fontFamily !== blockStyle.fontFamily) run.font = familyOf(style);
+      if (style.fontSize !== blockStyle.fontSize) run.fontSize = parseFloat(style.fontSize) * PT;
+      runs.push(run);
     }
 
     // Collapse whitespace across run boundaries and trim the block's ends, as
