@@ -121,6 +121,19 @@ describe('extractResumeBlocks', () => {
 		]);
 	});
 
+	it('keeps neighbouring runs apart when only their face or size differs', () => {
+		const html = PRINT_FIXTURE.replace(
+			'<li>Shipped the 2.0 launch.</li>',
+			'<li>Shipped <span style="font-family: Arial, sans-serif">the</span><span style="font-size: 14px"> 2.0</span> launch.</li>',
+		);
+		assert.deepEqual(extract(html).blocks[5].runs, [
+			plain('Shipped '),
+			{ ...plain('the'), font: 'Arial' },
+			{ ...plain(' 2.0'), fontSize: 10.5 },
+			plain(' launch.'),
+		]);
+	});
+
 	it('collapses whitespace within and across runs and trims the block', () => {
 		const { blocks } = extract();
 		assert.deepEqual(blocks[3].runs, [plain('Led a team of eight engineers.')]);

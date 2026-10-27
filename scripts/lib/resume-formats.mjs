@@ -135,7 +135,14 @@ export function extractResumeBlocks() {
       let text = run.text;
       if (!prev || prev.text.endsWith(" ")) text = text.replace(/^ /, "");
       if (!text) continue;
-      if (prev && prev.bold === run.bold && prev.underline === run.underline && prev.href === run.href) {
+      if (
+        prev &&
+        prev.bold === run.bold &&
+        prev.underline === run.underline &&
+        prev.href === run.href &&
+        prev.font === run.font &&
+        prev.fontSize === run.fontSize
+      ) {
         prev.text += text;
       } else {
         merged.push({ ...run, text });
@@ -210,8 +217,9 @@ export function runsText(runs) {
   return runs.map(run => run.text).join("");
 }
 
-// Join neighbouring runs that print alike, so two files that split one stretch
-// of text into different runs still compare equal.
+// Join neighbouring runs that match on what the read-back compares (bold,
+// underline, link; the .txt carries no face or size), so two files that split
+// one stretch of text into different runs still compare equal.
 export function mergeRuns(runs) {
   const merged = [];
   for (const { text, bold, underline, href } of runs) {
