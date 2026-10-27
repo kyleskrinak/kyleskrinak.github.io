@@ -150,14 +150,17 @@ describe('extractResumeBlocks', () => {
 	it('compares a contact item\'s face and size against the contact line, whose layout the .docx copies', () => {
 		const html = PRINT_FIXTURE.replace(
 			'<div class="contact-info">',
-			'<div class="contact-info" style="font-family: Arial, sans-serif">',
+			'<div class="contact-info" style="font-family: Arial, sans-serif; font-size: 14px">',
 		);
 		const [, contact] = extract(html).blocks;
 		assert.equal(contact.layout.font, 'Arial');
+		assert.equal(contact.layout.fontSize, 10.5);
+		// The items keep the stub's default 14.6667px, in points.
+		const own = { font: 'Times New Roman', fontSize: 14.6667 * 0.75 };
 		assert.deepEqual(contact.items, [
-			[{ text: 'kyle@example.com', bold: false, underline: false, href: 'mailto:kyle@example.com', font: 'Times New Roman' }],
-			[{ ...plain('Apex, NC'), font: 'Times New Roman' }],
-			[{ text: 'kyle.skrinak.com', bold: false, underline: false, href: 'https://kyle.skrinak.com', font: 'Times New Roman' }],
+			[{ text: 'kyle@example.com', bold: false, underline: false, href: 'mailto:kyle@example.com', ...own }],
+			[{ ...plain('Apex, NC'), ...own }],
+			[{ text: 'kyle.skrinak.com', bold: false, underline: false, href: 'https://kyle.skrinak.com', ...own }],
 		]);
 	});
 

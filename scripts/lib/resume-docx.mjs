@@ -39,7 +39,11 @@ const HANGING_PT = 10;
 const twips = pt => Math.round(pt * 20);
 const halfPoints = pt => Math.round(pt * 2);
 
-// A block's runs as one paragraph: a contact block's items joined by the separator.
+// A block's runs as one paragraph: a contact block's items joined by the
+// separator. The PDF prints the separator through each item's ::before, in the
+// item's face and size; the separator run here carries neither, so the .docx
+// prints it in the contact line's. The two match because resume.css sets face
+// and size only on .contact-info, and the items and ::before inherit them.
 function paragraphRuns(block) {
   if (block.kind !== "contact") return block.runs;
   const separator = { text: CONTACT_SEPARATOR, bold: false, underline: false, href: null };

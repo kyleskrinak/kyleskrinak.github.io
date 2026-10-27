@@ -44,7 +44,7 @@ const MAX_REPORTED = 5;
  *
  * Throws on any element the writers cannot represent rather than dropping it:
  * .resume-content may hold only h2, p and ul > li, and a block may hold only
- * text, bold, and links.
+ * text, bold, underline, links, and spans whose face or size the runs carry.
  */
 export function extractResumeBlocks() {
   // Inline elements whose formatting a run carries. Anything else inside a
@@ -94,7 +94,7 @@ export function extractResumeBlocks() {
       if (!INLINE.has(el.tagName)) {
         throw new Error(
           `Unsupported <${el.tagName.toLowerCase()}> inside a resume <${tag}> — ` +
-            `the .docx and .txt writers carry text, bold, underline and links only.`
+            `the .docx and .txt writers carry text, bold, underline, links, face and size only.`
         );
       }
     }
