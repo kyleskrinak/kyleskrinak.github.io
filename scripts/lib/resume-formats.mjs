@@ -25,8 +25,9 @@
  *
  * Each file is checked before anything is written. The blocks must account for
  * every character the page prints (verifyBlocksCoverPage), and each file must
- * read back to the same blocks (verifyResumeText here, verifyResumeDocx in
- * resume-docx.mjs).
+ * read back to what it carries of the blocks: the .txt to their kind and text
+ * (verifyResumeText here), the .docx to their text, bullets, bold, underline
+ * and links (verifyResumeDocx in resume-docx.mjs).
  */
 
 // Between contact items in all three files. The print stylesheet prints it in
@@ -85,7 +86,9 @@ export function extractResumeBlocks() {
     return layout;
   }
 
-  function runsOf(block) {
+  // layoutEl is the element whose layout the block's .docx paragraph copies:
+  // the block itself, or .contact-info for a contact item.
+  function runsOf(block, layoutEl = block) {
     const tag = block.tagName.toLowerCase();
     for (const el of block.querySelectorAll("*")) {
       if (!INLINE.has(el.tagName)) {
@@ -96,7 +99,8 @@ export function extractResumeBlocks() {
       }
     }
 
-    const blockStyle = getComputedStyle(block);
+    const layoutStyle = getComputedStyle(layoutEl);
+    const layoutFont = familyOf(layoutStyle);
     const runs = [];
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
@@ -119,10 +123,11 @@ export function extractResumeBlocks() {
       const link = parent.closest("a");
       const href = link && block.contains(link) ? link.href : null;
       const run = { text, bold, underline, href };
-      // Face and size only where the run departs from its block; the .docx
-      // sets every other run from the block's layout.
-      if (familyOf(style) !== familyOf(blockStyle)) run.font = familyOf(style);
-      if (style.fontSize !== blockStyle.fontSize) run.fontSize = parseFloat(style.fontSize) * PT;
+      // Face and size only where the run departs from its paragraph's layout;
+      // the .docx sets every other run from that layout.
+      const font = familyOf(style);
+      if (font !== layoutFont) run.font = font;
+      if (style.fontSize !== layoutStyle.fontSize) run.fontSize = parseFloat(style.fontSize) * PT;
       runs.push(run);
     }
 
@@ -180,7 +185,7 @@ export function extractResumeBlocks() {
     const separators = [];
     for (const el of contact.children) {
       if (hidden(el)) continue;
-      const runs = runsOf(el);
+      const runs = runsOf(el, contact);
       if (runs.length === 0) continue;
       items.push(runs);
       separators.push(beforeText(el));

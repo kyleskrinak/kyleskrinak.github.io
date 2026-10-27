@@ -137,12 +137,27 @@ describe('extractResumeBlocks', () => {
 	it('merges neighbouring runs that print alike', () => {
 		const html = PRINT_FIXTURE.replace(
 			'<li>Shipped the 2.0 launch.</li>',
-			'<li>Shipped <span>the</span> <span style="font-family: Arial, sans-serif">2.0</span><span style="font-family: Arial, sans-serif"> launch</span>.</li>',
+			'<li>Shipped <span>the</span> <span style="font-family: Arial, sans-serif">2.0</span><span style="font-family: Arial, sans-serif"> launch</span><span style="font-size: 14px">, on</span><span style="font-size: 14px"> time</span>.</li>',
 		);
 		assert.deepEqual(extract(html).blocks[5].runs, [
 			plain('Shipped the '),
 			{ ...plain('2.0 launch'), font: 'Arial' },
+			{ ...plain(', on time'), fontSize: 10.5 },
 			plain('.'),
+		]);
+	});
+
+	it('compares a contact item\'s face and size against the contact line, whose layout the .docx copies', () => {
+		const html = PRINT_FIXTURE.replace(
+			'<div class="contact-info">',
+			'<div class="contact-info" style="font-family: Arial, sans-serif">',
+		);
+		const [, contact] = extract(html).blocks;
+		assert.equal(contact.layout.font, 'Arial');
+		assert.deepEqual(contact.items, [
+			[{ text: 'kyle@example.com', bold: false, underline: false, href: 'mailto:kyle@example.com', font: 'Times New Roman' }],
+			[{ ...plain('Apex, NC'), font: 'Times New Roman' }],
+			[{ text: 'kyle.skrinak.com', bold: false, underline: false, href: 'https://kyle.skrinak.com', font: 'Times New Roman' }],
 		]);
 	});
 
@@ -251,13 +266,20 @@ describe('verifyBlocksCoverPage', () => {
 });
 
 describe('mergeRuns', () => {
-	it('joins neighbours that print alike and keeps the rest apart', () => {
+	it('joins neighbours that match on bold, underline and link, and keeps the rest apart', () => {
 		const bold = text => ({ text, bold: true, underline: false, href: null });
 		assert.deepEqual(mergeRuns([plain('a'), plain('b'), bold('c'), bold('d'), plain('e')]), [
 			plain('ab'),
 			bold('cd'),
 			plain('e'),
 		]);
+	});
+
+	it('ignores face and size, which the .docx read-back does not read', () => {
+		assert.deepEqual(
+			mergeRuns([{ ...plain('a'), font: 'Arial' }, { ...plain('b'), fontSize: 10.5 }, plain('c')]),
+			[plain('abc')],
+		);
 	});
 
 	it('does not modify its input', () => {
