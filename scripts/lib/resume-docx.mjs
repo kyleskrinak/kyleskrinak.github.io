@@ -5,14 +5,16 @@
  * Each paragraph copies its block's print layout (font, size, exact line
  * height, space above, indent, alignment) and the section copies the @page
  * margins, so a word processor lays out the lines the PDF prints. Bold,
- * underline and links come from the runs. The contact items share one line,
- * separated by CONTACT_SEPARATOR, as in the .txt file.
+ * underline, links, and any face or size that departs from the block's come
+ * from the runs. The contact items share one line, separated by
+ * CONTACT_SEPARATOR, as in the .txt file.
  *
  * verifyResumeDocx unzips the file and reads word/document.xml with a small
  * tokenizer: each paragraph's text, whether it is a list item, and its bold,
  * underlined and linked stretches. Those must match the blocks, so a writer
- * change that drops text, formatting or a link fails the render instead of
- * shipping.
+ * change that drops text, bold, underline or a link fails the render instead
+ * of shipping. The read-back does not check face or size; the unit tests in
+ * resume-docx.test.mjs cover those.
  */
 
 import {

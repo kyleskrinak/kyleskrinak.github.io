@@ -134,6 +134,26 @@ describe('extractResumeBlocks', () => {
 		]);
 	});
 
+	it('merges neighbouring runs that print alike', () => {
+		const html = PRINT_FIXTURE.replace(
+			'<li>Shipped the 2.0 launch.</li>',
+			'<li>Shipped <span>the</span> <span style="font-family: Arial, sans-serif">2.0</span><span style="font-family: Arial, sans-serif"> launch</span>.</li>',
+		);
+		assert.deepEqual(extract(html).blocks[5].runs, [
+			plain('Shipped the '),
+			{ ...plain('2.0 launch'), font: 'Arial' },
+			plain('.'),
+		]);
+	});
+
+	it('carries no face for a run whose family list starts with its block\'s face', () => {
+		const html = PRINT_FIXTURE.replace(
+			'<li>Shipped the 2.0 launch.</li>',
+			'<li>Shipped <span style="font-family: \'Times New Roman\', Times, serif">the</span> 2.0 launch.</li>',
+		);
+		assert.deepEqual(extract(html).blocks[5].runs, [plain('Shipped the 2.0 launch.')]);
+	});
+
 	it('collapses whitespace within and across runs and trims the block', () => {
 		const { blocks } = extract();
 		assert.deepEqual(blocks[3].runs, [plain('Led a team of eight engineers.')]);

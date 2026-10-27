@@ -121,7 +121,7 @@ export function extractResumeBlocks() {
       const run = { text, bold, underline, href };
       // Face and size only where the run departs from its block; the .docx
       // sets every other run from the block's layout.
-      if (style.fontFamily !== blockStyle.fontFamily) run.font = familyOf(style);
+      if (familyOf(style) !== familyOf(blockStyle)) run.font = familyOf(style);
       if (style.fontSize !== blockStyle.fontSize) run.fontSize = parseFloat(style.fontSize) * PT;
       runs.push(run);
     }
@@ -217,9 +217,10 @@ export function runsText(runs) {
   return runs.map(run => run.text).join("");
 }
 
-// Join neighbouring runs that match on what the read-back compares (bold,
-// underline, link; the .txt carries no face or size), so two files that split
-// one stretch of text into different runs still compare equal.
+// Join neighbouring runs that match on what the .docx read-back compares (bold,
+// underline, link; readDocxParagraphs reads no face or size), so the blocks and
+// the .docx still compare equal when they split one stretch of text into
+// different runs.
 export function mergeRuns(runs) {
   const merged = [];
   for (const { text, bold, underline, href } of runs) {
