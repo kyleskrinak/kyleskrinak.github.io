@@ -27,11 +27,14 @@ import loadFonts from "../loadFonts";
 //           margin: "2.5rem",
 //           width: "88%",
 //           height: "80%",
+//           boxSizing: "border-box",
 //         }}
 //       />
 
 //       <div
 //         style={{
+//           position: "relative",
+//           boxSizing: "border-box",
 //           border: "4px solid #000",
 //           background: "#fefbfb",
 //           borderRadius: "4px",
@@ -58,6 +61,7 @@ import loadFonts from "../loadFonts";
 //               fontWeight: "bold",
 //               maxHeight: "84%",
 //               overflow: "hidden",
+//               margin: "17px 0 0",
 //             }}
 //           >
 //             {post.data.title}
@@ -73,13 +77,6 @@ import loadFonts from "../loadFonts";
 //           >
 //             <span>
 //               by{" "}
-//               <span
-//                 style={{
-//                   color: "transparent",
-//                 }}
-//               >
-//                 "
-//               </span>
 //               <span style={{ overflow: "hidden", fontWeight: "bold" }}>
 //                 {post.data.author || SITE.author}
 //               </span>
@@ -123,13 +120,17 @@ export default async post => {
                 margin: "2.5rem",
                 width: "88%",
                 height: "80%",
+                boxSizing: "border-box",
               },
             },
           },
           {
             type: "div",
             props: {
+              // Positioned so it paints above the absolute card before it.
               style: {
+                position: "relative",
+                boxSizing: "border-box",
                 border: "4px solid #000",
                 background: "#fefbfb",
                 borderRadius: "4px",
@@ -159,6 +160,9 @@ export default async post => {
                           fontWeight: "bold",
                           maxHeight: "84%",
                           overflow: "hidden",
+                          // Replaces <p>'s default 1em margin; 17px keeps
+                          // the title where satori 0.35 placed it.
+                          margin: "17px 0 0",
                         },
                         children: post.data.title,
                       },
@@ -179,13 +183,6 @@ export default async post => {
                             props: {
                               children: [
                                 "by ",
-                                {
-                                  type: "span",
-                                  props: {
-                                    style: { color: "transparent" },
-                                    children: '"',
-                                  },
-                                },
                                 {
                                   type: "span",
                                   props: {
