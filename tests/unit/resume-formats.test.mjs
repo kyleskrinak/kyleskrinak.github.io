@@ -182,6 +182,20 @@ describe('extractResumeBlocks', () => {
 		]);
 	});
 
+	it('drops a trailing run that holds only whitespace', () => {
+		const afterBold = PRINT_FIXTURE.replace('<li>Shipped the 2.0 launch.</li>', '<li>Shipped the <strong>2.0</strong> </li>');
+		assert.deepEqual(extract(afterBold).blocks[5].runs, [
+			plain('Shipped the '),
+			{ text: '2.0', bold: true, underline: false, href: null },
+		]);
+		// A size of its own keeps the space from merging into the run before it.
+		const ownSize = PRINT_FIXTURE.replace(
+			'<li>Shipped the 2.0 launch.</li>',
+			'<li>Shipped the 2.0 launch.<span style="font-size: 14px"> </span></li>',
+		);
+		assert.deepEqual(extract(ownSize).blocks[5].runs, [plain('Shipped the 2.0 launch.')]);
+	});
+
 	it('keeps a no-break space, which prints', () => {
 		const { blocks } = extract(PRINT_FIXTURE.replace('2.0 launch', '2.0\u00a0launch'));
 		assert.equal(blocks[5].runs[0].text, 'Shipped the 2.0\u00a0launch.');
