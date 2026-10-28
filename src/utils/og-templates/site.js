@@ -38,13 +38,17 @@ export default async () => {
                 margin: "2.5rem",
                 width: "88%",
                 height: "80%",
+                boxSizing: "border-box",
               },
             },
           },
           {
             type: "div",
             props: {
+              // Positioned so it paints above the absolute card before it.
               style: {
+                position: "relative",
+                boxSizing: "border-box",
                 border: "4px solid #000",
                 background: "#fefbfb",
                 borderRadius: "4px",
@@ -81,17 +85,19 @@ export default async () => {
                           textAlign: "center",
                         },
                         children: [
+                          // These margins replace <p>'s default 1em margins;
+                          // 32px keeps the gap satori 0.35 drew.
                           {
                             type: "p",
                             props: {
-                              style: { fontSize: 72, fontWeight: "bold" },
+                              style: { fontSize: 72, fontWeight: "bold", margin: "0 0 32px" },
                               children: SITE.title,
                             },
                           },
                           {
                             type: "p",
                             props: {
-                              style: { fontSize: 28 },
+                              style: { fontSize: 28, margin: 0 },
                               children: SITE.desc,
                             },
                           },
