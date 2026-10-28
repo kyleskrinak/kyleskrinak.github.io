@@ -42,14 +42,16 @@ const MAX_REPORTED = 5;
  * page.evaluate, which sends only this function's source text, so everything
  * it uses is declared inside it.
  *
- * Throws on any element the writers cannot represent rather than dropping it:
- * .resume-content may hold only h2, p and ul > li, and a block only text and
- * strong, b, a and span. The runs keep text, bold, underline, link, face and
- * size, and drop any other styling on those elements without an error.
+ * Throws on any element outside a fixed list rather than dropping it:
+ * .resume-content may hold only h2, p and ul > li, .contact-info only span
+ * items, and a block only text and strong, b, a and span. The runs keep text,
+ * bold, underline, link, face and size, and drop any other styling on those
+ * elements without an error.
  */
 export function extractResumeBlocks() {
-  // Inline elements whose formatting a run carries. Anything else inside a
-  // block (em, code, br, img) would print in the PDF and vanish from the files.
+  // The inline elements a block may hold. runsOf throws on any other, even one
+  // whose formatting the runs could carry (u, small), so a new element fails
+  // the render until someone checks what the files keep of it.
   const INLINE = new Set(["STRONG", "B", "A", "SPAN"]);
 
   const header = document.querySelector(".resume-header");
@@ -95,7 +97,7 @@ export function extractResumeBlocks() {
       if (!INLINE.has(el.tagName)) {
         throw new Error(
           `Unsupported <${el.tagName.toLowerCase()}> inside a resume <${tag}> — ` +
-            `a block may hold only <strong>, <b>, <a> and <span>, the tags whose formatting the .docx carries.`
+            `a block may hold only ${[...INLINE].map(name => `<${name.toLowerCase()}>`).join(", ")}.`
         );
       }
     }
@@ -186,6 +188,9 @@ export function extractResumeBlocks() {
     const separators = [];
     for (const el of contact.children) {
       if (hidden(el)) continue;
+      if (el.tagName !== "SPAN") {
+        throw new Error(`Unsupported <${el.tagName.toLowerCase()}> in .contact-info, which may hold only span items.`);
+      }
       const runs = runsOf(el, contact);
       if (runs.length === 0) continue;
       items.push(runs);
@@ -207,8 +212,7 @@ export function extractResumeBlocks() {
       }
     } else {
       throw new Error(
-        `Unsupported <${el.tagName.toLowerCase()}> in .resume-content — ` +
-          `the .docx and .txt writers handle h2, p and ul > li only.`
+        `Unsupported <${el.tagName.toLowerCase()}> in .resume-content, which may hold only h2, p and ul > li.`
       );
     }
   }

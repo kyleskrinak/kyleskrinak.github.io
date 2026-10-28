@@ -218,14 +218,19 @@ describe('extractResumeBlocks', () => {
 		);
 	});
 
-	it('throws on an inline element the writers cannot carry', () => {
+	it('throws on an inline element outside the list a block may hold', () => {
 		const html = PRINT_FIXTURE.replace('Shipped the 2.0 launch.', 'Shipped the <em>2.0</em> launch.');
-		assert.throws(() => extract(html), /Unsupported <em> inside a resume <li>/);
+		assert.throws(() => extract(html), /Unsupported <em> inside a resume <li> — a block may hold only <strong>, <b>, <a>, <span>\./);
 	});
 
-	it('throws on a content element the writers cannot carry', () => {
+	it('throws on a contact item other than a span', () => {
+		const html = PRINT_FIXTURE.replace('kyle.skrinak.com</a></span>', 'kyle.skrinak.com</a></span><img src="badge.png" alt="">');
+		assert.throws(() => extract(html), /Unsupported <img> in \.contact-info, which may hold only span items\./);
+	});
+
+	it('throws on a content element outside the list .resume-content may hold', () => {
 		const html = PRINT_FIXTURE.replace('<p>Led', '<table><tr><td>x</td></tr></table><p>Led');
-		assert.throws(() => extract(html), /Unsupported <table> in \.resume-content/);
+		assert.throws(() => extract(html), /Unsupported <table> in \.resume-content, which may hold only h2, p and ul > li\./);
 	});
 
 	it('measures layout in points from the page', () => {
