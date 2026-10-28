@@ -1,6 +1,7 @@
 name: Ensure release-backed PDFs
 description: >-
-  Generic hash-gated PDF artifact step. Makes the given PDF assets present in
+  Generic hash-gated artifact step for generated files (the archive PDFs, and
+  the resume's PDF, .docx and .txt). Makes the given assets present in
   the deployable AFTER the site build, using a GitHub Release as an untracked
   backing store. Regenerates only when the hashed rendering inputs change;
   otherwise downloads the existing assets. Requires a prior `npm run build`

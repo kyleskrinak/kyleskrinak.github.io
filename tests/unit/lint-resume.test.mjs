@@ -105,6 +105,31 @@ describe('checkMeasurableClaims', () => {
 	it('passes a bullet where the only number is embedded in a word like "9-year"', () => {
 		assert.deepEqual(checkMeasurableClaims(['Maintained zero turnover over a 9-year tenure.'], 'Role'), []);
 	});
+
+	// Manager Tools counts on time, on budget, or in scope as a measure, and any
+	// one of the three is enough without a digit.
+	it('passes a digit-free bullet that claims delivery on time, on budget, or in scope', () => {
+		assert.deepEqual(
+			checkMeasurableClaims(
+				[
+					'Delivered the portal migration on time by staging cutovers.',
+					'Shipped the ERP integration on budget.',
+					'Closed the accessibility remediation in scope.',
+					'Achieved on-time delivery for the records system.',
+				],
+				'Role',
+			),
+			[],
+		);
+	});
+
+	it('flags a bullet where "time" or "scope" appears without the delivery phrase', () => {
+		const result = checkMeasurableClaims(
+			['Cut response time by consolidating queues.', 'Expanded the scope of the platform.'],
+			'Role',
+		);
+		assert.equal(result.length, 2);
+	});
 });
 
 describe('checkActiveVoice', () => {

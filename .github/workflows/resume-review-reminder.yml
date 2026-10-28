@@ -96,7 +96,6 @@ jobs:
             "" \
             "- [ ] Update achievements and metrics from the past quarter" \
             "- [ ] Review skills inventory and last-reviewed date" \
-            "- [ ] Check certifications for expiry" \
             "- [ ] Verify the change log entry" \
             "- [ ] Confirm web and print renders match after edits" \
             > /tmp/issue-body.md

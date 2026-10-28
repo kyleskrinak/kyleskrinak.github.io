@@ -105,7 +105,7 @@ After any code change:
 Three facts that have been guessed wrong before:
 - `current_role` populates the resume's lead heading, both meta descriptions, and the About page sentence. None of those are hand-typed.
 - `skills_inventory` (9 category ids) and `FACETS` (7 bullet tags, `src/lib/remark-facets.mjs`) are **separate vocabularies**. Do not reconcile or cross-validate them.
-- Certifications live in `scripts/data/certifications.json` by decision. Keep certification data out of the resume source.
+- No certifications on any resume, variants included (Manager Tools; see `docs/references/manager-tools-rubric.md`).
 
 ## Coding Rules
 

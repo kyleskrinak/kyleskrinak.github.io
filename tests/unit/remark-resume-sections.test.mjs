@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { fromMarkdown } from 'mdast-util-from-markdown';
-import { remarkResumeSections } from '../../src/lib/remark-resume-sections.mjs';
-import { expandResumePlaceholders } from '../../src/lib/resume-sections.mjs';
+import { remarkResumeSections, renderedHeadings } from '../../src/lib/remark-resume-sections.mjs';
+import { expandResumePlaceholders, mdastText } from '../../src/lib/resume-sections.mjs';
 
 // Absolute, the way Astro hands it over; the plugin matches on the suffix.
 const RESUME_PATH = '/repo/src/content/pages/resume/index.md';
@@ -32,6 +32,12 @@ const education = {
 
 const data = { current_role: currentRole, education };
 
+// Each heading as the page renders it: the current role's carries its folded
+// admin line, and education's is a single line with nothing to fold.
+const ROLE_HEADING =
+	'June 2022 – Present: Senior IT Systems Engineering Manager, Digital Experience, Gilead Sciences — Raleigh, NC';
+const EDUCATION_HEADING = 'M.S. I.T., Rochester Institute of Technology — Rochester, NY | 1998 – 2001';
+
 function runPlugin(body, { path = RESUME_PATH, frontmatter = data } = {}) {
 	const tree = fromMarkdown(body);
 	const file = {
@@ -48,11 +54,11 @@ function runPlugin(body, { path = RESUME_PATH, frontmatter = data } = {}) {
 function treeHeadings(tree) {
 	return tree.children
 		.filter(node => node.type === 'heading' && node.depth === 2)
-		.map(node => node.children.map(child => child.value ?? '').join(''));
+		.map(node => mdastText(node));
 }
 
 function markdownHeadings(markdown) {
-	return [...markdown.matchAll(/^## (.+)$/gm)].map(match => match[1]);
+	return renderedHeadings(markdown).map(heading => heading.text);
 }
 
 describe('expansion parity between the two paths', () => {
@@ -108,10 +114,10 @@ describe('expansion parity between the two paths', () => {
 
 	it('expands the three top-level placeholders and leaves both code blocks alone', () => {
 		assert.deepEqual(treeHeadings(runPlugin(body)), [
-			'Senior IT Systems Engineering Manager, Digital Experience',
-			'M.S. I.T.',
+			ROLE_HEADING,
+			EDUCATION_HEADING,
 			// The one after the comment that carries a fence.
-			'M.S. I.T.',
+			EDUCATION_HEADING,
 		]);
 	});
 
@@ -147,10 +153,10 @@ describe('expansion parity between the two paths', () => {
 		// looked like sample text while the page expanded it — education missing
 		// from the PDF expectations and its variant anchors unknown.
 		const body = '<!-- TODO\n```\n-->\n\n<!-- education -->';
-		assert.deepEqual(treeHeadings(runPlugin(body)), ['M.S. I.T.']);
+		assert.deepEqual(treeHeadings(runPlugin(body)), [EDUCATION_HEADING]);
 		assert.deepEqual(
 			markdownHeadings(expandResumePlaceholders(body, data)),
-			['M.S. I.T.'],
+			[EDUCATION_HEADING],
 		);
 	});
 
@@ -176,6 +182,103 @@ describe('expansion parity between the two paths', () => {
 		assert.equal(
 			expandResumePlaceholders('before\n\n<!-- education -->\n\nafter', optedOut),
 			'before\n\n\nafter',
+		);
+	});
+});
+
+describe('the admin-line fold', () => {
+	const role = ['## Owner', '', '**Skrinak Creative, Inc.** — Apex, NC | January 2001 – July 2013', '', 'Scope.'].join('\n');
+
+	it('folds the employer line into the heading and removes its paragraph', () => {
+		const tree = runPlugin(role);
+		assert.deepEqual(treeHeadings(tree), ['January 2001 – July 2013: Owner, Skrinak Creative, Inc. — Apex, NC']);
+		assert.deepEqual(
+			tree.children.map(node => node.type),
+			['heading', 'paragraph'],
+		);
+		assert.equal(mdastText(tree.children[1]), 'Scope.');
+	});
+
+	it('sets off the dates, title and company as strong, and leaves the rest plain', () => {
+		const [heading] = runPlugin(role).children;
+		assert.deepEqual(
+			heading.children.map(child => [child.type, mdastText(child)]),
+			[
+				['strong', 'January 2001 – July 2013'],
+				['text', ': '],
+				['strong', 'Owner'],
+				['text', ', '],
+				['strong', 'Skrinak Creative, Inc.'],
+				['text', ' — Apex, NC'],
+			],
+		);
+	});
+
+	it('keeps the heading id on the title, so a date change never moves it', () => {
+		const ids = body =>
+			runPlugin(body)
+				.children.filter(node => node.type === 'heading')
+				.map(node => node.data.hProperties.id);
+		assert.deepEqual(ids(role), ['owner']);
+		assert.deepEqual(ids(role.replace('July 2013', 'August 2013')), ['owner']);
+		assert.deepEqual(ids('<!-- current-role -->'), [
+			'senior-it-systems-engineering-manager-digital-experience',
+		]);
+	});
+
+	it('fails the build on an employer line with no heading directly above it', () => {
+		for (const body of [
+			'**Acme** — Durham, NC | 2019 – 2020',
+			'## Owner\n\nScope.\n\n**Acme** — Durham, NC | 2019 – 2020',
+			'### Owner\n\n**Acme** — Durham, NC | 2019 – 2020',
+		]) {
+			assert.throws(() => runPlugin(body), /\[remark-resume-sections\].*must sit directly below/s, body);
+		}
+	});
+
+	it('fails the build on an employer line carrying other markup', () => {
+		// The fold cannot read a link or emphasis inside the line; left unfolded,
+		// the page and the PDF verifier would agree on a role with no dates.
+		for (const body of [
+			'## Owner\n\n**Acme** — [Durham, NC](https://example.com) | 2019 – 2020',
+			'## Owner\n\n**Acme** — *Durham, NC* | 2019 – 2020',
+		]) {
+			assert.throws(() => runPlugin(body), /\[remark-resume-sections\].*carries markup/s, body);
+		}
+	});
+
+	it('leaves any other bold paragraph alone', () => {
+		const tree = runPlugin('## Owner\n\n**Note:** see [the archive](https://example.com).');
+		assert.deepEqual(treeHeadings(tree), ['Owner']);
+		assert.equal(tree.children.length, 2);
+	});
+
+	it('folds nothing in any other document', () => {
+		const tree = runPlugin(role, { path: BLOG_PATH });
+		assert.deepEqual(treeHeadings(tree), ['Owner']);
+		assert.equal(tree.children.length, 3);
+	});
+});
+
+describe('renderedHeadings', () => {
+	it('folds each employer line into the heading above it', () => {
+		const markdown = expandResumePlaceholders('<!-- current-role -->\n\nScope.\n\n<!-- education -->', data);
+		assert.deepEqual(renderedHeadings(markdown), [
+			{ text: ROLE_HEADING, adminLine: true },
+			{ text: EDUCATION_HEADING, adminLine: false },
+		]);
+	});
+
+	it('throws, as the build does, on a misplaced or markup-carrying employer line', () => {
+		const line = '**Acme** — Durham, NC | 2019 – 2020';
+		assert.throws(
+			() => renderedHeadings(['## Owner', '', 'Scope.', '', line].join('\n')),
+			/must sit directly below its role's ## heading/,
+		);
+		assert.throws(() => renderedHeadings(line), /must sit directly below/);
+		assert.throws(
+			() => renderedHeadings('## Owner\n\n**Acme** — [Durham, NC](https://example.com) | 2019 – 2020'),
+			/carries markup/,
 		);
 	});
 });
@@ -251,7 +354,7 @@ describe('the matcher and the resume file on disk', () => {
 
 	it('expands for that file at its real absolute path', () => {
 		assert.deepEqual(treeHeadings(runPlugin('<!-- education -->', { path: REAL_RESUME })), [
-			'M.S. I.T.',
+			EDUCATION_HEADING,
 		]);
 	});
 });

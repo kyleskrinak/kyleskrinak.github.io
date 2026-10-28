@@ -41,10 +41,12 @@
 }
 
 /* Entry titles (jobs, degrees) are h2 — direct children of the page h1,
-   no intermediate section headings */
+   no intermediate section headings. A role's h2 is its Manager Tools admin
+   line ("Dates: Title, Company — Location"); the heading itself is regular
+   weight so only the set-off segments stand out. */
 .resume-content h2 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
   color: var(--foreground);
@@ -61,6 +63,13 @@
 .resume-content strong {
   font-weight: 600;
   color: var(--foreground);
+}
+
+/* The admin line's dates, title, and company: bold, the one place it
+   appears (Manager Tools sets them off for scanning). No underline —
+   Kyle's call over Manager Tools. */
+.resume-content h2 strong {
+  font-weight: 700;
 }
 
 .resume-content ul {
@@ -93,25 +102,44 @@
   }
 
   /* All print sizes below are rem-based, so scaling the root scales the
-     whole rendering. 14px root ≈ 10.5pt body text. Measured one-page
-     ceiling is ≈14.34px (10.75pt) at 1.22 leading — keep below it. */
+     whole rendering. The root is the body size, 11pt — Kyle's floor: no
+     print text may be smaller, so no print rule below goes under 1rem,
+     except the admin line's sans bold (below). Never shrink it to force
+     one page; cut content instead. */
   html {
-    font-size: 14px;
+    font-size: 11pt;
   }
 
-  /* Traditional proportional face for print — the site's monospace
-     --font-app is a web-only aesthetic and wastes print space. Times
-     matches the original GDoc/PDF resume face. */
+  /* One traditional proportional face for the page (Manager Tools) — the
+     site's monospace --font-app is a web-only aesthetic and wastes print
+     space. Times matches the original GDoc/PDF resume face. Liberation
+     Serif and Liberation Sans are Times New Roman's and Arial's same-width
+     stand-ins on the Linux CI runner. */
   body,
   .resume-content,
-  .resume-header h1,
   .contact-info {
-    font-family: "Times New Roman", Times, Georgia, serif;
+    font-family: "Times New Roman", "Liberation Serif", Times, Georgia, serif;
   }
 
+  /* Kyle's exceptions to the one face: the name and the admin line's
+     set-off segments print in sans bold. */
+  .resume-header h1,
+  .resume-content h2 strong {
+    font-family: Arial, "Liberation Sans", sans-serif;
+  }
+
+  /* And to the 11pt floor: half a point under the body, the size at which
+     sans matches 11pt Times */
+  .resume-content h2 strong {
+    font-size: calc(1rem - 0.5pt);
+  }
+
+  /* Pure white: the site's #fdfdfd background prints as faint shading.
+     Unlayered, so it beats the base layer's bg-background on body. */
   body {
     line-height: 1.22;
     color: #000;
+    background: #fff;
   }
 
   .resume-content {
@@ -130,17 +158,26 @@
     margin-bottom: 0.6rem;
   }
 
+  /* Sans bold, like the admin line's set-off segments */
   .resume-header h1 {
     font-size: 1.3rem;
     font-weight: 700;
     margin: 0 0 0.3rem 0;
   }
 
-  /* Flex layout comes from the screen rule; print only overrides the gap
-     (tighter) and font-size (body-sized per Kyle) */
+  /* Flex layout comes from the screen rule; print overrides font-size
+     (body-sized per Kyle) and swaps the gap for a printed separator */
   .contact-info {
-    gap: 0.8rem;
+    gap: 0;
     font-size: 1rem;
+  }
+
+  /* Must equal CONTACT_SEPARATOR (scripts/lib/resume-formats.mjs), which
+     the .docx and .txt print between the same items; the render fails on
+     a mismatch. */
+  .contact-info > span + span::before {
+    content: " | ";
+    white-space: pre;
   }
 
   .contact-info a {
@@ -151,59 +188,15 @@
   /* No overflow clipping: content exceeding one page must spill visibly
      to page 2 so the one-page constraint fails loudly, not silently */
 
-  /* Entry header lines are sans-serif against the Times body, at body
-     size. The h2 + p selector covers the employer segment that runs in
-     on the same line as the h2 role; its weights are left alone (bold
-     employer name, regular location/dates). */
-  .resume-content h2,
-  .resume-content h3,
-  .resume-content h4 {
-    font-weight: 600;
-  }
-
-  .resume-content h2,
-  .resume-content h3,
-  .resume-content h4,
-  .resume-content h2 + p {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    /* 10pt on paper — 0.5pt below the 10.5pt body */
-    font-size: 0.952rem;
-  }
-
-  /* Run each entry header as a single wrapping line (GDoc style): the h2
-     role and the employer paragraph that follows it flow together. The
-     block ::before forces the line break ahead of the entry and carries
-     the inter-entry spacing an inline h2 can no longer provide. */
+  /* Body-sized admin line; a paragraph-sized gap above each entry. The
+     screen rule's h2:first-child still zeroes the first entry's top. */
   .resume-content h2 {
-    display: inline;
-  }
-
-  .resume-content h2::before {
-    content: "";
-    display: block;
-    /* Paragraph-sized gap between sections */
-    margin-top: 0.75rem;
-  }
-
-  .resume-content h2:first-of-type::before {
-    margin-top: 0;
-  }
-
-  .resume-content h2::after {
-    content: ", ";
-  }
-
-  .resume-content h2 + p {
-    display: inline;
+    margin: 0.75rem 0 0.15rem;
   }
 
   .resume-content p {
     margin: 0.15rem 0;
     page-break-inside: avoid;
-  }
-
-  .resume-content strong {
-    font-weight: 700;
   }
 
   .resume-content ul {

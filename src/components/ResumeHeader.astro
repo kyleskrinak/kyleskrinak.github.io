@@ -14,7 +14,7 @@
  * The slot carries page-specific extras (the public page's download link).
  */
 type Props = {
-  title: string;
+  name: string;
   contactEmail?: string;
   contactWebsite?: string;
   contactLinkedin?: string;
@@ -23,7 +23,7 @@ type Props = {
 };
 
 const {
-  title,
+  name,
   contactEmail,
   contactWebsite,
   contactLinkedin,
@@ -35,7 +35,7 @@ const stripScheme = (url: string) => url.replace(/^https?:\/\//i, "");
 ---
 
 <div class="resume-header">
-  <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
+  <h1 class="text-2xl font-semibold sm:text-3xl">{name}</h1>
   <div class="contact-info">
     {contactEmail && (
       <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>

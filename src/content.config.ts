@@ -102,6 +102,10 @@ const pages = defineCollection({
 		contactWebsite: httpUrl.optional(),
 		contactLinkedin: httpUrl.optional(),
 		contactAddress: z.string().trim().min(1).optional(),
+		// The resume's name line: the h1 on both resume routes, and so the
+		// first line of the PDF, .docx and .txt and the .docx's title and
+		// author. Required there; both routes throw without it.
+		name: z.string().trim().min(1).optional(),
 		// Source of truth for the resume's lead heading and employer line (both
 		// injected into the body at <!-- current-role -->), the page meta
 		// description, and the About page's current-position sentence and its
@@ -125,12 +129,9 @@ const pages = defineCollection({
 				skills: z.array(z.string().trim().min(1)).min(1),
 			})),
 		}).optional(),
-		// No `certifications` here by decision: certification data lives in
-		// scripts/data/certifications.json, validated by build-resume-variant.mjs
-		// (validateCertificationsData). A schema block here validated nothing —
-		// the resume frontmatter carries no such key — and reading it as the
-		// contract is what made the JSON validator look optional.
-		// See docs/features/resume-source.md.
+		// No `certifications` here by decision: Manager Tools puts no
+		// certifications on a resume, tailored variants included
+		// (docs/references/manager-tools-rubric.md).
 		// Injected into the body at <!-- education -->, one section per item with
 		// render: true. `degree` holds the formal name for data reuse;
 		// `degree_abbr` is what the one-page resume prints as its heading.

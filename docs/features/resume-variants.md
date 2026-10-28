@@ -1,8 +1,10 @@
 # Resume Variants
 
-Resume variants are local, disposable PDFs built from the published resume page with small DOM transforms. The public `/resume/` page and the canonical generated resume PDF remain unchanged unless you edit the resume source itself.
+Resume variants are local, disposable resumes (PDF, .docx and .txt) built from the published resume page with small DOM transforms. The public `/resume/` page and the canonical generated resume PDF remain unchanged unless you edit the resume source itself.
 
 Use this workflow when you need a tailored one-page resume for a specific job role without changing the published default.
+
+A variant follows every rule in the [Manager Tools rubric](../references/manager-tools-rubric.md) and varies only which accomplishments appear. It adds nothing: no headline, no skills section, no certifications. Headings, which carry each role's admin line, and scope paragraphs always stay.
 
 ## How do I restructure my resume for a specific job role?
 
@@ -22,22 +24,19 @@ Then restructure the resume with this workflow:
 
 1. Create a variant JSON file outside the repo, usually in your private resume variants folder.
 2. Set `include_facets` to emphasize the role's themes. Add `exclude_facets` only when a theme is clearly distracting.
-3. Use `max_bullets_per_entry` to keep the PDF to one page. Trim weakest job bullets first.
-4. Use `bullet_order` only when the best bullet for a role is not already first after filtering.
-5. Add `include_certs` when certifications strengthen the role match.
-6. Add `include_skills` when the role screens on named technologies or competencies.
-7. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly.
+3. Use `bullet_order` to rank accomplishments by relevance to the role: one list for the whole page, most relevant first. Manager Tools sets no bullet count, so choose across the whole page rather than capping each entry.
+4. Build the variant, review the PDF visually, and adjust the config until the one-page result reads correctly. If the page has room, keep another relevant accomplishment.
 
 ## Variant config example
 
 ```json
 {
-  "title": "Kyle Skrinak - Platform Operations Leader",
   "include_facets": ["platform-ops", "leadership", "cost"],
-  "max_bullets_per_entry": 3,
-  "include_certs": ["az-104", "aiops-foundation"],
-  "include_skills": ["platform-ops", "cloud-infrastructure", "cost-optimization"],
-  "skills_anchor_before_id": "ms-it"
+  "bullet_order": [
+    "senior-it-systems-engineering-manager-digital-experience/2",
+    "senior-manager-it/0",
+    "senior-it-systems-engineering-manager-digital-experience/0"
+  ]
 }
 ```
 
@@ -45,70 +44,21 @@ Supported fields:
 
 | Field | Purpose |
 |---|---|
-| `title` | Optional resume title override. |
 | `include_facets` | Keep tagged bullets that match at least one listed facet. Untagged bullets always render. |
 | `exclude_facets` | Remove tagged bullets that match any listed facet. Exclude wins over include. |
-| `max_bullets_per_entry` | Cap kept bullets per resume entry. |
-| `bullet_order` | Reorder kept bullets by post-filter index for a specific entry id. |
-| `include_certs` | Add certifications by id, or use `"all"` for file order. Omitted or `[]` means no cert section. |
-| `anchor_before_id` | Optional per-variant cert placement override. Must match a rendered resume `h2` id. |
-| `include_skills` | Add skill categories by id, or use `"all"` for source order. Omitted or `[]` means no skills section. |
-| `skills_anchor_before_id` | Skills placement. Falls back to `anchor_before_id`. Must match a rendered resume `h2` id. |
+| `bullet_order` | The bullets to keep across the whole page, as `"<entry id>/<n>"` items, most relevant first. |
 
-## Skills data
+Any other key fails validation. That includes the retired `title`, `max_bullets_per_entry`, `include_certs`, `anchor_before_id`, `include_skills`, and `skills_anchor_before_id`, so a stale config fails loudly instead of building a resume the rubric rules out.
 
-Skill categories live in the resume frontmatter under `skills_inventory.categories` — nine categories, each with an `id`, a `name`, and a `skills` list. They do **not** render on the published resume; they are the reservoir a variant draws from. See [Resume Source and Data Flow](./resume-source.md).
+## Choosing bullets with `bullet_order`
 
-```json
-{
-  "include_skills": "all",
-  "skills_anchor_before_id": "ms-it"
-}
-```
-
-Rules:
-
-- `include_skills` is an array of category ids or the string `"all"`. An array selects in **config order**; `"all"` keeps source order.
-- Requesting skills requires an anchor. Certs default theirs from `certifications.json`; skills have no data file to default from, so the config must supply `skills_anchor_before_id` or `anchor_before_id`, or validation fails.
-- Duplicate or unknown category ids fail validation.
-- When skills and certs share an anchor, skills are injected first, so the Skills section sits above Certifications.
-- Category ids are **not** facets. `include_facets` filters bullets from the 7-item `FACETS` vocabulary; `include_skills` selects from the 9 category ids. The two lists overlap in wording and are deliberately separate.
-
-## Certification data
-
-Certification metadata lives in `scripts/data/certifications.json`:
-
-```json
-{
-  "anchor_before_id": "ms-it",
-  "certifications": [
-    {
-      "id": "aiops-foundation",
-      "name": "AIOps Foundation",
-      "issuer": "PeopleCert",
-      "issued": "2026-01",
-      "expires": "2029-01"
-    },
-    {
-      "id": "az-104",
-      "name": "Microsoft Certified: Azure Administrator Associate (AZ-104)",
-      "issuer": "Microsoft"
-    }
-  ]
-}
-```
-
-Rules:
-
-- `id` and `name` are required and must be non-empty.
-- `issuer` is optional but must be non-empty when present.
-- `issued` is optional and must use `YYYY-MM`.
-- `expires` is optional, must use `YYYY-MM`, and must fall **after** `issued` when both are present. Equal months fail validation. Omit it for a credential that does not lapse.
-- Rendering follows what is present: both dates give `Name — Issuer (2026-01 – 2029-01)`, `issued` alone gives `(2026-01)`, and `expires` alone gives `(expires 2029-01)` so a lone date is never mistaken for an issue month.
-- Duplicate certification ids fail validation.
-- `anchor_before_id` sets the default insertion point for the Certifications section.
-- A variant config can override placement with its own `anchor_before_id`.
-- `facets` on certification entries is not supported yet and fails validation.
+- `bullet_order` is one ranked list for the whole page. Each item names one bullet as `"<entry id>/<n>"`, so `"senior-manager-it/0"` is that role's first bullet.
+- The entry id is the `id` of a rendered resume `h2`. The builder derives the valid set from the expanded resume source through `headingIds()` in `src/lib/resume-sections.mjs`, the function that also sets the page's ids, so a renamed role cannot leave a stale item behind.
+- A job's id comes from its title alone (`senior-manager-it`). The dates and company fold into the heading after the id is set, so a config survives a date change. Renaming a title changes its id.
+- `n` counts the entry's bullets as written in the resume source, starting at 0, before any facet filter. An index past the end, a duplicate item, or an item naming a bullet the facets exclude fails the build.
+- Each bullet stays under its own entry; the list's order sets the order within each entry. Entries keep their resume order.
+- An unlisted bullet drops. An entry the list never names keeps its heading and scope, loses every bullet, and prints a warning in the terminal.
+- Without `bullet_order`, every bullet the facets pass renders, in source order.
 
 ## Build a variant
 
@@ -122,36 +72,40 @@ Config resolution order:
 2. `$RESUME_VARIANTS_DIR/<name>.json`.
 3. `~/Claude/Projects/KDS Resume/variants/<name>.json`.
 
-By default, the PDF is written next to the variant config. Pass `--output` to choose another path:
+One render writes all three formats, so they carry the same content. By default the builder writes `<variant>.pdf`, `<variant>.docx` and `<variant>.txt` next to the variant config. Pass `--output` to name the PDF somewhere else; the other two go beside it under the same base name. `--output` must end in `.pdf`:
 
 ```bash
 npm run resume:variant -- --variant ~/resume-variants/platform-ops.json --output /tmp/platform-ops.pdf
 ```
 
-Use `--base-url` only when the remote page matches the local resume source. The variant builder validates entry ids against the local markdown, then transforms the loaded page DOM; stale remote content can fail anchor lookup.
+Pass `--formats` to write a subset, as a comma-separated list of `pdf`, `docx` and `txt`:
+
+```bash
+npm run resume:variant -- --variant platform-ops --formats pdf,docx
+```
+
+The PDF renders even when `--formats` leaves it out, because the one-page check runs on it.
+
+Use `--base-url` only when the remote page matches the local resume source. The variant builder validates entry ids against the local markdown, then transforms the loaded page DOM, so stale remote content can carry different entries or bullets than the config names.
 
 ## Validation and failure behavior
 
-The builder fails before writing a PDF when:
+The builder writes no file of any format when:
 
 - The variant config has unknown keys or malformed values.
-- A facet id, cert id, skill category id, entry id, or section anchor is unknown.
-- `certifications.json` is missing or malformed when certs are requested.
-- `skills_inventory.categories` is absent or empty when skills are requested, or a category's
-  `skills` list is empty or holds a non-string or blank member. The members are checked because
-  the Node path parses the frontmatter as raw YAML, so the content-collection schema never runs
-  on it, and a blank or numeric entry would reach the injected list as skill text.
-- Skills are requested without an anchor to insert before.
-- The cert or skills section cannot be injected at the requested anchor.
-- A requested certification's **whole list item** — name, issuer, and date suffix — or a requested skill category name is missing from the rendered list. The cert check is deliberately the full line rather than the name alone, so a date suffix the injector built wrong cannot pass on the name.
+- A facet id or entry id is unknown.
+- A `bullet_order` item is malformed, listed twice, past the end of its entry, or names a bullet the facets exclude.
+- The rendered page is missing the title, the contact details, or any heading's full text. Each role's heading carries its whole admin line.
+- Any bullet or admin line runs past one printed line.
 - The rendered resume is not exactly one page.
+- The .docx or .txt does not read back to the printed page's text, bold, underline, links and bullets.
 
-If the one-page gate fails, reduce job bullets first with `max_bullets_per_entry`, `include_facets`, or `exclude_facets`. If certs or skills caused the overflow, reduce `include_certs` or `include_skills`.
+If a bullet wraps, tighten it in the resume source or drop it from the variant. If an admin line wraps, shorten its title or company in the resume source. If the one-page gate fails, drop the last items from `bullet_order` or narrow the facets. Never shrink the type: no print text goes below 11pt, except the admin line's 10.5pt Arial Bold [Kyle].
 
 ## Operational notes
 
-- Variants are local, one-off artifacts; visually inspect the generated PDF before sending.
+- Variants are local, one-off artifacts; visually inspect the generated PDF before sending. Before uploading the .docx or .txt to an applicant tracking system, check how the site renders the upload.
 - The published resume body remains the source of truth for default output.
 - The variant builder does not run `astro build`; run `npm run build` first unless using `--base-url`.
 - The default preview port is `4323`, shared by `build-resume-variant.mjs` and `print-resume-pdf.mjs` — one variable, one port. Override both with `RESUME_PREVIEW_PORT` if another process is using it. Neither defaults to `4321`; that is the dev server's port, and a preview started there cannot bind, so the render would silently take the dev server's output instead of `dist/`.
-- Variant PDFs should stay outside the repository unless intentionally captured.
+- Variant files should stay outside the repository unless intentionally captured.
