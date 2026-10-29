@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getBlogPosts } from "@/utils/getBlogPosts";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { getPath } from "@/utils/getPath";
-import { RESUME_DOCX_PATH, RESUME_PDF_PATH, SITE } from "@/config";
+import { SITE } from "@/config";
 import presentations from "@/data/presentations.json";
 
 /**
@@ -11,7 +11,7 @@ import presentations from "@/data/presentations.json";
  *
  * Pages included:
  * - Home page
- * - Static content pages (about, archives, lchf, resume, stack, presentations)
+ * - Static content pages (about, archives, lchf, stack, presentations)
  * - Individual blog posts
  * - Presentation pages (/presentations/<id>/) and their HTML decks
  *
@@ -66,7 +66,6 @@ export const GET: APIRoute = async ({ site }) => {
     { path: "" },          // Home page
     { path: "about/" },    // About page
     { path: "lchf/" },     // LCHF content page
-    { path: "resume/" },   // Resume page (/resume/print/ is noindex and intentionally NOT listed)
     { path: "stack/" },    // Technology stack page
     { path: "presentations/" }, // Presentations listing
   ];
@@ -104,12 +103,6 @@ export const GET: APIRoute = async ({ site }) => {
   const archiveFiles: SitemapEntry[] = [
     "blog-archive.pdf",
     "presentations-archive.pdf",
-    // Same pattern: built by the ensure-release-pdfs action. The /resume/print/
-    // HTML page that generates them is noindex and intentionally NOT listed.
-    // The .docx is listed so recruiters' searches can find the editable copy;
-    // the .txt is not, since a plain-text duplicate adds nothing to an index.
-    RESUME_PDF_PATH,
-    RESUME_DOCX_PATH,
   ].map(path => ({ path }));
 
   // Presentation pages, one per presentations.json entry — the same data
