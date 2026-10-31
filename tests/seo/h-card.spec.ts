@@ -18,7 +18,7 @@ const resolveUrl = (path: string) => {
 const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
 
 /**
- * The footer h-card is what lets sites receiving a webmention identify the author.
+ * The footer h-card is what lets a microformats parser identify the author.
  * Visual baselines only catch pixel drift -- they would pass just as happily with
  * p-name dropped or u-url pointing at the wrong origin, which is exactly what breaks
  * that identification. These assertions pin the microformat contract itself.

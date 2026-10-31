@@ -182,7 +182,7 @@ tests/visual/visual-regression.spec.ts-snapshots/  # Committed to repo
   ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
   ├── blog-archive-desktop-visual-desktop.png
   ├── home-page-desktop-visual-desktop.png
-  └── ... (42 baseline images: 21 screenshots × 2 projects)
+  └── ... (45 baseline images: 21 screenshots × 2 projects, plus 3 desktop-only OG images)
 ```
 
 **Baseline Workflow:**
@@ -310,7 +310,7 @@ tests/
 │       ├── about-desktop-visual-desktop.png       # {arg}-{project}.png (no OS suffix)
 │       ├── blog-archive-desktop-visual-desktop.png
 │       ├── home-page-desktop-visual-desktop.png
-│       └── ... (42 snapshots: 21 screenshots × 2 projects)
+│       └── ... (45 snapshots: 21 screenshots × 2 projects, plus 3 desktop-only OG images)
 playwright.config.ts (configuration)
 scripts/visual-test.sh (helper script)
 ```

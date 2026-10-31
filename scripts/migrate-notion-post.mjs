@@ -18,6 +18,9 @@
  *   NOTION_BLOG_BACKLOG_DATA_SOURCE_ID   required
  *   GH_TOKEN                            required unless --dry-run
  *   GITHUB_OUTPUT                       optional; if unset, outputs are logged
+ *   SITE_URL                            optional; post-url origin. Defaults
+ *                                       to production; must be http(s).
+ *                                       Checked before any Notion read.
  *
  * Exits 0 with no output written when there is nothing to migrate. When the
  * selected page has already been migrated, the idempotency guards below
@@ -43,6 +46,7 @@ import {
 	createPostDirectory,
 	writePostIndex,
 } from './lib/post-scaffold.mjs';
+import { resolveSiteUrl } from './lib/pdf-helpers.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -142,8 +146,7 @@ export function fenceFor(code) {
 	return '`'.repeat(Math.max(3, longest + 1));
 }
 
-// Notion link hrefs are untrusted external input — same rationale as
-// safeHttpUrl() in src/components/Webmentions.astro: reject anything that
+// Notion link hrefs are untrusted external input: reject anything that
 // isn't http(s) so a "javascript:"/"data:" URL can't be emitted into a
 // generated post. Notion hrefs are always absolute (not repo-relative), so
 // an http(s)-only allowlist doesn't risk breaking valid relative links.
@@ -369,6 +372,11 @@ async function main() {
 		process.exit(1);
 	}
 
+	// The site origin for the post-url output. resolveSiteUrl() trims SITE_URL,
+	// falls back to production, and throws on an invalid value, so it runs here,
+	// before any Notion read or filesystem write.
+	const siteUrl = resolveSiteUrl();
+
 	const notion = new Client({ auth: process.env.NOTION_API_TOKEN });
 
 	const queryRes = await notion.dataSources.query({
@@ -454,10 +462,6 @@ async function main() {
 		console.log(`Created ${indexPath}`);
 	});
 
-	// SITE_URL override, production default — same pattern as
-	// scripts/send-webmentions.mjs, so the canonical domain stays
-	// single-sourced if it ever changes.
-	const siteUrl = (process.env.SITE_URL || 'https://kyle.skrinak.com/').replace(/\/+$/, '');
 	const postUrl = `${siteUrl}/posts/${slug}/`;
 	await writeOutput('post-url', postUrl);
 
@@ -466,7 +470,7 @@ async function main() {
 
 // Only run when invoked directly, so the pure functions above stay importable
 // (e.g. by tests/unit/migrate-notion-post.test.mjs) without instantiating the
-// Notion client or exiting the process. Same pattern as send-webmentions.mjs.
+// Notion client or exiting the process.
 if (
 	process.argv[1] &&
 	import.meta.url === pathToFileURL(process.argv[1]).href

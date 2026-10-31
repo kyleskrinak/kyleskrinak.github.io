@@ -1,5 +1,6 @@
-// Determine website URL: SITE_URL is set by all build workflows.
-// Local dev without SITE_URL falls back to the production URL.
+// Determine website URL: pr-visual-check.yml and production-deploy.yml set
+// SITE_URL. linkwatch.yml and local dev leave it unset and fall back to the
+// production URL.
 // To test with a different URL locally, set SITE_URL explicitly.
 //
 // NOTE: Uses process.env instead of astro:env because this runs at build time before
