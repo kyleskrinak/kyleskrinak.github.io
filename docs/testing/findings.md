@@ -23,7 +23,7 @@ Visual regression testing comparing local development to production revealed **n
 **Local Baseline Generation**: ✅ 36/36 passed (29.7s)
 - Home page (desktop & mobile)
 - Blog archive and individual posts
-- Tag pages and category archives
+- Tag pages
 - About, search, archives pages
 - Responsive viewports (320px - 1920px)
 - Hero image rendering

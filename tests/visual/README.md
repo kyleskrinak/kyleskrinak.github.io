@@ -64,7 +64,6 @@ npm run test:visual:report
 - ✓ Blog archive
 - ✓ Individual blog posts (multiple examples)
 - ✓ Tag pages
-- ✓ Category archive
 - ✓ About page
 - ✓ Search page
 - ✓ Archives page
@@ -74,7 +73,6 @@ npm run test:visual:report
 - ✓ Mobile Large (414x896 - iPhone 11 Pro Max)
 - ✓ Tablet (768x1024 - iPad)
 - ✓ Desktop (1920x1080)
-- ✓ Desktop (1366x768)
 
 ### Features
 - ✓ Hero image rendering
@@ -125,7 +123,7 @@ npm run test:visual:report
 ## Understanding Test Results
 
 ### Passing Tests ✓
-All screenshots match baselines within tolerance (0.1% diff allowed for antialiasing).
+Each page screenshot differs from its baseline by at most 100 pixels (`PAGE_MAX_DIFF_PIXELS` in the spec). Playwright's default per-pixel threshold already ignores faint antialiasing differences.
 
 ### Failing Tests ✗
 Visual differences detected. Options:
@@ -251,7 +249,7 @@ timeout: 60000 // 60 seconds
 
 ### Flaky tests on CI
 - Disable animations: `prefers-reduced-motion: reduce`
-- Increase tolerance: `maxDiffPixelRatio: 0.15`
+- Find what varies before raising `PAGE_MAX_DIFF_PIXELS`. Docker renders match their baselines exactly, so a count that changes between runs points to the page or the test. A test that scrolls must return to the top before its screenshot, because the scroll-progress bar and the back-to-top button follow the scroll position (see `waitForCardImagesLoaded`).
 - Retry on CI: Set `retries: 2` in config
 
 ### "A preview server is live on port N, which blocks this run"
@@ -297,7 +295,7 @@ detection (it otherwise detaches the preview inside an agent session, and the su
 blocks every later run). Any value works — only an *unset* variable detaches.
 
 ### Different rendering on Mac vs Linux
-`snapshotPathTemplate` removes the OS suffix, so committed baselines *resolve* on any platform — but macOS and Ubuntu font metrics differ enough that `maxDiffPixelRatio: 0.1` doesn't absorb it; expect the height-diff failures described in [Baseline Management](#baseline-management). Regenerate baselines with `npm run test:visual:baseline:docker` rather than raising the tolerance — a looser tolerance would also mask real regressions.
+`snapshotPathTemplate` removes the OS suffix, so committed baselines *resolve* on any platform — but macOS and Ubuntu font metrics differ far beyond the 100-pixel `PAGE_MAX_DIFF_PIXELS` limit; expect the height-diff failures described in [Baseline Management](#baseline-management). Regenerate baselines with `npm run test:visual:baseline:docker` rather than raising the tolerance — a looser tolerance would also mask real regressions.
 
 ## File Structure
 
