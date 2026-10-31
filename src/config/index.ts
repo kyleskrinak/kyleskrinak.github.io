@@ -14,7 +14,7 @@ export const SITE = {
   website,
   author: "Kyle Skrinak",
   profile: "https://github.com/kyleskrinak",
-  desc: "Won't you join my musings on all things web, better living through low-carb, and whatever else tickles my fancy. Your muse's experience may vary.",
+  desc: "What I learn by doing: web platforms, security, AI-assisted development and stuff.",
   title,
   shortName: title, // manifest short_name — derived so it can't drift from the brand name
   themeColor: "#0096ff",
