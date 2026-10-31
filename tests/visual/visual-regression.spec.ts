@@ -81,7 +81,7 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
 // baselines, because the baseline update rewrites only snapshots that fail.
 // Docker renders matched their baselines exactly over five passes (2026-10-31),
 // so the allowance covers CI, which renders natively on ubuntu-latest.
-const PAGE_MAX_DIFF_PIXELS = 100;
+const PAGE_MAX_DIFF_PIXELS = 0;
 
 test.describe('Visual Regression - Home Page', () => {
   test('home page desktop should match baseline', async ({ page }) => {
