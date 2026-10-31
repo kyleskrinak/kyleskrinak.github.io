@@ -312,7 +312,6 @@ const testEnvVars = new Set([
   'ARCHIVE_PREVIEW_PORT',           // scripts/build-archive-pdf.mjs (preview port override)
   'RESUME_PREVIEW_PORT',            // print-resume-pdf.mjs + build-resume-variant.mjs (port override)
   'RESUME_VARIANTS_DIR',            // scripts/build-resume-variant.mjs (variants dir override)
-  'WEBMENTION_EXPECTED_HOST',       // scripts/send-webmentions.mjs (test seam)
   'NOTION_API_TOKEN',               // scripts/migrate-notion-post.mjs, scripts/notion-writeback.mjs
   'NOTION_BLOG_BACKLOG_DATA_SOURCE_ID', // scripts/migrate-notion-post.mjs
   'GH_TOKEN',                       // scripts/migrate-notion-post.mjs (gh CLI open-PR guard)
@@ -406,8 +405,10 @@ for (const file of allSourceFiles) {
 //
 // Design decision: src/config/index.ts uses process.env with a hardcoded production URL fallback
 // instead of astro:env because it runs at build initialization before Astro env is fully available.
-// All workflows set SITE_URL explicitly, so the fallback only applies in local dev.
-// We validate the literal against the registry to prevent drift.
+// pr-visual-check.yml and production-deploy.yml set SITE_URL explicitly; linkwatch.yml and local
+// dev build without it and use the fallback. We validate the literal against the registry to
+// prevent drift. resolveSiteUrl() in scripts/lib/pdf-helpers.mjs holds a second copy of the
+// literal, which this check does not cover.
 if (existsSync('src/config/index.ts')) {
   const configContent = readFileSync('src/config/index.ts', 'utf-8');
 

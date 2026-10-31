@@ -19,12 +19,12 @@ const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
 
 /**
  * The h-entry markup in PostDetails.astro is the machine-readable representation of
- * every post: what a webmention receiver, a reader, or an aggregator parses when it
- * pulls this site's content. Nothing else in the suite covers it. A dropped or
- * misplaced class passes lint, `astro check`, the build, the link check, and all 42
- * visual baselines in silence -- pixels are identical whether or not `e-content` is
- * on the article. These assertions pin the microformat contract itself, the way
- * h-card.spec.ts does for the footer card.
+ * every post: what a reader or an aggregator parses when it pulls this site's
+ * content. Nothing else in the suite covers it. A dropped or misplaced class passes
+ * lint, `astro check`, the build, the link check, and every visual baseline in
+ * silence -- pixels are identical whether or not `e-content` is on the article.
+ * These assertions pin the microformat contract itself, the way h-card.spec.ts does
+ * for the footer card.
  *
  * No microformats parser is installed in this project, so the properties are
  * asserted through DOM selectors rather than by parsing the document.
@@ -56,10 +56,7 @@ test.describe('Post h-entry', () => {
 		await expect(page.locator('main.h-entry')).toHaveCount(1);
 
 		// A nested h-entry would re-root every property below it onto the inner entry,
-		// silently emptying the outer one. <Webmentions /> renders *inside* main.h-entry
-		// and emits no microformats classes today; the day it renders mentions as
-		// h-cite/h-card, this assertion starts failing from remote data, not from a
-		// layout change. That is where to look first.
+		// silently emptying the outer one.
 		await expect(page.locator('.h-entry .h-entry')).toHaveCount(0);
 	});
 
@@ -85,7 +82,8 @@ test.describe('Post h-entry', () => {
 		const content = page.locator('.e-content');
 		await expect(content).toHaveCount(1);
 		// Anchored to the article element: e-content landing on a wrapper would hand
-		// consumers the surrounding chrome (tags, share links, webmentions) as the post.
+		// consumers the surrounding chrome (tags, share links, the email reply link)
+		// as the post.
 		await expect(page.locator('article#article.e-content')).toHaveCount(1);
 	});
 

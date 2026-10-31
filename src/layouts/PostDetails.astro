@@ -9,7 +9,6 @@ import Datetime from "@/components/Datetime.astro";
 import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import ReplyViaEmail from "@/components/ReplyViaEmail.astro";
-import Webmentions from "@/components/Webmentions.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import { getPath } from "@/utils/getPath";
@@ -48,10 +47,10 @@ const { Content } = await render(post);
 
 /* ========== Microformats2 ==========
    The h-entry's u-url is this page, not `canonicalURL` from frontmatter: a
-   post may declare an external canonical for SEO, but a webmention receiver
-   fetches the URL we sent as the source and needs the entry to identify that
-   page. Derived the same way Layout derives its canonical so the two agree
-   whenever frontmatter does not override it. */
+   post may declare an external canonical for SEO, but this entry describes
+   this page, so its URL has to point here. Derived the same way Layout
+   derives its canonical so the two agree whenever frontmatter does not
+   override it. */
 const postUrl = new URL(
   canonicalizePathname(Astro.url.pathname, import.meta.env.BASE_URL),
   Astro.site
@@ -154,7 +153,7 @@ const nextPost =
     {/* Microformats2 identity for this entry. No visible author chrome exists
         on a post page to carry these, and adding one would change the layout,
         so they ride on a hidden block: parsers read the DOM and ignore
-        `hidden`, which is what a webmention receiver does with this page.
+        `hidden`.
         u-photo is an <img> and u-url an <a> because those are the primary
         element rules for u-* — a parser reaches them before any fallback. */}
     <div class="post-identity" hidden>
@@ -222,8 +221,6 @@ const nextPost =
     <ShareLinks />
 
     <ReplyViaEmail {title} />
-
-    <Webmentions />
 
     <hr class="my-6 border-dashed" />
 

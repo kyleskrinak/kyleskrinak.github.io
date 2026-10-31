@@ -1,7 +1,6 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import Socials from "./Socials.astro";
-import Webring from "./Webring.astro";
 import { SITE } from "@/config";
 import { linkWithBase } from "@/utils/linkWithBase";
 
@@ -39,7 +38,6 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
       <span>All rights reserved.</span>
     </div>
   </div>
-  <Webring />
 
   {
     isHome && (

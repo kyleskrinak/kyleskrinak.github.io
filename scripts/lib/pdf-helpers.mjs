@@ -1,12 +1,14 @@
 /**
- * Shared helpers for the PDF-generation scripts. One implementation of CLI flag
- * parsing, preview-port resolution, and the astro-preview server lifecycle, so
- * fixes land everywhere.
+ * Shared helpers for the PDF-generation scripts and migrate-notion-post.mjs.
+ * One implementation of CLI flag parsing, preview-port resolution, the
+ * astro-preview server lifecycle, and site-origin resolution, so fixes land
+ * everywhere.
  *
  * Preview-lifecycle consumers: build-archive-pdf.mjs and lib/resume-render.mjs
  * (shared by print-resume-pdf.mjs and build-resume-variant.mjs).
  * build-presentations-pdf.mjs starts no preview server, so it uses parseFlags,
- * resolveSiteUrl and rewriteToProductionUrl only.
+ * resolveSiteUrl and rewriteToProductionUrl only. migrate-notion-post.mjs, not
+ * a PDF script, imports resolveSiteUrl alone for the URL of a migrated post.
  */
 
 import { spawn } from "node:child_process";
@@ -201,10 +203,9 @@ export async function waitForServer(url, { timeoutMs = 60000, child = null } = {
 }
 
 /**
- * The site's public origin, for the one PDF builder that cannot ask the page it
- * is printing. Same env-with-fallback shape as send-webmentions.mjs and
- * migrate-notion-post.mjs. Returns the URL without a trailing slash so callers
- * can append a path directly.
+ * The site's public origin, for scripts that cannot ask a built page for it:
+ * build-presentations-pdf.mjs and migrate-notion-post.mjs. Returns the URL
+ * without a trailing slash so callers can append a path directly.
  *
  * build-archive-pdf.mjs deliberately does NOT use this: it reads the origin out
  * of the page's own print-CSS exclusions instead, so the URL it rewrites links
@@ -224,9 +225,9 @@ export function resolveSiteUrl(env = process.env) {
   } catch {
     throw new Error(`SITE_URL is not a valid absolute URL: ${JSON.stringify(raw)}`);
   }
-  // The result becomes a link target in a published PDF, so only the two web
-  // schemes are meaningful. file: and ftp: parse cleanly and would otherwise
-  // ship as clickable annotations pointing somewhere a reader cannot follow.
+  // The result becomes a link target, in a published PDF or as a migrated
+  // post's URL, so only the two web schemes are meaningful. file: and ftp:
+  // parse cleanly and would otherwise ship as links a reader cannot follow.
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new Error(`SITE_URL must be http or https, got ${JSON.stringify(raw)}`);
   }
