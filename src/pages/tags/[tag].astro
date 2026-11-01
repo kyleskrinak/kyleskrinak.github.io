@@ -35,7 +35,7 @@ const posts = (await getBlogPosts())
   <Header />
   <Main pageTitle={["Tag: ", tagName]} titleTransition={tag}>
     <ul>
-      {posts.map(post => <Card {...post} variant="h3" />)}
+      {posts.map(post => <Card {...post} />)}
     </ul>
   </Main>
   <Footer />
