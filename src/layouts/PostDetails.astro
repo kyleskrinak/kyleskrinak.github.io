@@ -180,17 +180,20 @@ const nextPost =
             HERO_IMAGE's fit + position route to Sharp's resize at build time
             so the generated hero is cropped from the part of the source image
             specified by frontmatter `imagePosition` (default: center).
-            densities={[1, 2]} emits a 1x/2x srcset; sources <2400px wide get
-            only the 1x candidate (Sharp skips upscaling). */}
+            The site-wide `layout: "constrained"` in astro.config.ts generates
+            the width-based srcset (640w–2400w; Sharp skips upscaling), and
+            `sizes` picks the candidate. The 736px is `max-w-app` (768px) minus
+            the `px-4` gutters of `app-layout` in global.css: update it if that
+            container changes. */}
         <Image
           src={image}
           alt={alt || "Post hero image"}
           {...HERO_IMAGE}
           position={imagePosition || "center"}
-          densities={[1, 2]}
-          sizes={`(max-width: 640px) 100vw, (max-width: 1024px) 90vw, ${HERO_IMAGE.width}px`}
+          sizes="(max-width: 768px) calc(100vw - 2rem), 736px"
           loading="eager"
           decoding="sync"
+          fetchpriority="high"
           class="u-featured rounded-lg shadow-md"
         />
         {caption && (
@@ -235,7 +238,7 @@ const nextPost =
             <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
             <div>
               <span>Previous Post</span>
-              <div class="text-sm text-accent/85">{prevPost.title}</div>
+              <div class="text-sm text-accent">{prevPost.title}</div>
             </div>
           </a>
         )
@@ -248,7 +251,7 @@ const nextPost =
           >
             <div>
               <span>Next Post</span>
-              <div class="text-sm text-accent/85">{nextPost.title}</div>
+              <div class="text-sm text-accent">{nextPost.title}</div>
             </div>
             <IconChevronRight class="inline-block flex-none rtl:rotate-180" />
           </a>

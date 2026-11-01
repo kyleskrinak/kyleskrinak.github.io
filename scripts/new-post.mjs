@@ -15,8 +15,8 @@
  * via the project's existing sharp dependency. WebP/AVIF/SVG/GIF are copied
  * as-is. The first image becomes the frontmatter `image:` and the rest
  * are emitted as inline `![alt](./<basename>)` references in the body.
- * Hero sources narrower than 2400px emit a retina warning (the hero renders
- * at 1200px 1x / 2400px 2x via PostDetails.astro densities={[1, 2]}).
+ * Hero sources narrower than 2400px emit a retina warning (the hero's srcset
+ * tops out at 2400w; see the hero <Image> comment in PostDetails.astro).
  */
 import { readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';

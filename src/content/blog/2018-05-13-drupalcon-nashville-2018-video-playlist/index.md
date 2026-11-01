@@ -14,7 +14,7 @@ description: Below is my list of videos to catch up on DrupalCon Nashville 2018.
 
 Below is my list of videos to catch up on DrupalCon Nashville 2018. The first is the youtube embed of my public playlist, followed by the exported links for non-js browsers.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLHdTfMnfIBBIRQBp5IzyS3dsC8rC44iEC" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLHdTfMnfIBBIRQBp5IzyS3dsC8rC44iEC" title="DrupalCon Nashville 2018 YouTube playlist" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 * [DrupalCon Nashville 2018: Driesnote](https://www.youtube.com/watch?v=8HkOdpNT8Ec)
 * [DrupalCon Nashville 2018: Keynote: Drupal and the secret of my success \| Steve Francia](https://www.youtube.com/watch?v=EJo9tPXGPo8)
