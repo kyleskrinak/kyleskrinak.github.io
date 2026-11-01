@@ -15,7 +15,7 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 - 🎨 **Responsive** - Works on all devices
 - 🌙 **Dark mode** - Light and dark theme toggle
 - 🔍 **Full-text search** - Powered by Pagefind
-- ♿ **Accessible** - Lighthouse Accessibility score 93 on production
+- ♿ **Accessible** - Lighthouse Accessibility score 100 on production
 - 📱 **Mobile-first** - Perfect on phones, tablets, desktops
 - 📊 **SEO-friendly** - Sitemaps, RSS feeds, canonical URLs
 - 🎯 **TypeScript** - Type-safe markdown and configuration
@@ -144,9 +144,9 @@ Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [
 
 ## 📈 Performance
 
-**Lighthouse Scores** (Production, measured 2026-05-25 against three desktop posts, post-Disqus-removal):
-- Performance: 99
-- Accessibility: 93
+**Lighthouse Scores** (Production, measured 2026-11-01 against three desktop posts, after the accessibility fixes):
+- Performance: 100
+- Accessibility: 100
 - Best Practices: 100
 - SEO: 100
 
