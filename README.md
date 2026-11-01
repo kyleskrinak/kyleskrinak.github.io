@@ -11,11 +11,11 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 
 ## ✨ Features
 
-- ⚡ **Fast by default** - Static HTML with 1.4s LCP on production
+- ⚡ **Fast by default** - Static HTML, no server runtime
 - 🎨 **Responsive** - Works on all devices
 - 🌙 **Dark mode** - Light and dark theme toggle
 - 🔍 **Full-text search** - Powered by Pagefind
-- ♿ **Accessible** - Lighthouse Accessibility score 100 on production
+- ♿ **Accessible** - Audited with Lighthouse in light and dark themes
 - 📱 **Mobile-first** - Perfect on phones, tablets, desktops
 - 📊 **SEO-friendly** - Sitemaps, RSS feeds, canonical URLs
 - 🎯 **TypeScript** - Type-safe markdown and configuration
@@ -144,11 +144,7 @@ Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [
 
 ## 📈 Performance
 
-**Lighthouse Scores** (Production, measured 2026-11-01 against three desktop posts, after the accessibility fixes):
-- Performance: 100
-- Accessibility: 100
-- Best Practices: 100
-- SEO: 100
+Current Lighthouse scores live on the [stack page](https://kyle.skrinak.com/stack/).
 
 See [CHANGELOG.md](./CHANGELOG.md) "Jekyll → Astro Migration" section for Jekyll vs. Astro migration benchmarks.
 

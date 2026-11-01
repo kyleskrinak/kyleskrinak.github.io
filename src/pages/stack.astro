@@ -36,7 +36,7 @@ function cleanVersion(v: string | undefined): string {
 
       <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
       <p>
-        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro column reflects production at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a> as measured on 2026-11-01, after an accessibility pass.
+        Before migrating to Astro in January 2026, the site ran on Jekyll. I measured these scores across three matching posts on desktop using Google Lighthouse. The Astro column shows production at <a href="https://kyle.skrinak.com">kyle.skrinak.com</a>, which I measured on 2026-11-01 after the accessibility and image fixes.
       </p>
 
       <table>
@@ -51,7 +51,7 @@ function cleanVersion(v: string | undefined): string {
           <tr>
             <td>Performance</td>
             <td>57</td>
-            <td>100</td>
+            <td>99</td>
           </tr>
           <tr>
             <td>Accessibility</td>
@@ -61,7 +61,7 @@ function cleanVersion(v: string | undefined): string {
           <tr>
             <td>Best Practices</td>
             <td>73</td>
-            <td>100</td>
+            <td>92</td>
           </tr>
           <tr>
             <td>SEO</td>
@@ -72,11 +72,15 @@ function cleanVersion(v: string | undefined): string {
       </table>
 
       <p>
-        Disqus comment embeds used to modestly lower Performance and Best Practices — third-party scripts affect Largest Contentful Paint. After a one-month free trial generated no conversation, I decided a paid Disqus license wasn't worth maintaining for a personal blog and removed the integration. SEO scores 100 on the production URL. Running Lighthouse against a preview URL drops that score because those URLs don't match the canonical address the site declares.
+        Best Practices averages 92 because the 2017 Duke meetup post embeds a Microsoft Sway presentation, which Lighthouse faults for third-party cookies.
       </p>
 
       <p>
-        On 2026-10-31, I ran Lighthouse against every page type in both the light and dark themes. It found accessibility failures: link and badge colors a shade too faint for their backgrounds, breadcrumb links set apart by color alone, a skipped heading level on tag pages, and two embeds without titles. Fixing them brought Accessibility to 100 on every page readers browse. The same audit caught the hero image telling browsers it displays at 1200 pixels wide, when the layout caps it at 736. Desktop readers now download the 750-pixel version instead of the 1200.
+        Disqus comment embeds used to modestly lower Performance and Best Practices — third-party scripts affect Largest Contentful Paint. After a one-month paid trial generated no conversation, I decided a paid Disqus license wasn't worth maintaining for a personal blog and removed the integration. SEO scores 100 on the production URL. Running Lighthouse against a preview URL drops that score because those URLs don't match the canonical address the site declares.
+      </p>
+
+      <p>
+        On 2026-10-31, I ran Lighthouse against every page type in both the light and dark themes. It found accessibility failures: link and badge colors a shade too faint for their backgrounds, breadcrumb links set apart by color alone, a skipped heading level on tag pages, and two embeds without titles. Fixing them brought Accessibility to 100 on the three posts in the table above. The same audit caught the hero image telling browsers it displays at 1200 pixels wide, when the layout caps it at 736. Desktop readers now download a smaller file.
       </p>
 
       <p class="text-sm italic opacity-80">
@@ -84,7 +88,7 @@ function cleanVersion(v: string | undefined): string {
       </p>
 
       <p class="text-sm italic opacity-80">
-        Revised 2026-11-01: re-measured after accessibility and hero image fixes.
+        Revised 2026-11-01: re-measured the Astro column after accessibility and hero image fixes.
       </p>
 
       <h2>Current versions</h2>
@@ -135,7 +139,7 @@ function cleanVersion(v: string | undefined): string {
 
       <ul>
         <li><strong>Zero server runtime.</strong> Every page is a static HTML file. There is nothing to patch, no runtime to exploit, and no server to go down under load.</li>
-        <li><strong>Strong SEO and accessibility by design.</strong> Astro's static output scores SEO 100 on production without extra configuration, and Accessibility 100 after the October 2026 fixes. (An earlier version of the site included Disqus comments lazy-loaded on scroll; after a month of paid trial without engagement I decided the license cost outweighed the value and removed the integration.)</li>
+        <li><strong>Strong SEO and accessibility.</strong> Production scores SEO 100 without extra configuration. Accessibility reached 100 on the comparison posts after an October 2026 pass on theme colors and markup. (An earlier version of the site included Disqus comments lazy-loaded on scroll; after a month of paid trial without engagement I decided the license cost outweighed the value and removed the integration.)</li>
         <li><strong>Full-text search without a backend.</strong> Pagefind builds a search index at deploy time. Readers can search the entire archive without any API call to a server.</li>
         <li><strong>Automatic image optimization.</strong> Sharp resizes and crops every hero image at build time. Browsers receive the right size for their viewport — no oversized images shipped over the wire.</li>
         <li><strong>Dark mode.</strong> Theme toggle persists across sessions, respects system preference on first visit.</li>
