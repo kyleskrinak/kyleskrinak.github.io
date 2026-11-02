@@ -1,6 +1,6 @@
 # Dependency Pins
 
-> Part of the broader [Supply-Chain Security](./supply-chain.md) posture. This page covers **npm `overrides`** specifically; SHA-pinned GitHub Actions and the Docker base image are documented there.
+> Part of the broader [Supply-Chain Security](./supply-chain.md) posture. This page covers **npm `overrides`** and the **direct dependencies held below their latest release**; SHA-pinned GitHub Actions and the Docker base image are documented there.
 
 This site uses `package.json` `overrides` to pin specific transitive dependencies to exact versions. The pins exist to resolve open npm audit advisories without invoking `npm audit fix`, which would also drag in unrelated freshly-published packages.
 
@@ -30,6 +30,15 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 |---|---|---|
 | GHSA-48c2-rrv3-qjmp (yaml stack overflow on deeply nested collections) | `yaml-language-server` → `volar-service-yaml` → `@astrojs/language-server` → `@astrojs/check` | Fix requires `npm audit fix --force`, which downgrades `@astrojs/check` (breaking change). The vulnerable code runs in IDE tooling only — not in the build pipeline or shipped output. |
 
+## Held direct dependencies
+
+| Package | Held at | Blocked by (checked 2026-11-02) | Upstream |
+|---|---|---|---|
+| `typescript` | `~6.0.3` | `typescript-eslint` and `@typescript-eslint/parser` 8.72.1 declare `typescript` `>=4.8.4 <6.1.0`; `@astrojs/check` 0.9.12 declares `^5.0.0 \|\| ^6.0.0`. Against 7.0.2, `npm ci` fails with ERESOLVE ([#273](https://github.com/kyleskrinak/kyleskrinak.github.io/pull/273)). | [typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940) |
+
+- **The tilde matters.** `^6.0.3` admits 6.1 releases, which the `typescript-eslint` ceiling (`<6.1.0`) excludes. `~6.0.3` stays on 6.0.x.
+- **Renovate won't announce TypeScript 7 support.** Closing #273 on 2026-08-11 made Renovate ignore every 7.x release, so the quarterly review checks the peer ranges instead. When both admit 7, tick #273's recreate box under "PR Closed (Blocked)" on the Renovate Dependency Dashboard, or bump `package.json` by hand. After a manual bump, Renovate resumes 7.x minor and patch updates.
+
 ## Operational notes
 
 ### Exact-version pins do not self-update
@@ -51,7 +60,8 @@ npm applies an override even when it violates the range a dependent declares, an
 5. Run `npm audit signatures` to confirm registry signature integrity.
 6. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual`.
 7. Re-evaluate the deferred `yaml` chain — when `@astrojs/check` ships a release that no longer pulls the vulnerable `yaml-language-server`, drop the deferral and update.
-8. Review the **manually pinned** CI/build dependencies (GitHub Action SHAs, Docker base image) — these are excluded from Renovate and do not self-update. See [Supply-Chain Security → Manually pinned](./supply-chain.md#manually-pinned-not-managed-by-renovate).
+8. Re-check the TypeScript hold: run `npm view typescript-eslint peerDependencies` and `npm view @astrojs/check peerDependencies`. When both admit `typescript` 7, follow [Held direct dependencies](#held-direct-dependencies).
+9. Review the **manually pinned** CI/build dependencies (GitHub Action SHAs, Docker base image) — these are excluded from Renovate and do not self-update. See [Supply-Chain Security → Manually pinned](./supply-chain.md#manually-pinned-not-managed-by-renovate).
 
 ### When to remove a pin
 A pin can be removed once the dependency tree naturally resolves to a non-vulnerable version on its own (i.e., a parent package upgraded its dependency range). Verify by temporarily removing the override and running `npm install` followed by `npm audit`. If audit stays clean, the pin is no longer load-bearing.
