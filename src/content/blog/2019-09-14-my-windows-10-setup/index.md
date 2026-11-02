@@ -1,7 +1,7 @@
 ---
 title: My Windows 10 Setup
 pubDate: 2019-09-14T00:00:00.000Z
-updatedDate: 2026-07-16T00:00:00.000Z
+updatedDate: 2026-11-01T00:00:00.000Z
 categories: []
 description: Why Windows and how I like my default Windows 10 configured
 image: ./punch_card.webp
@@ -33,8 +33,9 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
   1. Run [Windows Update](https://windowsupdate.microsoft.com)
       * This can take several restarts
   1. Install [1Password](https://1password.com/)
-  1. Install [Chocolatey](https://chocolatey.org/install) using cmd.exe, installation page found <a href="https://chocolatey.org/install">here</a>.
+  1. Install [Chocolatey](https://chocolatey.org/install) using cmd.exe.
       * `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+      * *Revised 2026-11-01: removed the redundant "installation page found here."*
   1. Restart after chocolatey package install. 
   1. Install chocolatey script for my applications
   1. Enable Hyper-V
@@ -52,7 +53,8 @@ All of which reminds me: time to update my vimrc configuration file. Or should I
           *  `chmod 600 *`
           *  `chmod 644 *.pub`
       * `sudo apt-get update && sudo apt-get install build-essential binutils file openssl libssl-dev`  
-         *(brew won't install without this, see this <a href="https://web.archive.org/web/20190629064424/https://github.com/Homebrew/linuxbrew-core/issues/13596">link</a>)*
+         *(brew won't install without this, see <a href="https://web.archive.org/web/20190629064424/https://github.com/Homebrew/linuxbrew-core/issues/13596">Linuxbrew issue #13596</a>)*
+        * *Revised 2026-11-01: linked the issue by name instead of "this link."*
       * `sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"`
       * It is import to add the linuxbrew path to profile for this to work
       * Helpful cleanup commands:

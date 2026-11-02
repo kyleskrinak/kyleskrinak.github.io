@@ -26,7 +26,7 @@ The timeline also turned up something unexpected. Writing this post exposed a ho
 
 ## Blow by blow
 
-**The news, Sep 2025 to Mar 2026**
+### The news, Sep 2025 to Mar 2026
 
 - Sep 8, 2025: [Attackers published malicious versions of chalk and debug](https://vercel.com/blog/critical-npm-supply-chain-attack-response-september-8-2025) after phishing their maintainer.
 - Sep 15, 2025: [The Shai-Hulud worm spread through stolen npm publishing tokens](https://www.cisa.gov/news-events/alerts/2025/09/23/widespread-supply-chain-compromise-impacting-npm-ecosystem).
@@ -36,7 +36,7 @@ The timeline also turned up something unexpected. Writing this post exposed a ho
 - Mar 31, 2026: [Attackers hijacked the axios maintainer's account and published a malicious axios 1.14.1](https://github.com/axios/axios/issues/10636).
 - None of these hit the blog.
 
-**The setup, May 31, 2026**
+### The setup, May 31, 2026
 
 - Looking for a more secure alternative to Dependabot version updates, Kyle added Renovate for heightened protection against supply-chain attacks.
 - Kyle chose Renovate because a review of the options showed it was a mainstream path for securing the supply chain.
@@ -45,19 +45,19 @@ The timeline also turned up something unexpected. Writing this post exposed a ho
 - Renovate opens PRs against develop, and Kyle vets each one before merging.
 - Dependabot alerts still supply the security findings that Renovate acts on.
 
-**The gap**
+### The gap
 
 - Kyle turned off the repo's Dependabot alerts because they were flooding Kyle's inbox.
 - Turning off alerts also cut off Renovate's security path, because Renovate reads those alerts.
 - Routine PRs kept arriving, so the setup looked healthy.
 
-**The fix**
+### The fix
 
 - Writing this post led Kyle to Renovate's logs, which showed it wasn't receiving any alerts.
 - Kyle turned the alerts back on, and Renovate started opening security PRs again.
 - The security PRs only covered packages Kyle manages directly. To cover the rest, Kyle added weekly lockfile maintenance, which also respects the seven-day wait.
 
-**What it bought**
+### What it bought
 
 - Kyle put defenses in place before any attack reached the blog. Renovate holds routine updates for seven days, and in the recent incidents, npm and the maintainers pulled the malicious releases within hours.
 - Every dependency change now arrives as a PR against develop, so Kyle sees and approves each one instead of trusting an auto-update.

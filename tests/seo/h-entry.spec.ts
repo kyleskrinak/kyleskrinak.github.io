@@ -37,7 +37,7 @@ const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
  *   POST_HERO_AND_TAGS  has `image` and `tags`      -> u-featured, p-category
  *   POST_PLAIN          has none of image/tags/     -> the only clean negative for
  *                       updatedDate                    all three absence cases
- *   POST_REVISED        has updatedDate (2026-07-16) -> dt-updated
+ *   POST_REVISED        has updatedDate             -> dt-updated
  *                       after pubDate (2019-09-14)
  *
  * POST_REVISED also carries an `image`, so it is not a u-featured negative.

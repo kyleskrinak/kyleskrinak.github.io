@@ -117,7 +117,7 @@ _Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissi
 
 ## 10\:45 AM &mdash; My Presentation
 
-You can find my slide-deck [here](/presentations/2019-drupalcon-drupal-8-multisite.html).
+You can find [my slide-deck](/presentations/2019-drupalcon-drupal-8-multisite.html) here.
 
 My presentation on DevOps, Drupal 8 and Multi-site represents the culmination of three year’s work from our team’s investigation and implementation of the very topic. Of course we’re all very busy, and we’ve been putting such narratives to low priority for our support and standard daily tasks. Despite all this hard work, we’re still very much at draft status.
 

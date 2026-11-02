@@ -1,6 +1,7 @@
 ---
 title: "From Big Kibble to Indie Feed"
 pubDate: 2026-08-24T00:00:00.000Z
+updatedDate: 2026-11-01T00:00:00.000Z
 description: "I went looking for what engagement might mean for a personal blog and found a fifteen-year-old movement that had been answering the question the whole time."
 image: ./2026-08-24-cole-architects-dream.webp
 alt: "Thomas Cole painting of an architect reclining on a column capital amid his drawings, looking out over Gothic, Greek, Roman and Egyptian buildings"
@@ -20,7 +21,9 @@ So a virtual acquaintance responded on a thread on X started by a young female c
 
 ---
 
-As all five of you faithful followers know, I restarted my blog roughly this time last year. You can read about it restarting [here](https://kyle.skrinak.com/posts/2025-09-19-modernizing-an-old-jekyll-blog-with-github-actions-and-ai/) and [here](https://kyle.skrinak.com/posts/2026-02-02-fun-at-scale/). Then, as time rolled on, I was able to improve my blog at a clip I'd never managed before, thanks to ChatGPT, GitHub, and then Claude. No, I don't mean content creation. That is mine. I mean the Jekyll-to-Astro migration, the GitHub Actions pipeline, the Playwright visual regression suite, the webmention implementation, among other infrastructure implementations. I now had something workable that I lacked for years.
+As all five of you faithful followers know, I restarted my blog roughly this time last year. You can read about it restarting in [Modernizing an Old Jekyll Blog with GitHub Actions and AI](https://kyle.skrinak.com/posts/2025-09-19-modernizing-an-old-jekyll-blog-with-github-actions-and-ai/) and [Fun at Scale](https://kyle.skrinak.com/posts/2026-02-02-fun-at-scale/). Then, as time rolled on, I was able to improve my blog at a clip I'd never managed before, thanks to ChatGPT, GitHub, and then Claude. No, I don't mean content creation. That is mine. I mean the Jekyll-to-Astro migration, the GitHub Actions pipeline, the Playwright visual regression suite, the webmention implementation, among other infrastructure implementations. I now had something workable that I lacked for years.
+
+*Revised 2026-11-01: linked the two earlier posts by title instead of "here" and "here."*
 
 "Sexy Lexy" was the last straw, but I had something better, though I didn't know that then. I had hopped from Facebook to Twitter to Instagram and finally to Substack. I was hoping Substack would be more long-form, and while it is, it is essentially a home for writers or famous people looking for a convenient place to post their content for a subscription fee. That’s great, but that’s not what I’m looking for. I’m a DevOps guy. I can build my own. I’m in control. As I started blogging again, I asked a question about what engagement might mean for my own blog. I wasn't looking for anything big, but I didn't want to be a voice in the wilderness, either.
 

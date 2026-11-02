@@ -70,7 +70,7 @@ What it means to arrive at this point, near the end of a long vocation, is to fi
 
 ---
 
-### Notes
+## Notes
 
 [1] Lowry Pressly makes the counter-case in *The Right to Oblivion: Privacy and the Good Life*, discussed on EconTalk, ["Let Me Be Forgotten,"](https://www.econtalk.org/let-me-be-forgotten-with-lowry-pressly/) August 4, 2025. Pressly argues that something is lost when a life is frozen into information, the fixed record standing in for the living, changing thing.
 

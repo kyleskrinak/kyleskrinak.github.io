@@ -68,7 +68,7 @@ Testimonials are already coming in.
 *Adam, from the Creation of Adam, Michelangelo, 1512*
 :::
 
-Recommended supplements:
+## Recommended supplements
 
 :::cards{.supplements}
 ### Board game

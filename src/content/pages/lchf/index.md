@@ -34,7 +34,7 @@ Quite serendipitously, while browsing the official [Duke University](https://www
 
 ## The Road to Damascus
 
-On June 8, 2017, I started my low-carb diet under the direction of Dr. Eric Westman. His method is both radical and simple. He flips the food pyramid upside-down with his famous “Page Four” reference for his patients. "Page Four" is the fourth page of a handout he gives his patients to help them with what to eat and how much to eat. Dr. Westman then follows up with a 45-minute class with his recent initiates. You can see this in his infamous “white coat” video at this <a href="https://www.youtube.com/watch?v=oNZsfluh0Uo">link.</a> He discusses what one can eat, what to eat in limited quantities, and what to avoid. He helps his patients identify starchy and sugary foods that people commonly confuse with healthy food.
+On June 8, 2017, I started my low-carb diet under the direction of Dr. Eric Westman. His method is both radical and simple. He flips the food pyramid upside-down with his famous “Page Four” reference for his patients. "Page Four" is the fourth page of a handout he gives his patients to help them with what to eat and how much to eat. Dr. Westman then follows up with a 45-minute class with his recent initiates. You can see this in his infamous <a href="https://www.youtube.com/watch?v=oNZsfluh0Uo">“white coat” video</a>. He discusses what one can eat, what to eat in limited quantities, and what to avoid. He helps his patients identify starchy and sugary foods that people commonly confuse with healthy food.
 
 June 8 was also the first day I took a long road trip with my daughter to help her move to Dallas, Texas, for a college internship. While the trip was <a href="https://www.facebook.com/notes/10160461453807166/">interesting on its own</a>, I was starting my diet away from the creature comforts of my home kitchen. Dr. Westman’s plan is brilliant for such ad-hoc situations, I learned. I also experienced the first “Oh, my” NSV of completely losing my driving-induced (or carb-induced?) narcoleptic response. Previously, I could only drive for up to 90 minutes before having to pull over and nap for 15 minutes. On this trip? I could drive, and drive, and drive. It was fantastic, though I hadn’t quite made the connection yet.
 
@@ -67,7 +67,7 @@ I came for weight loss and found a healthier way of living.
 
 ### Social Networks
 
-* I roughly maintain an “X (formerly Twitter) list” that you can find <a href="https://twitter.com/i/lists/965948026517901312">here</a>. My X handle is available in the footer. Note: I spend very little time there these days. In fact, it's in my best interest to get off social media.
+* I roughly maintain an <a href="https://twitter.com/i/lists/965948026517901312">“X (formerly Twitter) list”</a> that you can find here. My X handle is available in the footer. Note: I spend very little time there these days. In fact, it's in my best interest to get off social media.
 
 ### Books and Authors
 

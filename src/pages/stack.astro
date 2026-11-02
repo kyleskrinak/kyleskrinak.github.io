@@ -4,13 +4,28 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import { SITE } from "@/config";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import packageJson from "../../package.json";
 
-const { dependencies, devDependencies, engines, version: themeVersion } = packageJson;
+dayjs.extend(utc);
+dayjs.extend(timezone);
+// Wall-clock build date in the site's timezone, so a late-evening build doesn't show tomorrow.
+const builtAt = dayjs().tz(SITE.timezone);
 
-function cleanVersion(v: string | undefined): string {
-  if (!v) return "—";
-  return v.replace(/^[\^~>=<]+/, "");
+const { engines, version: themeVersion } = packageJson;
+
+// Installed versions come from the lockfile, which is what CI installs.
+// package.json holds only range floors, which lockfile updates never move.
+const lockfile = JSON.parse(readFileSync(join(process.cwd(), "package-lock.json"), "utf8"));
+
+function installedVersion(name: string): string {
+  const version = lockfile.packages?.[`node_modules/${name}`]?.version;
+  if (!version) throw new Error(`package-lock.json has no installed version for ${name} — stack page needs it`);
+  return version;
 }
 ---
 
@@ -93,7 +108,7 @@ function cleanVersion(v: string | undefined): string {
 
       <h2>Current versions</h2>
       <p>
-        Astro reads these versions directly from <code>package.json</code> at build time. They update automatically whenever a dependency version changes — no manual maintenance.
+        At build time, Astro reads the installed dependency versions from <code>package-lock.json</code>, and the theme and Node.js rows from <code>package.json</code>. This table is current as of the last build, on <time datetime={builtAt.toISOString()}>{builtAt.format("D MMM, YYYY")}</time>. Dependency versions update automatically whenever the lockfile changes — no manual maintenance.
       </p>
 
       <table>
@@ -106,27 +121,27 @@ function cleanVersion(v: string | undefined): string {
         <tbody>
           <tr>
             <td><a href="https://astro.build/">Astro</a></td>
-            <td>{cleanVersion(dependencies.astro)}</td>
+            <td>{installedVersion("astro")}</td>
           </tr>
           <tr>
-            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a></td>
+            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a> (forked from)</td>
             <td>{themeVersion}</td>
           </tr>
           <tr>
             <td><a href="https://tailwindcss.com/">Tailwind CSS</a></td>
-            <td>{cleanVersion(dependencies.tailwindcss)}</td>
+            <td>{installedVersion("tailwindcss")}</td>
           </tr>
           <tr>
             <td><a href="https://www.typescriptlang.org/">TypeScript</a></td>
-            <td>{cleanVersion(devDependencies.typescript)}</td>
+            <td>{installedVersion("typescript")}</td>
           </tr>
           <tr>
             <td><a href="https://pagefind.app/">Pagefind</a></td>
-            <td>{cleanVersion(devDependencies.pagefind)}</td>
+            <td>{installedVersion("pagefind")}</td>
           </tr>
           <tr>
             <td><a href="https://sharp.pixelplumbing.com/">Sharp</a></td>
-            <td>{cleanVersion(dependencies.sharp)}</td>
+            <td>{installedVersion("sharp")}</td>
           </tr>
           <tr>
             <td>Node.js (minimum)</td>

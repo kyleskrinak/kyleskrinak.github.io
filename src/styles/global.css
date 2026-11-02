@@ -91,6 +91,26 @@ html[data-theme="dark"] {
   scroll-margin-block: 1rem;
 }
 
+/* Note boxes (FbMigrate and in-post <aside class="notice">).
+   Theme tokens keep the text readable in both themes. Unlayered, like the
+   card rows below, so it beats the @layer base .app-prose rules. */
+.notice {
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border-inline-start: 4px solid var(--accent);
+  border-start-end-radius: 0.25rem;
+  border-end-end-radius: 0.25rem;
+  background: var(--muted);
+  /* Bare text in the box would otherwise inherit prose's fixed gray body color */
+  color: var(--foreground);
+}
+.notice > :first-child {
+  margin-block-start: 0;
+}
+.notice > :last-child {
+  margin-block-end: 0;
+}
+
 /* Card rows (remark-cards :::cards directive).
    Unlayered on purpose: beats the @layer base .app-prose overrides in
    typography.css (img border/margins, h3 spacing) without !important. */
