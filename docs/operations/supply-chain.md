@@ -12,7 +12,7 @@ Related: [Dependency Pins](./dependency-pins.md) (npm `overrides` detail) · [Ma
 | Install-time isolation | `ignore-scripts=true` | `.npmrc` |
 | Pre-install local audit | `npm run audit:deps` | `scripts/audit-deps.mjs` |
 | CI signature verification | `npm audit signatures` | `.github/workflows/supply-chain-audit.yml` |
-| Helper unit tests | `npm run test:unit` | `.github/workflows/unit-tests.yml` |
+| Lint and unit tests (the helper's suite included) | `npm run lint:md`, `npm run lint`, `npm run test:unit` | `.github/workflows/unit-tests.yml` |
 | Transitive CVE pins | npm `overrides` | `package.json` → see [Dependency Pins](./dependency-pins.md) |
 | Pinned CI/build dependencies | SHA pins (manual) | workflows + `Dockerfile` (see below) |
 
@@ -80,7 +80,7 @@ What it does (`scripts/audit-deps.mjs`):
 Both run on pull requests **and** on direct pushes to `develop`/`main` (so a change can't reach a deploy branch without the gate), plus `workflow_dispatch`:
 
 - **`supply-chain-audit.yml`** — `npm ci --ignore-scripts` then `npm audit signatures`. Runs on all PRs and all pushes to `develop`/`main`. Transient registry errors are retried (3 attempts with backoff); tamper indicators and unrecognized errors fail closed immediately. On sustained failure (registry outage or repeated attempt timeouts) the signature step is skipped with a warning — outage alone is not treated as a supply-chain signal.
-- **`unit-tests.yml`** — `npm run test:unit` (the `audit-deps.mjs` helper's unit suite). Runs on all PRs and all pushes to `develop`/`main`.
+- **`unit-tests.yml`** — `npm ci --ignore-scripts`, then `npm run lint:md`, `npm run lint`, and `npm run test:unit` (every suite in `tests/unit/`, the `audit-deps.mjs` helper's included). Runs on all PRs and all pushes to `develop`/`main`.
 
 ## Manually pinned (NOT managed by Renovate)
 

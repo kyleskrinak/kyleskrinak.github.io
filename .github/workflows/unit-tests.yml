@@ -35,5 +35,8 @@ jobs:
       - name: Lint markdown
         run: npm run lint:md
 
+      - name: Lint code
+        run: npm run lint
+
       - name: Run unit tests
         run: npm run test:unit

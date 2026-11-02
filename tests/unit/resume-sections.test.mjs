@@ -286,7 +286,11 @@ describe('renderEducation', () => {
 	// This module reads raw frontmatter, so the schema's `render: false` default
 	// never runs before it: the opt-in has to be the literal flag in the file.
 	it('skips an item carrying no render flag at all', () => {
-		const items = education.items.map(({ render, ...item }) => item);
+		const items = education.items.map(item => {
+			const withoutFlag = { ...item };
+			delete withoutFlag.render;
+			return withoutFlag;
+		});
 		assert.equal(renderEducation({ items }), '');
 	});
 
@@ -353,7 +357,8 @@ describe('renderEducation', () => {
 	// is the schema's own opt-out and has to stay one here. These two cases are
 	// what the validation above must not catch.
 	it('still treats an omitted flag and a literal false as deliberate opt-outs', () => {
-		const { render, ...noFlag } = education.items[0];
+		const noFlag = { ...education.items[0] };
+		delete noFlag.render;
 		assert.equal(renderEducation({ items: [noFlag] }), '');
 		assert.equal(renderEducation({ items: [{ ...education.items[0], render: false }] }), '');
 	});

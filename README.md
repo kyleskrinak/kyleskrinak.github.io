@@ -103,7 +103,7 @@ Layered dependency hardening to limit exposure from compromised or malicious pac
 - **Renovate** (npm only) with a 7-day cooling-off on routine bumps and weekly lockfile maintenance; security alerts fast-tracked (requires the repo's Dependabot alerts to stay on, plus OSV as a second source for direct dependencies)
 - **`ignore-scripts=true`** — no package lifecycle scripts run on install
 - **`npm run audit:deps`** — local pre-install audit: lockfile diff, publish-age, dormant-revival detection, and signature verification with a GO / REVIEW / BLOCK verdict
-- **CI gates** — `npm audit signatures` and the helper unit suite run on PRs and pushes to deploy branches
+- **CI gates** — `npm audit signatures`, markdown and code lint, and the unit tests run on PRs and pushes to deploy branches
 - **SHA-pinned** Docker base image, `actions/checkout`, and `actions/setup-node`; other Actions locked to major-version tags; transitive CVEs pinned via npm `overrides`
 
 Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [Dependency Pins](./docs/operations/dependency-pins.md).

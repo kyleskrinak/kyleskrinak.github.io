@@ -111,7 +111,6 @@ if (!isManualMode) {
   failedUrls = parsed.failedUrls;
   nonNetworkFailures = parsed.nonNetworkFailures;
 
-  const totalFailures = parsed.totalFailures;
   const uniqueUrls = failedUrls.length;
   const skippedCount = parsed.skippedCount;
 
