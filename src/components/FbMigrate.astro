@@ -14,34 +14,10 @@ interface Props {
 const { original_date } = Astro.props;
 ---
 
-<div class="notice notice--info">
+<aside class="notice">
   <em>
     <strong>Note:</strong>
     I originally posted this on my Facebook account on
     {original_date}. Facebook has since retired Notes; the original can still be found with some effort. I've moved this content here, with some edits for clarity.
   </em>
-</div>
-
-<style>
-  .notice {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border-left: 4px solid #3498db;
-    background-color: #ecf0f1;
-    border-radius: 0 3px 3px 0;
-  }
-
-  .notice--info {
-    border-left-color: #3498db;
-    background-color: #d5edf7;
-  }
-
-  .notice em {
-    display: block;
-  }
-
-  .notice strong {
-    font-weight: 700;
-  }
-
-</style>
+</aside>

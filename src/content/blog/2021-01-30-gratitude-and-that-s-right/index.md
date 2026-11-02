@@ -5,74 +5,13 @@ description: Another day in the life of Kyle Skrinak
 categories: []
 ---
 
-<style>
-.notice {
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #3498db;
-  background-color: #ecf0f1;
-  border-radius: 0 3px 3px 0;
-}
-
-.notice--info {
-  border-left-color: #3498db;
-  background-color: #d5edf7;
-}
-
-.notice em {
-  display: block;
-}
-
-.notice strong {
-  font-weight: 700;
-}
-
-.notice a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.notice a:hover {
-  text-decoration: underline;
-}
-
-.figure {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.figure__image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.figure__caption {
-  font-size: 0.9em;
-  color: #666;
-  font-style: italic;
-  padding: 0 1rem;
-}
-
-.figure__caption a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.figure__caption a:hover {
-  text-decoration: underline;
-}
-</style>
-
-<div class="notice notice--info">
+<aside class="notice">
 <em>
 <strong>Note:</strong>
 I originally posted this on my Facebook account on
 April 2nd, 2017. Facebook has since retired Notes; the original can still be found with some effort. I've moved this content here, with some edits for clarity.
 </em>
-</div>
+</aside>
 
 You all have been so kind about the two recent notes I've published. I've been thrashing that story around for years in my head. As my friend Jim tells me, you don't have to be writing to be writing. I'd love to write some more, as I've found it quite enjoyable and satisfying, but, well, not yet. So, I hope you enjoy this journal entry of sorts.
 

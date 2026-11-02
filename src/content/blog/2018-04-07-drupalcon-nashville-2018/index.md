@@ -14,9 +14,9 @@ description: I will be leading two sessions at the DrupalCon Higher Education
 
 I will be leading two sessions at the [DrupalCon Higher Education Summit](https://events.drupal.org/nashville2018/higher-ed-summit) on Monday, April 8th, 2018, and I&rsquo;m using this post for my preparation notes.
 
-You can find all the virtual directory for all the Higher Education Summit Session notes [here](https://drive.google.com/drive/folders/1uaFfgSob8VHlIpvb1WNMi_UdYdrYXwTA).  
+You can find all the virtual directory for all the [Higher Education Summit Session notes](https://drive.google.com/drive/folders/1uaFfgSob8VHlIpvb1WNMi_UdYdrYXwTA) here.  
 
-<div style="padding: 1rem; margin-bottom: 1.5rem; border-left: 4px solid #3498db; background-color: #d5edf7; border-radius: 0 3px 3px 0;"><strong>Note:</strong> these agenda items are not hard-and-fast discussion items. Depending on session attendees and details I cannot anticipate, these discussions tend to grow a life of their own. I find that nearly always, the actual discussion turns out far better than I anticipate. <em>Caveat lector.</em></div>
+<aside class="notice"><strong>Note:</strong> these agenda items are not hard-and-fast discussion items. Depending on session attendees and details I cannot anticipate, these discussions tend to grow a life of their own. I find that nearly always, the actual discussion turns out far better than I anticipate. <em>Caveat lector.</em></aside>
 
 ## Session 1; 11\:20 AM &ndash; 12\:20 PM
 ### Continuous Integration / Continuous Development Strategies
@@ -52,7 +52,7 @@ How would you like to extend your CI/CD adoption?
 
 Led by my fellow Dukie, [Joel,](https://joelcrawfordsmith.com/) with whom we collaborate frequently. Looking forward to his session.
 
-You can find his session notes [here](https://docs.google.com/document/d/1xOq9NTtG8qaSjdmymFplZR0RCtQ4usgELM5MvHUYgjQ/edit?usp=sharing)
+You can find [his session notes](https://docs.google.com/document/d/1xOq9NTtG8qaSjdmymFplZR0RCtQ4usgELM5MvHUYgjQ/edit?usp=sharing) here
 
 ## Session 3; 2\:30 AM &ndash; 3\:30 PM
 ### Holistic DevOps &amp; Drupal Security

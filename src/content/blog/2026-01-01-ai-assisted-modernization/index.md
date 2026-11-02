@@ -72,7 +72,8 @@ Note: I asked Copilot to summarize the subsequent QA changes. Everything below i
 
 ### Visual Regression Enhancements
 
-**Pixel-Perfect Local/Production Parity:**
+#### Pixel-Perfect Local/Production Parity
+
 - Extended visual regression suite to all 54+ pages, not just Reveal presentations
 - Created `tests/full-visual-regression.spec.js` with 2% pixel tolerance, revealing five color mismatches:
   - Archive item H2 links: `#575b62` (was inheriting `$link-color`)
@@ -83,7 +84,8 @@ Note: I asked Copilot to summarize the subsequent QA changes. Everything below i
 - Fixed all five colors in `assets/css/_custom.scss` with `!important` overrides
 - Confirmed 54/54 pages pass pixel-perfect comparison
 
-**Interactive QA Tool:**
+#### Interactive QA Tool
+
 - Built `/compare/` page for side-by-side local/production inspection
 - Left/right iframes, Previous/Next navigation, keyboard shortcuts
 - Developed-only (excluded from staging/production builds via config)
@@ -91,29 +93,34 @@ Note: I asked Copilot to summarize the subsequent QA changes. Everything below i
 
 ### Sitemap & Artifact Cleanup
 
-**Removed Non-Public Assets from Sitemap:**
+#### Removed Non-Public Assets from Sitemap
+
 - Updated `_config.yml` to exclude `assets/files/` (PDFs) and `assets/reveal/plugin/notes/speaker-view.html`
 - Ensured legitimate pages remain indexed (55 URLs now vs bloated prior list)
 - Added jekyll-sitemap plugin configuration with explicit exclusions
 
-**Playwright Artifact Consolidation:**
+#### Playwright Artifact Consolidation
+
 - Unified test outputs under single `tmp/playwright/` root
 - Added `.gitignore` entries to exclude test artifacts
 - Cleaner workspace, easier cleanup
 
 ### Documentation & Workflow
 
-**README.md enhancements:**
+#### README.md enhancements
+
 - Added "Full-Page Visual Regression Testing" section with workflow details
 - Documented `/compare/` tool and its purpose as dev-only QA
 - Updated snapshot location references to `tmp/playwright/`
 
-**CHANGELOG.md expansion:**
+#### CHANGELOG.md expansion
+
 - Comprehensive "Unreleased" section logging all QA refinements
 - Color fix inventory + rationale
 - Explain the changed Playwright directory structure
 
-**.github/CONTRIBUTING.md updates:**
+#### .github/CONTRIBUTING.md updates
+
 - New "Full-Page Visual Regression Testing" guide with typical output
 - Interactive "Side-by-Side Comparison" tool documentation
 - Expanded PR checklist: CSS changes now require a full visual regression run

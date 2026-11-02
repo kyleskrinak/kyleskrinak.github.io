@@ -6,74 +6,13 @@ description: I forget when in 1973 the Skrinak family house caught on fire. I’
 categories: []
 ---
 
-<style>
-.notice {
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #3498db;
-  background-color: #ecf0f1;
-  border-radius: 0 3px 3px 0;
-}
-
-.notice--info {
-  border-left-color: #3498db;
-  background-color: #d5edf7;
-}
-
-.notice em {
-  display: block;
-}
-
-.notice strong {
-  font-weight: 700;
-}
-
-.notice a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.notice a:hover {
-  text-decoration: underline;
-}
-
-.figure {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.figure__image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.figure__caption {
-  font-size: 0.9em;
-  color: #666;
-  font-style: italic;
-  padding: 0 1rem;
-}
-
-.figure__caption a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.figure__caption a:hover {
-  text-decoration: underline;
-}
-</style>
-
-<div class="notice notice--info">
+<aside class="notice">
 <em>
 <strong>Note:</strong>
 I originally posted this on my Facebook account on
 March 19th, 2017. Facebook has since retired Notes; the original can still be found with some effort. I've moved this content here, with some edits for clarity.
 </em>
-</div>
+</aside>
 
 I forget when in 1973 the Skrinak family house caught on fire. I’m guessing it was in late Spring, but that was so long ago. I do remember this &mdash; it was warm enough for my 11-year-old self to be on the roof of my house in my pajamas.
 

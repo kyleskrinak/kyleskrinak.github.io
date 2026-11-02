@@ -45,12 +45,13 @@ const {
 // root-relative paths against the origin, ignoring the current page path.
 const socialImageURL = new URL(ogImage, Astro.url);
 
+// Only posts pass pubDate, so it decides post vs. page markup below.
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "BlogPosting",
+  "@type": pubDate ? "BlogPosting" : "WebPage",
   headline: `${title}`,
   image: `${socialImageURL}`,
-  datePublished: `${pubDate?.toISOString()}`,
+  ...(pubDate && { datePublished: pubDate.toISOString() }),
   ...(updatedDate && { dateModified: updatedDate.toISOString() }),
   author: [
     {
@@ -92,6 +93,7 @@ const structuredData = {
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={pubDate ? "article" : "website"} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
