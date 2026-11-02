@@ -25,5 +25,22 @@ export default [
     files: ["tests/**"],
     rules: { "no-console": "off" },
   },
-  { ignores: ["dist/**", ".astro", "public/_pagefind/**"] },
+  // CloudFront Functions invoke `handler` by name; nothing in the file calls it.
+  // The exception lives here, not inline: infra/cloudfront/deploy.sh publishes
+  // the file byte for byte, so an inline disable comment would ship to CloudFront.
+  {
+    files: ["infra/cloudfront/redirect-trailing-slash.js"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "^handler$" }],
+    },
+  },
+  {
+    ignores: [
+      "dist/**",
+      ".astro",
+      "public/_pagefind/**",
+      // Gitignored rollback snapshots that the infra/cloudfront scripts write.
+      "infra/cloudfront/.rollback/**",
+    ],
+  },
 ];
