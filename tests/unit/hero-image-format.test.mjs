@@ -2,7 +2,7 @@
 // does. `npm run test:unit` is a plain `node --test tests/unit/*.test.mjs`, so
 // that import is resolved by Node's native TypeScript type stripping rather than
 // by a build step. It needs Node 22.18+ or 24 — package.json engines require
-// >=22.22.2 and CI runs 24, so both are covered — but on an older 22.x the
+// >=22.23.4 and CI runs 24, so both are covered — but on an older 22.x the
 // failure is an unresolved import that takes down the *whole* suite, not just
 // this file. Anything here that would need more than type erasure (enums,
 // namespaces, decorators, or importing a .ts that uses them) does not work, and
