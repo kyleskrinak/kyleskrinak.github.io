@@ -16,7 +16,8 @@ export async function GET() {
       link: getPostUrl(id, filePath, config.site.lang),
       title: data.title,
       description: data.description,
-      pubDate: new Date(data.modDatetime ?? data.pubDatetime),
+      // SITE-OVERRIDE: item date is the original publish date, not upstream's modDatetime ?? pubDatetime, so a revision never re-dates a feed item.
+      pubDate: new Date(data.pubDatetime),
     })),
   });
 }
