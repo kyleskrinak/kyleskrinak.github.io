@@ -104,8 +104,8 @@ Education has no admin line: each degree renders as a single heading (see `educa
 | The resume's lead admin line (its `##` heading and employer line) | `<!-- current-role -->` |
 | The `/resume/` meta description | `resumeMetaDescription()` in `src/pages/resume.astro` |
 | The `/resume/print/` meta description | the same function in `src/pages/resume/print/index.astro` |
-| The About page's current-position sentence | `src/pages/about.astro` reads the resume entry via `getEntry("pages", "resume")` |
-| The employer link in that sentence (`<a href>`) | `current_role.employer_url`, read by the same `about.astro` sentence |
+| The About page's current-position sentence | `src/components/CurrentRole.astro`, placed in `src/content/pages/about.mdx`, reads the resume entry via `getEntry("pages", "resume")` |
+| The employer link in that sentence (`<a href>`) | `current_role.employer_url`, read by the same `CurrentRole.astro` |
 
 Changing the job title in frontmatter changes all four. Before this wiring, `about.astro` carried its own hand-typed copy, and the two drifted.
 

@@ -1,0 +1,21 @@
+---
+/**
+ * CurrentRole Component
+ * The About page's current position: "<title> for <employer link>".
+ *
+ * The current position — title, employer, and the employer's URL — is stated
+ * once, in the resume's current_role, and read here. Hand-typing it on the
+ * About page is what let the two drift apart (docs/features/resume-source.md).
+ *
+ * Usage in MDX:
+ * Currently, I am the <CurrentRole />.
+ */
+import { getEntry } from "astro:content";
+
+const resume = await getEntry("pages", "resume");
+if (!resume) throw new Error("Resume page not found — the About page reads current_role from it");
+const currentRole = resume.data.current_role;
+if (!currentRole) throw new Error("Resume frontmatter is missing current_role — the About page needs it");
+---
+
+{currentRole.title} for <a href={currentRole.employer_url}>{currentRole.employer}</a>
