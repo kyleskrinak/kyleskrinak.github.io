@@ -5,12 +5,6 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* SITE-OVERRIDE: system monospace font stack (#291), until the font commit
-   switches to upstream's Google Sans Code. */
-@theme inline {
-  --font-app: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
-}
-
 @layer base {
   * {
     @apply border-border outline-accent/75;

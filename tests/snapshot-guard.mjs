@@ -6,9 +6,9 @@ import { tmpdir } from 'node:os';
 /**
  * Keep host-rendered snapshots out of the repository.
  *
- * Committed baselines are compared against CI's Ubuntu rendering, whose font stack
- * renders slightly taller than macOS, so a snapshot written anywhere else will fail CI
- * even with no real visual change. Docker and CI are both Linux, so the sanctioned
+ * Committed baselines are compared against CI's Ubuntu rendering, which rasterizes
+ * the site's web font differently from macOS, so a snapshot written anywhere else will
+ * fail CI even with no real visual change. Docker and CI are both Linux, so the sanctioned
  * baseline paths (`npm run test:visual:baseline:docker`) are unaffected.
  *
  * The guard is deliberately one idea: compare the snapshot files before and after a
@@ -159,7 +159,7 @@ export const assertNoSnapshotsCreated = (root) => {
 			`Refusing to keep ${created.length} snapshot(s) written from a ${process.platform} host.`,
 			'',
 			"These had no baseline yet, so Playwright created them from this host's rendering,",
-			"which does not match CI's Ubuntu font stack. They have been deleted:",
+			"which does not match CI's Ubuntu font rendering. They have been deleted:",
 			...created.map((file) => `  ${file}`),
 			'',
 			'Generate them where they will match CI:',

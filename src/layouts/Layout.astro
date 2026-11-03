@@ -1,5 +1,5 @@
 ---
-// SITE-OVERRIDE: no Font import until the font commit; see the <Font> note below.
+import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
@@ -60,7 +60,10 @@ const sitemapHref = getAssetPath("sitemap.xml");
     <meta name="generator" content={Astro.generator} />
 
     <!-- Font -->
-    {/* SITE-OVERRIDE: system font stack (#291); the font commit restores upstream's <Font> here. */}
+    <Font
+      cssVariable="--font-google-sans-code"
+      preload={[{ subset: "latin", weight: 400, style: "normal" }]}
+    />
 
     <!-- Primary meta -->
     <title>{title}</title>
