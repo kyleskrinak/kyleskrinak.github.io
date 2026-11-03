@@ -49,3 +49,12 @@ public/presentations-archive.pdf
 
 # CloudFront function rollback snapshots (timestamped, pulled from LIVE)
 infra/cloudfront/.rollback/
+
+# pagefind
+public/pagefind
+
+# pnpm
+.pnpm-store
+
+# docker compose
+compose.override.yaml

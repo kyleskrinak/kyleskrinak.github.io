@@ -1,0 +1,12 @@
+---
+// Reading time beside the post date, inserted into upstream's post route from
+// one line. See UPSTREAM.md.
+import { getReadingTime } from "@/utils/readingTime";
+
+type Props = { body?: string };
+
+const readingTime = getReadingTime(Astro.props.body ?? "");
+---
+
+<span aria-hidden="true" class="text-skin-base opacity-50">·</span>
+<span class="text-sm text-skin-base opacity-80">{readingTime} min read</span>

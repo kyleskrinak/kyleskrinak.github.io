@@ -16,7 +16,7 @@
  * as-is. The first image becomes the frontmatter `image:` and the rest
  * are emitted as inline `![alt](./<basename>)` references in the body.
  * Hero sources narrower than 2400px emit a retina warning (the hero's srcset
- * tops out at 2400w; see the hero <Image> comment in PostDetails.astro).
+ * tops out at 2400w; see the hero <Image> comment in PostHero.astro).
  */
 import { readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';

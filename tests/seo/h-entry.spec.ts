@@ -18,7 +18,7 @@ const resolveUrl = (path: string) => {
 const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
 
 /**
- * The h-entry markup in PostDetails.astro is the machine-readable representation of
+ * The h-entry markup on the post page is the machine-readable representation of
  * every post: what a reader or an aggregator parses when it pulls this site's
  * content. Nothing else in the suite covers it. A dropped or misplaced class passes
  * lint, `astro check`, the build, the link check, and every visual baseline in
@@ -166,7 +166,7 @@ test.describe('Post h-entry', () => {
 
 		// Full-URL equality only where the canonical still names this page's own path.
 		// postUrl deliberately ignores a frontmatter canonicalURL override (see the
-		// comment in PostDetails.astro), so an unconditional comparison would fire on
+		// comment in PostIdentity.astro), so an unconditional comparison would fire on
 		// the first post that points its canonical at an external original. No post
 		// overrides it today, so this branch always runs.
 		const canonicalPath = new URL(canonical as string, page.url()).pathname;

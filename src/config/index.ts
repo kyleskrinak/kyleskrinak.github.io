@@ -75,7 +75,7 @@ export const OG_IMAGE_SIZE = {
 // this object, so the dimensions cannot drift between them. Astro names
 // derivatives by hashing the transform params, so identical params resolve to
 // the same generated file — the hero <Image>, the og:image getImage() call in
-// PostDetails.astro, and the print hero in archive-book.astro all share one
+// heroOgImage.ts, and the print hero in archive-book.astro all share one
 // asset. `position` is per-post (frontmatter `imagePosition`) and is passed at
 // each call site rather than fixed here.
 export const HERO_IMAGE = {

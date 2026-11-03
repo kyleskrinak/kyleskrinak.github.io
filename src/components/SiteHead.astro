@@ -1,0 +1,28 @@
+---
+// Site-only <head> tags, inserted into upstream's Layout from one line.
+// See UPSTREAM.md.
+import config from "@/config";
+import { getAssetPath } from "@/utils/withBase";
+
+type Props = {
+  noindex?: boolean;
+};
+
+const { noindex = false } = Astro.props;
+---
+
+<link
+  rel="icon"
+  type="image/png"
+  sizes="96x96"
+  href={getAssetPath("favicon-96x96.png")}
+/>
+<link rel="apple-touch-icon" href={getAssetPath("apple-touch-icon.png")} />
+<link rel="manifest" href={getAssetPath("site.webmanifest")} />
+{import.meta.env.PROD && <link rel="me" href={config.site.profile} />}
+{
+  /* Pages are indexed by default. Navigation and functional pages opt out via
+     the `noindex` prop, keeping `follow` so crawlers still discover content
+     through them. Related: src/pages/robots.txt.ts (Allow: /). */
+}
+{noindex && <meta name="robots" content="noindex,follow" />}
