@@ -2,6 +2,8 @@
 import LinkButton from "@/components/LinkButton.astro";
 import { tplStr, useTranslations } from "@/i18n";
 import config from "@/config";
+// SITE-OVERRIDE: native Web Share button (f452f5b, #64).
+import NativeShare from "@/components/NativeShare.astro";
 
 const { shareLinks } = config;
 const t = useTranslations(Astro.currentLocale);
@@ -36,6 +38,8 @@ const items = await Promise.all(
     <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start">
       <span class="italic">{t.post.sharePostIntro}</span>
       <div class="text-center">
+        {/* SITE-OVERRIDE: native Web Share button, ahead of the network links. */}
+        <NativeShare />
         {items.map(({ url, title, Icon }) =>
           Icon ? (
             <LinkButton

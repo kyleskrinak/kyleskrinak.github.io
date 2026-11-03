@@ -1,0 +1,56 @@
+---
+// The native Web Share button (f452f5b, #64), inserted from one line in
+// upstream's ShareLinks ahead of the network links. It hides itself in
+// browsers without navigator.share. See UPSTREAM.md.
+import LinkButton from "@/components/LinkButton.astro";
+import IconShare from "@/assets/icons/IconShare.svg";
+
+const title = "Share this post";
+---
+
+<LinkButton
+  href={Astro.url.toString()}
+  class="scale-90 p-2 hover:rotate-6 sm:p-1"
+  title={title}
+  data-native-share="true"
+>
+  <IconShare class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
+  <span class="sr-only">{title}</span>
+</LinkButton>
+
+<script>
+  function initNativeShare() {
+    const buttons = document.querySelectorAll<HTMLElement>(
+      'a[data-native-share="true"]'
+    );
+    for (const button of buttons) {
+      // astro:page-load fires on every navigation; bind each button once.
+      if (button.dataset.initialized === "true") continue;
+      button.dataset.initialized = "true";
+
+      if (!navigator.share) {
+        button.style.display = "none";
+        continue;
+      }
+
+      button.addEventListener("click", async e => {
+        e.preventDefault();
+        try {
+          await navigator.share({
+            title: document.title,
+            url: window.location.href,
+          });
+        } catch (err) {
+          // The reader cancelled the share sheet, or the share failed.
+          if ((err as Error).name !== "AbortError") {
+            console.error("Share failed:", err);
+          }
+        }
+      });
+    }
+  }
+
+  // Upstream's ClientRouter fires astro:page-load on the first load and after
+  // each client-side navigation.
+  document.addEventListener("astro:page-load", initNativeShare);
+</script>
