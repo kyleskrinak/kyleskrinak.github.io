@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 import { getImage } from "astro:assets";
-import { HERO_IMAGE } from "@/config/index";
+import { HERO_IMAGE } from "@/site-config";
 
 /**
  * The og:image for a post with a hero and no frontmatter `ogImage`. Called from

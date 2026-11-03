@@ -36,13 +36,14 @@ const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
  *
  *   POST_HERO_AND_TAGS  has `image` and `tags`      -> u-featured, p-category
  *   POST_PLAIN          has none of image/tags/     -> the only clean negative for
- *                       updatedDate                    all three absence cases
- *   POST_REVISED        has updatedDate             -> dt-updated
- *                       after pubDate (2019-09-14)
+ *                       modDatetime                    u-featured and dt-updated, and
+ *                                                      the default "others" tag
+ *   POST_REVISED        has modDatetime             -> dt-updated
+ *                       after pubDatetime (2019-09-14)
  *
  * POST_REVISED also carries an `image`, so it is not a u-featured negative.
- * Adding `tags:`, `image:`, or `updatedDate:` to POST_PLAIN turns three passing
- * negative assertions into failures on a change that is not a regression.
+ * Adding `tags:`, `image:`, or `modDatetime:` to POST_PLAIN turns a passing
+ * assertion into a failure on a change that is not a regression.
  */
 const POST_HERO_AND_TAGS = '/posts/2026-07-19-funmaxxing/';
 const POST_PLAIN = '/posts/2021-01-16-jekyll-hugo-and-me/';
@@ -197,11 +198,15 @@ test.describe('Post h-entry', () => {
 		}
 	});
 
-	test('p-category is absent from an untagged post', async ({ page }) => {
+	test('an untagged post carries the default "others" p-category', async ({ page }) => {
 		await page.goto(resolveUrl(POST_PLAIN), { waitUntil: 'networkidle' });
-		// Page-global, as with .dt-updated and .u-featured below: an untagged post
-		// must carry no p-category anywhere, not merely none inside the entry.
-		await expect(page.locator('.p-category')).toHaveCount(0);
+		// Upstream's schema tags an untagged post "others". Page-global, as with
+		// .dt-updated and .u-featured below: that is its only p-category anywhere.
+		const categories = page.locator('.p-category');
+		await expect(categories).toHaveCount(1);
+		expect(((await categories.textContent()) ?? '').trim()).toBe('others');
+		const href = await categories.evaluate((el) => (el as HTMLAnchorElement).href);
+		expect(new URL(href).pathname).toBe('/tags/others/');
 	});
 
 	test('u-featured is the hero image, and sits outside e-content', async ({ page }) => {

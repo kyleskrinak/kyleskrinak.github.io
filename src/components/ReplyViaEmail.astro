@@ -1,11 +1,11 @@
 ---
-import { SITE } from "@/config";
+import { BLOG_CONTACT_EMAIL } from "@/site-config";
 
 type Props = { title: string };
 
 const { title } = Astro.props;
 
-const mailtoHref = `mailto:${SITE.blogContactEmail}?subject=${encodeURIComponent(`Re: ${title}`)}`;
+const mailtoHref = `mailto:${BLOG_CONTACT_EMAIL}?subject=${encodeURIComponent(`Re: ${title}`)}`;
 ---
 
 <p class="text-sm text-skin-base opacity-80">

@@ -45,7 +45,7 @@ Only when Kyle explicitly asks ('apply grammar corrections'), fix grammar (typos
 
 ## Post Files
 
-- Blog posts are co-located directories: `src/content/blog/YYYY-MM-DD-lowercase-kebab-slug/index.md`, with the post's images beside that `index.md` and referenced as `./image.webp`.
+- Blog posts are co-located directories: `src/content/posts/YYYY-MM-DD-lowercase-kebab-slug/index.md`, with the post's images beside that `index.md` and referenced as `./image.webp`.
 - Scaffold with `npm run new-post -- <slug>`; add `--images <dir>` to convert a folder of images to WebP and co-locate them.
 
 ## Hero Images

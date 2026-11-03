@@ -1,6 +1,6 @@
 import satori from "satori";
-import { SITE, OG_IMAGE_SIZE } from "@/config";
-import loadFonts from "../loadFonts";
+import config from "@/config";
+import { OG_IMAGE_SIZE } from "@/site-config";
 import loadFaviconBadge from "../loadFaviconBadge";
 
 const AVATAR_SIZE = 320;
@@ -15,7 +15,9 @@ const BACKGROUND = "#212737";
 const FOREGROUND = "#eaedf3";
 const ACCENT = "#ff6b01";
 
-export default async () => {
+// The route (src/pages/og.png.ts) loads the IBM Plex Mono files through the
+// Fonts API and passes their data in.
+export default async ({ regularData, boldData }) => {
   const avatarDataUri = await loadFaviconBadge(AVATAR_SIZE);
 
   return satori(
@@ -76,7 +78,7 @@ export default async () => {
                       color: FOREGROUND,
                       lineHeight: 1.1,
                     },
-                    children: SITE.author,
+                    children: config.site.author,
                   },
                 },
                 {
@@ -95,7 +97,7 @@ export default async () => {
                   props: {
                     style: { fontSize: 42, color: FOREGROUND, lineHeight: 1.35 },
                     // Non-breaking hyphens keep each hyphenated word on one line.
-                    children: SITE.desc.replaceAll("-", "\u2011"),
+                    children: config.site.description.replaceAll("-", "\u2011"),
                   },
                 },
                 {
@@ -107,7 +109,7 @@ export default async () => {
                       color: ACCENT,
                       marginTop: "36px",
                     },
-                    children: new URL(SITE.website).hostname,
+                    children: new URL(config.site.url).hostname,
                   },
                 },
               ],
@@ -120,7 +122,10 @@ export default async () => {
       width: OG_IMAGE_SIZE.width,
       height: OG_IMAGE_SIZE.height,
       embedFont: true,
-      fonts: await loadFonts(),
+      fonts: [
+        { name: "IBM Plex Mono", data: regularData, weight: 400, style: "normal" },
+        { name: "IBM Plex Mono", data: boldData, weight: 700, style: "normal" },
+      ],
     }
   );
 };

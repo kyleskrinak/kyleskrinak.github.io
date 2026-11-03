@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Migrate the oldest "ready to post" page in the Notion Blog Backlog
- * database into a new src/content/blog/<slug>/ directory.
+ * database into a new src/content/posts/<slug>/ directory.
  *
  * Usage:
  *   node scripts/migrate-notion-post.mjs [--dry-run]
@@ -27,6 +27,10 @@
  * still return early, but `notion-page-id`, `title`, and `slug` are written
  * before those guards run — only `post-url` is withheld on that no-op path
  * (see .github/workflows/notion-migrate.yml, which gates on `post-url`).
+ *
+ * Exits 1 when the selected page has an empty Name or an empty Description.
+ * Neither failure writes a file, and the page stays "ready to post", so the
+ * next run retries it once the field is filled in.
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -51,7 +55,7 @@ import { resolveSiteUrl } from './lib/pdf-helpers.mjs';
 const execFileAsync = promisify(execFile);
 
 const ROOT = process.cwd();
-const BLOG_DIR = join(ROOT, 'src/content/blog');
+const BLOG_DIR = join(ROOT, 'src/content/posts');
 const DATA_SOURCE_ID = process.env.NOTION_BLOG_BACKLOG_DATA_SOURCE_ID;
 
 // Mirrors src/utils/slugify.ts's hybrid algorithm exactly. Reimplemented
@@ -110,6 +114,21 @@ function collapseWhitespace(s) {
 
 export function plainTextDescription(page) {
 	return collapseWhitespace(richTextToPlainText(page.properties?.Description?.rich_text));
+}
+
+// content.config.ts requires `description` (upstream AstroPaper's schema), so
+// a post without one fails the Astro build. main() calls this before any
+// download or write: a throw there lets the workflow's failure steps open a
+// tracking issue and flag the Notion page, in place of a PR that can't build.
+export function requireDescription(page) {
+	const description = plainTextDescription(page);
+	if (!description) {
+		throw new Error(
+			`Page ${page.id} has an empty Description — the post schema requires one. ` +
+			'Fill in Description in Notion; the page stays "ready to post", so the next run migrates it.',
+		);
+	}
+	return description;
 }
 
 // Distinct from an image block's own Notion caption (which feeds `alt` —
@@ -405,7 +424,7 @@ async function main() {
 	const slugStem = slugifyStr(title);
 	// Capture the UTC date once and reuse it everywhere below — calling
 	// todayUTCDate() again later could return a different day if the run
-	// straddles UTC midnight, desyncing the slug from pubDate/post-url.
+	// straddles UTC midnight, desyncing the slug from pubDatetime/post-url.
 	const utcDate = todayUTCDate();
 	const slug = `${utcDate}-${slugStem}`;
 	if (!SLUG_RE.test(slugStem)) {
@@ -428,6 +447,10 @@ async function main() {
 		return;
 	}
 
+	// After the guards, so an already-migrated page still skips; before the
+	// block walk, so a missing Description costs no downloads.
+	const description = requireDescription(page);
+
 	// All Notion reads (block walk + image downloads) complete, fully in
 	// memory, before any filesystem write begins below.
 	const { markdown, images } = await fetchContentAndImages(notion, page.id);
@@ -440,14 +463,11 @@ async function main() {
 
 		const frontmatter = {
 			title,
-			pubDate: `${utcDate}T00:00:00.000Z`,
+			pubDatetime: `${utcDate}T00:00:00.000Z`,
 			tags: extractTags(page),
-			published: false,
+			draft: true,
+			description,
 		};
-		const description = plainTextDescription(page);
-		if (description) {
-			frontmatter.description = description;
-		}
 		const caption = plainTextCaption(page);
 		if (caption) {
 			frontmatter.caption = caption;

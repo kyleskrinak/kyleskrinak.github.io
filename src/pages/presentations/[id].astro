@@ -3,8 +3,8 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import { linkWithBase } from "@/utils/linkWithBase";
-import { SITE } from "@/config";
+import { getAssetPath } from "@/utils/withBase";
+import config from "@/config";
 import presentations from "@/data/presentations.json";
 
 interface Props {
@@ -25,11 +25,11 @@ if (!presentation) {
   return Astro.redirect("/404");
 }
 
-const htmlFile = linkWithBase(`/presentations/${id}.html`);
+const htmlFile = getAssetPath(`/presentations/${id}.html`);
 ---
 
 <Layout
-  title={`${presentation.title} | ${SITE.title}`}
+  title={`${presentation.title} | ${config.site.title}`}
   description={presentation.description}
 >
   <Header />
@@ -37,7 +37,7 @@ const htmlFile = linkWithBase(`/presentations/${id}.html`);
   <main id="main-content" class="app-layout pb-12">
     <div class="mb-8">
       <a
-        href={linkWithBase("/presentations/")}
+        href={getAssetPath("/presentations/")}
         class="text-accent hover:underline"
       >
         ← Back to Presentations

@@ -2,7 +2,7 @@
 /**
  * Scaffold a new blog post as a co-located directory.
  *
- *   src/content/blog/<slug>/
+ *   src/content/posts/<slug>/
  *   ├── index.md
  *   └── <optional co-located images>
  *
@@ -37,7 +37,7 @@ import {
 } from './lib/post-scaffold.mjs';
 
 const ROOT = process.cwd();
-const BLOG_DIR = join(ROOT, 'src/content/blog');
+const BLOG_DIR = join(ROOT, 'src/content/posts');
 
 function parseArgs(argv) {
 	const opts = { slug: null, imagesDir: null };
@@ -182,9 +182,9 @@ async function main() {
 
 		const frontmatter = {
 			title: deriveTitle(opts.slug),
-			pubDate: `${todayUTCDate()}T00:00:00.000Z`,
+			pubDatetime: `${todayUTCDate()}T00:00:00.000Z`,
 			tags: [],
-			published: false,
+			draft: true,
 		};
 		let bodyImages = '';
 		if (writtenImages.length > 0) {

@@ -9,21 +9,21 @@
  * public/blog-archive.pdf; the CI deploy writes it into dist/ via --output).
  *
  * Post selection mirrors the live site exactly:
- *   - getBlogPosts() drops drafts (`published: false`) in production builds.
- *   - postFilter drops not-yet-due scheduled posts (future pubDate) in prod.
+ *   - postFilter drops drafts (`draft: true`) and, in prod, not-yet-due
+ *     scheduled posts (future pubDatetime).
  * So the book can never contain anything the public site does not already show.
  */
 import { Image } from "astro:assets";
 import { render } from "astro:content";
-import { getBlogPosts } from "@/utils/getBlogPosts";
-import postFilter from "@/utils/postFilter";
-import { SITE, HERO_IMAGE } from "@/config";
+import { getCollection } from "astro:content";
+import { postFilter } from "@/utils/postFilter";
+import config from "@/config";
+import { HERO_IMAGE, SITE_TIMEZONE } from "@/site-config";
 
-const posts = (await getBlogPosts())
-  .filter(postFilter)
+const posts = (await getCollection("posts", postFilter))
   .sort(
     (a, b) =>
-      new Date(a.data.pubDate).getTime() - new Date(b.data.pubDate).getTime()
+      new Date(a.data.pubDatetime).getTime() - new Date(b.data.pubDatetime).getTime()
   );
 
 const chapters = await Promise.all(
@@ -35,16 +35,16 @@ const fmtDate = (d: Date | string) =>
     year: "numeric",
     month: "long",
     day: "numeric",
-    timeZone: SITE.timezone,
+    timeZone: SITE_TIMEZONE,
   });
 
 const firstYear = posts.length
-  ? new Date(posts[0].data.pubDate).getFullYear()
+  ? new Date(posts[0].data.pubDatetime).getFullYear()
   : new Date().getFullYear();
 const lastYear = posts.length
-  ? new Date(posts[posts.length - 1].data.pubDate).getFullYear()
+  ? new Date(posts[posts.length - 1].data.pubDatetime).getFullYear()
   : firstYear;
-// Date the content was last updated (latest post's updatedDate or pubDate). Using
+// Date the content was last updated (latest post's modDatetime or pubDatetime). Using
 // the content date — not today's clock — keeps the printed "current as of" date
 // stable across re-exports, so the visible colophon only changes on real content
 // updates. NOTE: this does NOT make the PDF byte-identical — Chromium stamps a
@@ -54,11 +54,11 @@ const lastYear = posts.length
 // the PDF to its release-backed store only when post content changes. The PDF is
 // untracked — never commit the binary (see .github/actions/ensure-archive-pdfs).
 const latestContent = posts.reduce((max, p) => {
-  const t = new Date(p.data.updatedDate || p.data.pubDate).getTime();
+  const t = new Date(p.data.modDatetime || p.data.pubDatetime).getTime();
   return t > max ? t : max;
 }, 0);
 const currentAsOf = posts.length ? fmtDate(new Date(latestContent)) : fmtDate(new Date());
-const title = `${SITE.author} — Collected Writing`;
+const title = `${config.site.author} — Collected Writing`;
 
 // Printed link destinations for the PDF archive.
 //
@@ -69,7 +69,7 @@ const title = `${SITE.author} — Collected Writing`;
 // surface in Search Console as "Not found (404)". The href stays intact as a
 // live PDF link annotation, so digital readers lose nothing.
 //
-// Interpolated rather than static because SITE.website follows SITE_URL, which
+// Interpolated rather than static because config.site.url follows SITE_URL, which
 // every build workflow sets to the production origin but a local build can
 // override. Both schemes are excluded in case older content links over http.
 //
@@ -87,9 +87,9 @@ const title = `${SITE.author} — Collected Writing`;
 // the defect the exclusions exist to prevent. Parsing also lowercases the host
 // (CSS attribute selectors are case-sensitive; hosts are not) and normalizes
 // away redundant trailing slashes, which a single .replace(/\/$/) would not.
-// An unparseable SITE.website throws the build rather than emitting selectors
+// An unparseable config.site.url throws the build rather than emitting selectors
 // that silently match nothing.
-const siteHost = new URL(SITE.website).host;
+const siteHost = new URL(config.site.url).host;
 const sameOriginExclusion = ["https", "http"]
   .flatMap((scheme) => [
     `[href^="${scheme}://${siteHost}/"]`,
@@ -110,7 +110,7 @@ const printedUrlCss = `
 ---
 
 <!doctype html>
-<html lang={SITE.lang || "en"}>
+<html lang={config.site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="robots" content="noindex" />
@@ -280,7 +280,7 @@ const printedUrlCss = `
   </head>
   <body>
     <section class="cover">
-      <h1>{SITE.author}<br />Collected Writing</h1>
+      <h1>{config.site.author}<br />Collected Writing</h1>
       <div class="range">{firstYear}–{lastYear}</div>
       <div class="site">{siteHost}</div>
     </section>
@@ -303,7 +303,7 @@ const printedUrlCss = `
         from any website that may or may not still exist when you find this.
       </p>
       <p>
-        Written by {SITE.author}. Where a piece links to a video or other online
+        Written by {config.site.author}. Where a piece links to a video or other online
         material that cannot be printed, the web address is shown in its place so
         the reference is preserved.
       </p>
@@ -318,7 +318,7 @@ const printedUrlCss = `
               <a class="toc-title" href={`#chapter-${i}`}>
                 {i + 1}. {post.data.title}
               </a>
-              <span class="toc-date">{fmtDate(post.data.pubDate)}</span>
+              <span class="toc-date">{fmtDate(post.data.pubDatetime)}</span>
             </li>
           ))
         }
@@ -330,7 +330,7 @@ const printedUrlCss = `
         <article class="chapter" id={`chapter-${i}`}>
           <header>
             <h2>{post.data.title}</h2>
-            <div class="chapter-date">{fmtDate(post.data.pubDate)}</div>
+            <div class="chapter-date">{fmtDate(post.data.pubDatetime)}</div>
           </header>
           {
             post.data.image && (

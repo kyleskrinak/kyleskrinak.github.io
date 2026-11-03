@@ -102,6 +102,30 @@ export default defineConfig({
       styles: ["normal", "italic"],
       formats: ["woff", "ttf"],
     },
+    // SITE-OVERRIDE: IBM Plex Mono for the site's OG card designs
+    // (src/utils/og-templates/), read by the two OG routes. Pages don't use it.
+    // Local files, not Google's: Google's copy lacks U+2011, the non-breaking
+    // hyphen the home card sets in "AI-assisted".
+    {
+      name: "IBM Plex Mono",
+      cssVariable: "--font-ibm-plex-mono",
+      provider: fontProviders.local(),
+      fallbacks: ["monospace"],
+      options: {
+        variants: [
+          {
+            weight: 400,
+            style: "normal",
+            src: ["./src/assets/fonts/ibm-plex-mono-400.ttf"],
+          },
+          {
+            weight: 700,
+            style: "normal",
+            src: ["./src/assets/fonts/ibm-plex-mono-700.ttf"],
+          },
+        ],
+      },
+    },
   ],
   // SITE-OVERRIDE: Sharp image service with an input-pixel cap, and
   // constrained responsive images.
@@ -129,9 +153,9 @@ export default defineConfig({
         optional: true,
       }),
       // BUILD_ENV and SITE_URL are "type-system only" entries - declared here for
-      // validation but consumed via process.env in src/config/index.ts (not astro:env)
+      // validation but consumed via process.env in astro-paper.config.ts (not astro:env)
       // because that file runs at build initialization before Astro env is available.
-      // Hardcoded fallback values in src/config/index.ts are validated against the
+      // Hardcoded fallback values in astro-paper.config.ts are validated against the
       // registry by config/validate.mjs to prevent drift.
       //
       // access: "secret" here is NOT a credential classification — these are not

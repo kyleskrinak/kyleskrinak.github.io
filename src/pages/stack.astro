@@ -3,7 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import { SITE } from "@/config";
+import config from "@/config";
+import { SITE_TIMEZONE } from "@/site-config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import dayjs from "dayjs";
@@ -14,7 +15,7 @@ import packageJson from "../../package.json";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 // Wall-clock build date in the site's timezone, so a late-evening build doesn't show tomorrow.
-const builtAt = dayjs().tz(SITE.timezone);
+const builtAt = dayjs().tz(SITE_TIMEZONE);
 
 const { engines, version: themeVersion } = packageJson;
 
@@ -30,7 +31,7 @@ function installedVersion(name: string): string {
 ---
 
 <Layout
-  title={`Blog Stack | ${SITE.title}`}
+  title={`Blog Stack | ${config.site.title}`}
   description="The technology stack behind this blog: Astro, AstroPaper, Tailwind CSS, Pagefind, and how it all gets published."
 >
   <Header />

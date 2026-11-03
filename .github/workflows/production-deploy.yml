@@ -75,16 +75,17 @@ jobs:
           tag: archive-pdfs
           title: Archive PDFs (automation backing store)
           hash-paths: |
-            src/content/blog
+            src/content/posts
             public/presentations
             src/pages/archive-book.astro
-            src/utils/getBlogPosts.ts
             src/utils/postFilter.ts
             src/content.config.ts
             scripts/build-archive-pdf.mjs
             scripts/build-presentations-pdf.mjs
             scripts/lib/pdf-helpers.mjs
-            src/config
+            astro-paper.config.ts
+            src/config.ts
+            src/site-config.ts
           assets: |
             blog-archive.pdf dist
             presentations-archive.pdf dist
@@ -121,7 +122,11 @@ jobs:
             src/components/ResumeHeader.astro
             src/layouts/Layout.astro
             src/styles/global.css
-            src/config
+            src/styles/theme.css
+            src/styles/typography.css
+            astro-paper.config.ts
+            src/config.ts
+            src/site-config.ts
             src/content.config.ts
             astro.config.ts
           # One render writes all three (print-resume-pdf.mjs defaults to
@@ -147,7 +152,7 @@ jobs:
             --only-show-errors \
             --exclude "*" \
             --include "_astro/*" \
-            --include "_pagefind/*" \
+            --include "pagefind/*" \
             --cache-control "max-age=31536000,public,immutable"
 
       # Step 2: push everything else (HTML + non-asset files) with a short cache
@@ -162,7 +167,7 @@ jobs:
             --delete \
             --only-show-errors \
             --exclude "_astro/*" \
-            --exclude "_pagefind/*" \
+            --exclude "pagefind/*" \
             --exclude "resume/kyle-skrinak-resume.docx" \
             --exclude "resume/kyle-skrinak-resume.txt" \
             --cache-control "max-age=300,public"

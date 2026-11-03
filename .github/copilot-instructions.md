@@ -11,7 +11,7 @@ Focus code reviews on:
 ## Files to Skip
 
 **Do NOT review or comment on:**
-- Blog post content files: `src/content/blog/**/*.md` and `src/content/blog/**/*.mdx`
+- Blog post content files: `src/content/posts/**/*.md` and `src/content/posts/**/*.mdx`
 - Presentation content files: `slidev-presentations/slides/**/*.md`
 - Documentation narrative in `docs/**/*.md` (unless specifically about code behavior)
 

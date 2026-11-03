@@ -5,8 +5,8 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import ResumeHeader from "@/components/ResumeHeader.astro";
-import { RESUME_DOCX_PATH, RESUME_PDF_PATH, RESUME_TXT_PATH } from "@/config";
-import { linkWithBase } from "@/utils/linkWithBase";
+import { RESUME_DOCX_PATH, RESUME_PDF_PATH, RESUME_TXT_PATH } from "@/site-config";
+import { getAssetPath } from "@/utils/withBase";
 import { resumeMetaDescription } from "@/lib/resume-sections.mjs";
 import "@/styles/resume.css";
 
@@ -21,7 +21,7 @@ if (!name) throw new Error("Resume frontmatter has no name");
 const description = resumeMetaDescription(page.data);
 ---
 
-{/* Content title already carries the site owner's name — no SITE.title
+{/* Content title already carries the site owner's name — no config.site.title
     suffix, which would render "Kyle Skrinak — Resume | Kyle Skrinak" */}
 <Layout
   title={title}
@@ -41,9 +41,9 @@ const description = resumeMetaDescription(page.data);
       <p class="resume-download mt-4">
         {/* compressHTML drops whitespace that spans a line break next to a tag, so each space is explicit. */}
         You can download my resume as a{" "}
-        <a href={linkWithBase(RESUME_PDF_PATH)} target="_blank" rel="noopener noreferrer">PDF</a>,{" "}
-        <a href={linkWithBase(RESUME_DOCX_PATH)} target="_blank" rel="noopener noreferrer">DOCX</a>, or{" "}
-        <a href={linkWithBase(RESUME_TXT_PATH)} target="_blank" rel="noopener noreferrer">TEXT</a> file.
+        <a href={getAssetPath(RESUME_PDF_PATH)} target="_blank" rel="noopener noreferrer">PDF</a>,{" "}
+        <a href={getAssetPath(RESUME_DOCX_PATH)} target="_blank" rel="noopener noreferrer">DOCX</a>, or{" "}
+        <a href={getAssetPath(RESUME_TXT_PATH)} target="_blank" rel="noopener noreferrer">TEXT</a> file.
       </p>
     </ResumeHeader>
     <article class="resume-content mt-8">

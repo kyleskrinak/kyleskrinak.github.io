@@ -23,6 +23,9 @@ function getIdSlug(id: string): string {
 function getPostSlugPath(id: string, filePath: string | undefined): string {
   const pathSegments = getPostPathSegments(filePath);
   const slug = getIdSlug(id);
+  // SITE-OVERRIDE: posts are co-located (foo/index.md), so the last directory
+  // repeats the slug. Drop it: /posts/foo/, not /posts/foo/foo/.
+  if (pathSegments.at(-1) === slug) pathSegments.pop();
   return pathSegments.length > 0
     ? [...pathSegments, slug].join("/")
     : String(slug);

@@ -4,7 +4,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import { SITE } from "@/config";
+import config from "@/config";
 
 const page = await getEntry("pages", "lchf");
 if (!page) throw new Error("LCHF page not found");
@@ -14,7 +14,7 @@ const { title, description } = page.data;
 ---
 
 <Layout
-  title={`${title} | ${SITE.title}`}
+  title={`${title} | ${config.site.title}`}
   description={description}
 >
   <Header />

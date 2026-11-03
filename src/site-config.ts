@@ -1,43 +1,24 @@
-// Determine website URL: pr-visual-check.yml and production-deploy.yml set
-// SITE_URL. linkwatch.yml and local dev leave it unset and fall back to the
-// production URL.
-// To test with a different URL locally, set SITE_URL explicitly.
-//
-// NOTE: Uses process.env instead of astro:env because this runs at build time before
-// Astro env is fully initialized. Hardcoded fallback URL is validated against
-// config/registry.mjs by config/validate.mjs to prevent drift.
-const siteUrl = process.env.SITE_URL;
-const website = siteUrl || "https://kyle.skrinak.com/";
-const title = "Screenack";
+// Site-only constants that upstream AstroPaper's config has no key for.
+// Theme settings live in astro-paper.config.ts; see UPSTREAM.md.
 
-export const SITE = {
-  website,
-  author: "Kyle Skrinak",
-  profile: "https://github.com/kyleskrinak",
-  desc: "What I learn by doing: web platforms, security, AI-assisted development and stuff.",
-  title,
-  shortName: title, // manifest short_name — derived so it can't drift from the brand name
+// Dedicated reply-by-email address, distinct from the resume's personal
+// contactEmail. Read by ReplyViaEmail.astro.
+export const BLOG_CONTACT_EMAIL = "muddles.jitter.2t@icloud.com";
+
+// Web app manifest fields (src/pages/site.webmanifest.ts). name and
+// description come from astro-paper.config.ts; short_name is the title so it
+// can't drift from the brand name.
+export const MANIFEST = {
   themeColor: "#0096ff",
   backgroundColor: "#ffffff",
   display: "standalone",
-  lightAndDarkMode: true,
-  postPerIndex: 5,
-  postPerPage: 5,
-  scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
-  showArchives: true,
-  showBackButton: true, // show back button in post detail
-  blogContactEmail: "muddles.jitter.2t@icloud.com", // dedicated reply-by-email address, distinct from the resume's personal contactEmail
-  editPost: {
-    enabled: false,
-    text: "Edit on GitHub",
-    url: "https://github.com/kyleskrinak/kyleskrinak.github.io/edit/main/",
-  },
-  defaultOgImage: "og.png", // bare filename (no leading slash); linkWithBase() in Layout.astro resolves it to a root-relative URL. Built by src/pages/og.png.ts.
-  dynamicOgImage: true, // when true, posts render Satori per-post OG images instead of falling back to defaultOgImage
-  dir: "ltr", // "rtl" | "auto"
-  lang: "en", // html lang code. Set this empty and default will be "en"
-  timezone: "America/New_York", // Default global timezone (IANA format)
 } as const;
+
+// Wall-clock timezone for the site-only pages that print a date of their own:
+// the stack page's build date and the archive PDF's post dates. The theme's
+// config.site.timezone stays "UTC" because post dates sit at midnight UTC and
+// would show a day early in America/New_York.
+export const SITE_TIMEZONE = "America/New_York";
 
 // Root-relative paths of the build-generated resume files, all written by one
 // render. Single source for the site code (download links, sitemap). The CI

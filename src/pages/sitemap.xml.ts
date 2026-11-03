@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
-import { getBlogPosts } from "@/utils/getBlogPosts";
-import getSortedPosts from "@/utils/getSortedPosts";
-import { getPath } from "@/utils/getPath";
-import { SITE } from "@/config";
+import { getCollection } from "astro:content";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import { getPostUrl } from "@/utils/getPostPaths";
+import config from "@/config";
 import presentations from "@/data/presentations.json";
 
 /**
@@ -56,10 +56,10 @@ const isoDay = (date: Date) => date.toISOString().split("T")[0];
 type SitemapEntry = { path: string; lastmod?: string };
 
 export const GET: APIRoute = async ({ site }) => {
-  // getSortedPosts applies postFilter, which excludes future-dated posts. Calling
-  // getBlogPosts alone filters drafts only, so scheduled posts used to appear in
-  // the sitemap before the pages they point at existed.
-  const posts = getSortedPosts(await getBlogPosts());
+  // getSortedPosts applies postFilter, which excludes drafts and future-dated
+  // posts, so scheduled posts can't appear in the sitemap before the pages they
+  // point at exist.
+  const posts = getSortedPosts(await getCollection("posts"));
 
   // Static indexable pages
   const staticPages: SitemapEntry[] = [
@@ -71,17 +71,17 @@ export const GET: APIRoute = async ({ site }) => {
   ];
 
   // Conditionally add archives if enabled
-  if (SITE.showArchives) {
+  if (config.features.showArchives) {
     staticPages.push({ path: "archives/" });
   }
 
-  // Individual blog posts (all indexable). getPath is the same helper the router
-  // and RSS feed use: it derives segments from the file path and slugifies each
-  // one. Deriving the URL from post.id instead lets the sitemap and the router
+  // Individual blog posts (all indexable). getPostUrl is the same helper the RSS
+  // feed and post links use, built on the slug path the router uses: it derives
+  // segments from the file path and slugifies each one. Deriving the URL from post.id instead lets the sitemap and the router
   // disagree silently, which is how a sitemap starts advertising 404s.
   const postPages: SitemapEntry[] = posts.map(post => ({
-    path: getPath(post.id, post.filePath),
-    lastmod: isoDay(post.data.updatedDate ?? post.data.pubDate),
+    path: getPostUrl(post.id, post.filePath),
+    lastmod: isoDay(post.data.modDatetime ?? post.data.pubDatetime),
   }));
 
   // Presentation HTML files (actual content, not directory pages)
