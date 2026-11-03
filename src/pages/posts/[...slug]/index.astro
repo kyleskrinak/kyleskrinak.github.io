@@ -160,8 +160,8 @@ const mfContent = "e-content";
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
 
-    {/* SITE-OVERRIDE: h-entry identity (u-url, author h-card, dt-published). */}
-    <PostIdentity {title} {pubDatetime} {modDatetime} />
+    {/* SITE-OVERRIDE: h-entry identity (u-url, author h-card). */}
+    <PostIdentity {title} />
 
     {/* SITE-OVERRIDE: hero image. */}
     {image && <PostHero {image} {alt} {caption} {imagePosition} />}

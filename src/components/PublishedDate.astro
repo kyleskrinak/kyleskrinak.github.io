@@ -1,0 +1,59 @@
+---
+// A revised post's publish date, shown ahead of upstream's "Revised on: <date>"
+// (Kyle, 2026-11-03: the publish date matters more than a revision). Inserted
+// into upstream's Datetime from one line, so it renders as flex children of
+// Datetime's row. See UPSTREAM.md.
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import config from "@/config";
+import { resolveTimezone } from "@/utils/resolveTimezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+type Props = {
+  size?: "sm" | "lg";
+  pubDatetime: string | Date;
+  timezone?: string;
+  modDatetime?: string | Date | null;
+};
+
+const {
+  pubDatetime,
+  modDatetime,
+  size = "sm",
+  timezone: postTimezone,
+} = Astro.props;
+
+// Same test as Datetime's isModified. An unrevised post shows its publish date
+// through Datetime itself.
+const isModified = modDatetime && modDatetime > pubDatetime;
+
+const published = dayjs(pubDatetime).tz(
+  resolveTimezone(postTimezone ?? config.site.timezone)
+);
+---
+
+{
+  isModified && (
+    <>
+      <time
+        class:list={[
+          "dt-published",
+          "text-sm",
+          { "sm:text-base": size === "lg" },
+        ]}
+        datetime={published.toISOString()}
+      >
+        {published.format("D MMM, YYYY")}
+      </time>
+      <span
+        aria-hidden="true"
+        class:list={["text-sm", { "sm:text-base": size === "lg" }]}
+      >
+        ·
+      </span>
+    </>
+  )
+}

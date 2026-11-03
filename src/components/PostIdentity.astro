@@ -7,11 +7,9 @@ import { canonicalizePathname } from "@/utils/canonicalizePathname";
 
 type Props = {
   title: string;
-  pubDatetime: Date;
-  modDatetime?: Date | null;
 };
 
-const { title, pubDatetime, modDatetime } = Astro.props;
+const { title } = Astro.props;
 
 /* The h-entry's u-url is this page, not `canonicalURL` from frontmatter: a
    post may declare an external canonical for SEO, but this entry describes
@@ -29,11 +27,6 @@ const postUrl = new URL(
 // too, but as the favicon and PWA icon; changing the avatar need not touch
 // those.)
 const authorPhoto = new URL(getAssetPath("favicon-96x96.png"), Astro.site).href;
-
-// Upstream's Datetime shows only the updated date on a revised post, marked
-// dt-updated. The published date rides here so the h-entry keeps it. Same test
-// as Datetime's isModified.
-const isModified = modDatetime && modDatetime > pubDatetime;
 ---
 
 {/* No visible author chrome exists on a post page to carry these, and adding
@@ -43,13 +36,6 @@ const isModified = modDatetime && modDatetime > pubDatetime;
     element rules for u-* — a parser reaches them before any fallback. */}
 <div class="post-identity" hidden>
   <a class="u-url" href={postUrl}>{title}</a>
-  {
-    isModified && (
-      <time class="dt-published" datetime={pubDatetime.toISOString()}>
-        {pubDatetime.toISOString()}
-      </time>
-    )
-  }
   <div class="p-author h-card">
     <img class="u-photo" src={authorPhoto} alt="" width="32" height="32" />
     <a class="p-name u-url" href={config.site.url}>{config.site.author}</a>
