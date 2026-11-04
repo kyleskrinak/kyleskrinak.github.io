@@ -8,5 +8,5 @@ type Props = { body?: string };
 const readingTime = getReadingTime(Astro.props.body ?? "");
 ---
 
-<span aria-hidden="true" class="text-skin-base opacity-50">·</span>
-<span class="text-sm text-skin-base opacity-80">{readingTime} min read</span>
+<span aria-hidden="true" class="opacity-50">·</span>
+<span class="text-sm opacity-80">{readingTime} min read</span>
