@@ -9,6 +9,7 @@
   * {
     @apply border-border outline-accent/75;
     scrollbar-width: auto;
+    scrollbar-color: var(--color-muted) transparent;
   }
   a,
   button,
