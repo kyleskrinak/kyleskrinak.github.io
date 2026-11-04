@@ -1,17 +1,14 @@
 import type { APIRoute } from "astro";
 
+const getRobotsTxt = (sitemapURL: URL) => `
+User-agent: *
+Allow: /
+
+Sitemap: ${sitemapURL.href}
+`;
+
 export const GET: APIRoute = ({ site }) => {
-  const sitemapURL = site ? new URL("sitemap.xml", site) : undefined;
-
-  const body = [
-    "User-agent: *",
-    "Allow: /",
-    sitemapURL ? `Sitemap: ${sitemapURL.href}` : "Sitemap: /sitemap.xml",
-    "",
-  ].join("\n");
-
-  return new Response(body, {
-    status: 200,
-    headers: { "Content-Type": "text/plain" },
-  });
+  // SITE-OVERRIDE: /sitemap.xml (src/pages/sitemap.xml.ts) in place of @astrojs/sitemap's sitemap-index.xml.
+  const sitemapURL = new URL("sitemap.xml", site);
+  return new Response(getRobotsTxt(sitemapURL));
 };

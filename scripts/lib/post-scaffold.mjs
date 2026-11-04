@@ -1,6 +1,6 @@
 /**
  * Shared helpers for scaffolding a blog post directory
- * (`src/content/blog/<slug>/index.md` + co-located images).
+ * (`src/content/posts/<slug>/index.md` + co-located images).
  *
  * Used by scripts/new-post.mjs (human-authored stub) and
  * scripts/migrate-notion-post.mjs (Notion-sourced draft).

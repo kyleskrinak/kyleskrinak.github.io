@@ -5,7 +5,7 @@ IgnoreCanonicalBrokenLinks: false
 IgnoreAltMissing: false
 # alt="" is the correct markup for a decorative or placeholder image, and this
 # site has three: the lightbox <img> placeholder (script sets alt on open), the
-# hidden microformats u-photo in PostDetails, and the homepage footer h-card
+# hidden microformats u-photo in PostIdentity, and the homepage footer h-card
 # photo. htmltest counts every one as "alt text empty", which put 99 errors in
 # every run and made tier 1 structurally unpassable — the early-exit fast path
 # in check-links.js was dead code and each run paid the full external sweep.

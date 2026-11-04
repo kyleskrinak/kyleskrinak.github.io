@@ -1,0 +1,52 @@
+---
+// Post hero figure, inserted into upstream's post route from one line.
+// See UPSTREAM.md.
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import { HERO_IMAGE } from "@/site-config";
+
+type Props = {
+  image: ImageMetadata;
+  alt?: string;
+  caption?: string;
+  imagePosition?: string;
+};
+
+const { image, alt, caption, imagePosition } = Astro.props;
+---
+
+<figure class="hero-image mt-8 mb-8 w-full">
+  {/* u-featured below is the entry's representative image for link
+      previews. It sits inside the h-entry but outside e-content, which is
+      the shape the h-entry spec documents — the image is declared once
+      here rather than duplicated into the body. (The class cannot be
+      annotated inline: Astro rejects a comment in attribute position.)
+
+      HERO_IMAGE's fit + position route to Sharp's resize at build time
+      so the generated hero is cropped from the part of the source image
+      specified by frontmatter `imagePosition` (default: center).
+      The site-wide `layout: "constrained"` in astro.config.ts generates
+      the width-based srcset (640w–2400w; Sharp skips upscaling), and
+      `sizes` picks the candidate. The 736px is `max-w-app` (768px) minus
+      the `px-4` gutters of `app-layout` in global.css: update it if that
+      container changes. */}
+  <Image
+    src={image}
+    alt={alt || "Post hero image"}
+    {...HERO_IMAGE}
+    position={imagePosition || "center"}
+    sizes="(max-width: 768px) calc(100vw - 2rem), 736px"
+    loading="eager"
+    decoding="sync"
+    fetchpriority="high"
+    class="u-featured rounded-lg shadow-md"
+  />
+  {
+    caption && (
+      <figcaption class="mt-2 text-center text-sm italic text-gray-600 dark:text-gray-400">
+        {/* caption is author-controlled frontmatter, not user input — set:html is safe here */}
+        <span set:html={caption} />
+      </figcaption>
+    )
+  }
+</figure>

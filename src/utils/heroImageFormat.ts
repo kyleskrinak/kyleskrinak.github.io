@@ -15,7 +15,7 @@
  *             `fit`/`position` have nothing to crop in an SVG. Hence a
  *             rejection list, not an allowlist: nothing else needs excluding.
  *
- *   ogImage — served to scrapers verbatim. PostDetails.astro assigns
+ *   ogImage — served to scrapers verbatim. The post route assigns
  *             `initOgImage.src` straight to og:image with no transform, so
  *             whatever the author committed is what Facebook, Slack and
  *             LinkedIn have to decode. That warrants an allowlist of formats

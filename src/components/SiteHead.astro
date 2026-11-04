@@ -1,0 +1,60 @@
+---
+// Site-only <head> tags, inserted into upstream's Layout from one line.
+// See UPSTREAM.md.
+import config from "@/config";
+import { getAssetPath } from "@/utils/withBase";
+
+type Props = {
+  noindex?: boolean;
+  ogType?: "website" | "article";
+  title: string;
+  image: string;
+};
+
+const { noindex = false, ogType = "website", title, image } = Astro.props;
+const { site } = config;
+
+// Posts get BlogPosting JSON-LD from PostLayout; every other page gets
+// WebPage (5e70a37).
+const webPage = ogType === "website" && {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  headline: title,
+  image,
+  author: [
+    {
+      "@type": "Person",
+      name: site.author,
+      ...(site.profile && { url: site.profile }),
+    },
+  ],
+};
+---
+
+<link
+  rel="icon"
+  type="image/png"
+  sizes="96x96"
+  href={getAssetPath("favicon-96x96.png")}
+/>
+<link rel="apple-touch-icon" href={getAssetPath("apple-touch-icon.png")} />
+<link rel="manifest" href={getAssetPath("site.webmanifest")} />
+{import.meta.env.PROD && <link rel="me" href={config.site.profile} />}
+{
+  /* Pages are indexed by default. Navigation and functional pages opt out via
+     the `noindex` prop, keeping `follow` so crawlers still discover content
+     through them. Related: src/pages/robots.txt.ts (Allow: /). */
+}
+{noindex && <meta name="robots" content="noindex,follow" />}
+{
+  /* Escape "<" so a title containing "</script>" can't end the JSON-LD block. */
+}
+{
+  webPage && (
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(webPage).replace(/</g, "\\u003c")}
+    />
+  )
+}

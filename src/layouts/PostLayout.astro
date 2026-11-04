@@ -1,0 +1,65 @@
+---
+import Layout from "./Layout.astro";
+import config from "@/config";
+
+type Props = {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalURL?: string;
+  pubDatetime?: Date;
+  modDatetime?: Date | null;
+};
+
+const { site } = config;
+
+const { title, description, ogImage, canonicalURL, pubDatetime, modDatetime } =
+  Astro.props;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title ?? site.title,
+  image: ogImage,
+  ...(pubDatetime && { datePublished: pubDatetime.toISOString() }),
+  ...(modDatetime && { dateModified: modDatetime.toISOString() }),
+  author: [
+    {
+      "@type": "Person",
+      name: site.author,
+      ...(site.profile && { url: site.profile }),
+    },
+  ],
+};
+---
+
+{/* SITE-OVERRIDE: og:type="article" through Layout's ogType prop, in place of a second og:type tag in the head slot. */}
+<Layout {title} {description} {ogImage} {canonicalURL} ogType="article">
+  <Fragment slot="head">
+    {
+      pubDatetime && (
+        <meta
+          property="article:published_time"
+          content={pubDatetime.toISOString()}
+        />
+      )
+    }
+    {
+      modDatetime && (
+        <meta
+          property="article:modified_time"
+          content={modDatetime.toISOString()}
+        />
+      )
+    }
+
+    {/* SITE-OVERRIDE: escape "<" so a title containing "</script>" can't end the JSON-LD block. */}
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(structuredData).replace(/</g, "\\u003c")}
+    />
+  </Fragment>
+
+  <slot />
+</Layout>

@@ -117,7 +117,7 @@ The production workflow sets up intelligent caching:
 
 - **HTML files**: 5 minutes (for frequent updates)
 - **JS/CSS**: 1 hour (for moderate caching)
-- **Assets** (`_astro/`, `_pagefind/`): 1 year with `immutable` flag (versioned by build)
+- **Assets** (`_astro/`, `pagefind/`): 1 year with `immutable` flag (versioned by build)
 
 ## Environment Variables
 
@@ -242,33 +242,16 @@ See also:
 
 ## Common Build & Configuration Issues
 
-### Build Fails with "cannot stat 'dist/pagefind'"
-
-**Error**:
-```
-cp: cannot stat 'dist/pagefind': No such file or directory
-Error: Process completed with exit code 1
-```
-
-**Root Cause**: The `npm run build` script references the wrong Pagefind output directory
-
-**Solution**: Verify your build script matches the `pagefind.json` configuration:
-- Config specifies: `output_subdir: "_pagefind"` (with underscore)
-- Script should use: `cp -r dist/_pagefind public/` (with underscore)
-
-See [Build & Configuration Guide](./build-configuration.md) for details.
-
 ### Pagefind Search Not Working
 
 **Symptoms**: Search functionality missing or broken in production
 
 **Check**:
-1. Verify search assets exist: `aws s3 ls s3://kyle.skrinak.com/_pagefind/`
-2. Check CloudFront distribution includes `_pagefind/*` paths
-3. Verify `pagefind.json` config is correct
-4. Check browser console for errors
+1. Verify search assets exist: `aws s3 ls s3://kyle.skrinak.com/pagefind/`
+2. Check CloudFront distribution includes `pagefind/*` paths
+3. Check browser console for errors
 
-**Reference**: [Build & Configuration Guide](./build-configuration.md#critical-configuration-pagefind)
+**Reference**: [Build & Configuration Guide](./build-configuration.md#pagefind)
 
 ### Deployment Stuck or Not Progressing
 

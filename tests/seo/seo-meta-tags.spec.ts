@@ -122,6 +122,33 @@ test.describe('SEO Meta Tags - Robots Directives', () => {
 		});
 	});
 
+	// Layout sets og:type and SiteHead the WebPage JSON-LD; PostLayout asks for
+	// "article" and adds BlogPosting. A second og:type tag would lose to the
+	// first, which Open Graph gives preference.
+	test.describe('Open Graph type and JSON-LD', () => {
+		const expectations = [
+			{ path: '/posts/2018-04-07-drupalcon-nashville-2018/', ogType: 'article', ldType: 'BlogPosting' },
+			{ path: '/', ogType: 'website', ldType: 'WebPage' },
+			{ path: '/about/', ogType: 'website', ldType: 'WebPage' },
+			{ path: '/tags/ai/', ogType: 'website', ldType: 'WebPage' },
+		];
+
+		for (const { path, ogType, ldType } of expectations) {
+			test(`${path} has one og:type (${ogType}) and one JSON-LD block (${ldType})`, async ({ page }) => {
+				await page.goto(resolveUrl(path), { waitUntil: 'networkidle' });
+
+				const ogTypes = await page.locator('meta[property="og:type"]').evaluateAll(
+					(tags) => tags.map((tag) => tag.getAttribute('content'))
+				);
+				expect(ogTypes, `og:type tags on ${path}`).toEqual([ogType]);
+
+				const ldBlocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+				const ldTypes = ldBlocks.map((block) => JSON.parse(block)['@type']);
+				expect(ldTypes, `JSON-LD @type values on ${path}`).toEqual([ldType]);
+			});
+		}
+	});
+
 	test.describe('Canonical URLs', () => {
 		test('all pages have canonical URLs', async ({ page }) => {
 			const pages = [

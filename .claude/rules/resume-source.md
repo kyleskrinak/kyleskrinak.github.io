@@ -5,12 +5,13 @@ paths:
   - "scripts/**/*resume*"
   - "src/pages/resume.astro"
   - "src/pages/resume/**"
-  - "src/pages/about.astro"
+  - "src/content/pages/about.mdx"
+  - "src/components/CurrentRole.astro"
 ---
 
 # Resume Source
 
-**Before editing `src/content/pages/resume/index.md`, any `src/lib/resume-*`, `scripts/*resume*`, `src/pages/resume*`, or `src/pages/about.astro`, read `docs/features/resume-source.md`.** It records which frontmatter field populates which output. Do not infer that architecture from the code, and do not propose deleting a structured field as a duplicate of the body text — the resume is revised quarterly, and those fields exist so one edit reaches every render.
+**Before editing `src/content/pages/resume/index.md`, any `src/lib/resume-*`, `scripts/*resume*`, `src/pages/resume*`, `src/content/pages/about.mdx`, or `src/components/CurrentRole.astro`, read `docs/features/resume-source.md`.** It records which frontmatter field populates which output. Do not infer that architecture from the code, and do not propose deleting a structured field as a duplicate of the body text — the resume is revised quarterly, and those fields exist so one edit reaches every render.
 
 Three facts that have been guessed wrong before:
 - `current_role` populates the resume's lead heading, both meta descriptions, and the About page sentence. None of those are hand-typed.

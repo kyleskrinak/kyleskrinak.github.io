@@ -14,11 +14,11 @@ GRACE_DAYS="${DOCKER_CACHE_TTL_DAYS:-7}"
 
 # Hash build inputs: only include files that can affect the build environment
 # (components, config, dependencies, Dockerfile). Blog post Markdown/MDX files
-# under src/content/blog/ are excluded so that adding a new post doesn't trigger
+# under src/content/posts/ are excluded so that adding a new post doesn't trigger
 # an unnecessary Docker rebuild. Trade-off: a content-only build failure
 # (e.g., bad MDX syntax, schema validation error) won't be caught here —
 # run `npm run build` to validate content changes before pushing.
-# The exclusion is scoped to src/content/blog/ .md/.mdx only; page content
+# The exclusion is scoped to src/content/posts/ .md/.mdx only; page content
 # under src/content/pages/ still invalidates the cache.
 # Outside git, fall back to manifests (e.g., fresh tarball extract).
 compute_input_hash() {
@@ -29,7 +29,7 @@ compute_input_hash() {
     {
         git ls-files -z
         git ls-files -z --others --exclude-standard
-    } | grep -zEv '^src/content/blog/.+\.(md|mdx)$' \
+    } | grep -zEv '^src/content/posts/.+\.(md|mdx)$' \
       | xargs -0 sha256sum -- \
       | sha256sum | awk '{print $1}'
 }

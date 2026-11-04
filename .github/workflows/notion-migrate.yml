@@ -53,9 +53,9 @@ jobs:
             Auto-migrated from Notion (page `${{ steps.migrate.outputs.notion-page-id }}`).
 
             Review content, images, and consider `:::cards` formatting.
-            Flip `published: true` when ready. Future URL: ${{ steps.migrate.outputs.post-url }}
+            Remove `draft: true` when ready. Future URL: ${{ steps.migrate.outputs.post-url }}
           commit-message: "Add draft post from Notion: ${{ steps.migrate.outputs.slug }}"
-          add-paths: src/content/blog/**
+          add-paths: src/content/posts/**
 
       - name: Write back to Notion
         if: steps.cpr.outputs.pull-request-number != ''

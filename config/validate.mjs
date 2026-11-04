@@ -74,19 +74,16 @@ function normalizeWhitespace(str) {
   return str.replace(/\s+/g, ' ').trim();
 }
 
-// Validate analytics gating
-if (existsSync('src/layouts/Layout.astro')) {
-  const layout = readFileSync('src/layouts/Layout.astro', 'utf-8');
-  const layoutWithoutComments = stripComments(layout);
-
-  const expectedCloudflareGating = ConfigRegistry.analytics.cloudflare.gating;
-  if (!normalizeWhitespace(layoutWithoutComments).includes(normalizeWhitespace(expectedCloudflareGating))) {
-    issues.push(`Cloudflare analytics gating mismatch: expected "${expectedCloudflareGating}" in Layout.astro`);
+// Validate analytics gating: each registry entry names the file that holds its
+// gating expression.
+for (const [name, { gating, location }] of Object.entries(ConfigRegistry.analytics)) {
+  if (!location || !existsSync(location)) {
+    issues.push(`${name} gating file "${location}" not found - update ConfigRegistry.analytics.${name}.location`);
+    continue;
   }
-
-  const expectedGsvGating = ConfigRegistry.analytics.googleSiteVerification.gating;
-  if (!normalizeWhitespace(layoutWithoutComments).includes(normalizeWhitespace(expectedGsvGating))) {
-    issues.push(`GSV gating mismatch: expected "${expectedGsvGating}" in Layout.astro`);
+  const contentWithoutComments = stripComments(readFileSync(location, 'utf-8'));
+  if (!normalizeWhitespace(contentWithoutComments).includes(normalizeWhitespace(gating))) {
+    issues.push(`${name} gating mismatch: expected "${gating}" in ${location}`);
   }
 }
 
@@ -350,14 +347,16 @@ for (const filePath of allFiles) {
 // Validate that files use astro:env imports instead of import.meta.env
 // Two-tier approach: strict checks on critical files + comprehensive scan for all files
 //
-// NOTE: src/config/index.ts is exempt from this check because it uses process.env
-// for build-time fallback logic that runs before Astro env is available.
+// NOTE: astro-paper.config.ts is not scanned: it uses process.env for build-time
+// fallback logic that runs before Astro env is available.
 // See the hardcoded fallback validation section below and CLAUDE.md for design rationale.
 
 // Tier 1: Critical files must use astro:env imports (strict validation)
 const criticalAstroEnvFiles = [
   'src/pages/robots.txt.ts',
-  'src/layouts/Layout.astro'
+  'src/layouts/Layout.astro',
+  'src/components/CloudflareBeacon.astro',
+  'src/config.ts'
 ];
 for (const file of criticalAstroEnvFiles) {
   if (!existsSync(file)) continue;
@@ -383,15 +382,12 @@ const allSourceFiles = [
   ...findFiles('src/pages', ['ts', 'astro']),
   ...findFiles('src/layouts', ['ts', 'astro']),
   ...findFiles('src/components', ['ts', 'astro']),
-  ...findFiles('src/config', ['ts', 'astro'])
+  ...['src/config.ts', 'src/site-config.ts'].filter(file => existsSync(file))
 ];
 
 for (const file of allSourceFiles) {
   // Skip files already checked in tier 1
   if (criticalAstroEnvFiles.includes(file)) continue;
-  // src/config/index.ts uses process.env by design — it runs at build initialization
-  // before Astro env is available. See CLAUDE.md and the hardcoded fallback section below.
-  if (file === 'src/config/index.ts') continue;
 
   const content = readFileSync(file, 'utf-8');
 
@@ -401,27 +397,29 @@ for (const file of allSourceFiles) {
   }
 }
 
-// Validate hardcoded fallback URL in src/config/index.ts against registry
+// Validate hardcoded fallback URL in astro-paper.config.ts against registry
 //
-// Design decision: src/config/index.ts uses process.env with a hardcoded production URL fallback
+// Design decision: astro-paper.config.ts uses process.env with a hardcoded production URL fallback
 // instead of astro:env because it runs at build initialization before Astro env is fully available.
 // pr-visual-check.yml and production-deploy.yml set SITE_URL explicitly; linkwatch.yml and local
 // dev build without it and use the fallback. We validate the literal against the registry to
 // prevent drift. resolveSiteUrl() in scripts/lib/pdf-helpers.mjs holds a second copy of the
 // literal, which this check does not cover.
-if (existsSync('src/config/index.ts')) {
-  const configContent = readFileSync('src/config/index.ts', 'utf-8');
+if (!existsSync('astro-paper.config.ts')) {
+  issues.push('astro-paper.config.ts not found - cannot validate its production URL fallback');
+} else {
+  const configContent = readFileSync('astro-paper.config.ts', 'utf-8');
 
   // Loose regex: tolerates variable renames, || vs ??, and single vs double quotes.
   // Anchored to https:// URLs to avoid false positives from other fallback expressions.
   const prodUrlMatch = configContent.match(/(?:\|\||\?\?)\s*["'](https?:\/\/[^"']+)["']/);
   if (prodUrlMatch === null) {
-    issues.push('Failed to extract production URL fallback from src/config/index.ts - config format may have changed');
+    issues.push('Failed to extract production URL fallback from astro-paper.config.ts - config format may have changed');
   } else {
     const hardcodedProdUrl = prodUrlMatch[1];
     const registryProdUrl = ConfigRegistry.environments['main-aws'].SITE_URL.value;
     if (hardcodedProdUrl !== registryProdUrl) {
-      issues.push(`src/config/index.ts production URL "${hardcodedProdUrl}" doesn't match registry "${registryProdUrl}"`);
+      issues.push(`astro-paper.config.ts production URL "${hardcodedProdUrl}" doesn't match registry "${registryProdUrl}"`);
     }
   }
 }

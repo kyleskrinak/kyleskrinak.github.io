@@ -1,13 +1,14 @@
 import type { APIRoute } from "astro";
-import { SITE } from "@/config";
+import config from "@/config";
+import { MANIFEST } from "@/site-config";
 
 export const GET: APIRoute = () => {
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const manifest = {
-    name: SITE.title,
-    short_name: SITE.shortName,
-    description: SITE.desc,
+    name: config.site.title,
+    short_name: config.site.title,
+    description: config.site.description,
     icons: [
       {
         src: `${baseUrl}favicon-96x96.png`,
@@ -39,9 +40,9 @@ export const GET: APIRoute = () => {
         purpose: "maskable",
       },
     ],
-    theme_color: SITE.themeColor,
-    background_color: SITE.backgroundColor,
-    display: SITE.display,
+    theme_color: MANIFEST.themeColor,
+    background_color: MANIFEST.backgroundColor,
+    display: MANIFEST.display,
     scope: baseUrl,
     start_url: baseUrl,
   };

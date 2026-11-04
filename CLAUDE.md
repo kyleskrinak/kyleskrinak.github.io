@@ -45,7 +45,12 @@ If my instruction is unclear, ask what I want. Don't assume.
 
 **Single Source of Truth:** `config/registry.mjs`. After any config change: `npm run config:generate && npm run config:validate`, update workflows, commit together.
 - **New env var:** add to `astro.config.ts` env schema + registry + affected workflows, then validate.
-- **URL change:** update registry + workflows + `src/config/index.ts` fallbacks; validate.
+- **URL change:** update registry + workflows + the `astro-paper.config.ts` fallback; validate.
+- **Where settings live:** theme settings in `astro-paper.config.ts` (upstream's file, read through upstream's `src/config.ts`); site-only constants in `src/site-config.ts`.
+
+## Upstream Theme (AstroPaper)
+
+The site merges upstream AstroPaper with git; `UPSTREAM.md` holds the update procedure, the conflict rules and the departures table. In a file that also exists upstream, make additions only. Replacing an upstream mechanism needs Kyle's approval, a `SITE-OVERRIDE: <what>` comment on the line above the change, and an `UPSTREAM.md` row.
 
 ## Git Workflow
 
@@ -95,7 +100,7 @@ After any code change:
 
 1. **Search ALL instances** — `grep -rn "pattern" src/ scripts/ tests/ public/ config/` before and after; must reach zero results.
 2. **Check docs and interacting systems** — read implementation first, not docs. Verify docs match code. Changed code → check docs/tests/configs; removed tool → grep all files.
-3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual:docker` (all must pass). Run visual tests via the Docker variant, never the bare `test:visual` — baselines are Docker/CI-rendered, and running natively on macOS produces systematic font-rendering diffs (near-universal 1–2px height mismatches) that look like regressions but aren't. New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline:docker` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits. Page weight is monitored nightly against production (real uncompressed bytes, 512KB Club methodology, including third-party trackers; transfer bytes also reported) via `weightwatch.yml` — not a push gate; see `scripts/check-live-weight.mjs`.
+3. **Quality gates before push** — `npm run build && npm run check:links && npm run test:visual:docker` (all must pass). Run visual tests via the Docker variant, never the bare `test:visual` — baselines are Docker/CI-rendered, and running natively on macOS produces font-rendering pixel diffs that look like regressions but aren't. New blog post exceptions: canonical URL 404 (resolves on deploy) and listing-page height diffs are expected (update baselines with `npm run test:visual:baseline:docker` — ask first); other failures are real. **Docs-only changes** (docs/, README.md): build required; link check and visual optional for trivial edits. Page weight is monitored nightly against production (real uncompressed bytes, 512KB Club methodology, including third-party trackers; transfer bytes also reported) via `weightwatch.yml` — not a push gate; see `scripts/check-live-weight.mjs`.
 4. Before committing, report a one-line summary of what you searched and what you fixed.
 
 ## Coding Rules
@@ -108,7 +113,7 @@ After any code change:
 
 **Web performance:** Always include `width`/`height` on images (including SVGs) for CLS prevention. `sizes` attribute must match actual container width, not viewport.
 
-**Post slugs:** `getPath()` uses `post.id` without lowercasing, and S3 keys are case-sensitive — a mixed-case post directory 404s in production and on Linux CI even though macOS hides it. Enforced by `tests/unit/post-slug-case.test.mjs`.
+**Post slugs:** `getPostUrl()` (`src/utils/getPostPaths.ts`) builds the URL from `post.id` without lowercasing it, and S3 keys are case-sensitive — a mixed-case post directory 404s in production and on Linux CI even though macOS hides it. Enforced by `tests/unit/post-slug-case.test.mjs`.
 
 ## Review Response Protocol
 
@@ -136,7 +141,7 @@ When instructions appear to conflict:
 
 1. **Safety first:** Blocker Resolution Protocol overrides all other instructions
 2. **Category rules:** Infrastructure rules override MVP rules for:
-   - Configuration files (astro.config.ts, src/config/index.ts)
+   - Configuration files (astro.config.ts, astro-paper.config.ts, src/site-config.ts)
    - Build scripts, CI/CD workflows
    - Test files and test infrastructure
 3. **Source hierarchy:** CLAUDE.md overrides Memory (Memory may be outdated)

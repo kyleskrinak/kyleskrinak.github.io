@@ -1,7 +1,7 @@
 import satori from "satori";
 // import { html } from "satori-html";
-import { SITE, OG_IMAGE_SIZE } from "@/config";
-import loadFonts from "../loadFonts";
+import config from "@/config";
+import { OG_IMAGE_SIZE } from "@/site-config";
 
 // const markup = html`<div
 //       style={{
@@ -78,19 +78,21 @@ import loadFonts from "../loadFonts";
 //             <span>
 //               by{" "}
 //               <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-//                 {post.data.author || SITE.author}
+//                 {post.data.author || config.site.author}
 //               </span>
 //             </span>
 
 //             <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-//               {SITE.title}
+//               {config.site.title}
 //             </span>
 //           </div>
 //         </div>
 //       </div>
 //     </div>`;
 
-export default async post => {
+// The route (src/pages/posts/[...slug]/index.png.ts) loads the IBM Plex Mono
+// files through the Fonts API and passes their data in.
+export default async (post, { regularData, boldData }) => {
   return satori(
     {
       type: "div",
@@ -190,7 +192,7 @@ export default async post => {
                                       overflow: "hidden",
                                       fontWeight: "bold",
                                     },
-                                    children: post.data.author || SITE.author,
+                                    children: post.data.author || config.site.author,
                                   },
                                 },
                               ],
@@ -200,7 +202,7 @@ export default async post => {
                             type: "span",
                             props: {
                               style: { overflow: "hidden", fontWeight: "bold" },
-                              children: SITE.title,
+                              children: config.site.title,
                             },
                           },
                         ],
@@ -218,7 +220,10 @@ export default async post => {
       width: OG_IMAGE_SIZE.width,
       height: OG_IMAGE_SIZE.height,
       embedFont: true,
-      fonts: await loadFonts(),
+      fonts: [
+        { name: "IBM Plex Mono", data: regularData, weight: 400, style: "normal" },
+        { name: "IBM Plex Mono", data: boldData, weight: 700, style: "normal" },
+      ],
     }
   );
 };

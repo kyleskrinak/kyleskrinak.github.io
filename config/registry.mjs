@@ -5,7 +5,7 @@
  *
  * Scope: This registry covers deployment/environment configuration —
  * env vars, build flags, analytics gating, and deployment settings that
- * vary across environments. `src/config/index.ts` also exports static site
+ * vary across environments. `astro-paper.config.ts` also holds static site
  * content (author, title, description, social links, etc.) that is intentionally
  * out of scope here — those values don't vary by environment and don't need
  * registry tracking.
@@ -67,7 +67,7 @@ export const ConfigRegistry = {
         value: 'https://kyle.skrinak.com/',
         source: 'fallback',
         required: false,
-        notes: 'Not set as env var; src/config/index.ts falls back to production URL. Set SITE_URL explicitly to override.'
+        notes: 'Not set as env var; astro-paper.config.ts falls back to production URL. Set SITE_URL explicitly to override.'
       },
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: {
         value: null,
@@ -79,7 +79,7 @@ export const ConfigRegistry = {
         value: null,
         source: 'omitted',
         required: false,
-        notes: 'Gated on import.meta.env.PROD — never renders in local dev builds.'
+        notes: 'Not set here, so it never renders in local dev. Upstream src/config.ts has no import.meta.env.PROD gate.'
       }
     },
     'pr-visual-check': {
@@ -112,14 +112,16 @@ export const ConfigRegistry = {
   analytics: {
     cloudflare: {
       gating: 'import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN',
-      location: 'src/layouts/Layout.astro',
+      location: 'src/components/CloudflareBeacon.astro',
       testPolicy: 'Skip on local URLs to avoid prod-build setup',
       testLocation: 'tests/test-utils.ts (isLocalUrl)'
     },
     googleSiteVerification: {
-      gating: 'import.meta.env.PROD && PUBLIC_GOOGLE_SITE_VERIFICATION',
-      location: 'src/layouts/Layout.astro',
-      testPolicy: 'Not tested separately; gating covered by prod-build rule',
+      // Upstream's method: no import.meta.env.PROD gate. The tag renders in any
+      // build that sets the variable, and only main-aws sets it.
+      gating: 'userConfig.site.googleVerification || PUBLIC_GOOGLE_SITE_VERIFICATION',
+      location: 'src/config.ts',
+      testPolicy: 'Not tested separately; only main-aws sets the variable',
       testLocation: null
     }
   },
