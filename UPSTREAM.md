@@ -86,5 +86,7 @@ A reverted merge stays recorded as merged, so if an update's merge is ever rever
 | `src/pages/posts/[...page].astro`, `src/pages/tags/index.astro`, `src/pages/tags/[tag]/[...page].astro`, `src/pages/search.astro` | noindex,follow (871ac25); the search hint names npm | SEO; rule 4 |
 | `src/pages/posts/[...slug]/index.astro` | Hero image, a hero ahead of the dynamic OG card, h-entry classes and identity, reading time, reply by email, the heading anchors' `aria-label` (455c6e4) | Site-only features; the anchor's only child is `aria-hidden` |
 | `src/pages/posts/[...slug]/_components/ShareLinks.astro` | `<NativeShare />`, the native Web Share button (f452f5b, #64), ahead of the network links; the page URL is percent-encoded (70a5e40) | Kyle, 2026-11-03; the URL's own query string and fragment stay inside the share parameter |
+| `src/pages/posts/[...slug]/_components/AdjacentPostNav.astro` | Prev/next titles in `text-accent`, not `text-accent/85` (4fc1c51) | Kyle, 2026-11-04: upstream's `/85` measures 4.12:1 dark and 4.15:1 light; WCAG AA needs 4.5:1 |
 | `src/pages/og.png.ts`, `src/pages/posts/[...slug]/index.png.ts` | The site's card designs (`src/utils/og-templates/`), set in IBM Plex Mono | Rule 3 |
 | `src/styles/global.css` | `.card-row` styles | The `:::cards` directive |
+| `src/styles/global.css` | Callout title text in the foreground color; the icon keeps the callout color | Kyle, 2026-11-04: the obsidian theme's note title measures 3.32:1 dark and 4.25:1 light; WCAG AA needs 4.5:1 |
