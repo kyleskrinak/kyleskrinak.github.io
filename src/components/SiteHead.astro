@@ -6,9 +6,29 @@ import { getAssetPath } from "@/utils/withBase";
 
 type Props = {
   noindex?: boolean;
+  ogType?: "website" | "article";
+  title: string;
+  image: string;
 };
 
-const { noindex = false } = Astro.props;
+const { noindex = false, ogType = "website", title, image } = Astro.props;
+const { site } = config;
+
+// Posts get BlogPosting JSON-LD from PostLayout; every other page gets
+// WebPage (5e70a37).
+const webPage = ogType === "website" && {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  headline: title,
+  image,
+  author: [
+    {
+      "@type": "Person",
+      name: site.author,
+      ...(site.profile && { url: site.profile }),
+    },
+  ],
+};
 ---
 
 <link
@@ -26,3 +46,15 @@ const { noindex = false } = Astro.props;
      through them. Related: src/pages/robots.txt.ts (Allow: /). */
 }
 {noindex && <meta name="robots" content="noindex,follow" />}
+{
+  /* Escape "<" so a title containing "</script>" can't end the JSON-LD block. */
+}
+{
+  webPage && (
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(webPage).replace(/</g, "\\u003c")}
+    />
+  )
+}

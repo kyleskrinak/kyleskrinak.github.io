@@ -74,7 +74,8 @@ A reverted merge stays recorded as merged, so if an update's merge is ever rever
 | `src/utils/getPostPaths.ts` | Drops the repeated directory of a co-located `foo/index.md` | Keeps `/posts/foo/`, not `/posts/foo/foo/` |
 | `src/utils/slugify.ts` | "+" reads as "plus" (5ec6019) | Keeps the "Code+" tag at `/tags/code-plus/` |
 | `src/pages/robots.txt.ts` | `robots.txt` names `/sitemap.xml` | The sitemap row above |
-| `src/layouts/Layout.astro` | `<SiteHead />` (favicons, manifest, `rel="me"`, noindex), the Cloudflare beacon, trailing-slash canonicals, `rel="sitemap"` to `/sitemap.xml`, no `favicon.svg` link | Site-only features; rule 5 for the favicon |
+| `src/layouts/Layout.astro` | `<SiteHead />` (favicons, manifest, `rel="me"`, noindex, `WebPage` JSON-LD on every page but a post), the Cloudflare beacon, trailing-slash canonicals, `rel="sitemap"` to `/sitemap.xml`, no `favicon.svg` link | Site-only features (`WebPage` JSON-LD: 5e70a37); rule 5 for the favicon |
+| `src/layouts/Layout.astro`, `src/layouts/PostLayout.astro` | One `og:type` per page, from Layout's `ogType` prop; PostLayout passes `"article"` in place of a second `og:type` tag in the head slot | Open Graph gives the first of two tags preference, so upstream's post pages read as `website`; develop emitted one tag (5e70a37) |
 | `src/layouts/PostLayout.astro` | Escapes `<` in the JSON-LD | A title containing `</script>` can't end the block |
 | `src/components/Header.astro` | About dropdown and Presentations link (`HeaderSiteNav`); the skip link moves with a transform, not `top` (cdaf43c) | Site-only pages; Lighthouse non-composited animation |
 | `src/components/Breadcrumb.astro` | Underlined links (4fc1c51) | Lighthouse accessibility: links must not rely on color alone |
