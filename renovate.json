@@ -68,7 +68,7 @@
     },
     {
       "groupName": "build-tools",
-      "matchPackageNames": ["sharp", "satori", "@resvg/**"],
+      "matchPackageNames": ["sharp", "satori"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {

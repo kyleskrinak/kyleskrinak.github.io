@@ -1,13 +1,15 @@
 ---
-import { getBlogPosts } from '@/utils/getBlogPosts';
+import { getCollection } from 'astro:content';
+import { postFilter } from '@/utils/postFilter';
+import { getPostUrl } from '@/utils/getPostPaths';
+import config from '@/config';
 import Layout from '@/layouts/Layout.astro';
 import Footer from '../../components/Footer.astro';
 import Datetime from '@/components/Datetime.astro';
 import Header from '../../components/Header.astro';
-import { SITE_TITLE, createPath } from '@/config/consts';
 
 export async function getStaticPaths() {
-	const posts = await getBlogPosts();
+	const posts = await getCollection('posts', postFilter);
 	const categories = new Set<string>();
 
 	posts.forEach((post) => {
@@ -29,12 +31,12 @@ interface Props {
 }
 
 const { category } = Astro.props;
-const posts = (await getBlogPosts())
+const posts = (await getCollection('posts', postFilter))
 	.filter((post) => post.data.categories?.includes(category))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+	.sort((a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf());
 ---
 
-<Layout title={`${category} - ${SITE_TITLE}`} description={`Posts in category: ${category}`} noindex={true}>
+<Layout title={`${category} - ${config.site.author}`} description={`Posts in category: ${category}`} noindex={true}>
 	<Header />
 	<main id="main-content">
 		<h1>Category: {category}</h1>
@@ -43,11 +45,11 @@ const posts = (await getBlogPosts())
 			{
 				posts.map((post) => (
 					<li>
-						<a href={createPath(`/posts/${post.id}/`)}>
+						<a href={getPostUrl(post.id, post.filePath)}>
 							<h3 class="post-title">{post.data.title}</h3>
 						</a>
 						<p class="post-date">
-							<Datetime pubDate={post.data.pubDate} />
+							<Datetime pubDatetime={post.data.pubDatetime} />
 						</p>
 						{post.data.description && <p>{post.data.description}</p>}
 					</li>

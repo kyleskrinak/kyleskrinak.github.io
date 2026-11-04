@@ -8,7 +8,7 @@ import { expandResumePlaceholders, mdastText } from '../../src/lib/resume-sectio
 
 // Absolute, the way Astro hands it over; the plugin matches on the suffix.
 const RESUME_PATH = '/repo/src/content/pages/resume/index.md';
-const BLOG_PATH = '/repo/src/content/blog/2026-01-01-a-post/index.md';
+const BLOG_PATH = '/repo/src/content/posts/2026-01-01-a-post/index.md';
 
 const currentRole = {
 	title: 'Senior IT Systems Engineering Manager, Digital Experience',

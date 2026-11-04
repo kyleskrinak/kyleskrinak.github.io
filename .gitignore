@@ -10,7 +10,7 @@ yarn.lock
 # build output
 dist/
 .astro/
-public/_pagefind/
+public/pagefind/
 
 # environment
 .env

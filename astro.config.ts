@@ -1,57 +1,83 @@
-import { defineConfig, envField } from "astro/config";
-import { unified } from "@astrojs/markdown-remark";
+import {
+  defineConfig,
+  envField,
+  fontProviders,
+  svgoOptimizer,
+} from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
-// Removed: using custom sitemap endpoint instead
-// import sitemap from "@astrojs/sitemap";
+// SITE-OVERRIDE: /sitemap.xml (Kyle's selection, 2026-11-03). The site serves
+// one sitemap from src/pages/sitemap.xml.ts in place of @astrojs/sitemap, which
+// can only write sitemap-index.xml plus numbered files.
+import { unified } from "@astrojs/markdown-remark";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
-import remarkDirective from "remark-directive";
-import { remarkFacets } from "./src/lib/remark-facets.mjs";
-import { remarkResumeSections } from "./src/lib/remark-resume-sections.mjs";
-import { remarkCards } from "./src/lib/remark-cards.mjs";
+import rehypeCallouts from "rehype-callouts";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
+import { rehypeTableWrapper } from "./src/utils/rehypeTableWrapper";
+// SITE-OVERRIDE: site markdown plugins (resume sections, :::cards and other
+// directives, facets, image optimization).
+import remarkDirective from "remark-directive";
+import { remarkFacets } from "./src/lib/remark-facets.mjs";
+import { remarkResumeSections } from "./src/lib/remark-resume-sections.mjs";
+import { remarkCards } from "./src/lib/remark-cards.mjs";
 import { rehypeImageOptimization } from "./src/lib/rehype-components";
-import { SITE } from "./src/config/index";
+import config from "./astro-paper.config";
 
-// https://astro.build/config
-// NOTE: The site deploys to the root of kyle.skrinak.com (S3 + CloudFront), never to a
+// SITE-OVERRIDE: explicit base, read by config/validate.mjs.
+// The site deploys to the root of kyle.skrinak.com (S3 + CloudFront), never to a
 // subpath, so base stays "/". Canonical URLs, asset paths and link validation all assume it.
 // See: docs/operations/deployment.md.
 const base = "/";
 
 export default defineConfig({
   base,
-  site: SITE.website,
+  site: config.site.url,
+  // SITE-OVERRIDE: trailing slashes, for the S3 and CloudFront canonical URLs.
   trailingSlash: "always",
+  // SITE-OVERRIDE: DISABLE_DEV_TOOLBAR turns the dev toolbar off.
   devToolbar: {
     enabled: process.env.DISABLE_DEV_TOOLBAR !== "true",
   },
   integrations: [
     mdx(),
-    // Sitemap is generated via custom endpoint (src/pages/sitemap.xml.ts)
+    // SITE-OVERRIDE: no sitemap integration; see the import note above.
   ],
+  i18n: {
+    locales: ["en"],
+    defaultLocale: "en",
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   markdown: {
     processor: unified({
       remarkPlugins: [
-        // First: expands the resume's frontmatter-driven sections into real
+        // SITE-OVERRIDE: site remark plugins. remarkResumeSections runs first:
+        // it expands the resume's frontmatter-driven sections into real
         // headings, so every later plugin sees the finished document.
+        // remarkCards runs before remarkToc so card titles don't pollute TOCs.
         remarkResumeSections,
         remarkDirective,
-        remarkCards, // before remarkToc so card titles don't pollute TOCs
+        remarkCards,
         remarkToc,
         [remarkCollapse, { test: "Table of contents" }],
+        // SITE-OVERRIDE: remarkFacets.
         remarkFacets,
       ],
-      rehypePlugins: [rehypeImageOptimization],
+      rehypePlugins: [
+        rehypeCallouts,
+        rehypeTableWrapper,
+        // SITE-OVERRIDE: rehypeImageOptimization.
+        rehypeImageOptimization,
+      ],
     }),
     shikiConfig: {
-      // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },
       defaultColor: false,
       wrap: false,
@@ -65,10 +91,44 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
-    optimizeDeps: {
-      exclude: ["@resvg/resvg-js"],
-    },
   },
+  fonts: [
+    {
+      name: "Google Sans Code",
+      cssVariable: "--font-google-sans-code",
+      provider: fontProviders.google(),
+      fallbacks: ["monospace"],
+      weights: [300, 400, 500, 600, 700],
+      styles: ["normal", "italic"],
+      formats: ["woff", "ttf"],
+    },
+    // SITE-OVERRIDE: IBM Plex Mono for the site's OG card designs
+    // (src/utils/og-templates/), read by the two OG routes. Pages don't use it.
+    // Local files, not Google's: Google's copy lacks U+2011, the non-breaking
+    // hyphen the home card sets in "AI-assisted".
+    {
+      name: "IBM Plex Mono",
+      cssVariable: "--font-ibm-plex-mono",
+      provider: fontProviders.local(),
+      fallbacks: ["monospace"],
+      options: {
+        variants: [
+          {
+            weight: 400,
+            style: "normal",
+            src: ["./src/assets/fonts/ibm-plex-mono-400.ttf"],
+          },
+          {
+            weight: 700,
+            style: "normal",
+            src: ["./src/assets/fonts/ibm-plex-mono-700.ttf"],
+          },
+        ],
+      },
+    },
+  ],
+  // SITE-OVERRIDE: Sharp image service with an input-pixel cap, and
+  // constrained responsive images.
   image: {
     service: {
       entrypoint: "astro/assets/services/sharp",
@@ -86,15 +146,16 @@ export default defineConfig({
         context: "client",
         optional: true,
       }),
+      // SITE-OVERRIDE: site env vars (Cloudflare analytics, BUILD_ENV, SITE_URL).
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: envField.string({
         access: "public",
         context: "client",
         optional: true,
       }),
       // BUILD_ENV and SITE_URL are "type-system only" entries - declared here for
-      // validation but consumed via process.env in src/config/index.ts (not astro:env)
+      // validation but consumed via process.env in astro-paper.config.ts (not astro:env)
       // because that file runs at build initialization before Astro env is available.
-      // Hardcoded fallback values in src/config/index.ts are validated against the
+      // Hardcoded fallback values in astro-paper.config.ts are validated against the
       // registry by config/validate.mjs to prevent drift.
       //
       // access: "secret" here is NOT a credential classification — these are not
@@ -113,5 +174,8 @@ export default defineConfig({
         optional: true,
       }),
     },
+  },
+  experimental: {
+    svgOptimizer: svgoOptimizer(),
   },
 });

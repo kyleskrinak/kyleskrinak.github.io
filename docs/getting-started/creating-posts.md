@@ -4,10 +4,10 @@ Quick cheat sheet for writing new blog posts in Astro.
 
 ## File Location
 
-Each post is a directory under **`src/content/blog/`** containing an `index.md` (or `index.mdx`) and any images the post uses:
+Each post is a directory under **`src/content/posts/`** containing an `index.md` (or `index.mdx`) and any images the post uses:
 
 ```
-src/content/blog/2026-01-20-my-first-astro-post/
+src/content/posts/2026-01-20-my-first-astro-post/
 ├── index.md
 └── hero.webp        # optional
 ```
@@ -41,7 +41,7 @@ npm run new-post -- 2026-01-20-my-first-astro-post
 npm run new-post -- 2026-01-20-my-first-astro-post --images ~/Desktop/post-images
 ```
 
-This creates the directory, writes `index.md` with a minimal frontmatter stub (`title`, today's UTC `pubDate`, empty `tags`, `published: false`), and — with `--images` — copies/converts images into the post directory and wires the first one in as the hero. See [Image Workflow Guide](./images.md) for details.
+This creates the directory, writes `index.md` with a minimal frontmatter stub (`title`, today's UTC `pubDatetime`, empty `tags`, `draft: true`), and — with `--images` — copies/converts images into the post directory and wires the first one in as the hero. The stub has no `description`, which the schema requires, so add one before running `npm run dev` or a build. See [Image Workflow Guide](./images.md) for details.
 
 ## Drafting in Notion
 
@@ -53,13 +53,13 @@ The repo's `.mcp.json` registers the hosted Notion MCP server so an editor/agent
 
 1. Draft the post as a page in the Blog Backlog database (duplicate the "Blog Post Template" page, or the database's template picker once it's set up, for the right shape). Content, headings, code blocks, quotes, dividers, and images are all supported. Fill in the `Description`, `Tags`, and `Caption` properties alongside the body — they map directly to the post's `description`, `tags`, and `caption` frontmatter fields.
 2. When ready, set the page's `Status` to `ready to post`.
-3. On the next push to `develop` (or a manual `workflow_dispatch` run), `.github/workflows/notion-migrate.yml` picks up the oldest `ready to post` page, converts it to `src/content/blog/YYYY-MM-DD-slug/index.md`, and opens a PR against `develop`. The page's `Status` is set to `in review` and `Post URL` is filled in with the (future) live URL.
-4. Review the PR like any other: check the converted content, add `:::cards` formatting for images if desired (this is not done automatically — see [Card Grids](#card-grids)), and flip `published: true` when ready.
-5. After the PR merges, manually set the Notion page's `Status` to `posted`. This last step is intentionally manual — the automation never merges PRs or flips `published: true` itself.
+3. On the next push to `develop` (or a manual `workflow_dispatch` run), `.github/workflows/notion-migrate.yml` picks up the oldest `ready to post` page, converts it to `src/content/posts/YYYY-MM-DD-slug/index.md`, and opens a PR against `develop`. The page's `Status` is set to `in review` and `Post URL` is filled in with the (future) live URL.
+4. Review the PR like any other: check the converted content, add `:::cards` formatting for images if desired (this is not done automatically — see [Card Grids](#card-grids)), and remove `draft: true` when ready.
+5. After the PR merges, manually set the Notion page's `Status` to `posted`. This last step is intentionally manual — the automation never merges PRs or removes `draft: true` itself.
 
 **Block conversion:** paragraphs, headings, bulleted/numbered lists, code blocks, quotes, dividers, and images convert automatically. Anything else (tables, embeds, columns, synced blocks) lands as an HTML comment marker (`<!-- MIGRATION: unsupported block "type" omitted -->`) in the generated Markdown — search for `MIGRATION:` in the PR diff and fill those sections in by hand. Nested content (a toggle, callout, or sub-list indented under another block) is not fetched at all — a `<!-- MIGRATION: nested content under this ... block was omitted -->` marker flags it the same way; check the source page in Notion and add it manually.
 
-**Frontmatter mapping:** `Description`, `Tags`, and `Caption` are Notion properties you fill in directly. `pubDate` is always the migration date (not editorial — there's no property for it), `alt` comes from the first image block's own Notion caption, and `image` is that same first image — none of these three are typed into a property.
+**Frontmatter mapping:** `Description`, `Tags`, and `Caption` are Notion properties you fill in directly. `pubDatetime` is always the migration date (not editorial — there's no property for it), `alt` comes from the first image block's own Notion caption, and `image` is that same first image — none of these three are typed into a property.
 
 **Troubleshooting:**
 
@@ -74,8 +74,8 @@ Every post needs frontmatter at the top. Copy this template:
 ---
 title: "Your Post Title Here"
 description: "Brief description for search results and meta tags"
-pubDate: 2026-01-20  # Date the post was published
-updatedDate: 2026-01-20  # Optional: date post was last updated
+pubDatetime: 2026-01-20  # Date the post was published
+modDatetime: 2026-01-20  # Optional: date the post was last revised
 image: ./post-image.webp  # Optional: featured image (co-located in post dir)
 alt: "Alt text for the image"  # Required when image is set
 categories: ["astro", "blogging"]  # Optional: topic tags
@@ -89,21 +89,21 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 | Field | Example | Notes |
 |-------|---------|-------|
 | `title` | `"Learning Astro"` | Post title (appears in browser tab and listings) |
-| `pubDate` | `2026-01-20T00:00:00.000Z` | Publication date. ISO 8601 or `YYYY-MM-DD`. Drives sort order. |
+| `pubDatetime` | `2026-01-20T00:00:00.000Z` | Publication date. ISO 8601 or `YYYY-MM-DD`, unquoted. Drives sort order. A production build leaves out a post dated after the build day (UTC). |
+| `description` | `"A beginner's guide to Astro"` | Used in search results and social meta. |
 
 ### Optional Fields
 
 | Field | Example | Notes |
 |-------|---------|-------|
-| `description` | `"A beginner's guide to Astro"` | Used in search results and social meta. Optional but recommended. |
-| `updatedDate` | `2026-01-20T00:00:00.000Z` | Last modified date (shows in post metadata; RSS pubDate refresh). |
+| `modDatetime` | `2026-01-20T00:00:00.000Z` | Revision date. The post shows its publish date, then "Revised on:" and this date. Sort order and the RSS item date stay on `pubDatetime`. |
 | `image` | `./my-image.webp` | Featured image. Also the default Open Graph card. |
 | `alt` | `"A screenshot of code"` | Accessibility text. **Required** when `image` is set. |
 | `caption` | `"Screenshot of the homepage"` | Optional caption displayed below featured image. Accepts inline HTML (e.g. `<em>Title</em>`) and renders as HTML everywhere it's shown, including the archive page. Author-controlled only — do not put user-supplied content here. |
 | `ogImage` | `./social.webp` | Override: use different image for social sharing (defaults to `image`) |
 | `categories` | `["astro", "web"]` | Topic categories for filtering |
-| `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery |
-| `published` | `false` | When `false`, the post is hidden from production builds but still visible in `npm run dev`. Default: published. |
+| `tags` | `["astro", "tutorial"]` | Tags for filtering and discovery. A post without the field gets the `others` tag. |
+| `draft` | `true` | When `true`, the post is hidden from every build, `npm run dev` included. Default: published. |
 
 ## Complete Frontmatter Example
 
@@ -111,8 +111,8 @@ categories: ["astro", "blogging"]  # Optional: topic tags
 ---
 title: "Building a Blog with Astro"
 description: "Learn how to set up a fast, modern blog using Astro static site generator"
-pubDate: 2026-01-20
-updatedDate: 2026-01-21
+pubDatetime: 2026-01-20
+modDatetime: 2026-01-21
 image: ./astro-blog.webp
 alt: "Astro logo and code editor"
 categories: ["astro", "web development", "tutorial"]
@@ -127,7 +127,7 @@ After the closing `---` of frontmatter, write your post in **Markdown**:
 ---
 title: "Your Title"
 description: "Your description"
-pubDate: 2026-01-20
+pubDatetime: 2026-01-20
 ---
 
 # Heading 1
@@ -283,13 +283,15 @@ Use `backticks` for inline code
 npm run new-post -- YYYY-MM-DD-slug
 ```
 
-Then edit `src/content/blog/YYYY-MM-DD-slug/index.md`. Or, scaffold straight from a folder of images:
+Then edit `src/content/posts/YYYY-MM-DD-slug/index.md`. Or, scaffold straight from a folder of images:
 
 ```bash
 npm run new-post -- YYYY-MM-DD-slug --images ~/Desktop/post-images
 ```
 
 ### 2. Test locally
+
+Remove `draft: true` first: a draft doesn't render, even in dev.
 
 ```bash
 npm run dev
@@ -319,7 +321,7 @@ npm run test:console
 The repo workflow is `develop → main` via pull request. Push to `develop`, then open a PR to `main` so the change goes through CI checks before deploying to production.
 
 ```bash
-git add src/content/blog/2026-01-20-your-post/
+git add src/content/posts/2026-01-20-your-post/
 git commit -m "blog: Add new post about your topic"
 git push origin develop
 gh pr create --base main --head develop --title "blog: Add new post about your topic"
@@ -334,7 +336,7 @@ gh pr create --base main --head develop --title "blog: Add new post about your t
 | Image path uses `../../assets/…` | Old layout. Use `./name.webp` — images co-locate in the post directory |
 | Uppercase letters in slug | Slug must be lowercase. Wrong case 404s on Linux CI |
 | Spaces in image filenames | Rename to `kebab-case.webp` — JS imports and URLs both fail otherwise |
-| Missing `pubDate` | Required field - must be present |
+| Missing `pubDatetime` or `description` | Required fields - the build fails without them |
 | Missing `alt` when `image` is set | Schema rejects this. Add a descriptive `alt:` |
 | Extra spaces in YAML | YAML is whitespace-sensitive - check indentation |
 
@@ -356,13 +358,13 @@ See existing posts for examples of style and tone.
 - **Markdown syntax**: [CommonMark Spec](https://spec.commonmark.org/)
 - **Astro docs**: [astro.build](https://astro.build/)
 - **Image handling**: See [Image Workflow Guide](./images.md)
-- **Existing posts**: Check `src/content/blog/` for reference
+- **Existing posts**: Check `src/content/posts/` for reference
 
 ---
 
 **Quick checklist before publishing:**
-- [ ] Frontmatter has `title`, `pubDate` (required); `description` set (recommended, not enforced)
-- [ ] Directory is `src/content/blog/YYYY-MM-DD-slug/`
+- [ ] Frontmatter has `title`, `pubDatetime` and `description` (all required)
+- [ ] Directory is `src/content/posts/YYYY-MM-DD-slug/`
 - [ ] Images are co-located in the post directory and referenced as `./name.webp`
 - [ ] `alt` is set whenever `image` is set
 - [ ] Post tested locally with `npm run dev`

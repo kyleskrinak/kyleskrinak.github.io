@@ -34,7 +34,7 @@ test.describe('Layout Consistency', () => {
 			// All content pages have an h1
 			await expect(page.locator('h1').first()).toBeVisible();
 
-			// Breadcrumb is rendered by Main.astro
+			// Each page renders Breadcrumb next to Main.astro
 			await expect(page.locator('nav[aria-label="breadcrumb"], .breadcrumb, nav').first()).toBeVisible();
 		});
 	}

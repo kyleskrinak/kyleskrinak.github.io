@@ -1,12 +1,15 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "public/_pagefind"],
+  "exclude": ["dist", "public/pagefind"],
   "compilerOptions": {
+    // SITE-OVERRIDE: Node types, for Buffer in the OG routes and for process
+    // and node: modules in site code. TypeScript 6 no longer loads @types/*
+    // on its own.
+    "types": ["node"],
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
+      "@/*": ["./src/*"],
+      "@/astro-paper.config": ["./astro-paper.config"]
+    }
   }
 }

@@ -2,10 +2,10 @@
 /**
  * Migrate flat blog posts to per-post co-located directories.
  *
- * Input:  src/content/blog/<slug>.md   referencing src/assets/images/foo.jpg
+ * Input:  src/content/posts/<slug>.md   referencing src/assets/images/foo.jpg
  *         or /assets/images/foo.jpg (raw HTML)
  *
- * Output: src/content/blog/<slug>/
+ * Output: src/content/posts/<slug>/
  *         ├── index.md  (or index.mdx if raw HTML img tags present)
  *         └── <co-located images>
  *
@@ -26,7 +26,7 @@ import { join, basename, relative } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 
 const ROOT = process.cwd();
-const BLOG_DIR = join(ROOT, 'src/content/blog');
+const BLOG_DIR = join(ROOT, 'src/content/posts');
 const SRC_ASSETS = join(ROOT, 'src/assets/images');
 const PUBLIC_ASSETS_IMAGES = join(ROOT, 'public/assets/images');
 const PUBLIC_ASSETS = join(ROOT, 'public/assets');

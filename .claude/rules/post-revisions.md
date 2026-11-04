@@ -1,13 +1,13 @@
 ---
 paths:
-  - "src/content/blog/**"
+  - "src/content/posts/**"
 ---
 
 # Post Revisions
 
 When making content edits to a previously-published post (one published before the current session), apply BOTH:
 
-1. **Frontmatter** — add `updatedDate: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC). Drives the "Revised on:" label and RSS `pubDate` update; does NOT affect sort order (original `pubDate` controls ordering).
+1. **Frontmatter** — add `modDatetime: YYYY-MM-DDTHH:MM:SS.000Z` (today's date, UTC). Drives the "Revised on:" label. It changes neither the sort order nor the RSS item date: `getSortedPosts` and `rss.xml.ts` use `pubDatetime` (`SITE-OVERRIDE`s of upstream's `modDatetime ?? pubDatetime`), so a revised post keeps its place in the post lists and the feed.
 
 2. **Inline marker at each change point** — plain italic line directly after the affected paragraph:
    ```markdown

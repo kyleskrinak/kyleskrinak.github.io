@@ -1,4 +1,4 @@
-// Every post directory must be lowercase-kebab-case. getPath() builds the URL
+// Every post directory must be lowercase-kebab-case. getPostUrl() builds the URL
 // from post.id without lowercasing it, and production serves from S3, whose
 // keys are case-sensitive: a mixed-case directory ships a mixed-case URL that
 // 404s when anyone links it in lowercase. macOS's case-insensitive filesystem
@@ -10,7 +10,7 @@ import { readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { SLUG_RE } from '../../scripts/lib/post-scaffold.mjs';
 
-const BLOG_DIR = join(process.cwd(), 'src/content/blog');
+const BLOG_DIR = join(process.cwd(), 'src/content/posts');
 const ENTRY_RE = /\.(md|mdx)$/;
 
 describe('blog post paths', () => {

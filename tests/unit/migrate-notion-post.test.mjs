@@ -5,6 +5,7 @@ import {
   richTextToPlainText,
   plainTextTitle,
   plainTextDescription,
+  requireDescription,
   plainTextCaption,
   extractTags,
   fenceFor,
@@ -144,6 +145,24 @@ describe('plainTextDescription', () => {
 
   it('returns an empty string when the property is missing', () => {
     assert.equal(plainTextDescription({ properties: {} }), '');
+  });
+});
+
+describe('requireDescription', () => {
+  it('returns the cleaned description', () => {
+    const page = { id: 'p1', properties: { Description: { rich_text: [{ plain_text: '  A summary\nacross lines  ' }] } } };
+    assert.equal(requireDescription(page), 'A summary across lines');
+  });
+
+  it('throws, naming the page, when the property is missing', () => {
+    // content.config.ts requires description; a post without one fails the
+    // Astro build, so the migration stops before writing anything.
+    assert.throws(() => requireDescription({ id: 'p1', properties: {} }), /Page p1 has an empty Description/);
+  });
+
+  it('throws on a whitespace-only property', () => {
+    const page = { id: 'p1', properties: { Description: { rich_text: [{ plain_text: '   \n  ' }] } } };
+    assert.throws(() => requireDescription(page), /empty Description/);
   });
 });
 

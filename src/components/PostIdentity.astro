@@ -1,0 +1,43 @@
+---
+// Microformats2 identity for a post's h-entry, inserted into upstream's post
+// route from one line. See UPSTREAM.md.
+import config from "@/config";
+import { getAssetPath } from "@/utils/withBase";
+import { canonicalizePathname } from "@/utils/canonicalizePathname";
+
+type Props = {
+  title: string;
+};
+
+const { title } = Astro.props;
+
+/* The h-entry's u-url is this page, not `canonicalURL` from frontmatter: a
+   post may declare an external canonical for SEO, but this entry describes
+   this page, so its URL has to point here. Derived the same way Layout
+   derives its canonical so the two agree whenever frontmatter does not
+   override it. */
+const postUrl = new URL(
+  canonicalizePathname(Astro.url.pathname, import.meta.env.BASE_URL),
+  Astro.site
+).href;
+// The same identity the homepage footer h-card carries: name and URL both read
+// config.site, so those cannot drift. The photo is not shared state — this
+// filename is a literal here and in HCard.astro, and nothing enforces that the
+// two h-cards name the same file. (SiteHead.astro and site.webmanifest.ts use it
+// too, but as the favicon and PWA icon; changing the avatar need not touch
+// those.)
+const authorPhoto = new URL(getAssetPath("favicon-96x96.png"), Astro.site).href;
+---
+
+{/* No visible author chrome exists on a post page to carry these, and adding
+    one would change the layout, so they ride on a hidden block: parsers read
+    the DOM and ignore `hidden`.
+    u-photo is an <img> and u-url an <a> because those are the primary
+    element rules for u-* — a parser reaches them before any fallback. */}
+<div class="post-identity" hidden>
+  <a class="u-url" href={postUrl}>{title}</a>
+  <div class="p-author h-card">
+    <img class="u-photo" src={authorPhoto} alt="" width="32" height="32" />
+    <a class="p-name u-url" href={config.site.url}>{config.site.author}</a>
+  </div>
+</div>

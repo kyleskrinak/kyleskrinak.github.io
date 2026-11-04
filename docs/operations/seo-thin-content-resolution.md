@@ -5,6 +5,8 @@
 **Resolution**: Implemented targeted noindex strategy
 
 > **Revised 2026-10-08:** `/presentations/` and the presentation pages (`/presentations/<id>/`) are indexable again and listed in the sitemap, alongside the HTML decks. `/stack/` was added to the sitemap. The sections below record the February 2026 state; entries affected by this revision are marked.
+>
+> **Note:** Issue #443 moved the tag page template to `src/pages/tags/[tag]/[...page].astro`, which also builds the paginated tag pages (`/tags/<tag>/<n>/`), all `noindex,follow`. The robots meta tag now renders in `src/components/SiteHead.astro`, which `src/layouts/Layout.astro` calls with its `noindex` prop.
 
 ---
 

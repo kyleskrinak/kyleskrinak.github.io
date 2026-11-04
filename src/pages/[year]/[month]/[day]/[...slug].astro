@@ -1,8 +1,9 @@
 ---
-import { getBlogPosts } from '@/utils/getBlogPosts';
-import { getPath } from '@/utils/getPath';
-import { linkWithBase } from '@/utils/linkWithBase';
-import { SITE } from '@/config';
+import { getCollection } from 'astro:content';
+import { postFilter } from '@/utils/postFilter';
+import { getPostUrl } from '@/utils/getPostPaths';
+import { getAssetPath } from '@/utils/withBase';
+import config from '@/config';
 
 /**
  * Dynamic redirect route for Jekyll URL format
@@ -18,7 +19,7 @@ import { SITE } from '@/config';
  */
 
 export async function getStaticPaths() {
-  const posts = await getBlogPosts();
+  const posts = await getCollection('posts', postFilter);
 
   return posts.map(post => {
     // Post ID format: "2025-09-19-modernizing-an-old-jekyll-blog"
@@ -48,11 +49,9 @@ const { post } = Astro.props;
 const { year, month, day, slug } = Astro.params;
 
 // Build new and old URLs (with base path)
-const postPath = getPath(post.id, post.filePath);
-const newUrl = linkWithBase(postPath);
-const oldUrl = linkWithBase(`/${year}/${month}/${day}/${slug}/`);
-// Remove leading slash for canonical URL to preserve base path in SITE.website
-const canonicalUrl = new URL(postPath.slice(1), SITE.website).href;
+const newUrl = getPostUrl(post.id, post.filePath);
+const oldUrl = getAssetPath(`/${year}/${month}/${day}/${slug}/`);
+const canonicalUrl = new URL(newUrl, config.site.url).href;
 ---
 
 <!doctype html>

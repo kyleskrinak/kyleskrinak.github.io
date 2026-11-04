@@ -42,13 +42,13 @@ Astro build flags set automatically by the framework (not configurable via workf
 
 ### Cloudflare
 - Gating: `import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`
-- Location: src/layouts/Layout.astro
+- Location: src/components/CloudflareBeacon.astro
 - Test policy: Skip on local URLs to avoid prod-build setup
 
 ### Google Site Verification
-- Gating: `import.meta.env.PROD && PUBLIC_GOOGLE_SITE_VERIFICATION`
-- Location: src/layouts/Layout.astro
-- Test policy: Not tested separately; gating covered by prod-build rule
+- Gating: `userConfig.site.googleVerification || PUBLIC_GOOGLE_SITE_VERIFICATION`
+- Location: src/config.ts
+- Test policy: Not tested separately; only main-aws sets the variable
 
 **Key:** Analytics gating based on `import.meta.env.PROD`, NOT hostname.
 

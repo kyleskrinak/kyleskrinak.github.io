@@ -24,7 +24,7 @@ For detailed architecture information, see:
 ├─────────────────────────────────────────────────────────────┤
 │  • Astro SSG build                                          │
 │  • Pagefind search indexing                                 │
-│  • Visual regression testing (PR artifact baseline)         │
+│  • Visual regression testing (committed baselines)          │
 │  • Link validation (htmltest + Playwright)                  │
 │  • SEO & analytics privacy tests                            │
 └───────────────┬─────────────────────────────────────────────┘
@@ -47,7 +47,7 @@ For detailed architecture information, see:
 ### 2. **Content Collections with Type Safety**
 - Zod schemas enforce content structure
 - TypeScript ensures compile-time safety
-- See `src/content/config.ts`
+- See `src/content.config.ts`
 
 ### 3. **Two-Tier Link Validation**
 - First pass: htmltest (fast HTTP checks)
@@ -55,10 +55,10 @@ For detailed architecture information, see:
 - Minimizes false positives
 - See [Link Checking Guide](../link-checking.md)
 
-### 4. **Artifact-Based Visual Regression**
+### 4. **Visual Regression Against Committed Baselines**
 - No cloud service dependency (Percy, Chromatic, etc.)
-- GitHub Actions artifacts store baselines (90-day retention)
-- Secure two-workflow pattern (untrusted PR code + secure commenting)
+- Baselines committed in `tests/visual/visual-regression.spec.ts-snapshots/`
+- One workflow, `pr-visual-check.yml`, runs on PRs to `main` with `contents: read`; on failure it uploads the diffs as the `visual-diffs-pr-<n>` artifact, kept 30 days
 - See [Visual Regression Guide](../testing/visual-regression.md)
 
 ### 5. **Environment-Based Feature Gating**
@@ -73,16 +73,16 @@ For detailed architecture information, see:
 
 **Layouts**:
 - `src/layouts/Layout.astro` - Base layout (head, analytics, body)
-- `src/layouts/PostDetails.astro` - Blog post layout
+- `src/layouts/PostLayout.astro` - Blog post layout
 
 **Pages** (Astro file-based routing):
 - Static: `src/pages/index.astro`, `about.astro`, etc.
-- Dynamic: `src/pages/posts/[...slug].astro` (blog posts)
+- Dynamic: `src/pages/posts/[...slug]/index.astro` (blog posts)
 - Generated: `src/pages/sitemap.xml.ts`, `rss.xml.ts`
 
 **Components**:
 - Shared across pages and layouts
-- Mix of Astro and framework components
+- Astro components only (no UI framework integration)
 - See `src/components/`
 
 ## Data Flow
@@ -101,7 +101,7 @@ This document will eventually include:
 - Performance optimization strategies
 - Security architecture
 - Caching strategy details
-- Integration patterns (analytics, comments, search)
+- Integration patterns (analytics, search)
 
 For current architectural details, see:
 - [Special Implementations](./special-implementations.md)

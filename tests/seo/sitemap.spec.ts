@@ -195,7 +195,7 @@ test.describe('Sitemap Validation', () => {
 
 			expect(posts.length).toBeGreaterThan(0);
 
-			// Posts draw lastmod from frontmatter (updatedDate ?? pubDate).
+			// Posts draw lastmod from frontmatter (modDatetime ?? pubDatetime).
 			posts.forEach(({ loc, lastmod }) => {
 				expect(lastmod, `Expected ${loc} to carry a lastmod`).toBeDefined();
 				expect(lastmod).toMatch(/^\d{4}-\d{2}-\d{2}$/);

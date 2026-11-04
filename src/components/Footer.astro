@@ -1,23 +1,18 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import Socials from "./Socials.astro";
-import { SITE } from "@/config";
-import { linkWithBase } from "@/utils/linkWithBase";
-
-const currentYear = new Date().getFullYear();
-
-// The h-card is only *representative* on the page whose URL its u-url matches,
-// so it renders on the homepage alone. Trailing slashes are normalized because
-// astro.config.ts sets trailingSlash: "always" while BASE_URL may lack one.
-const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
-const isHome =
-  withSlash(Astro.url.pathname) === withSlash(import.meta.env.BASE_URL || "/");
+// SITE-OVERRIDE: h-card on the home page.
+import HCard from "./HCard.astro";
+import { useTranslations } from "@/i18n";
 
 type Props = {
   noMarginTop?: boolean;
 } & HTMLAttributes<"footer">;
 
 const { noMarginTop = false, class: className, ...attrs } = Astro.props;
+
+const t = useTranslations(Astro.currentLocale);
+const currentYear = new Date().getFullYear();
 ---
 
 <footer
@@ -25,49 +20,19 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
   {...attrs}
 >
   <div
-    class:list={[
-      "py-6 sm:py-4",
-      "border-t border-border",
-      "flex flex-col items-center justify-between sm:flex-row-reverse",
-    ]}
+    class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4"
   >
-    <Socials label="Social Links:" ariaLabel="Footer social links" />
+    {/* SITE-OVERRIDE: "Social Links:" label in the footer, using upstream's hero label markup (70a5e40). */}
+    <div class="flex max-sm:flex-col sm:items-center">
+      <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">{t.home.socialLinks}:</div>
+      <Socials />
+    </div>
     <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
-      <span>Copyright &#169; {currentYear}</span>
+      <span>{t.footer.copyright} &#169; {currentYear}</span>
       <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
-      <span>All rights reserved.</span>
+      <span>{t.footer.allRightsReserved}</span>
     </div>
   </div>
-
-  {
-    isHome && (
-      <div class="pb-6 text-center">
-        <div class="inline-block rounded-lg border border-border px-4 py-3">
-          <div class="h-card">
-            <div class="inline-flex items-center gap-2">
-              <img
-                src={linkWithBase("favicon-96x96.png")}
-                alt=""
-                width="32"
-                height="32"
-                decoding="async"
-                class="u-photo size-8 rounded-full"
-              />
-              <a
-                href={SITE.website}
-                class="p-name u-url font-semibold underline decoration-dashed underline-offset-4 hover:text-accent"
-              >
-                {SITE.author}
-              </a>
-            </div>
-            <p class="p-note mx-auto mt-2 max-w-prose text-sm opacity-80">
-              Senior manager of web platform operations, writing on web
-              technology, AI, low-carb living, and the arts and faith if
-              I&rsquo;m so inclined.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  {/* SITE-OVERRIDE: h-card on the home page. */}
+  <HCard />
 </footer>

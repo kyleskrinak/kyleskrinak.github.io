@@ -12,10 +12,10 @@
 # Any arguments after the mode are forwarded to Playwright, so
 # `./scripts/visual-test.sh docker --grep home` filters as it would directly.
 #
-# Why docker/docker-baseline: pr-visual-check.yml runs on ubuntu-latest, whose font
-# stack renders slightly taller than macOS. Baselines committed from a bare `npm run
-# test:visual:baseline` on macOS will consistently fail CI's height comparison even
-# with no real visual change. These modes run the same test through the official
+# Why docker/docker-baseline: pr-visual-check.yml runs on ubuntu-latest, which
+# rasterizes the site's web font differently from macOS. Baselines committed from a
+# bare `npm run test:visual:baseline` on macOS will consistently fail CI's pixel
+# comparison even with no real visual change. These modes run the same test through the official
 # Playwright Docker image (matched to the installed @playwright/test version, on the
 # Ubuntu codename CI currently uses) so committed baselines are pixel-consistent with CI.
 

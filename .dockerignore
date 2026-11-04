@@ -6,6 +6,7 @@ coverage/
 design/
 docs/
 tests/
+playwright.config.ts
 playwright-report/
 test-results/
 .docker-cache
@@ -16,7 +17,7 @@ test-results/
 .DS_Store
 tmp/
 .astro/
-public/_pagefind/
+public/pagefind/
 .vscode/
 .idea/
 .npm/
