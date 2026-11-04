@@ -76,9 +76,9 @@ export const GET: APIRoute = async ({ site }) => {
   }
 
   // Individual blog posts (all indexable). getPostUrl is the same helper the RSS
-  // feed and post links use, built on the slug path the router uses: it derives
-  // segments from the file path and slugifies each one. Deriving the URL from post.id instead lets the sitemap and the router
-  // disagree silently, which is how a sitemap starts advertising 404s.
+  // feed and post links use, built on the slug path the router uses. Building
+  // the URL by hand lets the sitemap and the router disagree silently, which is
+  // how a sitemap starts advertising 404s.
   const postPages: SitemapEntry[] = posts.map(post => ({
     path: getPostUrl(post.id, post.filePath),
     lastmod: isoDay(post.data.modDatetime ?? post.data.pubDatetime),
