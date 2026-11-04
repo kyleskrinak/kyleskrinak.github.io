@@ -2,6 +2,8 @@
 
 **Status: Completed 2026-05-25.** All seven phases shipped on `develop` as commits `af1ec80` (Phases 1–7 consolidated) and the pre-PR review follow-up. This doc is kept as a record of the migration's rationale and gotchas for future reference.
 
+> **Note:** Paths and field names below predate issue #443, which moved posts to `src/content/posts/`, renamed `pubDate` to `pubDatetime`, `updatedDate` to `modDatetime` and `published: false` to `draft: true`, and replaced `PostDetails.astro` with `PostLayout.astro`.
+
 ## Phases
 
 | Phase | Description | Status |

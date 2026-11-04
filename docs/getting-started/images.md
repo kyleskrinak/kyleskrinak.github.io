@@ -7,7 +7,7 @@ How images are organized, processed, and referenced in posts.
 Every blog post lives in its own directory. Images for the post live alongside `index.md`:
 
 ```
-src/content/blog/2026-05-25-example-post/
+src/content/posts/2026-05-25-example-post/
 ├── index.md          # or index.mdx if you need raw <img> blocks
 ├── hero.webp
 ├── inline-1.webp
@@ -34,7 +34,7 @@ npm run new-post -- 2026-05-25-my-new-post --images ~/Desktop/post-images
 
 What it does:
 
-- Creates `src/content/blog/<slug>/index.md` with title, today's UTC `pubDate`, empty `tags`, and `published: false`.
+- Creates `src/content/posts/<slug>/index.md` with title, today's UTC `pubDatetime`, empty `tags`, and `draft: true`. The stub has no `description`, which the schema requires, so add one before running `npm run dev` or a build.
 - With `--images <dir>`: copies each image into the post directory. JPG/PNG are converted to WebP (quality 85, resized to a maximum 1200 px width). WebP, SVG, GIF, and AVIF pass through unchanged. The first image becomes the frontmatter `image:`, the rest are appended as inline `![alt](./name)` references.
 
 Slug rules: lowercase letters, digits, and hyphens. `2026-05-25-` date prefix is conventional but not required by the script.
@@ -66,7 +66,8 @@ If you already have a post directory and want to add an image by hand:
 ```yaml
 ---
 title: My post
-pubDate: 2026-05-25
+description: One-line summary of the post
+pubDatetime: 2026-05-25
 image: ./hero.webp
 alt: Descriptive alt text for the hero image
 caption: Optional caption rendered below the image
@@ -110,7 +111,8 @@ If you need width/height attributes, `<figure>`/`<figcaption>` markup, or float 
 ```mdx
 ---
 title: My post
-pubDate: 2026-05-25
+description: One-line summary of the post
+pubDatetime: 2026-05-25
 ---
 import { Image } from "astro:assets";
 import hero from "./hero.webp";
@@ -177,7 +179,7 @@ alt: ""             # never empty (use a decorative-image pattern in MDX if trul
 
 Commit:
 
-- Post directories under `src/content/blog/<slug>/` including their images.
+- Post directories under `src/content/posts/<slug>/` including their images.
 - `/design/` originals if reasonably sized (< ~5 MB each).
 
 Don't commit:
@@ -227,14 +229,14 @@ Copy it into both post directories. Sharing via a central directory was the old 
 
 ```bash
 # All hero images currently in use
-grep -rh "^image:" src/content/blog/*/index.md{,x} | sort -u
+grep -rh "^image:" src/content/posts/*/index.md{,x} | sort -u
 
 # All inline images currently referenced
-grep -rh "!\[.*\](\./" src/content/blog/*/index.md{,x}
+grep -rh "!\[.*\](\./" src/content/posts/*/index.md{,x}
 
 # Find oversized images
-find src/content/blog -name '*.webp' -size +500k -ls
-find src/content/blog \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) -size +500k -ls
+find src/content/posts -name '*.webp' -size +500k -ls
+find src/content/posts \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) -size +500k -ls
 ```
 
 ---
