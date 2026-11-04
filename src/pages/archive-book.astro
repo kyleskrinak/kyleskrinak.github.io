@@ -275,6 +275,26 @@ const printedUrlCss = `
         word-break: break-all;
         color: #1a4d8f;
       }
+      /* Callouts print as one paragraph, "Note: text", the way the notices
+         before them printed. The icon carries no meaning on paper. */
+      .callout {
+        margin: 1em 0;
+      }
+      .callout-title-icon {
+        display: none;
+      }
+      .callout-title,
+      .callout-title-text,
+      .callout-content,
+      .callout-content > p:first-child {
+        display: inline;
+      }
+      .callout-title-text {
+        font-weight: bold;
+      }
+      .callout-title-text::after {
+        content: ": ";
+      }
     </style>
     <style is:inline set:html={printedUrlCss}></style>
   </head>
