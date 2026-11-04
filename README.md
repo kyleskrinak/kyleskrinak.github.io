@@ -177,4 +177,4 @@ Licensed under the MIT License. See [LICENSE](./LICENSE) file for details.
 
 ---
 
-Made with ❤️ for my blog. Based on [AstroPaper](https://github.com/satnaing/astro-paper) theme.
+Made with ❤️ for my blog. Based on the [AstroPaper](https://github.com/satnaing/astro-paper) theme by [Sat Naing](https://satnaing.dev) and [contributors](https://github.com/satnaing/astro-paper/graphs/contributors).

@@ -17,7 +17,12 @@ dayjs.extend(timezone);
 // Wall-clock build date in the site's timezone, so a late-evening build doesn't show tomorrow.
 const builtAt = dayjs().tz(SITE_TIMEZONE);
 
-const { engines, version: themeVersion } = packageJson;
+// The fork base: package.json keeps the version bb6da59 copied from AstroPaper
+// (UPSTREAM.md, rule 4).
+const { engines, version: themeForkVersion } = packageJson;
+// The version in upstream's package.json at the last upstream commit merged.
+// Each upstream merge updates it (UPSTREAM.md, update procedure).
+const themeMergedVersion = "7.0.0";
 
 // Installed versions come from the lockfile, which is what CI installs.
 // package.json holds only range floors, which lockfile updates never move.
@@ -47,7 +52,7 @@ function installedVersion(name: string): string {
       </p>
 
       <p>
-        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what each page explicitly requires. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a>, which I've adapted and extended for this site. <a href="https://pagefind.app/">Pagefind</a> handles full-text search, building a search index at deploy time so search works with no backend. <a href="https://sharp.pixelplumbing.com/">Sharp</a> processes every hero image at build time, resizing and cropping to the right dimensions on every deploy.
+        The static site generator is <a href="https://astro.build/">Astro</a>, built on Node.js. Astro ships zero JavaScript to the browser by default, adding only what each page explicitly requires. The visual theme is <a href="https://github.com/satnaing/astro-paper">AstroPaper</a> by Sat Naing and contributors, which I've adapted and extended for this site. <a href="https://pagefind.app/">Pagefind</a> handles full-text search, building a search index at deploy time so search works with no backend. <a href="https://sharp.pixelplumbing.com/">Sharp</a> processes every hero image at build time, resizing and cropping to the right dimensions on every deploy.
       </p>
 
       <h2>Jekyll vs. Astro: Lighthouse comparison</h2>
@@ -109,7 +114,7 @@ function installedVersion(name: string): string {
 
       <h2>Current versions</h2>
       <p>
-        At build time, Astro reads the installed dependency versions from <code>package-lock.json</code>, and the theme and Node.js rows from <code>package.json</code>. This table is current as of the last build, on <time datetime={builtAt.toISOString()}>{builtAt.format("D MMM, YYYY")}</time>. Dependency versions update automatically whenever the lockfile changes — no manual maintenance.
+        At build time, Astro reads the installed dependency versions from <code>package-lock.json</code>, and the Node.js row and the theme's fork version from <code>package.json</code>. This table is current as of the last build, on <time datetime={builtAt.toISOString()}>{builtAt.format("D MMM, YYYY")}</time>. Dependency versions update automatically whenever the lockfile changes — no manual maintenance.
       </p>
 
       <table>
@@ -125,8 +130,8 @@ function installedVersion(name: string): string {
             <td>{installedVersion("astro")}</td>
           </tr>
           <tr>
-            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a> (forked from)</td>
-            <td>{themeVersion}</td>
+            <td><a href="https://github.com/satnaing/astro-paper">AstroPaper theme</a></td>
+            <td>forked from {themeForkVersion}; upstream changes merged through {themeMergedVersion}</td>
           </tr>
           <tr>
             <td><a href="https://tailwindcss.com/">Tailwind CSS</a></td>
