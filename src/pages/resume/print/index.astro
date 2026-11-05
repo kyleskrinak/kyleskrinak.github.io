@@ -9,16 +9,19 @@ const page = await getEntry("pages", "resume");
 if (!page) throw new Error("Resume page not found");
 
 const { Content } = await render(page);
-const { name, contactEmail, contactWebsite, contactLinkedin, contactAddress } = page.data;
+const { name, contactEmail, contactWebsite, contactLinkedin, contactAddress } =
+  page.data;
 if (!name) throw new Error("Resume frontmatter has no name");
 // Same composed description as the public route — see src/pages/resume.astro.
 const description = resumeMetaDescription(page.data);
 ---
 
-{/* Canonical points at the public /resume/ page: this route is a noindex
+{
+  /* Canonical points at the public /resume/ page: this route is a noindex
     PDF-rendering source and must not declare itself canonical. The title is
     the name alone: Chromium copies it into the PDF's Title field, and the
-    .docx takes the same title from the h1. */}
+    .docx takes the same title from the h1. */
+}
 <Layout
   title={name}
   description={description}

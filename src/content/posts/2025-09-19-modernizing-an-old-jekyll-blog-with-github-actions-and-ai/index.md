@@ -18,7 +18,6 @@ alt: typewriter to laptop
 source: jekyll
 ---
 
-
 ## Why Now?
 
 Well, hello there, September 2025. It’s been a while, hasn’t it? I’ve been meaning to update my online presence for a while, and the old blog sitting untouched for years kept reminding me it was overdue. A recent home-grounding cold gave me the time and space to revisit a long-neglected pet project: this blog. Around the same time, I had also scaled back my time on social media — Facebook, X, Instagram, and the like. The constant distraction had become a death-by-a-thousand-cuts, and Facebook’s push to make “Reels” as prominent as TikTok (which I’ve avoided for that exact reason) only sealed the deal. With that space reclaimed, I found I had more energy to create instead of mindlessly scrolling through mediocre content. Before diving back in, I weighed whether to keep it in Jekyll or switch to one of the many newer static site generators. I examined various metrics, such as community size, commit activity, and available tools. In the end, Jekyll still met my simple purposes, even though the theme I use is essentially deprecated. The frustrating part is that the theme’s author no longer supports its development. Though it may not be cutting edge anymore, it works — and that’s enough to get the blog moving again.

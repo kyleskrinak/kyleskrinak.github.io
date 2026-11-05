@@ -43,7 +43,6 @@ I keep both men in mind as I write this reflection. Two sites at opposite ends o
 
 Only one of them was ever asked to last. The Professor wanted his life's work to outlive him and asked too late, at the tail end, when granting it would have cost more than building it did. Mike never asked at all. His site is one of those towns inside the Chornobyl ring, the kettle still on the stove, the calendar still on the wall, nobody coming back. Two different roads. One ends in a museum, the other in an empty lot.
 
-
 I've had my fingers on thousands of sites. We spin them up, they serve their purpose, they get redesigned or retired, and the orphaned ones go quiet without anyone marking it. (For the record, I delight in decommissioning websites and electronic cleanup on Aisle 7.) None of it ever touched me. These two did, and I think the difference is mostly where I'm standing now. The decay was always running, under every site I've built, the long-gone ones and the ones still up this morning, mine included. Permanence was never something those sites had. It was only ever something someone might have paid for, once, at the start, and almost no one does, because in the daily work you are never thinking about the end. You are thinking about the launch, the bug, the renewal, the next call. In my productive years, I'd have read all this and moved on to the next ticket. It takes some age to look up from the work, notice what was always true, and count the cost.
 
 ---
@@ -72,6 +71,6 @@ What it means to arrive at this point, near the end of a long vocation, is to fi
 
 ## Notes
 
-[1] Lowry Pressly makes the counter-case in *The Right to Oblivion: Privacy and the Good Life*, discussed on EconTalk, ["Let Me Be Forgotten,"](https://www.econtalk.org/let-me-be-forgotten-with-lowry-pressly/) August 4, 2025. Pressly argues that something is lost when a life is frozen into information, the fixed record standing in for the living, changing thing.
+[1] Lowry Pressly makes the counter-case in _The Right to Oblivion: Privacy and the Good Life_, discussed on EconTalk, ["Let Me Be Forgotten,"](https://www.econtalk.org/let-me-be-forgotten-with-lowry-pressly/) August 4, 2025. Pressly argues that something is lost when a life is frozen into information, the fixed record standing in for the living, changing thing.
 
 [2] My gesture toward a long-term archive of my blog: this [PDF archive](/blog-archive.pdf).

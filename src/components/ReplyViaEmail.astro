@@ -9,6 +9,9 @@ const mailtoHref = `mailto:${BLOG_CONTACT_EMAIL}?subject=${encodeURIComponent(`R
 ---
 
 <p class="text-sm opacity-80">
-  Have a thought? <a href={mailtoHref} class="underline decoration-dashed underline-offset-4 hover:text-accent">Reply by email</a>.
-  I read everything that isn't spam.
+  Have a thought? <a
+    href={mailtoHref}
+    class="hover:text-accent underline decoration-dashed underline-offset-4"
+    >Reply by email</a
+  >. I read everything that isn't spam.
 </p>

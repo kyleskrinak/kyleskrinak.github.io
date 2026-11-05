@@ -33,7 +33,9 @@ const structuredData = {
 };
 ---
 
-{/* SITE-OVERRIDE: og:type="article" through Layout's ogType prop, in place of a second og:type tag in the head slot. */}
+{
+  /* SITE-OVERRIDE: og:type="article" through Layout's ogType prop, in place of a second og:type tag in the head slot. */
+}
 <Layout {title} {description} {ogImage} {canonicalURL} ogType="article">
   <Fragment slot="head">
     {
@@ -53,7 +55,9 @@ const structuredData = {
       )
     }
 
-    {/* SITE-OVERRIDE: escape "<" so a title containing "</script>" can't end the JSON-LD block. */}
+    {
+      /* SITE-OVERRIDE: escape "<" so a title containing "</script>" can't end the JSON-LD block. */
+    }
     <script
       type="application/ld+json"
       is:inline

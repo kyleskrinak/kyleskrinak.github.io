@@ -1,104 +1,110 @@
 ---
-import { getCollection } from 'astro:content';
-import { postFilter } from '@/utils/postFilter';
-import { getPostUrl } from '@/utils/getPostPaths';
-import config from '@/config';
-import Layout from '@/layouts/Layout.astro';
-import Footer from '../../components/Footer.astro';
-import Datetime from '@/components/Datetime.astro';
-import Header from '../../components/Header.astro';
+import { getCollection } from "astro:content";
+import { postFilter } from "@/utils/postFilter";
+import { getPostUrl } from "@/utils/getPostPaths";
+import config from "@/config";
+import Layout from "@/layouts/Layout.astro";
+import Footer from "../../components/Footer.astro";
+import Datetime from "@/components/Datetime.astro";
+import Header from "../../components/Header.astro";
 
 export async function getStaticPaths() {
-	const posts = await getCollection('posts', postFilter);
-	const categories = new Set<string>();
+  const posts = await getCollection("posts", postFilter);
+  const categories = new Set<string>();
 
-	posts.forEach((post) => {
-		if (post.data.categories) {
-			post.data.categories.forEach((cat) => {
-				categories.add(cat);
-			});
-		}
-	});
+  posts.forEach(post => {
+    if (post.data.categories) {
+      post.data.categories.forEach(cat => {
+        categories.add(cat);
+      });
+    }
+  });
 
-	return Array.from(categories).map((category) => ({
-		params: { category: category.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-') },
-		props: { category },
-	}));
+  return Array.from(categories).map(category => ({
+    params: {
+      category: category.toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-"),
+    },
+    props: { category },
+  }));
 }
 
 interface Props {
-	category: string;
+  category: string;
 }
 
 const { category } = Astro.props;
-const posts = (await getCollection('posts', postFilter))
-	.filter((post) => post.data.categories?.includes(category))
-	.sort((a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf());
+const posts = (await getCollection("posts", postFilter))
+  .filter(post => post.data.categories?.includes(category))
+  .sort((a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf());
 ---
 
-<Layout title={`${category} - ${config.site.author}`} description={`Posts in category: ${category}`} noindex={true}>
-	<Header />
-	<main id="main-content">
-		<h1>Category: {category}</h1>
-		<p>{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
-		<ul>
-			{
-				posts.map((post) => (
-					<li>
-						<a href={getPostUrl(post.id, post.filePath)}>
-							<h3 class="post-title">{post.data.title}</h3>
-						</a>
-						<p class="post-date">
-							<Datetime pubDatetime={post.data.pubDatetime} />
-						</p>
-						{post.data.description && <p>{post.data.description}</p>}
-					</li>
-				))
-			}
-		</ul>
-	</main>
-	<Footer />
+<Layout
+  title={`${category} - ${config.site.author}`}
+  description={`Posts in category: ${category}`}
+  noindex={true}
+>
+  <Header />
+  <main id="main-content">
+    <h1>Category: {category}</h1>
+    <p>{posts.length} post{posts.length !== 1 ? "s" : ""}</p>
+    <ul>
+      {
+        posts.map(post => (
+          <li>
+            <a href={getPostUrl(post.id, post.filePath)}>
+              <h3 class="post-title">{post.data.title}</h3>
+            </a>
+            <p class="post-date">
+              <Datetime pubDatetime={post.data.pubDatetime} />
+            </p>
+            {post.data.description && <p>{post.data.description}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+  <Footer />
 </Layout>
 
 <style>
-	main {
-		width: 960px;
-	}
-	h1 {
-		margin: 2rem 0 1rem 0;
-	}
-	ul {
-		list-style-type: none;
-		padding: 0;
-		margin: 1rem 0;
-	}
-	ul li {
-		margin-bottom: 1rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid rgb(var(--gray-light));
-	}
-	ul li:last-child {
-		border-bottom: none;
-	}
-	.post-title {
-		font-size: 1.5rem;
-		margin: 0.5rem 0;
-	}
-	.post-date {
-		color: rgb(var(--gray));
-		font-size: 0.9rem;
-	}
-	a {
-		text-decoration: none;
-		color: rgb(var(--accent));
-	}
-	a:hover {
-		text-decoration: underline;
-	}
-	@media (max-width: 720px) {
-		main {
-			width: 100%;
-			padding: 0 1rem;
-		}
-	}
+  main {
+    width: 960px;
+  }
+  h1 {
+    margin: 2rem 0 1rem 0;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+  ul li {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgb(var(--gray-light));
+  }
+  ul li:last-child {
+    border-bottom: none;
+  }
+  .post-title {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+  }
+  .post-date {
+    color: rgb(var(--gray));
+    font-size: 0.9rem;
+  }
+  a {
+    text-decoration: none;
+    color: rgb(var(--accent));
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 720px) {
+    main {
+      width: 100%;
+      padding: 0 1rem;
+    }
+  }
 </style>

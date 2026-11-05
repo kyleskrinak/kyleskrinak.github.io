@@ -13,16 +13,13 @@ const { Content } = await render(page);
 const { title, description } = page.data;
 ---
 
-<Layout
-  title={`${title} | ${config.site.title}`}
-  description={description}
->
+<Layout title={`${title} | ${config.site.title}`} description={description}>
   <Header />
   <Breadcrumb />
   <main id="main-content" class="app-layout pb-12">
     <h1 class="text-2xl font-semibold sm:text-3xl">{title}</h1>
 
-    <section class="app-prose mt-8 max-w-app">
+    <section class="app-prose max-w-app mt-8">
       <Content />
     </section>
   </main>

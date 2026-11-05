@@ -1,9 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
-import { postFilter } from '@/utils/postFilter';
-import { getPostUrl } from '@/utils/getPostPaths';
-import { getAssetPath } from '@/utils/withBase';
-import config from '@/config';
+import { getCollection } from "astro:content";
+import { postFilter } from "@/utils/postFilter";
+import { getPostUrl } from "@/utils/getPostPaths";
+import { getAssetPath } from "@/utils/withBase";
+import config from "@/config";
 
 /**
  * Dynamic redirect route for Jekyll URL format
@@ -19,11 +19,11 @@ import config from '@/config';
  */
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts', postFilter);
+  const posts = await getCollection("posts", postFilter);
 
   return posts.map(post => {
     // Post ID format: "2025-09-19-modernizing-an-old-jekyll-blog"
-    const parts = post.id.split('-');
+    const parts = post.id.split("-");
 
     // Extract year, month, day
     const year = parts[0];
@@ -31,7 +31,7 @@ export async function getStaticPaths() {
     const day = parts[2];
 
     // Join remaining parts as slug
-    const postSlug = parts.slice(3).join('-');
+    const postSlug = parts.slice(3).join("-");
 
     return {
       params: {
@@ -56,16 +56,16 @@ const canonicalUrl = new URL(newUrl, config.site.url).href;
 
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Redirecting to: {newUrl}</title>
-  <meta http-equiv="refresh" content={`0;url=${newUrl}`}>
-  <meta name="robots" content="noindex">
-  <link rel="canonical" href={canonicalUrl}>
-</head>
-<body>
-  <a href={newUrl}>
-    Redirecting from <code>{oldUrl}</code> to <code>{newUrl}</code>
-  </a>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting to: {newUrl}</title>
+    <meta http-equiv="refresh" content={`0;url=${newUrl}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={canonicalUrl} />
+  </head>
+  <body>
+    <a href={newUrl}>
+      Redirecting from <code>{oldUrl}</code> to <code>{newUrl}</code>
+    </a>
+  </body>
 </html>

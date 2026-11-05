@@ -8,7 +8,6 @@ description: Here are my hastily-assembled thoughts on Drupal 8 for 2017 at
   Trinity Technology Services.
 ---
 
-
 Here are my hastily-assembled thoughts on Drupal 8 for 2017 at Trinity Technology Services.
 
 To view this document on [Sway](https://sway.com/thDd10XgSCzLMAlr)

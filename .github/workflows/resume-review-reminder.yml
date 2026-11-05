@@ -5,7 +5,7 @@ on:
     # Fires on days 1–7 of January, April, July, and October at 09:00 UTC
     # (up to 7 runs per quarter-start month). GitHub cron cannot express
     # "first Monday" natively — the workflow skips non-Mondays internally.
-    - cron: '0 9 1-7 1,4,7,10 *'
+    - cron: "0 9 1-7 1,4,7,10 *"
   workflow_dispatch:
 
 permissions:

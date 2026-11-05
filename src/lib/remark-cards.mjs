@@ -33,9 +33,13 @@ const isSafeId = v =>
   !["body", "location", "documentElement", "head"].includes(v);
 
 const isImageParagraph = n =>
-  n.type === "paragraph" && n.children.length === 1 && n.children[0].type === "image";
+  n.type === "paragraph" &&
+  n.children.length === 1 &&
+  n.children[0].type === "image";
 const isFooterParagraph = n =>
-  n.type === "paragraph" && n.children.length === 1 && n.children[0].type === "emphasis";
+  n.type === "paragraph" &&
+  n.children.length === 1 &&
+  n.children[0].type === "emphasis";
 
 function buildCard(group) {
   const children = [...group];
@@ -57,7 +61,10 @@ function buildCard(group) {
       delete child.depth;
       child.data ??= {};
       child.data.hName = "h3";
-      child.data.hProperties = { ...child.data.hProperties, className: ["card-title"] };
+      child.data.hProperties = {
+        ...child.data.hProperties,
+        className: ["card-title"],
+      };
     }
   }
 
@@ -65,7 +72,10 @@ function buildCard(group) {
   if (last && last !== children[0] && isFooterParagraph(last)) {
     last.data ??= {};
     last.data.hName = "figcaption";
-    last.data.hProperties = { ...last.data.hProperties, className: ["card-footer"] };
+    last.data.hProperties = {
+      ...last.data.hProperties,
+      className: ["card-footer"],
+    };
     hasFooter = true;
   }
 
@@ -73,7 +83,10 @@ function buildCard(group) {
   return {
     type: "cardsCard", // synthetic node; mdast-util-to-hast renders it via data.hName
     children,
-    data: { hName: isFigure ? "figure" : "div", hProperties: { className: ["card"] } },
+    data: {
+      hName: isFigure ? "figure" : "div",
+      hProperties: { className: ["card"] },
+    },
   };
 }
 
@@ -92,13 +105,19 @@ export function remarkCards() {
       const variant = (attrs.class ?? "").split(/\s+/).filter(Boolean);
       // Allowlist safe passthrough attributes; block event handlers, style, etc.
       const safeAttrs = Object.fromEntries(
-        Object.entries(attrs).filter(([k, v]) =>
-          (k === "id" && isSafeId(v)) || k.startsWith("data-") || k.startsWith("aria-")
+        Object.entries(attrs).filter(
+          ([k, v]) =>
+            (k === "id" && isSafeId(v)) ||
+            k.startsWith("data-") ||
+            k.startsWith("aria-")
         )
       );
       node.data ??= {};
       node.data.hName = "div";
-      node.data.hProperties = { ...safeAttrs, className: ["card-row", ...variant] };
+      node.data.hProperties = {
+        ...safeAttrs,
+        className: ["card-row", ...variant],
+      };
       node.children = groups.filter(g => g.length).map(buildCard);
     });
   };

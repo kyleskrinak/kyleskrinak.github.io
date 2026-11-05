@@ -102,4 +102,4 @@ For a more technical walkthrough of this migration, see [my presentation on AI-A
 
 ---
 
-*This post was developed collaboratively with Claude Sonnet 4.6 (claude.ai) in a single session, using the same iterative, AI-assisted approach described above.*
+_This post was developed collaboratively with Claude Sonnet 4.6 (claude.ai) in a single session, using the same iterative, AI-assisted approach described above._

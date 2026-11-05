@@ -63,7 +63,10 @@ function employerLineSource(paragraph) {
   for (const child of paragraph.children) {
     if (child.type === "text") {
       source += child.value;
-    } else if (child.type === "strong" && child.children.every(c => c.type === "text")) {
+    } else if (
+      child.type === "strong" &&
+      child.children.every(c => c.type === "text")
+    ) {
       source += `**${mdastText(child)}**`;
     } else {
       return null;
@@ -82,7 +85,9 @@ function employerLineSource(paragraph) {
 function looksLikeEmployerLine(paragraph) {
   const [lead, ...rest] = paragraph.children;
   if (lead?.type !== "strong") return false;
-  return isEmployerLine(`**${mdastText(lead)}**${rest.map(mdastText).join("")}`);
+  return isEmployerLine(
+    `**${mdastText(lead)}**${rest.map(mdastText).join("")}`
+  );
 }
 
 /**
@@ -104,8 +109,8 @@ function foldAdminLines(tree, file) {
           file,
           node,
           new Error(
-            `employer line "${mdastText(node).trim()}" carries markup the fold cannot read — write it as bold text, then plain text`,
-          ),
+            `employer line "${mdastText(node).trim()}" carries markup the fold cannot read — write it as bold text, then plain text`
+          )
         );
       }
       continue;
@@ -118,13 +123,19 @@ function foldAdminLines(tree, file) {
       throw expansionError(
         file,
         node,
-        new Error(`employer line "${source.trim()}" must sit directly below its role's ## heading`),
+        new Error(
+          `employer line "${source.trim()}" must sit directly below its role's ## heading`
+        )
       );
     }
-    heading.children = adminLineSegments(mdastText(heading).trim(), fields).map(segment =>
-      segment.setOff
-        ? { type: "strong", children: [{ type: "text", value: segment.text }] }
-        : { type: "text", value: segment.text },
+    heading.children = adminLineSegments(mdastText(heading).trim(), fields).map(
+      segment =>
+        segment.setOff
+          ? {
+              type: "strong",
+              children: [{ type: "text", value: segment.text }],
+            }
+          : { type: "text", value: segment.text }
     );
     tree.children.splice(i, 1);
     folded.push(heading);
@@ -146,7 +157,10 @@ export function renderedHeadings(markdown) {
   const folded = new Set(foldAdminLines(tree));
   return tree.children
     .filter(node => node.type === "heading" && node.depth === 2)
-    .map(node => ({ text: mdastText(node).trim(), adminLine: folded.has(node) }));
+    .map(node => ({
+      text: mdastText(node).trim(),
+      adminLine: folded.has(node),
+    }));
 }
 
 export function remarkResumeSections() {
@@ -192,7 +206,10 @@ export function remarkResumeSections() {
     }
 
     for (const { node, id } of headingIds(tree)) {
-      node.data = { ...node.data, hProperties: { ...node.data?.hProperties, id } };
+      node.data = {
+        ...node.data,
+        hProperties: { ...node.data?.hProperties, id },
+      };
     }
 
     foldAdminLines(tree, file);

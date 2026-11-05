@@ -63,10 +63,10 @@ export const GET: APIRoute = async ({ site }) => {
 
   // Static indexable pages
   const staticPages: SitemapEntry[] = [
-    { path: "" },          // Home page
-    { path: "about/" },    // About page
-    { path: "lchf/" },     // LCHF content page
-    { path: "stack/" },    // Technology stack page
+    { path: "" }, // Home page
+    { path: "about/" }, // About page
+    { path: "lchf/" }, // LCHF content page
+    { path: "stack/" }, // Technology stack page
     { path: "presentations/" }, // Presentations listing
   ];
 
@@ -111,7 +111,13 @@ export const GET: APIRoute = async ({ site }) => {
     path: `presentations/${pres.id}/`,
   }));
 
-  const entries = [...staticPages, ...postPages, ...presentationPages, ...presentationFiles, ...archiveFiles];
+  const entries = [
+    ...staticPages,
+    ...postPages,
+    ...presentationPages,
+    ...presentationFiles,
+    ...archiveFiles,
+  ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

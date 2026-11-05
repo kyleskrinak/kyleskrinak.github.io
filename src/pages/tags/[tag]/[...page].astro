@@ -40,7 +40,10 @@ const t = useTranslations(locale);
 const noindex = true;
 ---
 
-<Layout title={`${t.pages.tagTitle}: ${tagName} | ${config.site.title}`} {noindex}>
+<Layout
+  title={`${t.pages.tagTitle}: ${tagName} | ${config.site.title}`}
+  {noindex}
+>
   <Header />
 
   <Breadcrumb />

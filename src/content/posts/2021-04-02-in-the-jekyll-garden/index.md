@@ -9,8 +9,7 @@ description: Continuing my research on a static website workflow, I'm spinning
   up a new personal website as an excuse to try building...
 ---
 
-
-Continuing my research on a static website workflow, I'm spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges. 
+Continuing my research on a static website workflow, I'm spinning up a new personal website as an excuse to try building a new Jekyll-based static website. Doing so reveals the rough edges.
 
 How so?
 
@@ -42,4 +41,3 @@ This is a <a href="https://github.com/jekyll/jekyll/issues/8523">known Ruby 3.0.
 > `bundle add ffi --version=1.14.2`
 
 Finally, I can successfully launch my local compiled website and begin making edits. Since I am an information technologist, that's fine. These convolutions, however, make recommending this approach more problematic, especially for non-IT users, such as researchers or faculty.
-

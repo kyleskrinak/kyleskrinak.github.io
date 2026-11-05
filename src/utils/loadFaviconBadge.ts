@@ -23,10 +23,7 @@ import sharp from "sharp";
 const WHITE_THRESHOLD = 235; // channel value where the fade-to-transparent ramp begins
 const TRANSPARENT_THRESHOLD = 245; // at or above this, a pixel is background
 async function loadFaviconBadge(size: number): Promise<string> {
-  const inputPath = join(
-    process.cwd(),
-    "public/web-app-manifest-512x512.png"
-  );
+  const inputPath = join(process.cwd(), "public/web-app-manifest-512x512.png");
 
   const { data, info } = await sharp(inputPath)
     .resize(size, size)

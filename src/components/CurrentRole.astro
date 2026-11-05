@@ -13,9 +13,17 @@
 import { getEntry } from "astro:content";
 
 const resume = await getEntry("pages", "resume");
-if (!resume) throw new Error("Resume page not found — the About page reads current_role from it");
+if (!resume)
+  throw new Error(
+    "Resume page not found — the About page reads current_role from it"
+  );
 const currentRole = resume.data.current_role;
-if (!currentRole) throw new Error("Resume frontmatter is missing current_role — the About page needs it");
+if (!currentRole)
+  throw new Error(
+    "Resume frontmatter is missing current_role — the About page needs it"
+  );
 ---
 
-{currentRole.title} for <a href={currentRole.employer_url}>{currentRole.employer}</a>
+{currentRole.title} for <a href={currentRole.employer_url}
+  >{currentRole.employer}</a
+>

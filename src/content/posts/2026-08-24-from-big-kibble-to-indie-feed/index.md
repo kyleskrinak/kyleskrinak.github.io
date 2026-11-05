@@ -16,13 +16,13 @@ tags:
 
 > Sexy Lexy
 
-So a virtual acquaintance responded on a thread on X started by a young female content producer, or at least how the content presents its author. Ugh. I don't want to get moralistic here, rather, my point is, why did X feature this on *my* feed? We can safely presume that X wagers that I'll see the same thing he did and feel its tug for my attention. No. I'm done with all this. I'll confess that despite my contrarian nature (No "F's" given on sports, for example), social media can and does hijack my attention. I don't want to live like this. Control my attention, and you feed my soul, my direction, my temperament.
+So a virtual acquaintance responded on a thread on X started by a young female content producer, or at least how the content presents its author. Ugh. I don't want to get moralistic here, rather, my point is, why did X feature this on _my_ feed? We can safely presume that X wagers that I'll see the same thing he did and feel its tug for my attention. No. I'm done with all this. I'll confess that despite my contrarian nature (No "F's" given on sports, for example), social media can and does hijack my attention. I don't want to live like this. Control my attention, and you feed my soul, my direction, my temperament.
 
 ---
 
 As all five of you faithful followers know, I restarted my blog roughly this time last year. You can read about it restarting in [Modernizing an Old Jekyll Blog with GitHub Actions and AI](https://kyle.skrinak.com/posts/2025-09-19-modernizing-an-old-jekyll-blog-with-github-actions-and-ai/) and [Fun at Scale](https://kyle.skrinak.com/posts/2026-02-02-fun-at-scale/). Then, as time rolled on, I was able to improve my blog at a clip I'd never managed before, thanks to ChatGPT, GitHub, and then Claude. No, I don't mean content creation. That is mine. I mean the Jekyll-to-Astro migration, the GitHub Actions pipeline, the Playwright visual regression suite, the webmention implementation, among other infrastructure implementations. I now had something workable that I lacked for years.
 
-*Revised 2026-11-01: linked the two earlier posts by title instead of "here" and "here."*
+_Revised 2026-11-01: linked the two earlier posts by title instead of "here" and "here."_
 
 "Sexy Lexy" was the last straw, but I had something better, though I didn't know that then. I had hopped from Facebook to Twitter to Instagram and finally to Substack. I was hoping Substack would be more long-form, and while it is, it is essentially a home for writers or famous people looking for a convenient place to post their content for a subscription fee. That’s great, but that’s not what I’m looking for. I’m a DevOps guy. I can build my own. I’m in control. As I started blogging again, I asked a question about what engagement might mean for my own blog. I wasn't looking for anything big, but I didn't want to be a voice in the wilderness, either.
 
@@ -44,7 +44,7 @@ What surprised me was how much of the Indie Web runs on people. The webring mean
 
 ---
 
-Thanks to this year's process, I now know what these tools are. The risks are real, and I'm no glossy optimist. The ethics of how these systems get built. The environmental cost: energy and water at a scale nobody advertises; the land and the resources consumed to keep the data centers running. I agree with Pope Leo XIV, whose first encyclical, *Magnifica Humanitas*, addresses the safeguarding of the human person in the age of artificial intelligence.[1] Leo describes a colonialism that has added data to what it already takes: health records and genetic profiles harvested from regions without the standing to object, so that whoever holds the information can decide whose needs count. There's more to say there than I'll say here.
+Thanks to this year's process, I now know what these tools are. The risks are real, and I'm no glossy optimist. The ethics of how these systems get built. The environmental cost: energy and water at a scale nobody advertises; the land and the resources consumed to keep the data centers running. I agree with Pope Leo XIV, whose first encyclical, _Magnifica Humanitas_, addresses the safeguarding of the human person in the age of artificial intelligence.[1] Leo describes a colonialism that has added data to what it already takes: health records and genetic profiles harvested from regions without the standing to object, so that whoever holds the information can decide whose needs count. There's more to say there than I'll say here.
 
 The critique of attention capture is a critique of the unwitting, which would be a comfortable place to stand if I could claim it. I can't. Naming a thing has never yet excused me from resisting it. I don't believe the current AI paradigm is sustainable. Leo's question isn't whether to use these tools but what gets built with them, which is the only question I can actually answer from where I sit.
 
@@ -52,4 +52,4 @@ What the Indie Web lacks is the machinery that makes it hard to close a feed. No
 
 ## Notes
 
-[1] Leo XIV, *Magnifica Humanitas*, signed 15 May 2026 on the 135th anniversary of Leo XIII's *Rerum Novarum*, released 25 May 2026. https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html
+[1] Leo XIV, _Magnifica Humanitas_, signed 15 May 2026 on the 135th anniversary of Leo XIII's _Rerum Novarum_, released 25 May 2026. https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html

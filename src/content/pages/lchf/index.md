@@ -5,9 +5,8 @@ image: ./181008-butter.webp
 alt: Butter on a cutting board
 ---
 
-
 ![A self-portrait. Left - me when I was 40. Right, me, at 60.](./60th-birthday.webp)
-*A self-portrait. Left - me when I was 40. Right, me, at 60.*
+_A self-portrait. Left - me when I was 40. Right, me, at 60._
 
 ## Summary
 
@@ -30,7 +29,7 @@ In the spring of 2016, after my yearly checkup, my general practitioner noted on
 Quite serendipitously, while browsing the official [Duke University](https://www.youtube.com/user/Duke "Duke University YouTube video channel") video feed, I found a presentation featuring Dr. Westman of Duke University, giving a talk titled [“The Science and Practice of Low Carb Diets.”](https://www.youtube.com/watch?v=toLvGpk3HLE "Dr. Westman presents on LCHF") I had done the Atkins diet with great weight-loss success, only to backslide after I failed to correctly follow the Atkins maintenance plan, to the point of complete remission. I guessed that I needed expert help. What if I had the help of a doctor, especially a doctor who had taken the mantle from Dr. Atkins? My GP gave me a referral to see Dr. Westman.
 
 ![Me, through the years, from obesity and sore joints to health management](./fifth-year-keto-dates.webp)
-*Me, through the years, from obesity and sore joints to health management.*
+_Me, through the years, from obesity and sore joints to health management._
 
 ## The Road to Damascus
 
@@ -48,38 +47,39 @@ I love this way of eating and despise all the misinformation that has messed up 
 
 I came for weight loss and found a healthier way of living.
 
-*Last updated: 2026-07-23*
+_Last updated: 2026-07-23_
 
 ## Resources
 
 ### Websites
 
-* **Dr. Eric C Westman’s** [ Scholars@Duke profile ](https://scholars.duke.edu/person/ewestman "Dr. Westman’s Scholars at Duke profile page")
-* **Dr. Westman’s** [Facebook group](https://www.facebook.com/groups/DukeLowCarbSupportGroup "Dr. Westman’s facebook group page") page.
-* [**Adapt Your Life**](https://www.adaptyourlifeacademy.com "Adapt Your Life weblink") shares LCHF information with the public, working with Dr. Westman and others in the medical or scientific community who are leading on various related topics. They also maintain an active [YouTube channel](https://www.youtube.com/channel/UCni9TCw0YPwTdu7BYF3j0Eg "Ask Adapt YouTube video channel.").
-* **Amy Berger**, [Tuit Nutrition](https://www.tuitnutrition.com "Amy Berger's website"), a Certified Nutrition Specialist, focuses on “Keto without the Crazy,” and the crazy is getting worse at an increasingly crazy rate. Not everyone who studies or promotes low-carb eating follows a protocol that overlaps with theirs, but my experience is that she and Dr. Westman’s protocols overlap quite well.
+- **Dr. Eric C Westman’s** [ Scholars@Duke profile ](https://scholars.duke.edu/person/ewestman "Dr. Westman’s Scholars at Duke profile page")
+- **Dr. Westman’s** [Facebook group](https://www.facebook.com/groups/DukeLowCarbSupportGroup "Dr. Westman’s facebook group page") page.
+- [**Adapt Your Life**](https://www.adaptyourlifeacademy.com "Adapt Your Life weblink") shares LCHF information with the public, working with Dr. Westman and others in the medical or scientific community who are leading on various related topics. They also maintain an active [YouTube channel](https://www.youtube.com/channel/UCni9TCw0YPwTdu7BYF3j0Eg "Ask Adapt YouTube video channel.").
+- **Amy Berger**, [Tuit Nutrition](https://www.tuitnutrition.com "Amy Berger's website"), a Certified Nutrition Specialist, focuses on “Keto without the Crazy,” and the crazy is getting worse at an increasingly crazy rate. Not everyone who studies or promotes low-carb eating follows a protocol that overlaps with theirs, but my experience is that she and Dr. Westman’s protocols overlap quite well.
 
-*Revised 2026-07-23: updated Adapt Your Life link to adaptyourlifeacademy.com.*
+_Revised 2026-07-23: updated Adapt Your Life link to adaptyourlifeacademy.com._
 
 ### Podcasts
 
-* Heh. I used to listen to quite a few low-carb podcasts. In time, I found out that all this information consumption only added confusion and complexity to Dr. Westman’s simple plan. As listed above, Dr. Westman and Amy Berger publish a lot of information. I’ve come to appreciate that that’s all I need.
+- Heh. I used to listen to quite a few low-carb podcasts. In time, I found out that all this information consumption only added confusion and complexity to Dr. Westman’s simple plan. As listed above, Dr. Westman and Amy Berger publish a lot of information. I’ve come to appreciate that that’s all I need.
 
 ### Social Networks
 
-* I roughly maintain an <a href="https://twitter.com/i/lists/965948026517901312">“X (formerly Twitter) list”</a> that you can find here. My X handle is available in the footer. Note: I spend very little time there these days. In fact, it's in my best interest to get off social media.
+- I roughly maintain an <a href="https://twitter.com/i/lists/965948026517901312">“X (formerly Twitter) list”</a> that you can find here. My X handle is available in the footer. Note: I spend very little time there these days. In fact, it's in my best interest to get off social media.
 
 ### Books and Authors
 
-* No surprises here, but I'm recommending "<a href="https://www.amazon.com/gp/product/1628604298/ref=ppx_yo_dt_b_asin_title_o08_s00?ie=UTF8&psc=1">End Your Carb Confusion</a>" by Dr. Eric Westman and Amy Berger. I haven't read it, though it is in the "want to read" queue. I have no doubt it is an excellent reference. Here is the description from the book:
+- No surprises here, but I'm recommending "<a href="https://www.amazon.com/gp/product/1628604298/ref=ppx_yo_dt_b_asin_title_o08_s00?ie=UTF8&psc=1">End Your Carb Confusion</a>" by Dr. Eric Westman and Amy Berger. I haven't read it, though it is in the "want to read" queue. I have no doubt it is an excellent reference. Here is the description from the book:
+
   > Overwhelmed by the avalanche of information out there about diets and health? Tired of spending time and money following complicated and expensive plans and protocols that don’t deliver the results you want? Would a strict ketogenic diet be best for you? But what if you can’t imagine life without fruit or bread? Why won’t someone just make all this diet stuff simple?
   >
   > They have! Eric Westman, MD, has over twenty years of experience as an internal medicine doctor and obesity medicine specialist. He’s helped patients at his Keto Medicine Clinic at Duke University lose over 26,000 pounds and reverse conditions like type 2 diabetes, PCOS, high blood pressure, and more. In End Your Carb Confusion, he shares his time-tested and science-backed strategy with YOU!
 
-* Anything by [Gary Taubes](https://garytaubes.com/ "Gary Taubes’ website").
-  *  If you only read one work of his, make it his New York Times article ["What If It's All Been a Big Fat Lie?"](https://web.archive.org/web/20251109235000/https://www.nytimes.com/2002/07/07/magazine/what-if-it-s-all-been-a-big-fat-lie.html "Gary Taubes' launching salvo against the standard American diet") This article kicked off broader acknowledgment that we're dangerously heading down the wrong path on the science and practice of nutrition.
-* Anything by [Nina Teicholz](https://ninateicholz.com/ "Nina Teicholz’s website")
-  * I highly recommend her book, [“THE BIG FAT SURPRISE; Why Butter, Meat & Cheese Belong in a Healthy Diet”](https://ninateicholz.com/about/the-big-fat-surprise/ "website for her Big Fat Surprise book"), which explains how we got here and offers possible remedies.
+- Anything by [Gary Taubes](https://garytaubes.com/ "Gary Taubes’ website").
+  - If you only read one work of his, make it his New York Times article ["What If It's All Been a Big Fat Lie?"](https://web.archive.org/web/20251109235000/https://www.nytimes.com/2002/07/07/magazine/what-if-it-s-all-been-a-big-fat-lie.html "Gary Taubes' launching salvo against the standard American diet") This article kicked off broader acknowledgment that we're dangerously heading down the wrong path on the science and practice of nutrition.
+- Anything by [Nina Teicholz](https://ninateicholz.com/ "Nina Teicholz’s website")
+  - I highly recommend her book, [“THE BIG FAT SURPRISE; Why Butter, Meat & Cheese Belong in a Healthy Diet”](https://ninateicholz.com/about/the-big-fat-surprise/ "website for her Big Fat Surprise book"), which explains how we got here and offers possible remedies.
 
 ## My Low-Carb Blog Posts
 

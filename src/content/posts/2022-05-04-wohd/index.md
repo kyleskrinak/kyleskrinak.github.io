@@ -15,6 +15,7 @@ description: A summary of my experience and learnings from attending DrupalCon
 This presentation summarizes my experience at **DrupalCon 2022** in Portland, OR, covering key sessions, learnings, and takeaways from the conference.
 
 ### Topics Covered
+
 - Conference highlights and notable sessions
 - Drupal ecosystem trends
 - Community connections and networking

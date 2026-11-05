@@ -8,21 +8,24 @@ import config from "@/config";
 import presentations from "@/data/presentations.json";
 
 // Sort presentations by date, newest first
-const sortedPresentations = presentations.sort((a, b) =>
-  new Date(b.date).getTime() - new Date(a.date).getTime()
+const sortedPresentations = presentations.sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 );
 
 // Group presentations by type
-const groupedByType = sortedPresentations.reduce((acc, pres) => {
-  if (!acc[pres.type]) acc[pres.type] = [];
-  acc[pres.type].push(pres);
-  return acc;
-}, {} as Record<string, typeof presentations>);
+const groupedByType = sortedPresentations.reduce(
+  (acc, pres) => {
+    if (!acc[pres.type]) acc[pres.type] = [];
+    acc[pres.type].push(pres);
+    return acc;
+  },
+  {} as Record<string, typeof presentations>
+);
 
 const typeLabels: Record<string, string> = {
   conference: "Conference Presentations",
   technical: "Technical Presentations",
-  meeting: "Meeting Presentations"
+  meeting: "Meeting Presentations",
 };
 ---
 
@@ -36,35 +39,44 @@ const typeLabels: Record<string, string> = {
     <h1 class="text-2xl font-semibold sm:text-3xl">Presentations</h1>
 
     <section class="app-prose mt-8">
-      <p>Here is my collection of presentations and talks I've given at conferences, meetings, and technical events. I have built these using web technologies, not PowerPoint. This model lets me use markdown and JavaScript, making them lightweight, version-controllable, and viewable in any modern browser or a dedicated application. This approach first led me to reveal.js and, more recently, to Slidev, which I have now moved to. I developed most of the presentations here using Reveal, but then migrated them to Slidev.</p>
+      <p>
+        Here is my collection of presentations and talks I've given at
+        conferences, meetings, and technical events. I have built these using
+        web technologies, not PowerPoint. This model lets me use markdown and
+        JavaScript, making them lightweight, version-controllable, and viewable
+        in any modern browser or a dedicated application. This approach first
+        led me to reveal.js and, more recently, to Slidev, which I have now
+        moved to. I developed most of the presentations here using Reveal, but
+        then migrated them to Slidev.
+      </p>
     </section>
 
     {
       Object.entries(groupedByType).map(([type, items]) => (
         <section class="mt-12">
-          <h2 class="text-xl font-semibold tracking-wide mb-6">
+          <h2 class="mb-6 text-xl font-semibold tracking-wide">
             {typeLabels[type] || type}
           </h2>
           <ul class="space-y-6">
-            {items.map((pres) => (
-              <li class="border-b border-border pb-6">
+            {items.map(pres => (
+              <li class="border-border border-b pb-6">
                 <a
                   href={getAssetPath(`/presentations/${pres.id}/`)}
-                  class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 hover:underline"
+                  class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline"
                 >
                   {pres.title}
                 </a>
-                <p class="text-sm text-foreground/70 mt-1">
+                <p class="text-foreground/70 mt-1 text-sm">
                   {new Date(pres.date).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
-                    day: "numeric"
+                    day: "numeric",
                   })}
                 </p>
                 <p class="text-foreground/80 mt-2">{pres.description}</p>
-                <div class="flex flex-wrap gap-2 mt-3">
-                  {pres.tags.map((tag) => (
-                    <span class="inline-block text-xs bg-foreground/10 text-foreground/70 px-2 py-1 rounded">
+                <div class="mt-3 flex flex-wrap gap-2">
+                  {pres.tags.map(tag => (
+                    <span class="bg-foreground/10 text-foreground/70 inline-block rounded px-2 py-1 text-xs">
                       {tag}
                     </span>
                   ))}

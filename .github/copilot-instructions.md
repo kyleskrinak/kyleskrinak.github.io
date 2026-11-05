@@ -3,6 +3,7 @@
 ## Files to Review
 
 Focus code reviews on:
+
 - Source code files (`.ts`, `.js`, `.astro`, `.tsx`, `.jsx`)
 - Configuration files (`.json`, `.yaml`, `.toml`)
 - Build scripts and tooling
@@ -11,6 +12,7 @@ Focus code reviews on:
 ## Files to Skip
 
 **Do NOT review or comment on:**
+
 - Blog post content files: `src/content/posts/**/*.md` and `src/content/posts/**/*.mdx`
 - Presentation content files: `slidev-presentations/slides/**/*.md`
 - Documentation narrative in `docs/**/*.md` (unless specifically about code behavior)
@@ -20,6 +22,7 @@ Focus code reviews on:
 ## Review Focus
 
 When reviewing code:
+
 1. **Security**: XSS, injection, validation, dangerous protocols
 2. **Correctness**: Logic errors, type safety, edge cases
 3. **Completeness**: Missing error handling, related files not updated

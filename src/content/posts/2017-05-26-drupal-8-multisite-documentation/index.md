@@ -15,12 +15,12 @@ description: Documentation on Drupal 8 multisite configuration based on code
 
 In order to better understand what adopting Drupal 8 multisite means, I have reviewed the code base for Drupal 8.3.2 for all references related to 'multisite' or multi-site' in the comments of the Drupal code.
 
-* Conceptually, Drupal 8 multisite seems identical to Drupal 7's model, though there are noteworthy differences in how the docroot structure is different.
-  * We could continue with our git repo-based module and sites workflow?
-* I'm unclear what a composer workflow for multisite will look like.
-* JS/PHP library management in Drupal 8?
+- Conceptually, Drupal 8 multisite seems identical to Drupal 7's model, though there are noteworthy differences in how the docroot structure is different.
+  - We could continue with our git repo-based module and sites workflow?
+- I'm unclear what a composer workflow for multisite will look like.
+- JS/PHP library management in Drupal 8?
 
-## from the README.txt in docroot 
+## from the README.txt in docroot
 
 _Note: I have based this documentation on Drupal 8.3.x INSTALL.txt. I essentially changed the passive voice verbs to active._
 
@@ -94,24 +94,23 @@ Aliases are useful on development servers, where the domain name may not be the 
 
 To activate this feature, copy and rename it such that its path plus filename is 'sites/sites.php'.
 
-
 ## Code references to multisite
 
-* `core/lib/Drupal/Core/DrupalKernel.php`, line 363, findSitePath to determine site's base directory
-* `core/lib/Drupal/Core/Extension/ExtensionDiscovery.php`, line 176, determine site's "parent" for finding global extensions
-* `core/lib/Drupal/Core/Updater/Module.php`, line 20, for determining installation directory for modules in multisite contexts
-* `core/lib/Drupal/Core/Updater/Theme.php`, line 12, same as above
-* `core/modules/editor/src/Form/EditorImageDialog.php`, line 210, for creating valid file paths in multisite contexts
-* `core/modules/file/file.module`, 
-  * line 995, same as above
-  * line 1253, same as above for file link creation
-* `core/modules/filter/filter.module`, line 778, for creating valid file paths in multisite contexts
-* `core/modules/image/src/Plugin/Field/FieldFormatter/ImageFormatter.php`, line 209, for creating valid file paths in multisite contexts
-* `example.gitignore`, line 25, "ignore multisite environment"
-* `modules/README.txt`, line 29, multisite information, added above
-* `profiles/README.txt`, line 21, same as above
-* `sites/default/default.services.yml`, line 29, setting the cookie_domain variable.
-* `sites/default/default.settings.php`, 
-  * line 13, commented instructions on selection rules for site discovery
-  * line 709, commented instructions on setting the 'trusted_host_patterns' variable
-* `sites/example.sites.php`, This file is now essential for multisite. Worth reading entire file.
+- `core/lib/Drupal/Core/DrupalKernel.php`, line 363, findSitePath to determine site's base directory
+- `core/lib/Drupal/Core/Extension/ExtensionDiscovery.php`, line 176, determine site's "parent" for finding global extensions
+- `core/lib/Drupal/Core/Updater/Module.php`, line 20, for determining installation directory for modules in multisite contexts
+- `core/lib/Drupal/Core/Updater/Theme.php`, line 12, same as above
+- `core/modules/editor/src/Form/EditorImageDialog.php`, line 210, for creating valid file paths in multisite contexts
+- `core/modules/file/file.module`,
+  - line 995, same as above
+  - line 1253, same as above for file link creation
+- `core/modules/filter/filter.module`, line 778, for creating valid file paths in multisite contexts
+- `core/modules/image/src/Plugin/Field/FieldFormatter/ImageFormatter.php`, line 209, for creating valid file paths in multisite contexts
+- `example.gitignore`, line 25, "ignore multisite environment"
+- `modules/README.txt`, line 29, multisite information, added above
+- `profiles/README.txt`, line 21, same as above
+- `sites/default/default.services.yml`, line 29, setting the cookie_domain variable.
+- `sites/default/default.settings.php`,
+  - line 13, commented instructions on selection rules for site discovery
+  - line 709, commented instructions on setting the 'trusted_host_patterns' variable
+- `sites/example.sites.php`, This file is now essential for multisite. Worth reading entire file.

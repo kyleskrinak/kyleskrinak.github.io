@@ -2,32 +2,14 @@
 // Cloudflare Web Analytics, inserted into upstream's Layout <body> from one
 // line. See UPSTREAM.md. The beacon loads in production builds when a token is
 // provided and the visitor hasn't signaled DNT or GPC. It sits in <body>
-// because the script appends to document.body.
+// because the script appends to document.body. The script itself lives in
+// CloudflareBeaconScript.astro.
 import { PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN } from "astro:env/client";
+import CloudflareBeaconScript from "./CloudflareBeaconScript.astro";
 ---
 
 {
   import.meta.env.PROD && PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN && (
-    <script
-      is:inline
-      define:vars={{ token: PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN }}
-    >
-      // Respect user privacy signals: bail if DNT or GPC is enabled
-      const dnt =
-        typeof navigator !== "undefined" &&
-        (navigator.doNotTrack === "1" || navigator.doNotTrack === "yes");
-      // Guard for missing navigator/globalPrivacyControl: support varies by environment.
-      const gpc =
-        typeof navigator !== "undefined" &&
-        navigator.globalPrivacyControl === true;
-
-      if (!dnt && !gpc) {
-        const script = document.createElement("script");
-        script.async = true;
-        script.src = "https://static.cloudflareinsights.com/beacon.min.js";
-        script.setAttribute("data-cf-beacon", JSON.stringify({ token }));
-        document.body.appendChild(script);
-      }
-    </script>
+    <CloudflareBeaconScript token={PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN} />
   )
 }

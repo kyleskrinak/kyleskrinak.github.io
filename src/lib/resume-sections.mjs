@@ -48,7 +48,7 @@ export const RESUME_SECTIONS = ["current-role", "education"];
  * single-line half of the contract, for the reason stated there.
  */
 export const PLACEHOLDER_RE = new RegExp(
-  `^<!--\\s*(${RESUME_SECTIONS.join("|")})\\s*-->$`,
+  `^<!--\\s*(${RESUME_SECTIONS.join("|")})\\s*-->$`
 );
 
 /**
@@ -63,8 +63,18 @@ export const PLACEHOLDER_RE = new RegExp(
 const PLACEHOLDER_SHAPED_RE = /^<!--\s*([a-z][a-z0-9-]*)\s*-->$/;
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 /** En dash with spaces — the date-range separator the resume body already uses. */
@@ -103,7 +113,7 @@ export function classifyPlaceholder(value) {
   const shaped = PLACEHOLDER_SHAPED_RE.exec(trimmed);
   if (shaped) {
     fail(
-      `unknown section placeholder "<!-- ${shaped[1]} -->" — known sections: ${RESUME_SECTIONS.join(", ")}`,
+      `unknown section placeholder "<!-- ${shaped[1]} -->" — known sections: ${RESUME_SECTIONS.join(", ")}`
     );
   }
   return null;
@@ -131,7 +141,8 @@ export function formatMonthYear(value, label) {
     const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(value.trim());
     if (!m) fail(`${label}: expected YYYY-MM or YYYY-MM-DD, got "${value}"`);
     const month = Number(m[2]);
-    if (month < 1 || month > 12) fail(`${label}: month out of range in "${value}"`);
+    if (month < 1 || month > 12)
+      fail(`${label}: month out of range in "${value}"`);
     if (m[3] !== undefined) {
       const day = Number(m[3]);
       // Day 0 of the following month is the last day of this one, which settles
@@ -158,8 +169,10 @@ export function formatMonthYear(value, label) {
  */
 function employerLine(employer, location, dates, label) {
   if (!employer?.trim()) fail(`${label}: employer is required`);
-  if (!location?.trim()) fail(`${label}: location is required to build the employer line`);
-  if (!dates?.trim()) fail(`${label}: dates are required to build the employer line`);
+  if (!location?.trim())
+    fail(`${label}: location is required to build the employer line`);
+  if (!dates?.trim())
+    fail(`${label}: dates are required to build the employer line`);
   const line = `**${employer.trim()}** ${EMPLOYER_DASH} ${location.trim()} | ${dates.trim()}`;
   // The producer checks its own output against the recognizer below it. Three
   // non-empty fields are not sufficient: EMPLOYER_LINE_RE requires a digit after
@@ -168,7 +181,7 @@ function employerLine(employer, location, dates, label) {
   // the PDF verifier would stop checking that entry's company and dates.
   if (!EMPLOYER_LINE_RE.test(line)) {
     fail(
-      `${label}: "${line}" is not a recognized employer line — dates must contain a digit, as in "2019" or "expected 2027"`,
+      `${label}: "${line}" is not a recognized employer line — dates must contain a digit, as in "2019" or "expected 2027"`
     );
   }
   return line;
@@ -189,7 +202,7 @@ function employerLine(employer, location, dates, label) {
  * matches.
  */
 const EMPLOYER_LINE_RE = new RegExp(
-  `^\\*\\*(.+?)\\*\\*\\s*${EMPLOYER_DASH}\\s*(.*\\|.*\\d.*)$`,
+  `^\\*\\*(.+?)\\*\\*\\s*${EMPLOYER_DASH}\\s*(.*\\|.*\\d.*)$`
 );
 
 /** True for a body line that follows the employer-line convention. */
@@ -228,7 +241,8 @@ export function adminLineSegments(title, { employer, location, dates }) {
     { text: ", ", setOff: false },
     { text: employer, setOff: true },
   ];
-  if (location) segments.push({ text: ` ${EMPLOYER_DASH} ${location}`, setOff: false });
+  if (location)
+    segments.push({ text: ` ${EMPLOYER_DASH} ${location}`, setOff: false });
   return segments;
 }
 
@@ -263,7 +277,10 @@ export function headingIds(tree) {
  * placeholder replaces the two lines that restate structured facts.
  */
 export function renderCurrentRole(currentRole) {
-  if (!currentRole) fail("<!-- current-role --> is present but `current_role` is missing from the frontmatter");
+  if (!currentRole)
+    fail(
+      "<!-- current-role --> is present but `current_role` is missing from the frontmatter"
+    );
   const { title, employer, location, start_date: startDate } = currentRole;
   if (!title?.trim()) fail("current_role.title is required");
   const dates = `${formatMonthYear(startDate, "current_role.start_date")} ${RANGE_DASH} Present`;
@@ -292,7 +309,9 @@ function renderEducationItem(item, idx) {
   const years = item.years?.trim();
   if (!years) fail(`${label}: years are required`);
   if (!/\d/.test(years)) {
-    fail(`${label}: years "${years}" must contain a digit, as in "2019" or "expected 2027"`);
+    fail(
+      `${label}: years "${years}" must contain a digit, as in "2019" or "expected 2027"`
+    );
   }
   const lines = [
     `## ${degree}, ${item.institution.trim()} ${EMPLOYER_DASH} ${item.location.trim()} | ${years}`,
@@ -324,7 +343,10 @@ function renderEducationItem(item, idx) {
  * removing its section. An omitted flag and a literal `false` stay opt-outs.
  */
 export function renderEducation(education) {
-  if (!education) fail("<!-- education --> is present but `education` is missing from the frontmatter");
+  if (!education)
+    fail(
+      "<!-- education --> is present but `education` is missing from the frontmatter"
+    );
   const items = education.items;
   if (!Array.isArray(items)) fail("education.items must be an array");
   // Validate every item, including the ones about to be filtered out. The filter
@@ -339,10 +361,14 @@ export function renderEducation(education) {
   items.forEach((item, idx) => {
     const label = `education.items[${idx}]`;
     if (item === null || typeof item !== "object" || Array.isArray(item)) {
-      fail(`${label}: must be a mapping, not ${JSON.stringify(item) ?? typeof item}`);
+      fail(
+        `${label}: must be a mapping, not ${JSON.stringify(item) ?? typeof item}`
+      );
     }
     if (item.render !== undefined && typeof item.render !== "boolean") {
-      fail(`${label}.render: must be true or false when present, not ${JSON.stringify(item.render)}`);
+      fail(
+        `${label}.render: must be true or false when present, not ${JSON.stringify(item.render)}`
+      );
     }
   });
   return items
