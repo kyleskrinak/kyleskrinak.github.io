@@ -91,6 +91,15 @@ export const ConfigRegistry = {
       PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: null, source: 'omitted', required: false },
       PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
     },
+    'unit-tests': {
+      // Build check on every PR and on pushes to develop and main, the way upstream
+      // AstroPaper's ci.yml builds every PR. Production settings, no analytics tokens:
+      // the build only has to succeed, and nothing deploys from it.
+      BUILD_ENV: { value: 'production', source: 'workflow', required: true },
+      SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
+      PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: { value: null, source: 'omitted', required: false },
+      PUBLIC_GOOGLE_SITE_VERIFICATION: { value: null, source: 'omitted', required: false }
+    },
     'main-aws': {
       BUILD_ENV: { value: 'production', source: 'workflow', required: true },
       SITE_URL: { value: 'https://kyle.skrinak.com/', source: 'workflow', required: true },
@@ -105,6 +114,7 @@ export const ConfigRegistry = {
     'import.meta.env.PROD': {
       'local-develop': false,    // astro dev: always false
       'pr-visual-check': true,     // astro build: always true
+      'unit-tests': true,          // astro build: always true
       'main-aws': true             // astro build: always true
     }
   },

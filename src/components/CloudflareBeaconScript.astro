@@ -1,0 +1,29 @@
+---
+// The Cloudflare Web Analytics loader, rendered by CloudflareBeacon.astro once
+// its production-and-token check passes. The script sits at the top level of
+// its own component because Prettier can't parse an inline script that holds a
+// `{ }` block when the script sits inside a `{ … }` expression.
+type Props = {
+  token: string;
+};
+
+const { token } = Astro.props;
+---
+
+<script is:inline define:vars={{ token }}>
+  // Respect user privacy signals: bail if DNT or GPC is enabled
+  const dnt =
+    typeof navigator !== "undefined" &&
+    (navigator.doNotTrack === "1" || navigator.doNotTrack === "yes");
+  // Guard for missing navigator/globalPrivacyControl: support varies by environment.
+  const gpc =
+    typeof navigator !== "undefined" && navigator.globalPrivacyControl === true;
+
+  if (!dnt && !gpc) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    script.setAttribute("data-cf-beacon", JSON.stringify({ token }));
+    document.body.appendChild(script);
+  }
+</script>

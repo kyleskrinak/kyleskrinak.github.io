@@ -5,12 +5,12 @@
 
 ## Environment Variable Matrix
 
-| Variable | local-develop | pr-visual-check | main-aws |
-|----------|----------|----------|----------|
-| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ |
-| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
-| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | (omitted) | `required` ✓ |
-| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | `required` ✓ |
+| Variable | local-develop | pr-visual-check | unit-tests | main-aws |
+|----------|----------|----------|----------|----------|
+| `BUILD_ENV` | `production` | `production` ✓ | `production` ✓ | `production` ✓ |
+| `SITE_URL` | (fallback: `https://kyle.skrinak.com/`) | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ | `https://kyle.skrinak.com/` ✓ |
+| `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN` | (omitted) | (omitted) | (omitted) | `required` ✓ |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | (omitted) | (omitted) | (omitted) | `required` ✓ |
 
 ✓ = Required | (fallback: ...) = Effective value from code fallback logic, not an explicitly set env var
 
@@ -18,9 +18,9 @@
 
 Astro build flags set automatically by the framework (not configurable via workflow env vars):
 
-| Flag | local-develop | pr-visual-check | main-aws |
-|------|----------|----------|----------|
-| `import.meta.env.PROD` | `false` | `true` | `true` |
+| Flag | local-develop | pr-visual-check | unit-tests | main-aws |
+|------|----------|----------|----------|----------|
+| `import.meta.env.PROD` | `false` | `true` | `true` | `true` |
 
 ## Astro Configuration
 

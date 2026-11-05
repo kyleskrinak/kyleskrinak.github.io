@@ -38,5 +38,18 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+      # Lint, format check, then build: the order upstream AstroPaper's ci.yml
+      # runs them on every PR.
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Run unit tests
         run: npm run test:unit
+
+      # The only CI build for PRs into develop, Renovate's included;
+      # pr-visual-check.yml builds PRs into main.
+      - name: Build site
+        run: npm run build:ci
+        env:
+          BUILD_ENV: production
+          SITE_URL: https://kyle.skrinak.com/

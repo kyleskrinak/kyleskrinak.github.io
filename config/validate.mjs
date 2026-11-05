@@ -93,7 +93,8 @@ for (const [name, { gating, location }] of Object.entries(ConfigRegistry.analyti
 // are intentionally skipped because they don't perform builds.
 const WORKFLOW_TO_ENV_MAP = {
   'production-deploy.yml': 'main-aws',
-  'pr-visual-check.yml': 'pr-visual-check'
+  'pr-visual-check.yml': 'pr-visual-check',
+  'unit-tests.yml': 'unit-tests'
 };
 
 // Extracts env vars from the step that runs 'npm run build:ci'.
@@ -401,7 +402,7 @@ for (const file of allSourceFiles) {
 //
 // Design decision: astro-paper.config.ts uses process.env with a hardcoded production URL fallback
 // instead of astro:env because it runs at build initialization before Astro env is fully available.
-// pr-visual-check.yml and production-deploy.yml set SITE_URL explicitly; linkwatch.yml and local
+// pr-visual-check.yml, unit-tests.yml and production-deploy.yml set SITE_URL explicitly; linkwatch.yml and local
 // dev build without it and use the fallback. We validate the literal against the registry to
 // prevent drift. resolveSiteUrl() in scripts/lib/pdf-helpers.mjs holds a second copy of the
 // literal, which this check does not cover.

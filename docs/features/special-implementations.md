@@ -157,7 +157,7 @@ Indexes the post pages (`data-pagefind-body` in `src/pages/posts/[...slug]/index
 ### Analytics
 
 ✅ **Files**:
-- `src/components/CloudflareBeacon.astro`, inserted in `src/layouts/Layout.astro` - Cloudflare Web Analytics beacon (gated on `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`, production builds only)
+- `src/components/CloudflareBeacon.astro`, inserted in `src/layouts/Layout.astro` - Cloudflare Web Analytics beacon (gated on `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`, production builds only); the loader script is in `src/components/CloudflareBeaconScript.astro`
 
 ✅ **Standard**: Yes - standard integration
 
@@ -188,7 +188,7 @@ npm run build
 
 ### Presentations Build (Separate Command)
 
-`npm run build:presentations` converts each source in `slidev-presentations/slides/` to `public/presentations/<name>.html`. It runs apart from `npm run build`, which copies `public/presentations/` into `dist/` with the rest of `public/`.
+`npm run build:presentations` converts each source in `slidev-presentations/slides/` to `public/presentations/<name>.html`, then runs Prettier on `public/presentations/` so the decks pass `npm run format:check`. It runs apart from `npm run build`, which copies `public/presentations/` into `dist/` with the rest of `public/`.
 
 ---
 

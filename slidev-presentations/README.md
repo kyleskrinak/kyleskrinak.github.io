@@ -78,7 +78,7 @@ Run the build:
 npm run build:presentations
 ```
 
-This generates `public/presentations/YYYY-MM-DD-your-slug.html` (matching the source filename)
+This generates `public/presentations/YYYY-MM-DD-your-slug.html` (matching the source filename), then runs Prettier on `public/presentations/` so the decks pass the CI format check (`npm run format:check`)
 
 ### 4. Update sitemap.xml
 
