@@ -21,7 +21,7 @@ At some point, and I forget how, I learned that a single-decade Rosary was a thi
 :::cards
 ![Satellite map showing a pin labeled "Rosary" near a lake off Green Road, Grass Lake, Michigan](./grass-lake-rosary-location.webp)
 
-*The last known location for my previous Rugged Rosary.*
+_The last known location for my previous Rugged Rosary._
 :::
 
 That's where the story gets interesting. If they're rugged, why have you bought more? Simple. I'm clumsy AND absent-minded. I lost my first Rosary on a morning run on some trail's woodsy floor. I replaced that with their "Leather, Wood, Silver St. Benedict Tenner Rosary - With Keyring." Since this was my third, I called on a little help, and not from St. Anthony, but rather Apple with their AirTag technology. More than a few times, I used the "Play Sound" feature to hear where they lay hidden, such as in pants pockets or behind furniture. I kept that Rosary for three years, until several months ago. My AirTag-ed Rosary slipped out of my pocket one late night while fumbling for keys and an iPhone flashlight. We were in Grass Lake, Michigan, for a wedding. I know where they fell; Apple's "Find My" told me, but here is where the technology falls short. They fell in a cellular dead zone. I knew roughly where they fell, but in the dark of night, there was no cellular signal to help me in real time while I was at the site (or maybe not?). I couldn't find them.
@@ -29,7 +29,7 @@ That's where the story gets interesting. If they're rugged, why have you bought 
 :::cards
 ![Green-beaded pocket rosary with silver crucifix and keyring, resting on a canvas drawstring bag](./benedict-tenner-rosary-keyring.webp)
 
-*My second rosary, replacing the one I lost while jogging*
+_My second rosary, replacing the one I lost while jogging_
 :::
 
 Even with the late-night failure, I held out hope that the "Find My" tech would help me find it in daylight. Alas, 12 hours later, Find My showed them in a new location. They were now maybe a mile away, as if a deer (or raccoon?) had carried them off from where they'd dropped. "Find My" showed them off a gravel road near a lake. My first thought is, why would someone pick them up only to toss them? Despite lacking a clear motivator for the heist, I promptly made haste to the purported area. The area seemed clear of brush, enough, judging from the Apple satellite map, but it was not to be. It had a 2-3' growth of scrub and scratchy, thistle-like things that made sure they left a mark on my exposed lower legs. Despite an hour of frantic searching with as much coverage I could muster in the circumstances, I could not find it. Nor could Find My detect the Bluetooth signal when I tried to issue a "play sound" command.

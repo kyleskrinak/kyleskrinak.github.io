@@ -15,4 +15,4 @@ When I was 8, I played alongside a lake against a star-splattered night with my 
 
 For my daughter, that walk was just a brief moment between the scary campfire stories, marshmallow smores, and watching and playing with the campfire.
 
-For her dad, it was something else.  
+For her dad, it was something else.

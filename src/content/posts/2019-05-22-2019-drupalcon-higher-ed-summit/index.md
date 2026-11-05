@@ -12,34 +12,33 @@ description: The Higher Ed Summit organizers had considerably redesigned the
   schedule and makeup of the summit. I say to a significan...
 ---
 
-
-The Higher Ed Summit organizers had considerably redesigned the schedule and makeup of the summit. I say to a significantly improved format. 
+The Higher Ed Summit organizers had considerably redesigned the schedule and makeup of the summit. I say to a significantly improved format.
 
 This year, we:
-* Introductions and the usual keynote start
-* Held three sessions of three concurrent presentations, broken out by interest, i.e., marketing or back-end
-* Lunch
-* A “Solutions” meeting with randomized attendees, sever per table
-* Three 15-minute presentations to all members
-* Concluding thoughts
-* A closing mixer with a networking game that was surprisingly effective. Even considering the introverted nature of Higher Ed IT professionals.
+
+- Introductions and the usual keynote start
+- Held three sessions of three concurrent presentations, broken out by interest, i.e., marketing or back-end
+- Lunch
+- A “Solutions” meeting with randomized attendees, sever per table
+- Three 15-minute presentations to all members
+- Concluding thoughts
+- A closing mixer with a networking game that was surprisingly effective. Even considering the introverted nature of Higher Ed IT professionals.
 
 _Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissioned and the content was never archived._
 
-
 ## EduDU
 
-* We strongly encourage using the [EduDU Slack group](https://edudu.org/) and the #drupalcon channel to connect with other higher-ed professionals at DrupalCon, plan BoFs and braindates, and keep in touch with attendees after the conference.
-* Please fill out the form at the [EduDU website](https://edudu.org/) to receive an invite link. Non-edu email addresses will be removed from the Slack team, so make sure to use your work email addresses when signing up.
+- We strongly encourage using the [EduDU Slack group](https://edudu.org/) and the #drupalcon channel to connect with other higher-ed professionals at DrupalCon, plan BoFs and braindates, and keep in touch with attendees after the conference.
+- Please fill out the form at the [EduDU website](https://edudu.org/) to receive an invite link. Non-edu email addresses will be removed from the Slack team, so make sure to use your work email addresses when signing up.
 
 ## Opening session
 
-* Paul Grotevant presents on new summit format
-* “Braindates” continue the conversation afterwards
-  *  Connection opportunities.
-* The Solution problem
+- Paul Grotevant presents on new summit format
+- “Braindates” continue the conversation afterwards
+  - Connection opportunities.
+- The Solution problem
 
-*Revised 2026-07-16: removed dead link to Paul Grotevant's UT Austin blog.*
+_Revised 2026-07-16: removed dead link to Paul Grotevant's UT Austin blog._
 
 ## Keynote: Web Accessibility
 
@@ -51,47 +50,47 @@ _Note: The summit website (live-seattle-hes.pantheonsite.io) has been decommissi
 
 #### Some random thoughts I typed as Gian spoke
 
-* Not just visual
-* Better access to people are otherwise unable to do so
-* Who is disabled? 20% in US and AU
-* Screen and braille readers
-* Screen reader introduction video
-* Another screen reader demo, amazon website from a long time ago
-* Cognitive Disabilities
-* Add the word search to a search field
-* Reading disabilities
-* Cognitive disability
-  * Phonemes dyslexia
-* Assistive technologies
-* User Techniques
-  * Decreasing saturation common filter
-* Physical Disabilities
-  * “One Thumb to Rule Them All”
-* Hearing Impairments
-  * Signing cat
-* Mental health disabilities
-  * Depression, PTSD, Anxiety, OCD
-* Assitive tech
-  *  Spotify, Reader view
-* Legal precedents
-  * Sydney Olypmics
-    * June 1999 - August 2000
-  * Home.depot, Target, Canada, NetFlix
-* WCAG2
-  * Four principals
-  * Principals layout
-  * Three levels
+- Not just visual
+- Better access to people are otherwise unable to do so
+- Who is disabled? 20% in US and AU
+- Screen and braille readers
+- Screen reader introduction video
+- Another screen reader demo, amazon website from a long time ago
+- Cognitive Disabilities
+- Add the word search to a search field
+- Reading disabilities
+- Cognitive disability
+  - Phonemes dyslexia
+- Assistive technologies
+- User Techniques
+  - Decreasing saturation common filter
+- Physical Disabilities
+  - “One Thumb to Rule Them All”
+- Hearing Impairments
+  - Signing cat
+- Mental health disabilities
+  - Depression, PTSD, Anxiety, OCD
+- Assitive tech
+  - Spotify, Reader view
+- Legal precedents
+  - Sydney Olypmics
+    - June 1999 - August 2000
+  - Home.depot, Target, Canada, NetFlix
+- WCAG2
+  - Four principals
+  - Principals layout
+  - Three levels
 
-#### Phase A: Accessibility Roadmap 
+#### Phase A: Accessibility Roadmap
 
-  1. Build an accessibility committee
-  1. Develop disability reference group
-  1. appoint an accessibility champion
-  1. Hire additional disability services staff
-  1. Conduct an accessibility stocktake
-  1. Address accessibility issues identified in the stocktake
-  1. Develop accessibility resources
-  1. Provide a communication method for staff and students to comment on accessibility
+1. Build an accessibility committee
+1. Develop disability reference group
+1. appoint an accessibility champion
+1. Hire additional disability services staff
+1. Conduct an accessibility stocktake
+1. Address accessibility issues identified in the stocktake
+1. Develop accessibility resources
+1. Provide a communication method for staff and students to comment on accessibility
 
 #### Phase B: Develop an accessibility Plan
 
@@ -131,7 +130,7 @@ Finally, my extensive preparation for this session paid off later in the week, a
 
 Lunch was delicious and fully-compatible with my low-carb way of eating. Better was the company and information we gathered while we ate. While we talked a variety of topics, configuration management (CM) was front and center. We enjoyed the illuminating company of Shawn DeArmond, University of California, Davis, and his insights on CM. He offered his qualified opinions on what makes sense, and I have a new YouTube video to watch.
 
-[2018 BADCamp Configuration Management Drupal Multi-Site and Distributions](https://2018.badcamp.org/session/config-management-drupal-multi-site-and-distributions) 
+[2018 BADCamp Configuration Management Drupal Multi-Site and Distributions](https://2018.badcamp.org/session/config-management-drupal-multi-site-and-distributions)
 
 ## 1\:00 PM &mdash; Solutions session
 

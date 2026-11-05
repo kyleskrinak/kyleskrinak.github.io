@@ -1,794 +1,820 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DrupalCon 2022 Code+ Presentation</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a1a;
-            color: #fff;
-            overflow: hidden;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #1a1a1a;
+        color: #fff;
+        overflow: hidden;
+      }
 
-        .presentation-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+      .presentation-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .slides-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
+      .slides-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
 
+      .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 60px;
+        top: 0;
+        left: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        animation: fadeIn 0.5s;
+        overflow-y: auto;
+      }
+
+      .slide.active {
+        display: flex;
+      }
+
+      .slide-content {
+        font-size: 1.5rem;
+        line-height: 1.8;
+      }
+
+      .slide h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .slide h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .slide h3 {
+        font-size: 2rem;
+        margin-bottom: 0.8rem;
+        margin-top: 1rem;
+      }
+
+      .slide h4 {
+        font-size: 1.75rem;
+        margin-bottom: 0.8rem;
+        margin-top: 1rem;
+      }
+
+      .slide h5 {
+        font-size: 1.5rem;
+        margin-bottom: 0.8rem;
+        margin-top: 1rem;
+      }
+
+      .slide ul {
+        list-style-position: inside;
+        margin: 1rem 0;
+      }
+
+      .slide li {
+        margin: 0.5rem 0;
+        margin-left: 2rem;
+      }
+
+      .slide a {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      .slide p {
+        margin: 1rem 0;
+      }
+
+      .slide code {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 0.9em;
+      }
+
+      .slide pre {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 1rem 0;
+      }
+
+      .slide pre code {
+        background: none;
+        padding: 0;
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 0.85em;
+        line-height: 1.5;
+      }
+
+      .slide hr {
+        border: none;
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        margin: 1.5rem 0;
+      }
+
+      .slide table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1.5rem 0;
+        font-size: 0.9rem;
+      }
+
+      .slide table thead {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .slide table th,
+      .slide table td {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.75rem;
+        text-align: left;
+      }
+
+      .slide table tbody tr:nth-child(even) {
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .slide table tbody tr:hover {
+        background: rgba(0, 0, 0, 0.15);
+      }
+
+      .slide img {
+        max-width: 100%;
+        height: auto;
+        margin: 1rem 0;
+      }
+
+      .slide iframe {
+        max-width: 100%;
+        margin: 1rem 0;
+      }
+
+      .slide-number {
+        position: absolute;
+        bottom: 20px;
+        right: 40px;
+        font-size: 1rem;
+        opacity: 0.7;
+      }
+
+      .controls {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px 25px;
+        border-radius: 50px;
+      }
+
+      button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      button:active {
+        transform: scale(0.95);
+      }
+
+      .home-link {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        z-index: 100;
+      }
+
+      .home-link:hover {
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+        z-index: 10;
+        transition: width 0.3s;
+        width: 0%;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
         .slide {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            padding: 60px;
-            top: 0;
-            left: 0;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            animation: fadeIn 0.5s;
-            overflow-y: auto;
+          padding: 40px;
         }
-
-        .slide.active {
-            display: flex;
-        }
-
-        .slide-content {
-            font-size: 1.5rem;
-            line-height: 1.8;
-        }
-
         .slide h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
+          font-size: 2rem;
         }
-
         .slide h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            margin-top: 1.5rem;
+          font-size: 1.5rem;
         }
-
-        .slide h3 {
-            font-size: 2rem;
-            margin-bottom: 0.8rem;
-            margin-top: 1rem;
+        .slide-content {
+          font-size: 1rem;
         }
-
-        .slide h4 {
-            font-size: 1.75rem;
-            margin-bottom: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        .slide h5 {
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        .slide ul {
-            list-style-position: inside;
-            margin: 1rem 0;
-        }
-
-        .slide li {
-            margin: 0.5rem 0;
-            margin-left: 2rem;
-        }
-
-        .slide a {
-            color: #fff;
-            text-decoration: underline;
-        }
-
-        .slide p {
-            margin: 1rem 0;
-        }
-
-        .slide code {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .slide pre {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 1rem;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-
-        .slide pre code {
-            background: none;
-            padding: 0;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.85em;
-            line-height: 1.5;
-        }
-
-        .slide hr {
-            border: none;
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
-            margin: 1.5rem 0;
-        }
-
-        .slide table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1.5rem 0;
-            font-size: 0.9rem;
-        }
-
-        .slide table thead {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .slide table th,
-        .slide table td {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.75rem;
-            text-align: left;
-        }
-
-        .slide table tbody tr:nth-child(even) {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .slide table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.15);
-        }
-
-        .slide img {
-            max-width: 100%;
-            height: auto;
-            margin: 1rem 0;
-        }
-
-        .slide iframe {
-            max-width: 100%;
-            margin: 1rem 0;
-        }
-
-        .slide-number {
-            position: absolute;
-            bottom: 20px;
-            right: 40px;
-            font-size: 1rem;
-            opacity: 0.7;
-        }
-
         .controls {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px 25px;
-            border-radius: 50px;
+          padding: 10px 15px;
         }
-
         button {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
+          padding: 6px 12px;
+          font-size: 0.9rem;
         }
-
-        button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        .home-link {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            z-index: 100;
-        }
-
-        .home-link:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.5);
-            z-index: 10;
-            transition: width 0.3s;
-            width: 0%;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            .slide {
-                padding: 40px;
-            }
-            .slide h1 {
-                font-size: 2rem;
-            }
-            .slide h2 {
-                font-size: 1.5rem;
-            }
-            .slide-content {
-                font-size: 1rem;
-            }
-            .controls {
-                padding: 10px 15px;
-            }
-            button {
-                padding: 6px 12px;
-                font-size: 0.9rem;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <a href="../" class="home-link">← Home</a>
     <div class="progress-bar" id="progressBar"></div>
 
     <div class="presentation-container" id="container" data-pagefind-body>
-        <div class="slides-wrapper">
-
+      <div class="slides-wrapper">
         <section class="slide slide-title">
           <div class="slide-content">
             <h3>Duke University's</h3>
-<h4>Code+</h4>
-<p>co-curricular program</p>
-
+            <h4>Code+</h4>
+            <p>co-curricular program</p>
           </div>
           <div class="slide-number">1 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <p>promoting undergraduate</p>
-<h4>Diversity / Equity / Inclusion</h4>
-
+            <h4>Diversity / Equity / Inclusion</h4>
           </div>
           <div class="slide-number">2 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p>Link to presentation: <a href="../posts/2022-04-07-code-presentation/">../posts/2022-04-07-code-presentation/</a></p>
-
+            <p>
+              Link to presentation:
+              <a href="../posts/2022-04-07-code-presentation/"
+                >../posts/2022-04-07-code-presentation/</a
+              >
+            </p>
           </div>
           <div class="slide-number">3 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Kyle Skrinak</h4>
-<p><a href="https://www.drupal.org/u/screenack">https://www.drupal.org/u/screenack</a></p>
-<p>Senior Manager, I.T., Duke Web Services Development and Support</p>
-<h4>Duke University</h4>
-<p><a href="https://kyle.skrinak.com">https://kyle.skrinak.com</a></p>
-
+            <p>
+              <a href="https://www.drupal.org/u/screenack"
+                >https://www.drupal.org/u/screenack</a
+              >
+            </p>
+            <p>
+              Senior Manager, I.T., Duke Web Services Development and Support
+            </p>
+            <h4>Duke University</h4>
+            <p>
+              <a href="https://kyle.skrinak.com">https://kyle.skrinak.com</a>
+            </p>
           </div>
           <div class="slide-number">4 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p>Our team builds, hosts, and maintains over 250 Drupal websites, including multisite, headless, and other websites and applications.</p>
-
+            <p>
+              Our team builds, hosts, and maintains over 250 Drupal websites,
+              including multisite, headless, and other websites and
+              applications.
+            </p>
           </div>
           <div class="slide-number">5 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>What is Code+?</h4>
-
           </div>
           <div class="slide-number">6 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <iframe height="585" width="780" src="https://warpwire.duke.edu/w/q8cGAA/?info=0&cc_load_policy=1&controls=0" frameborder="0" scrolling="0" allow="autoplay *; encrypted-media*; fullscreen *; picture-in-picture*;" allowfullscreen></iframe>
+            <iframe
+              height="585"
+              width="780"
+              src="https://warpwire.duke.edu/w/q8cGAA/?info=0&cc_load_policy=1&controls=0"
+              frameborder="0"
+              scrolling="0"
+              allow="
+                autoplay *;
+                encrypted-media*;
+                fullscreen *;
+                picture-in-picture*;
+              "
+              allowfullscreen
+            ></iframe>
           </div>
           <div class="slide-number">7 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Origins for the Drupal module project</h4>
-
           </div>
           <div class="slide-number">8 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>A re-org at Duke</li>
-<li>Office of Information Technology's call for Code+ projects</li>
-<li>A mutually-beneficial project
-<ul>
-<li>Supports the Code+ team, Drupal, Open Source, and Duke</li>
-</ul>
-</li>
-<li>Duke maintains an internally-developed module on D.O. in need of attention
-<ul>
-<li>AKA "BasicShib" <a href="https://www.drupal.org/project/basicshib">https://www.drupal.org/project/basicshib</a></li>
-</ul>
-</li>
-<li>A Duke need: integrate Grouper with Shibboleth</li>
-</ul>
-
+              <li>A re-org at Duke</li>
+              <li>
+                Office of Information Technology's call for Code+ projects
+              </li>
+              <li>
+                A mutually-beneficial project
+                <ul>
+                  <li>
+                    Supports the Code+ team, Drupal, Open Source, and Duke
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Duke maintains an internally-developed module on D.O. in need of
+                attention
+                <ul>
+                  <li>
+                    AKA "BasicShib"
+                    <a href="https://www.drupal.org/project/basicshib"
+                      >https://www.drupal.org/project/basicshib</a
+                    >
+                  </li>
+                </ul>
+              </li>
+              <li>A Duke need: integrate Grouper with Shibboleth</li>
+            </ul>
           </div>
           <div class="slide-number">9 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is born</h4>
-
           </div>
           <div class="slide-number">10 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Draft and submit my proposal</li>
-<li>Lots of edits</li>
-<li>Code+ administrators accepted my proposal</li>
-</ul>
-
+              <li>Draft and submit my proposal</li>
+              <li>Lots of edits</li>
+              <li>Code+ administrators accepted my proposal</li>
+            </ul>
           </div>
           <div class="slide-number">11 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is born</h4>
-
           </div>
           <div class="slide-number">12 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h5>Drupal Module for Software Design and Development</h5>
-<p>The Drupal open-source software platform provides an opportunity for those who wish to design, develop, release, and finally maintain a non-commercial software project. A team of students will work with Duke's Office of Information Technology and other partners across campus to develop a Drupal module to extend the functionality of the existing framework to create an application. Students will work with Drupal 9 to extend Symfony's PHP object model paradigm. This allows students to work within a fully compliant Object-Oriented Programming, or OOP, paradigm.</p>
-
+            <p>
+              The Drupal open-source software platform provides an opportunity
+              for those who wish to design, develop, release, and finally
+              maintain a non-commercial software project. A team of students
+              will work with Duke's Office of Information Technology and other
+              partners across campus to develop a Drupal module to extend the
+              functionality of the existing framework to create an application.
+              Students will work with Drupal 9 to extend Symfony's PHP object
+              model paradigm. This allows students to work within a fully
+              compliant Object-Oriented Programming, or OOP, paradigm.
+            </p>
           </div>
           <div class="slide-number">13 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">14 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-1.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-1.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">15 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">16 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-2.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-2.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">17 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">18 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-3.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-3.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">19 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">20 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-4.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-4.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">21 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">22 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-5.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-5.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">23 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>A Code+ Project is Born</h4>
-
           </div>
           <div class="slide-number">24 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
-            <p><img src="/presentations/assets/code-plus/code-plus-workflow-6.svg" alt="workflow"></p>
-
+            <p>
+              <img
+                src="/presentations/assets/code-plus/code-plus-workflow-6.svg"
+                alt="workflow"
+              />
+            </p>
           </div>
           <div class="slide-number">25 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Project Parameters</h4>
-
           </div>
           <div class="slide-number">26 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Code+ administrators assigns five students to project</li>
-<li>We discuss project, training, and software requirements
-<ul>
-<li>Lando for development.</li>
-<li>Identify common means for collaboration.</li>
-</ul>
-</li>
-<li>Daily check-in and check-out on Microsoft Teams and Zoom
-<ul>
-<li>We had a mix of on-campus and remote students across time zones.</li>
-<li>Encourage team collaboration on a standard platform.</li>
-</ul>
-</li>
-</ul>
-
+              <li>Code+ administrators assigns five students to project</li>
+              <li>
+                We discuss project, training, and software requirements
+                <ul>
+                  <li>Lando for development.</li>
+                  <li>Identify common means for collaboration.</li>
+                </ul>
+              </li>
+              <li>
+                Daily check-in and check-out on Microsoft Teams and Zoom
+                <ul>
+                  <li>
+                    We had a mix of on-campus and remote students across time
+                    zones.
+                  </li>
+                  <li>Encourage team collaboration on a standard platform.</li>
+                </ul>
+              </li>
+            </ul>
           </div>
           <div class="slide-number">27 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Project Parameters</h4>
-
           </div>
           <div class="slide-number">28 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Respect each Code+ team's individual working style</li>
-<li>Regular checkin and feedback from leadership</li>
-<li>Encourage independence and team ownership</li>
-<li>Be approachable and available</li>
-</ul>
-
+              <li>Respect each Code+ team's individual working style</li>
+              <li>Regular checkin and feedback from leadership</li>
+              <li>Encourage independence and team ownership</li>
+              <li>Be approachable and available</li>
+            </ul>
           </div>
           <div class="slide-number">29 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Project Parameters</h4>
-
           </div>
           <div class="slide-number">30 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Code+ administrators assigns five students to project</li>
-<li>A project manager (Code+ administrator)</li>
-<li>Me: Project director, guiding direction, providing mentoring, and supporting the team</li>
-<li>Supporting partners from OIT</li>
-</ul>
-
+              <li>Code+ administrators assigns five students to project</li>
+              <li>A project manager (Code+ administrator)</li>
+              <li>
+                Me: Project director, guiding direction, providing mentoring,
+                and supporting the team
+              </li>
+              <li>Supporting partners from OIT</li>
+            </ul>
           </div>
           <div class="slide-number">31 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Project Successes</h4>
-
           </div>
           <div class="slide-number">32 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>A dedicated, highly-talented team</li>
-<li>Students developed knowledge in our software ecosystem</li>
-<li>Students developed professional development and communication skills</li>
-<li>Project deliverable: A Drupal module published on Drupal.org</li>
-<li>Open source software contributions</li>
-<li>Supporting undergraduates</li>
-</ul>
-
+              <li>A dedicated, highly-talented team</li>
+              <li>Students developed knowledge in our software ecosystem</li>
+              <li>
+                Students developed professional development and communication
+                skills
+              </li>
+              <li>
+                Project deliverable: A Drupal module published on Drupal.org
+              </li>
+              <li>Open source software contributions</li>
+              <li>Supporting undergraduates</li>
+            </ul>
           </div>
           <div class="slide-number">33 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Project Outcomes</h4>
-
           </div>
           <div class="slide-number">34 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>BasicShib Module Requirements and Learning Curve</li>
-<li>Module Maintenance Updates</li>
-<li>New Features Development</li>
-<li>Testing and Quality Assurance</li>
-<li>Team collaboration improvements</li>
-</ul>
-
+              <li>BasicShib Module Requirements and Learning Curve</li>
+              <li>Module Maintenance Updates</li>
+              <li>New Features Development</li>
+              <li>Testing and Quality Assurance</li>
+              <li>Team collaboration improvements</li>
+            </ul>
           </div>
           <div class="slide-number">35 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Challenges, Learnings, and Next Steps</h4>
-
           </div>
           <div class="slide-number">36 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Software development in an enterprise environment</li>
-<li>Open source community contribution</li>
-<li>Time management and project planning</li>
-<li>Professional communication and mentoring</li>
-</ul>
-
+              <li>Software development in an enterprise environment</li>
+              <li>Open source community contribution</li>
+              <li>Time management and project planning</li>
+              <li>Professional communication and mentoring</li>
+            </ul>
           </div>
           <div class="slide-number">37 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Challenges, Learnings, and Next Steps</h4>
-
           </div>
           <div class="slide-number">38 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>Difficulty in planning time for mentoring and team support</li>
-<li>Communication in a multi-timezone environment with MS Teams and Zoom</li>
-<li>Complexity of the BasicShib module architecture</li>
-<li>Team changes during the summer</li>
-</ul>
-
+              <li>
+                Difficulty in planning time for mentoring and team support
+              </li>
+              <li>
+                Communication in a multi-timezone environment with MS Teams and
+                Zoom
+              </li>
+              <li>Complexity of the BasicShib module architecture</li>
+              <li>Team changes during the summer</li>
+            </ul>
           </div>
           <div class="slide-number">39 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <ul>
-<li>A re-org at Duke</li>
-<li>Office of Information Technology's call for Code+ projects</li>
-<li>A mutually-beneficial project
-<ul>
-<li>Supports the Code+ team, Drupal, Open Source, and Duke</li>
-</ul>
-</li>
-</ul>
-
+              <li>A re-org at Duke</li>
+              <li>
+                Office of Information Technology's call for Code+ projects
+              </li>
+              <li>
+                A mutually-beneficial project
+                <ul>
+                  <li>
+                    Supports the Code+ team, Drupal, Open Source, and Duke
+                  </li>
+                </ul>
+              </li>
+            </ul>
           </div>
           <div class="slide-number">40 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Questions?</h4>
-
           </div>
           <div class="slide-number">41 / 42</div>
         </section>
 
-
-        <section class="slide ">
+        <section class="slide">
           <div class="slide-content">
             <h4>Thank you!</h4>
-
           </div>
           <div class="slide-number">42 / 42</div>
         </section>
-
-        </div>
+      </div>
     </div>
 
     <div class="controls">
-        <button onclick="prevSlide()">← Previous</button>
-        <button onclick="nextSlide()">Next →</button>
-        <button onclick="toggleFullscreen()">Fullscreen</button>
+      <button onclick="prevSlide()">← Previous</button>
+      <button onclick="nextSlide()">Next →</button>
+      <button onclick="toggleFullscreen()">Fullscreen</button>
     </div>
 
     <script>
-        let currentSlide = 0;
-        let slides = document.querySelectorAll('.slide');
-        let totalSlides = slides.length;
+      let currentSlide = 0;
+      let slides = document.querySelectorAll(".slide");
+      let totalSlides = slides.length;
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            showSlide();
-        }
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide();
+      }
 
-        function prevSlide() {
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            showSlide();
-        }
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        showSlide();
+      }
 
-        function showSlide() {
-            slides.forEach((slide, index) => {
-                if (index === currentSlide) {
-                    slide.classList.add('active');
-                } else {
-                    slide.classList.remove('active');
-                }
-            });
-
-            let progress = ((currentSlide + 1) / totalSlides) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert('Could not enter fullscreen: ' + err.message);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ') {
-                nextSlide();
-            } else if (e.key === 'ArrowLeft') {
-                window.prevSlide();
-            }
+      function showSlide() {
+        slides.forEach((slide, index) => {
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
         });
 
-        // Initialize
-        showSlide();
+        let progress = ((currentSlide + 1) / totalSlides) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+            alert("Could not enter fullscreen: " + err.message);
+          });
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      document.addEventListener("keydown", e => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          window.prevSlide();
+        }
+      });
+
+      // Initialize
+      showSlide();
     </script>
-</body>
+  </body>
 </html>

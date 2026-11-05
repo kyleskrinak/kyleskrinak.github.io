@@ -93,7 +93,8 @@ if (typeof initOgImage === "string") {
 }
 
 // SITE-OVERRIDE: a post with a hero shares the hero, ahead of the dynamic card.
-if (!ogImageUrl && image) ogImageUrl = await getHeroOgImageSrc(image, imagePosition);
+if (!ogImageUrl && image)
+  ogImageUrl = await getHeroOgImageSrc(image, imagePosition);
 
 if (!ogImageUrl && config.features.dynamicOgImage) {
   const postUrl = getPostUrl(post.id, post.filePath, locale).replace(

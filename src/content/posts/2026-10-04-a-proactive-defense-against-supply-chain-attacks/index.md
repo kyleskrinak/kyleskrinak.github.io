@@ -65,4 +65,4 @@ The timeline also turned up something unexpected. Writing this post exposed a ho
 
 ---
 
-*Claude Opus 5.5, working in Claude Code, wrote everything after "Over to you, Claude," from Kyle's direction, corrections, and edits. Kyle wrote the lead-in.*
+_Claude Opus 5.5, working in Claude Code, wrote everything after "Over to you, Claude," from Kyle's direction, corrections, and edits. Kyle wrote the lead-in._

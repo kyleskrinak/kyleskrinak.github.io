@@ -55,9 +55,13 @@ const sitemapHref = getAssetPath("sitemap.xml");
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {/* SITE-OVERRIDE: no favicon.svg link; the site ships its own favicons, not upstream's SVG. */}
+    {
+      /* SITE-OVERRIDE: no favicon.svg link; the site ships its own favicons, not upstream's SVG. */
+    }
     <link rel="icon" href={getAssetPath("favicon.ico")} />
-    {/* SITE-OVERRIDE: site favicons, manifest, rel="me", noindex and WebPage JSON-LD. */}
+    {
+      /* SITE-OVERRIDE: site favicons, manifest, rel="me", noindex and WebPage JSON-LD. */
+    }
     <SiteHead
       noindex={noindex}
       ogType={ogType}
@@ -81,7 +85,9 @@ const sitemapHref = getAssetPath("sitemap.xml");
     <link rel="sitemap" href={sitemapHref} />
 
     <!-- Open Graph -->
-    {/* SITE-OVERRIDE: og:type from the ogType prop, so a post carries one og:type, not two. */}
+    {
+      /* SITE-OVERRIDE: og:type from the ogType prop, so a post carries one og:type, not two. */
+    }
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={site.title} />
     <meta property="og:title" content={title} />

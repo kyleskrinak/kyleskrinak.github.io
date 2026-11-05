@@ -95,7 +95,11 @@ export default async ({ regularData, boldData }) => {
                 {
                   type: "div",
                   props: {
-                    style: { fontSize: 42, color: FOREGROUND, lineHeight: 1.35 },
+                    style: {
+                      fontSize: 42,
+                      color: FOREGROUND,
+                      lineHeight: 1.35,
+                    },
                     // Non-breaking hyphens keep each hyphenated word on one line.
                     children: config.site.description.replaceAll("-", "\u2011"),
                   },
@@ -123,7 +127,12 @@ export default async ({ regularData, boldData }) => {
       height: OG_IMAGE_SIZE.height,
       embedFont: true,
       fonts: [
-        { name: "IBM Plex Mono", data: regularData, weight: 400, style: "normal" },
+        {
+          name: "IBM Plex Mono",
+          data: regularData,
+          weight: 400,
+          style: "normal",
+        },
         { name: "IBM Plex Mono", data: boldData, weight: 700, style: "normal" },
       ],
     }

@@ -12,14 +12,14 @@ interface Props {
 }
 
 export function getStaticPaths() {
-  return presentations.map((pres) => ({
+  return presentations.map(pres => ({
     params: { id: pres.id },
-    props: { id: pres.id }
+    props: { id: pres.id },
   }));
 }
 
 const { id } = Astro.props;
-const presentation = presentations.find((p) => p.id === id);
+const presentation = presentations.find(p => p.id === id);
 
 if (!presentation) {
   return Astro.redirect("/404");
@@ -44,43 +44,47 @@ const htmlFile = getAssetPath(`/presentations/${id}.html`);
       </a>
     </div>
 
-    <h1 class="text-2xl font-semibold sm:text-3xl mb-2">
+    <h1 class="mb-2 text-2xl font-semibold sm:text-3xl">
       {presentation.title}
     </h1>
-    <p class="text-sm text-foreground/70 mb-6">
-      {new Date(presentation.date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      })}
+    <p class="text-foreground/70 mb-6 text-sm">
+      {
+        new Date(presentation.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      }
     </p>
 
-    <div class="flex flex-wrap gap-2 mb-8">
-      {presentation.tags.map((tag) => (
-        <span class="inline-block text-xs bg-foreground/10 text-foreground/70 px-3 py-1 rounded">
-          {tag}
-        </span>
-      ))}
+    <div class="mb-8 flex flex-wrap gap-2">
+      {
+        presentation.tags.map(tag => (
+          <span class="bg-foreground/10 text-foreground/70 inline-block rounded px-3 py-1 text-xs">
+            {tag}
+          </span>
+        ))
+      }
     </div>
 
     <p class="text-foreground/80 mb-8">{presentation.description}</p>
 
-    <div class="bg-background border border-border rounded-lg p-6 mb-8">
-      <p class="mb-4 text-sm text-foreground/80">
+    <div class="bg-background border-border mb-8 rounded-lg border p-6">
+      <p class="text-foreground/80 mb-4 text-sm">
         Click the button below to open the full presentation in fullscreen mode.
       </p>
       <a
         href={htmlFile}
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-block bg-accent text-background px-6 py-3 rounded font-medium hover:opacity-90 transition-opacity"
+        class="bg-accent text-background inline-block rounded px-6 py-3 font-medium transition-opacity hover:opacity-90"
       >
         View Presentation →
       </a>
     </div>
 
     <div class="prose prose-invert max-w-none">
-      <p class="text-sm text-foreground/70 italic">
+      <p class="text-foreground/70 text-sm italic">
         This presentation is displayed in a separate window. Use arrow keys or
         click to navigate through the slides.
       </p>

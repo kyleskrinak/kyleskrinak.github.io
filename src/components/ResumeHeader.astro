@@ -37,18 +37,30 @@ const stripScheme = (url: string) => url.replace(/^https?:\/\//i, "");
 <div class="resume-header">
   <h1 class="text-2xl font-semibold sm:text-3xl">{name}</h1>
   <div class="contact-info">
-    {contactEmail && (
-      <span><a href={`mailto:${contactEmail}`}>{contactEmail}</a></span>
-    )}
+    {
+      contactEmail && (
+        <span>
+          <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+        </span>
+      )
+    }
     {contactAddress && <span>{contactAddress}</span>}
-    {contactWebsite && (
-      <span><a href={contactWebsite}>{stripScheme(contactWebsite)}</a></span>
-    )}
-    {contactLinkedin && (
-      <span>
-        <a href={contactLinkedin}>{linkedinAsUrl ? stripScheme(contactLinkedin) : "LinkedIn"}</a>
-      </span>
-    )}
+    {
+      contactWebsite && (
+        <span>
+          <a href={contactWebsite}>{stripScheme(contactWebsite)}</a>
+        </span>
+      )
+    }
+    {
+      contactLinkedin && (
+        <span>
+          <a href={contactLinkedin}>
+            {linkedinAsUrl ? stripScheme(contactLinkedin) : "LinkedIn"}
+          </a>
+        </span>
+      )
+    }
   </div>
   <slot />
 </div>

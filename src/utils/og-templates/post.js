@@ -192,7 +192,8 @@ export default async (post, { regularData, boldData }) => {
                                       overflow: "hidden",
                                       fontWeight: "bold",
                                     },
-                                    children: post.data.author || config.site.author,
+                                    children:
+                                      post.data.author || config.site.author,
                                   },
                                 },
                               ],
@@ -221,7 +222,12 @@ export default async (post, { regularData, boldData }) => {
       height: OG_IMAGE_SIZE.height,
       embedFont: true,
       fonts: [
-        { name: "IBM Plex Mono", data: regularData, weight: 400, style: "normal" },
+        {
+          name: "IBM Plex Mono",
+          data: regularData,
+          weight: 400,
+          style: "normal",
+        },
         { name: "IBM Plex Mono", data: boldData, weight: 700, style: "normal" },
       ],
     }

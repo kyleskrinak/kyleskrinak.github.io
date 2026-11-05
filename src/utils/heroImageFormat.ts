@@ -26,7 +26,7 @@
  * Formats `image` may not be. Sharp re-encodes everything else, so this is the
  * whole exclusion — see the module note above for why it is not an allowlist.
  */
-export const HERO_REJECTED_FORMATS = ['svg'] as const;
+export const HERO_REJECTED_FORMATS = ["svg"] as const;
 
 /**
  * Formats a frontmatter `ogImage` may be, since it reaches scrapers untouched.
@@ -34,7 +34,7 @@ export const HERO_REJECTED_FORMATS = ['svg'] as const;
  * major link-preview scrapers. WebP is present because it does, and because the
  * fallback path already ships a WebP og:image derived from the hero.
  */
-export const OG_IMAGE_FORMATS = ['webp', 'jpg', 'jpeg', 'png', 'gif'] as const;
+export const OG_IMAGE_FORMATS = ["webp", "jpg", "jpeg", "png", "gif"] as const;
 
 /**
  * Read the file extension off an image reference.
@@ -59,8 +59,9 @@ export function assetExtension(img: unknown): string | null {
   // otherwise reach .toLowerCase() and throw, and a throw here escapes
   // superRefine as an unhandled exception instead of becoming the addIssue that
   // the `unreadable` finding below exists to produce.
-  const raw = typeof img === 'string' ? img : (img as { src?: unknown } | null)?.src;
-  if (typeof raw !== 'string') return null;
+  const raw =
+    typeof img === "string" ? img : (img as { src?: unknown } | null)?.src;
+  if (typeof raw !== "string") return null;
   // Cut at the first ? or # so a query string or fragment cannot hide the
   // extension behind them and turn a readable reference into a build failure.
   const path = raw.toLowerCase().split(/[?#]/)[0];
@@ -74,8 +75,8 @@ const unreadable = (field: string): HeroFormatIssue => ({
   field,
   message:
     `${field}: could not read a file extension from the image reference, so its ` +
-    'format could not be checked. This usually means Astro changed the image() ' +
-    'placeholder shape — update assetExtension() in src/utils/heroImageFormat.ts.',
+    "format could not be checked. This usually means Astro changed the image() " +
+    "placeholder shape — update assetExtension() in src/utils/heroImageFormat.ts.",
 });
 
 /**
@@ -93,10 +94,10 @@ export function heroFormatIssues(
   if (data.image) {
     const ext = assetExtension(data.image);
     if (ext === null) {
-      issues.push(unreadable('image'));
+      issues.push(unreadable("image"));
     } else if ((HERO_REJECTED_FORMATS as readonly string[]).includes(ext)) {
       issues.push({
-        field: 'image',
+        field: "image",
         message:
           // The remedy names the three formats worth reaching for, not every
           // format that would pass. AVIF and TIFF heroes are also accepted —
@@ -106,8 +107,8 @@ export function heroFormatIssues(
           // advice, not better. The rule is the rejection list above; this
           // string is guidance for the one case that hits it.
           `image must not be ${ext.toUpperCase()}: the hero is cropped by Sharp ` +
-          'to a fixed aspect ratio, and a vector gives fit/position nothing to ' +
-          'crop. Export a raster (webp, jpg, png) instead.',
+          "to a fixed aspect ratio, and a vector gives fit/position nothing to " +
+          "crop. Export a raster (webp, jpg, png) instead.",
       });
     }
   }
@@ -115,14 +116,14 @@ export function heroFormatIssues(
   if (data.ogImage) {
     const ext = assetExtension(data.ogImage);
     if (ext === null) {
-      issues.push(unreadable('ogImage'));
+      issues.push(unreadable("ogImage"));
     } else if (!(OG_IMAGE_FORMATS as readonly string[]).includes(ext)) {
       issues.push({
-        field: 'ogImage',
+        field: "ogImage",
         message:
-          `ogImage must be one of ${OG_IMAGE_FORMATS.join(', ')}, not ${ext}. It ` +
-          'is served to link-preview scrapers exactly as committed, with no ' +
-          'conversion step to rescue a format they cannot decode.',
+          `ogImage must be one of ${OG_IMAGE_FORMATS.join(", ")}, not ${ext}. It ` +
+          "is served to link-preview scrapers exactly as committed, with no " +
+          "conversion step to rescue a format they cannot decode.",
       });
     }
   }

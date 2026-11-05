@@ -7,6 +7,7 @@ A modern, fast, and accessible blog built with Astro. Migrated from Jekyll with 
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 **Live Site**:
+
 - 🚀 [Production](https://kyle.skrinak.com/) - Main blog
 
 ## ✨ Features
@@ -28,12 +29,12 @@ All project documentation is organized in the `/docs` directory. Start here:
 
 ### By Role:
 
-| Role | Start Here |
-|------|-----------|
-| 👨‍💻 **Developer** | [Getting Started](./docs/getting-started/) |
-| 🚀 **DevOps** | [Operations & Deployment](./docs/operations/) |
+| Role                         | Start Here                                                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 👨‍💻 **Developer**             | [Getting Started](./docs/getting-started/)                                                                  |
+| 🚀 **DevOps**                | [Operations & Deployment](./docs/operations/)                                                               |
 | 📖 **Understanding Project** | [Migration History](./CHANGELOG.md) - Jekyll → Astro migration summary (planning docs archived post-launch) |
-| 🧪 **QA/Testing** | [Testing Guide](./docs/testing/) |
+| 🧪 **QA/Testing**            | [Testing Guide](./docs/testing/)                                                                            |
 
 ### Quick Links:
 
@@ -84,12 +85,15 @@ npm run config:inspect   # Debug configuration values
 ## 🧪 Testing & Quality Assurance
 
 **PR Checks** (run on PRs to main):
+
 - **Visual Regression Testing** - Playwright-based screenshot comparison with automated baseline management
 
 **Scheduled Checks** (nightly):
+
 - **Link Validation** - Two-tier verification (htmltest + browser) that filters false positives
 
 **Test Suites** (run manually or in CI):
+
 - **Console Error Detection** - Scans for JavaScript errors on key pages
 - **SEO Validation** - Meta tags verification, sitemap accuracy, canonical URL checks
 - **Analytics Privacy** - DNT/GPC compliance
@@ -132,15 +136,15 @@ Full detail: **[Supply-Chain Security](./docs/operations/supply-chain.md)** · [
 
 ## 💻 Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | [Astro](https://astro.build/) |
-| **Styling** | [TailwindCSS](https://tailwindcss.com/) |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) |
-| **Search** | [Pagefind](https://pagefind.app/) |
-| **Testing** | [Playwright](https://playwright.dev/) |
+| Layer          | Technology                                                                 |
+| -------------- | -------------------------------------------------------------------------- |
+| **Framework**  | [Astro](https://astro.build/)                                              |
+| **Styling**    | [TailwindCSS](https://tailwindcss.com/)                                    |
+| **Language**   | [TypeScript](https://www.typescriptlang.org/)                              |
+| **Search**     | [Pagefind](https://pagefind.app/)                                          |
+| **Testing**    | [Playwright](https://playwright.dev/)                                      |
 | **Deployment** | GitHub Pages (disaster-recovery fallback) + AWS S3/CloudFront (production) |
-| **CI/CD** | GitHub Actions |
+| **CI/CD**      | GitHub Actions                                                             |
 
 ## 📈 Performance
 

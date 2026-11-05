@@ -15,6 +15,7 @@ description: How we Adopted CI/CD for TCA&S's Drupal Multisite Hosting for
 This talk covers how Trinity Technology Services adopted CI/CD practices for managing our Drupal Multisite hosting infrastructure, which serves over 100 Drupal websites across Trinity College.
 
 ### Key Topics
+
 - Drupal multisite architecture and management
 - CI/CD pipeline implementation
 - Deployment automation and workflow

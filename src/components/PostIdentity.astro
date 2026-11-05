@@ -29,11 +29,13 @@ const postUrl = new URL(
 const authorPhoto = new URL(getAssetPath("favicon-96x96.png"), Astro.site).href;
 ---
 
-{/* No visible author chrome exists on a post page to carry these, and adding
+{
+  /* No visible author chrome exists on a post page to carry these, and adding
     one would change the layout, so they ride on a hidden block: parsers read
     the DOM and ignore `hidden`.
     u-photo is an <img> and u-url an <a> because those are the primary
-    element rules for u-* — a parser reaches them before any fallback. */}
+    element rules for u-* — a parser reaches them before any fallback. */
+}
 <div class="post-identity" hidden>
   <a class="u-url" href={postUrl}>{title}</a>
   <div class="p-author h-card">

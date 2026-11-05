@@ -13,12 +13,14 @@ Brief summary of the changes in this PR.
 ## Checklist
 
 ### Code Quality
+
 - [ ] Code follows project conventions (ESLint, TypeScript, Prettier).
 - [ ] No hardcoded secrets, tokens, or sensitive data.
 - [ ] Type safety: no `@ts-ignore` without justification.
 - [ ] Comments added for complex logic.
 
 ### Testing & Validation
+
 - [ ] Local build succeeds: `npm run build`.
 - [ ] Visual regression tests pass: `npm run test:visual` (automatically runs on PRs to main).
 - [ ] No new broken links expected (run `npm run check:links` locally; nightly linkwatch will verify after merge).
@@ -28,15 +30,18 @@ Brief summary of the changes in this PR.
 - [ ] Environment variables are correctly documented in `.env.example` (if new vars added).
 
 ### CI Environment
+
 - [ ] CI environment variables configured (e.g., `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`).
 - [ ] CI build passes without errors.
 - [ ] No TypeScript or linting errors.
 
 ### Documentation
+
 - [ ] Inline code comments or README updated (if needed).
 - [ ] Deployment or setup impact documented (if applicable).
 
 ### Security & Performance
+
 - [ ] No new dependencies without justification and security review.
 - [ ] No hardcoded API endpoints or domains; use config/env where applicable.
 - [ ] No performance regression (e.g., new script loads efficiently).

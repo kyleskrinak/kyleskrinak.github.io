@@ -9,26 +9,25 @@ alt: Empty dining room
 source: jekyll
 ---
 
-
 ## Better Dining through Butter
 
 Who doesn&#39;t love the convenience of eating out? You can sit down, relax, and enjoy company -- or alone time -- while having others serve you drinks, snacks and then dinner. You&#39;re free to try new foods or drinks without renovating your kitchen. You can enjoy a wide range of ethnic cuisines, limited only by what&#39;s available nearby. As for variety, similar to [most Americans](https://web.archive.org/web/20221128083217/https://parade.com/397203/parade/top-10-ethnic-cuisines-americans-crave-most/), I like Mexican cuisine, followed by Asian, whether Chinese, Japanese or Thai and then Indian. On my LCHF way of eating, my new favorite is southern, but we&#39;ll get to that in a minute.
 
 When I changed how I eat, I followed [Dr. Westman&#39;s page four](https://adaptyourlifeacademy.com/start-keto-right/), which makes eating out practical enough. This all started on a week-long trip away from home. This wasn&#39;t by design, but, in retrospect, it was quite serendipitous. Being on the road forced me to eat out all the time. Despite my neophyte status and lack of a personal kitchen, this week also reflects the most dramatic weight loss (yes, yes, mostly water) so eating out on LCHF is possible. Since weight-loss was my key motivator back then, my success provided me with greater motivation to remain LCHF.
 
-*Revised 2026-05-12: Dr. Westman now avails his famous Page 4 list with additional training, available at [https://adaptyourlifeacademy.com/start-keto-right/](https://adaptyourlifeacademy.com/start-keto-right/).*
+_Revised 2026-05-12: Dr. Westman now avails his famous Page 4 list with additional training, available at [https://adaptyourlifeacademy.com/start-keto-right/](https://adaptyourlifeacademy.com/start-keto-right/)._
 
 I much prefer eating at home. I like to know precisely what I&#39;m eating, the ingredients and sources. So much so now that I generally dread eating out, unless it is at precious few select restaurants. Since then I&#39;ve learned some tricks to help guide me. That said, if you&#39;re new to LCHF, I cannot strongly recommend enough that you consult with Dr. Westman or a qualified low-carb practitioner. [I removed this link. Dr. Westman did not continue his Heal Clinic project.] Winging LCHF, solo, or with only the Internet as your guide, is a near certain recipe for disappointment.
 
-Another disappointment on LCHF is how inflexible restaurants are with what they serve. It is nearly certain you will need to make modifications to your menu selections. The good restaurant perk up at the opportunity to serve you. The bad ones? 
+Another disappointment on LCHF is how inflexible restaurants are with what they serve. It is nearly certain you will need to make modifications to your menu selections. The good restaurant perk up at the opportunity to serve you. The bad ones?
 
-~~~~
+```
 Keep movin', movin', movin'
 Though they're disapprovin'
 Keep them dogies movin', rawhide
-~~~~
+```
 
-If only there was a quick way to tell?  Well&hellip;
+If only there was a quick way to tell? Well&hellip;
 
 ## It boils down to one simple question:
 
@@ -36,25 +35,25 @@ If only there was a quick way to tell?  Well&hellip;
 
 The response might be a disinterested; _&quot;no,&quot;_ as the worker pauses without knowing what to say next, a confident _&quot;no, but what we serve **tastes just like butter,**&quot;_ a matter-of-fact _&quot;Sure do&quot;_ or, ideally, an incredulous _&quot;Are you kidding? What kind of restaurant doesn&#39;t serve real butter?&quot;_
 
-Yes, I want butter, not a *frankenbutter.* I'm not a child. The last response sings to me.
+Yes, I want butter, not a _frankenbutter._ I'm not a child. The last response sings to me.
 
 ## What to do?
 
 > Life is too short for fake butter, cheese or people. &mdash; Bill Murray
 
-*Revised 2026-05-09: removed broken Twitter embed; quote retained as a blockquote.*
+_Revised 2026-05-09: removed broken Twitter embed; quote retained as a blockquote._
 
 Try to call in advance, and ask this question before you go. Be prepared to wait. Most staff that answer the phones won’t know. If they don&#39;t have butter, you may be able to steer clear of the restaurant. If you cannot change venue, it may be an opportunity to fast or limit what you eat. If you ask at the time you&#39;re there, you might make others uncomfortable with your seemingly orthorexic-like questions on ingredients.
 
 Of course, I wouldn&#39;t bother asking an Asian restaurant. I&#39;d focus on the meat dishes and ask for no rice and watch the stir-fry! The standard frying fat is vegetable oil, something I do my best to avoid. Nina Teicholz provides a jaw-dropping [presentation](https://www.youtube.com/watch?v=Q2UnOryQiIY) on the historical reasons behind vegetable-based (seed-based, really) fats, and why they are so unhealthy, and unnecessary, for you. She also wrote a book about it, &quot;[The Big Fat Surprise](https://ninateicholz.com/about/the-big-fat-surprise/),&quot; well worth reading.
 
-Southern cooking, especially when the kitchen has lard or butter, can be the most accommodating on LCHF. It can also be terrible. The early 90&#39;s movie, &quot;My Cousin Vinny,&quot; mocks southern cooking, but, as we&#39;ve learned, Vinny&#39;s critique was way off, and now the joke&#39;s on us: 
+Southern cooking, especially when the kitchen has lard or butter, can be the most accommodating on LCHF. It can also be terrible. The early 90&#39;s movie, &quot;My Cousin Vinny,&quot; mocks southern cooking, but, as we&#39;ve learned, Vinny&#39;s critique was way off, and now the joke&#39;s on us:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/RuY-JRvlcKk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 One of my most memorable LCHF meals was at a southern-style restaurant in [Albany, GA](https://www.facebook.com/Pearlys-Famous-Country-Cooking-111689535534146/). They relished serving me with a side of butter. Bon Appetite!
 
-This question eliminates every, or nearly every, chain restaurant. That realization was difficult for me. I used to love On the Border. That was my &quot;go to&quot; for Father&#39;s Day, my birthday, and other artificial reasons in between. The Bordurrito was a go-to fav, the massive carb fest that thing was. It is thanks to OtB that I now know what [_&quot;Phase Butter,&quot;_](https://www.amazon.com/Phase-Liquid-Butter-Alternative-Pack/dp/B01C3JVC2K "Phase Butter") is, and that it _&quot;tastes just like butter.&quot;_ 
+This question eliminates every, or nearly every, chain restaurant. That realization was difficult for me. I used to love On the Border. That was my &quot;go to&quot; for Father&#39;s Day, my birthday, and other artificial reasons in between. The Bordurrito was a go-to fav, the massive carb fest that thing was. It is thanks to OtB that I now know what [_&quot;Phase Butter,&quot;_](https://www.amazon.com/Phase-Liquid-Butter-Alternative-Pack/dp/B01C3JVC2K "Phase Butter") is, and that it _&quot;tastes just like butter.&quot;_
 
 Uh-huh, to which I say;
 

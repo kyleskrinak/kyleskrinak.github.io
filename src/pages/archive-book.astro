@@ -20,11 +20,11 @@ import { postFilter } from "@/utils/postFilter";
 import config from "@/config";
 import { HERO_IMAGE, SITE_TIMEZONE } from "@/site-config";
 
-const posts = (await getCollection("posts", postFilter))
-  .sort(
-    (a, b) =>
-      new Date(a.data.pubDatetime).getTime() - new Date(b.data.pubDatetime).getTime()
-  );
+const posts = (await getCollection("posts", postFilter)).sort(
+  (a, b) =>
+    new Date(a.data.pubDatetime).getTime() -
+    new Date(b.data.pubDatetime).getTime()
+);
 
 const chapters = await Promise.all(
   posts.map(async post => ({ post, Content: (await render(post)).Content }))
@@ -57,7 +57,9 @@ const latestContent = posts.reduce((max, p) => {
   const t = new Date(p.data.modDatetime || p.data.pubDatetime).getTime();
   return t > max ? t : max;
 }, 0);
-const currentAsOf = posts.length ? fmtDate(new Date(latestContent)) : fmtDate(new Date());
+const currentAsOf = posts.length
+  ? fmtDate(new Date(latestContent))
+  : fmtDate(new Date());
 const title = `${config.site.author} — Collected Writing`;
 
 // Printed link destinations for the PDF archive.
@@ -91,13 +93,13 @@ const title = `${config.site.author} — Collected Writing`;
 // that silently match nothing.
 const siteHost = new URL(config.site.url).host;
 const sameOriginExclusion = ["https", "http"]
-  .flatMap((scheme) => [
+  .flatMap(scheme => [
     `[href^="${scheme}://${siteHost}/"]`,
     `[href^="${scheme}://${siteHost}?"]`,
     `[href^="${scheme}://${siteHost}#"]`,
     `[href="${scheme}://${siteHost}"]`,
   ])
-  .map((selector) => `:not(${selector})`)
+  .map(selector => `:not(${selector})`)
   .join("");
 const printedUrlCss = `
       .chapter a[href^="http"]:not(.url-in-text)${sameOriginExclusion}::after {
@@ -310,22 +312,23 @@ const printedUrlCss = `
       <p>
         This is a complete archive of the writing published at {siteHost},
         current as of {currentAsOf}. It contains {posts.length} pieces written between
-        {firstYear} and {lastYear}, arranged in the order they were written, oldest first.
+        {firstYear} and {lastYear}, arranged in the order they were written,
+        oldest first.
       </p>
       <p>
         Nothing else is needed to read it. This single file is self-contained:
         the words and images are all here. You do not need the website, any
-        account, or any special software beyond whatever you are already using to
-        view this page.
+        account, or any special software beyond whatever you are already using
+        to view this page.
       </p>
       <p>
         It was made so that the writing would remain readable on its own, apart
         from any website that may or may not still exist when you find this.
       </p>
       <p>
-        Written by {config.site.author}. Where a piece links to a video or other online
-        material that cannot be printed, the web address is shown in its place so
-        the reference is preserved.
+        Written by {config.site.author}. Where a piece links to a video or other
+        online material that cannot be printed, the web address is shown in its
+        place so the reference is preserved.
       </p>
     </section>
 
@@ -352,24 +355,20 @@ const printedUrlCss = `
             <h2>{post.data.title}</h2>
             <div class="chapter-date">{fmtDate(post.data.pubDatetime)}</div>
           </header>
-          {
-            post.data.image && (
-              <figure class="hero-image">
-                <Image
-                  src={post.data.image}
-                  alt={post.data.alt || "Post hero image"}
-                  {...HERO_IMAGE}
-                  position={post.data.imagePosition || "center"}
-                  loading="eager"
-                  decoding="sync"
-                />
-                {/* caption is author-controlled frontmatter, not user input — set:html is safe here */}
-                {post.data.caption && (
-                  <figcaption set:html={post.data.caption} />
-                )}
-              </figure>
-            )
-          }
+          {post.data.image && (
+            <figure class="hero-image">
+              <Image
+                src={post.data.image}
+                alt={post.data.alt || "Post hero image"}
+                {...HERO_IMAGE}
+                position={post.data.imagePosition || "center"}
+                loading="eager"
+                decoding="sync"
+              />
+              {/* caption is author-controlled frontmatter, not user input — set:html is safe here */}
+              {post.data.caption && <figcaption set:html={post.data.caption} />}
+            </figure>
+          )}
           <Content />
         </article>
       ))
