@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Routine bumps grouped by ecosystem (minor + patch only). Major bumps fall through to Renovate's default and open as individual PRs for explicit review. The 'typescript' group is patch-only on purpose — TS minor releases can ship subtle type-system changes, so minor TS bumps open as individual PRs too. The 'utilities' group's `lodash.*` glob matches per-method packages like `lodash.kebabcase` but NOT the bare `lodash` package (no dot); if `lodash` is ever added, either extend matchPackageNames or expect it to open as an individual PR. baseBranchPatterns: develop combined with useBaseBranchConfig: merge so Renovate reads this config from develop in addition to main (the GitHub default branch). Security PRs (vulnerabilityAlerts) target develop too with minimumReleaseAge: 0 — they still flow develop → main; for critical CVEs the human operator fast-tracks promotion manually. enabledManagers is restricted to npm on purpose: the Dockerfile base image and the SHA-pinned GitHub Actions are managed manually as part of the supply-chain posture, so Renovate must not silently open PRs against them. vulnerabilityAlerts only works while the repo's Dependabot alerts setting is ON (Renovate reads those alerts); Dependabot security updates stay OFF so Dependabot does not open its own PRs against main. osvVulnerabilityAlerts is a second, independent source (OSV database) but covers direct dependencies only. lockFileMaintenance regenerates package-lock.json weekly so transitive dependencies move forward; with minimumReleaseAge set, Renovate passes npm --before so the regenerated lockfile only resolves versions at least 7 days old.",
+  "description": "Routine bumps grouped by ecosystem (minor + patch only). Major bumps fall through to Renovate's default and open as individual PRs for explicit review. The 'typescript' group is patch-only on purpose — TS minor releases can ship subtle type-system changes, so minor TS bumps open as individual PRs too. The 'utilities' group's `lodash.*` glob matches per-method packages like `lodash.kebabcase` but NOT the bare `lodash` package (no dot); if `lodash` is ever added, either extend matchPackageNames or expect it to open as an individual PR. baseBranchPatterns: develop combined with useBaseBranchConfig: merge so Renovate reads this config from develop in addition to main (the GitHub default branch). Security PRs (vulnerabilityAlerts) target develop too with minimumReleaseAge: 0 — they still flow develop → main; for critical CVEs the human operator fast-tracks promotion manually. enabledManagers is restricted to npm on purpose: the Dockerfile base image and the SHA-pinned GitHub Actions are managed manually as part of the supply-chain posture, so Renovate must not silently open PRs against them. vulnerabilityAlerts only works while the repo's Dependabot alerts setting is ON (Renovate reads those alerts); Dependabot security updates stay OFF so Dependabot does not open its own PRs against main. osvVulnerabilityAlerts is a second, independent source (OSV database) but covers direct dependencies only. lockFileMaintenance regenerates package-lock.json weekly so transitive dependencies move forward; with minimumReleaseAge set, Renovate passes npm --before so the regenerated lockfile only resolves versions at least 7 days old. The last packageRule gives lockFileMaintenance prPriority 10 (Renovate accepts prPriority only inside packageRules), and lockFileMaintenance uses the global Monday window, both on purpose: by default Renovate sorts lock file maintenance after every other update and confines it to before 4am, so routine bumps took both PR slots the hourly limit (prHourlyLimit, default 2) allows and the job never ran. Security PRs still sort ahead of it. npmrc sets allow-remote=all for Renovate's npm runs only: under npm 12's default (allow-remote=none), npm rejects the registry tarball of any package that declares bundleDependencies (such as @tailwindcss/oxide-wasm32-wasi) during --package-lock-only, so lock file maintenance and tailwind bumps fail with EALLOWREMOTE and Renovate opens no PR (npm/cli#9800). The repo's .npmrc is untracked, so this value is the whole .npmrc Renovate sees; local and CI installs keep npm 12's default. Remove this line once npm ships a fix for #9800.",
   "extends": ["config:recommended"],
   "enabledManagers": ["npm"],
   "baseBranchPatterns": [
@@ -24,8 +24,10 @@
     "labels": ["dependencies", "security"]
   },
   "osvVulnerabilityAlerts": true,
+  "npmrc": "allow-remote=all",
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "schedule": ["before 9am on Monday"]
   },
   "packageRules": [
     {
@@ -82,6 +84,10 @@
         "lodash.*"
       ],
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "prPriority": 10
     }
   ]
 }
