@@ -156,29 +156,6 @@ const nested = Object.entries(overrides).filter(
 );
 
 /**
- * Every place the lockfile resolves `name`, at any depth, as
- * `{ path, parent, version }`. `parent` is the package the copy is nested under,
- * or null when it is hoisted to the root `node_modules`.
- *
- * Splitting on `/node_modules/` keeps scoped names (`@scope/pkg`) intact, since
- * their slash is not a nesting boundary.
- */
-const lockEntriesFor = (name) => {
-	const found = [];
-	for (const [path, entry] of Object.entries(lockPackages)) {
-		if (!path || !entry?.version) continue; // root project entry, or a link/workspace
-		const segments = `/${path}`.split('/node_modules/');
-		if (segments.at(-1) !== name) continue;
-		found.push({
-			path,
-			parent: segments.length > 2 ? segments.at(-2) : null,
-			version: entry.version,
-		});
-	}
-	return found;
-};
-
-/**
  * The lockfile path that `name` resolves to from the package at `fromPath`, walking
  * up through enclosing `node_modules` the way Node does, or null if none resolves.
  */
@@ -221,6 +198,63 @@ const findOutOfRange = () => {
 					range,
 					resolvedPath,
 					version,
+				});
+			}
+		}
+	}
+	return found;
+};
+
+/**
+ * Every dependency on an overridden package, at any depth, as
+ * `{ from, name, resolvedPath, version, carveOut }`: the package that declares it,
+ * the copy Node loads for it, that copy's version, and the nested carve-out that
+ * governs it (null when the tree-wide pin does).
+ *
+ * Where npm puts a copy on disk says nothing about which override governs it: a
+ * from-scratch resolve hoists whichever copy npm meets first, and PR #457's lockfile
+ * put markdownlint-cli2's js-yaml 5.4.1 at the root `node_modules/js-yaml` and the
+ * tree-wide 4.3.2 under `@astrojs/mdx`. So this walks the logical tree down from the
+ * root instead. npm applies a nested override to its parent's whole subtree ("a
+ * child (or grandchild, or great grandchild, etc)", per the npm docs), so a
+ * dependency's governing override is the innermost carve-out parent on the walk that
+ * names it.
+ */
+const findPinnedDependencies = () => {
+	const pinnedNames = new Set([
+		...topLevel.map(([name]) => name),
+		...nested.flatMap(([, block]) => Object.keys(block)),
+	]);
+	const carveOutParents = new Set(nested.map(([parent]) => parent));
+	const found = [];
+	const visited = new Set();
+	// `carveOuts` lists the carve-out parents on the walk to `path`, outermost first.
+	const pending = [{ path: '', carveOuts: [] }];
+	while (pending.length > 0) {
+		const { path, carveOuts } = pending.pop();
+		const key = `${path}\n${carveOuts.join('\n')}`;
+		if (visited.has(key)) continue;
+		visited.add(key);
+
+		const fields = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+		if (!path) fields.push('devDependencies');
+		for (const field of fields) {
+			for (const name of Object.keys(lockPackages[path]?.[field] ?? {})) {
+				const resolvedPath = resolveFrom(path, name);
+				if (!resolvedPath) continue; // an optional or peer dependency left uninstalled
+				if (pinnedNames.has(name)) {
+					found.push({
+						from: path || '(root)',
+						name,
+						resolvedPath,
+						version: lockPackages[resolvedPath].version,
+						carveOut: carveOuts.findLast((parent) => name in overrides[parent]) ?? null,
+					});
+				}
+				const entersCarveOut = carveOutParents.has(name) && !carveOuts.includes(name);
+				pending.push({
+					path: resolvedPath,
+					carveOuts: entersCarveOut ? [...carveOuts, name] : carveOuts,
 				});
 			}
 		}
@@ -328,50 +362,49 @@ test('markdownlint-cli2 keeps its js-yaml 5.x carve-out', () => {
 test('lockfile resolves each nested carve-out to its declared version', () => {
 	// The half that let #372 through CI: that PR's package.json and lockfile
 	// disagreed, and nothing compared them.
+	const dependencies = findPinnedDependencies();
 	for (const [parent, block] of nested) {
 		for (const [name, version] of Object.entries(block)) {
-			const path = `node_modules/${parent}/node_modules/${name}`;
-			const entry = lockPackages[path];
+			const governed = dependencies.filter((dep) => dep.carveOut === parent && dep.name === name);
 			assert.ok(
-				entry,
-				`lockfile has no ${path}, so the "${parent}" > "${name}" carve-out did not ` +
-					'take effect. Run `npm install` and commit the lockfile.',
+				governed.length > 0,
+				`nothing under "${parent}" in the lockfile depends on "${name}", so the ` +
+					`"${parent}" > "${name}" carve-out governs nothing. Run \`npm install\` and commit ` +
+					`the lockfile, or drop the carve-out deliberately if ${parent} no longer needs it.`,
 			);
-			assert.equal(
-				entry.version,
-				version,
-				`lockfile resolves ${path} to ${entry.version}, but package.json pins it to ` +
-					`${version}. package.json and package-lock.json disagree -- run \`npm install\`.`,
-			);
+			for (const { from, resolvedPath, version: resolved } of governed) {
+				assert.equal(
+					resolved,
+					version,
+					`${from} loads ${resolvedPath} at ${resolved}, but package.json's "${parent}" > ` +
+						`"${name}" carve-out pins it to ${version}. package.json and package-lock.json ` +
+						'disagree -- run `npm install`.',
+				);
+			}
 		}
 	}
 });
 
 test('lockfile resolves each tree-wide pin everywhere it is not carved out', () => {
-	// A tree-wide override applies at every depth, so checking only the hoisted
-	// `node_modules/<name>` copy would miss drift in a package that npm placed
-	// solely under a parent -- and would skip the check entirely, silently, for a
-	// package that never hoists.
+	// A tree-wide override applies at every depth, and the root `node_modules/<name>`
+	// copy may belong to a carve-out (see findPinnedDependencies), so this checks the
+	// copy each dependent actually loads rather than any one path.
+	const dependencies = findPinnedDependencies();
 	for (const [name, version] of topLevel) {
-		const entries = lockEntriesFor(name);
+		const governed = dependencies.filter((dep) => dep.name === name && dep.carveOut === null);
 		assert.ok(
-			entries.length > 0,
-			`package.json pins "${name}" to ${version} but the lockfile resolves it nowhere. ` +
-				'The pin is vestigial -- drop it, and its ADVISORY_FLOORS entry, once the ' +
-				'dependency is genuinely gone.',
+			governed.length > 0,
+			`package.json pins "${name}" to ${version} but nothing in the lockfile depends on it ` +
+				'outside a carve-out. The pin is vestigial -- drop it, and its ADVISORY_FLOORS ' +
+				'entry, once the dependency is genuinely gone.',
 		);
-
-		for (const { path, parent, version: resolved } of entries) {
-			// A nested carve-out is a deliberate exemption from the tree-wide version;
-			// the carve-out tests above own it.
-			if (parent && overrides[parent]?.[name]) continue;
-
+		for (const { from, resolvedPath, version: resolved } of governed) {
 			assert.equal(
 				resolved,
 				version,
-				`lockfile resolves ${path} to ${resolved}, but package.json pins "${name}" to ` +
+				`${from} loads ${resolvedPath} at ${resolved}, but package.json pins "${name}" to ` +
 					`${version}. Either package.json and package-lock.json disagree -- run ` +
-					'`npm install` -- or this copy needs a deliberate nested carve-out.',
+					'`npm install` -- or this dependent needs a deliberate nested carve-out.',
 			);
 		}
 	}
