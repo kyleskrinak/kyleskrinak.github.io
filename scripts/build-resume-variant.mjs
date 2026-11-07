@@ -19,9 +19,8 @@
  * only the bullets bullet_order lists, in its order. It changes
  * nothing else: Manager Tools puts no headline, no skills list and no
  * certifications on a resume (docs/references/manager-tools-rubric.md), so a
- * variant keeps the published name line, and the resume frontmatter's
- * skills_inventory never renders, in a variant or anywhere else. Headings, which
- * carry each role's admin line, and scope paragraphs are never removed. The
+ * variant keeps the published name line. Headings, which carry each role's
+ * admin line, and scope paragraphs are never removed. The
  * one-page gate and content verification in resume-render.mjs run after the
  * transform.
  */

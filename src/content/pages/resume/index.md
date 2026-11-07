@@ -17,100 +17,6 @@ current_role:
   employer_url: https://www.gilead.com/
   location: Raleigh, NC
   start_date: 2022-06-01
-skills_inventory:
-  last_reviewed: 2026-07-06
-  categories:
-    - name: Leadership & Team Development
-      id: leadership
-      skills:
-        - Technical Leadership
-        - Team Management
-        - Vendor Management
-        - Contractor Leadership
-        - Delegation Frameworks
-        - Cross-Functional Alignment
-        - Stakeholder Management
-        - Mentoring
-    - name: Platform Operations
-      id: platform-ops
-      skills:
-        - Site Reliability
-        - Incident Management
-        - Production Operations
-        - Change Management
-        - Release Management
-        - Service Delivery
-        - Operational Governance
-        - Runbook Development
-    - name: Cloud & Infrastructure
-      id: cloud-infrastructure
-      skills:
-        - Microsoft Azure
-        - Amazon Web Services (AWS)
-        - AKS
-        - ECS
-        - Cloud Architecture
-        - Infrastructure Modernization
-        - SSL Certificate Management
-        - DNS Management
-    - name: DevOps & Automation
-      id: devops-automation
-      skills:
-        - Azure DevOps
-        - CI/CD
-        - Git
-        - Infrastructure as Code
-        - Terraform
-        - Automation Design
-        - Workflow Optimization
-        - Deployment Engineering
-    - name: Cost Optimization & FinOps
-      id: cost-optimization
-      skills:
-        - FinOps
-        - Azure Cost Management
-        - Reserved Instances
-        - Resource Optimization
-        - Cloud Financial Governance
-        - Capacity Planning
-        - Cost Reporting
-    - name: Search & Content Platforms
-      id: search-content-platforms
-      skills:
-        - Sitecore
-        - Solr
-        - SolrCloud
-        - Content Delivery Platforms
-        - Search Architecture
-        - CMS Operations
-    - name: Security & Compliance
-      id: security-compliance
-      skills:
-        - Security Reviews
-        - Risk Assessment
-        - Compliance Governance
-        - Crown Jewels Assessments
-        - Privacy Controls
-        - Audit Support
-        - Certificate Governance
-    - name: Documentation & Process Excellence
-      id: documentation-process
-      skills:
-        - Technical Documentation
-        - SOP Development
-        - Knowledge Management
-        - Process Improvement
-        - Governance Frameworks
-        - Operational Standards
-    - name: AI & Productivity Enablement
-      id: ai-productivity
-      skills:
-        - Microsoft Copilot
-        - AI Adoption
-        - Prompt Engineering
-        - AIOps
-        - Process Automation
-        - Productivity Engineering
 education:
   items:
     - degree: Master of Science, Information Technology
@@ -125,56 +31,18 @@ education:
       location: Philadelphia, PA
       years: "1980 – 1984"
       render: true
-changelog:
-  - date: 2026-07-03
-    entry: Initial migration from Google Doc snapshot
-  - date: 2026-07-06
-    entry: >-
-      Migration complete — this file is the canonical resume source. The web
-      page (/resume/), the print route (/resume/print/), and the
-      build-generated PDF all render from it; the Google Doc is retired as a
-      source and is no longer maintained.
-  - date: 2026-07-06
-    entry: Populated skills inventory (9 categories), certifications, and education metadata
-  - date: 2026-07-06
-    entry: >-
-      Phase B — facet tagging: added <!-- f: … --> comments to all 10 bullets and 5 scope
-      paragraphs; wired remark-facets plugin; migrated remark/rehype plugins to unified()
-      processor in astro.config.ts.
-  - date: 2026-10-05
-    entry: >-
-      Restored current_role, skills_inventory, education, and this change log.
-      Commit dc8069e removed all four while moving certifications to
-      scripts/data/certifications.json; only the certifications move was
-      intended. Certifications stay in that file.
-  - date: 2026-10-25
-    entry: >-
-      Removed certifications from the repo: Manager Tools puts none on a
-      resume, tailored variants included. scripts/data/certifications.json and
-      the variant builder's certification section are gone.
-  - date: 2026-10-27
-    entry: >-
-      Manager Tools revision: retitled current_role; split Duke into three
-      roles; rewrote the Gilead scope paragraph and bullets to lead with
-      results, adding the Sectigo and SolrCloud bullets; added a Hachette
-      scope paragraph; rewrote the Skrinak Creative scope paragraph and the
-      Skrinak Creative, Litho and Hachette bullets; tightened The Stat Store
-      paragraph; dropped the M.S. honors line and restored the Manager, IT
-      bullet on 80+ concurrent projects in its place. In print, the name and the admin
-      line's bold segments now set in Arial Bold, the admin-line bold at
-      10.5pt (Kyle's exception to the 11pt floor), and the render gate now
-      covers admin lines as well as bullets.
 ---
 
 <!-- current-role -->
 
-Lead a team of 12 offshore IT contractors supporting static, LAMP, .NET, and Sitecore CMS platforms for ~200 highly visible, policy-sensitive pharmaceutical websites. Own platform operations and the standard operating procedures for deployment, monitoring, disaster recovery, and change management, partnering with Architecture, Development, Security, and Cloud DevOps. Govern a deployment calendar averaging 30 releases per week across UAT and production. Continuously harden the platform against ~1,400 reported CVEs across ~30 domains built by a mix of agencies and contractors, using an AI agent on an automated weekly pipeline to find exposures before outside notification. <!-- f: leadership, platform-ops, security -->
+Lead an offshore IT contractor team supporting static, LAMP, .NET, and Sitecore CMS platforms for a large portfolio of highly visible, policy-sensitive pharmaceutical websites. Own platform operations and their standard operating procedures, partnering with Architecture, Development, and Cloud DevOps. Co-author and deliver Sitecore platform governance, from deployment authority to go-live. Govern a high-volume deployment calendar across UAT and production. Direct vulnerability remediation with Security, finding exposures early through automated, AI-assisted detection. <!-- f: leadership, platform-ops, security -->
 
-- Cut Azure hosting run-rate 28.7% (~$328K/year) by retiring legacy infrastructure, right-sizing, and reserving capacity. <!-- f: cost, platform-ops -->
-- Maintained ~99.99% availability across ~200 production websites by monitoring the stack ahead of issues. <!-- f: platform-ops, delivery -->
-- Migrated ~800 certificates to Sectigo on time against a 3-week deadline by coordinating cloud and application teams. <!-- f: security, delivery -->
-- Moved ~30 websites off a legacy EC2 environment to containerized AWS ECS/Fargate on schedule. <!-- f: platform-ops, delivery -->
-- Eliminated Sitecore search's single point of failure with clustered SolrCloud on AKS, load-tested to 500 users. <!-- f: platform-ops -->
+- Cut Azure hosting run-rate 28.7% by retiring legacy infrastructure, right-sizing, and reserving capacity. <!-- f: cost, platform-ops -->
+- Sustained ~99.99% availability across the website portfolio by monitoring the stack ahead of issues. <!-- f: platform-ops, delivery -->
+- Led a large-scale certificate migration to Sectigo on time against an accelerated deadline. <!-- f: security, delivery -->
+- Moved websites off a legacy EC2 environment to containerized AWS ECS/Fargate on time. <!-- f: platform-ops, delivery -->
+- Migrated Sitecore deployments from Azure DevOps to GitHub Actions and JFrog Artifactory on time. <!-- f: platform-ops, delivery -->
+- Delivered highly available Sitecore search on time and validated it under load. <!-- f: platform-ops -->
 
 ## Senior Manager, Web Development
 
