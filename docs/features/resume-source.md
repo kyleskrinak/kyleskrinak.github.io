@@ -10,7 +10,7 @@ This document records **which field populates which output**, so a future edit d
 
 The resume gets revisited quarterly. Structured fields exist so a quarterly edit changes a fact in **one** place and every render follows. They are not a duplicate of the body text awaiting cleanup.
 
-Commit `dc8069e` deleted `current_role`, `skills_inventory`, `education`, and the change log while moving certifications out to `scripts/data/certifications.json`. **Only the certifications move was intended.** The other four deletions were accidental and were restored on 2026-10-05. Do not "clean up" these fields as redundant — the sections below are what reads them. Certifications have since left the repo altogether: Manager Tools puts none on a resume (see [Certifications](#certifications--on-no-resume) below).
+Commit `dc8069e` deleted `current_role`, `skills_inventory`, `education`, and the change log while moving certifications out to `scripts/data/certifications.json`. **Only the certifications move was intended.** The other four deletions were accidental and were restored on 2026-10-05. Do not "clean up" `current_role` or `education` as redundant — the sections below are what reads them. Certifications have since left the repo altogether: Manager Tools puts none on a resume (see [Certifications](#certifications--on-no-resume) below). The skills inventory and the change log left on 2026-11-07: neither rendered anywhere, and both records now stay outside this repo (see [Skills inventory and change log](#skills-inventory-and-change-log--outside-this-repo) below).
 
 ## Placeholder expansion
 
@@ -19,9 +19,9 @@ The body carries top-level HTML comment placeholders where a data-driven section
 ```markdown
 <!-- current-role -->
 
-Lead a team of 12 offshore IT contractors… <!-- f: leadership, platform-ops -->
+Lead an offshore IT contractor team… <!-- f: leadership, platform-ops, security -->
 
-- Cut Azure hosting run-rate 24.5%… <!-- f: cost, platform-ops -->
+- Cut Azure hosting run-rate 28.7%… <!-- f: cost, platform-ops -->
 
 ## Senior Manager, IT
 …
@@ -137,34 +137,19 @@ The opt-in default is deliberate, and it is why the field is a boolean rather th
 
 Each education heading gets its id from the same `headingIds()` pass as the job headings, so the id slugs the whole line (`ms-it-rochester-institute-of-technology--rochester-ny--1998--2001`). Education carries no bullets, so no variant config needs one.
 
-### `skills_inventory` — a record, rendered nowhere
+### Skills inventory and change log — outside this repo
 
-The nine categories render nowhere, a tailored variant included: Manager Tools puts no skills list on a resume and names a required technology inside an accomplishment instead. The inventory stays in the frontmatter as a record, and the quarterly review still checks it.
-
-`last_reviewed` is the quarterly-review marker, maintained by hand.
+Both records left the frontmatter on 2026-11-07, and both stay outside this repo. Neither rendered anywhere, a tailored variant included: Manager Tools puts no skills list on a resume and names a required technology inside an accomplishment instead. The quarterly review still checks both.
 
 ### `description` — the career summary only
 
 `resumeMetaDescription()` composes the meta description as `current_role.title` + `". "` + `description`. The role sentence therefore must **not** be repeated in `description`; that field carries only the career summary no structured field can derive.
-
-### `changelog` — a record, not a render
-
-Nothing renders it. It documents what changed and why, which is how the `dc8069e` accident above is now traceable from the source file itself.
 
 ### Certifications — on no resume
 
 Manager Tools puts no certifications on a resume, tailored variants included; a certification a posting requires goes in the cover letter, which stays outside this repo. **Keep certification information out of the resume source.** `scripts/data/certifications.json` and the variant builder's certification section are gone.
 
 `src/content.config.ts` carries **no `certifications` block**, and that absence is deliberate: the resume frontmatter has no such key, so a schema block would validate nothing.
-
-## Two vocabularies, deliberately separate
-
-| Vocabulary | Where defined | Count | Purpose |
-|---|---|---|---|
-| `FACETS` | `src/lib/remark-facets.mjs` | 7 | Tags body bullets and scope paragraphs (`<!-- f: leadership, cost -->`) so variants can filter them. |
-| `skills_inventory.categories[].id` | the resume frontmatter | 9 | Names a block of the skills inventory, which renders nowhere. |
-
-These overlap in wording (`leadership`, `platform-ops`) and **are not the same list**. A facet answers "does this bullet belong in this variant?"; a category id only labels part of the inventory. Do not reconcile them, and do not validate one against the other.
 
 ## Quarterly review
 
@@ -173,8 +158,8 @@ A revision is warranted by a role or title change, a completed project worth cit
 | Checkbox | What to edit |
 |---|---|
 | Update achievements and metrics | body bullets, with `<!-- f: … -->` tags |
-| Review skills inventory and last-reviewed date | `skills_inventory` |
-| Verify the change log entry | `changelog` |
+| Review skills inventory and last-reviewed date | the skills inventory, outside this repo |
+| Verify the change log entry | the change log, outside this repo |
 | Confirm web and print renders match | `npm run build`, then review `/resume/` and the PDF; check the .docx and .txt in an applicant tracking system's upload preview |
 
 ## Verifying a change

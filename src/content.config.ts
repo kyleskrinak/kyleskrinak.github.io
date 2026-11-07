@@ -164,21 +164,6 @@ const pages = defineCollection({
             start_date: z.coerce.date(),
           })
           .optional(),
-        skills_inventory: z
-          .object({
-            last_reviewed: z.coerce.date(),
-            categories: z.array(
-              z.object({
-                name: z.string().trim().min(1),
-                id: z
-                  .string()
-                  .trim()
-                  .regex(/^[a-z0-9-]+$/),
-                skills: z.array(z.string().trim().min(1)).min(1),
-              })
-            ),
-          })
-          .optional(),
         // No `certifications` here by decision: Manager Tools puts no
         // certifications on a resume, tailored variants included
         // (docs/references/manager-tools-rubric.md).
@@ -202,14 +187,6 @@ const pages = defineCollection({
               })
             ),
           })
-          .optional(),
-        changelog: z
-          .array(
-            z.object({
-              date: z.coerce.date(),
-              entry: z.string().trim().min(1),
-            })
-          )
           .optional(),
       })
       // SITE-OVERRIDE: hero-image format rules on pages.
