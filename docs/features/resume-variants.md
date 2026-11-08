@@ -82,7 +82,7 @@ npm run resume:variant -- --variant ~/resume-variants/platform-ops.json --output
 Pass `--formats` to write a subset, as a comma-separated list of `pdf`, `docx` and `txt`:
 
 ```bash
-npm run resume:variant -- --variant platform-ops --formats pdf,docx
+RESUME_VARIANTS_DIR=~/resume-variants npm run resume:variant -- --variant platform-ops --formats pdf,docx
 ```
 
 The PDF renders even when `--formats` leaves it out, because the one-page check runs on it.

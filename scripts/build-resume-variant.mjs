@@ -88,19 +88,21 @@ export function parseResumePreviewPort(env = process.env) {
   return parsePreviewPort("RESUME_PREVIEW_PORT", 4323, env);
 }
 
-function resolveConfigPath(nameOrPath) {
+// env is injectable so the unit tests can exercise resolution without touching
+// process.env, as parseResumePreviewPort does.
+export function resolveConfigPath(nameOrPath, env = process.env) {
   if (path.isAbsolute(nameOrPath) || nameOrPath.includes("/") || nameOrPath.includes("\\")) {
     return path.resolve(nameOrPath);
   }
   // Bare name: append .json unless the caller already did (avoids name.json.json).
   const file = nameOrPath.endsWith(".json") ? nameOrPath : `${nameOrPath}.json`;
-  if (!process.env.RESUME_VARIANTS_DIR) {
+  if (!env.RESUME_VARIANTS_DIR) {
     throw new Error(
       `Variant "${nameOrPath}" is a bare name and RESUME_VARIANTS_DIR is unset: ` +
         "set RESUME_VARIANTS_DIR or pass a path to the config"
     );
   }
-  return path.join(process.env.RESUME_VARIANTS_DIR, file);
+  return path.join(env.RESUME_VARIANTS_DIR, file);
 }
 
 function isObject(value) {
