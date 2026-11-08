@@ -2,7 +2,7 @@
 
 The resume lives in exactly one file: `src/content/pages/resume/index.md`. Its frontmatter holds structured career data; its body holds hand-written prose. Everything downstream — the web page, the print route, the canonical PDF and its .docx and .txt copies, the content linter, and every tailored variant — reads that one file. One render of the print route writes all three files: the PDF prints the page, and `scripts/lib/resume-formats.mjs` reads the .docx and .txt content out of the same laid-out page, so the three cannot disagree.
 
-This document records **which field populates which output**, so a future edit does not have to infer the architecture from the code. For how a revision proceeds — editing cadence, register, the one-page constraint, and which calls are Kyle's — see the `resume-workflow` skill in `.claude/skills/`.
+This document records **which field populates which output**, so a future edit does not have to infer the architecture from the code.
 
 **The governing invariant: one source, two renderings.** The web page and the print output derive from the same file. A change that lands in one and not the other is a defect, not a variation.
 
@@ -23,7 +23,7 @@ Lead an offshore IT contractor team… <!-- f: leadership, platform-ops, securit
 
 - Cut Azure hosting run-rate 28.7%… <!-- f: cost, platform-ops -->
 
-## Senior Manager, IT
+## Senior Manager, Web Development
 …
 <!-- education -->
 ```
@@ -68,14 +68,14 @@ Manager Tools puts every role's dates, title, and company on one line and sets t
 The markdown keeps the two lines apart:
 
 ```markdown
-## Senior Manager, IT
+## Manager, IT
 
-**Duke University, Office of Information Technology** — Durham, NC | July 2013 – June 2022
+**Duke University, Trinity Technology Services** — Durham, NC | January 2016 – October 2021
 ```
 
 `src/lib/remark-resume-sections.mjs` joins them after it expands the placeholders:
 
-1. It sets every heading's id first, through `headingIds()`: one github-slugger across every heading level, in document order. A job's id therefore comes from its title alone (`senior-manager-it`), and a date change never moves it. Astro keeps an id a heading already carries.
+1. It sets every heading's id first, through `headingIds()`: one github-slugger across every heading level, in document order. A job's id therefore comes from its title alone (`manager-it`), and a date change never moves it. Astro keeps an id a heading already carries.
 2. It then replaces each employer-line paragraph and the `##` heading above it with one `h2` built from `adminLineSegments()`. The dates, title, and company become `strong`, which `src/styles/resume.css` bolds.
 
 The fold exists once. `renderedHeadings()`, exported from the same module, parses the expanded markdown with `fromMarkdown` and runs that fold over it, and `resume-render.mjs` checks the printed page for each heading it returns, so PDF verification covers every role's full admin line. The fold throws on an employer line that does not sit directly below a `##` heading (blank lines aside), so a misplaced line fails the build instead of printing a role with no dates.
