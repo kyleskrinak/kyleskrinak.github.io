@@ -33,9 +33,9 @@ Then restructure the resume with this workflow:
 {
   "include_facets": ["platform-ops", "leadership", "cost"],
   "bullet_order": [
-    "senior-it-systems-engineering-manager-digital-experience/2",
-    "senior-manager-it/0",
-    "senior-it-systems-engineering-manager-digital-experience/0"
+    "senior-manager-digital-experience-platform-operations/1",
+    "manager-it/1",
+    "senior-manager-digital-experience-platform-operations/0"
   ]
 }
 ```
@@ -52,9 +52,9 @@ Any other key fails validation. That includes the retired `title`, `max_bullets_
 
 ## Choosing bullets with `bullet_order`
 
-- `bullet_order` is one ranked list for the whole page. Each item names one bullet as `"<entry id>/<n>"`, so `"senior-manager-it/0"` is that role's first bullet.
+- `bullet_order` is one ranked list for the whole page. Each item names one bullet as `"<entry id>/<n>"`, so `"manager-it/0"` is that role's first bullet.
 - The entry id is the `id` of a rendered resume `h2`. The builder derives the valid set from the expanded resume source through `headingIds()` in `src/lib/resume-sections.mjs`, the function that also sets the page's ids, so a renamed role cannot leave a stale item behind.
-- A job's id comes from its title alone (`senior-manager-it`). The dates and company fold into the heading after the id is set, so a config survives a date change. Renaming a title changes its id.
+- A job's id comes from its title alone (`manager-it`). The dates and company fold into the heading after the id is set, so a config survives a date change. Renaming a title changes its id.
 - `n` counts the entry's bullets as written in the resume source, starting at 0, before any facet filter. An index past the end, a duplicate item, or an item naming a bullet the facets exclude fails the build.
 - Each bullet stays under its own entry; the list's order sets the order within each entry. Entries keep their resume order.
 - An unlisted bullet drops. An entry the list never names keeps its heading and scope, loses every bullet, and prints a warning in the terminal.
@@ -63,14 +63,15 @@ Any other key fails validation. That includes the retired `title`, `max_bullets_
 ## Build a variant
 
 ```bash
-npm run resume:variant -- --variant platform-ops
+RESUME_VARIANTS_DIR=~/resume-variants npm run resume:variant -- --variant platform-ops
 ```
 
 Config resolution order:
 
 1. Literal path, absolute or containing a path separator.
 2. `$RESUME_VARIANTS_DIR/<name>.json`.
-3. `~/Claude/Projects/KDS Resume/variants/<name>.json`.
+
+A bare name such as `platform-ops` needs `RESUME_VARIANTS_DIR`. With the variable unset, the builder exits with an error that says to set it or pass a path.
 
 One render writes all three formats, so they carry the same content. By default the builder writes `<variant>.pdf`, `<variant>.docx` and `<variant>.txt` next to the variant config. Pass `--output` to name the PDF somewhere else; the other two go beside it under the same base name. `--output` must end in `.pdf`:
 

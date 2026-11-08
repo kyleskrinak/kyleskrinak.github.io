@@ -13,7 +13,7 @@
  * Config resolution order:
  *   1. Literal path (absolute or contains path separator)
  *   2. $RESUME_VARIANTS_DIR/<name>.json
- *   3. ~/Claude/Projects/KDS Resume/variants/<name>.json
+ * A bare name with RESUME_VARIANTS_DIR unset is an error.
  *
  * The DOM transform filters li[data-facets] bullets per facet rules and keeps
  * only the bullets bullet_order lists, in its order. It changes
@@ -26,7 +26,6 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fromMarkdown } from "mdast-util-from-markdown";
@@ -95,10 +94,13 @@ function resolveConfigPath(nameOrPath) {
   }
   // Bare name: append .json unless the caller already did (avoids name.json.json).
   const file = nameOrPath.endsWith(".json") ? nameOrPath : `${nameOrPath}.json`;
-  if (process.env.RESUME_VARIANTS_DIR) {
-    return path.join(process.env.RESUME_VARIANTS_DIR, file);
+  if (!process.env.RESUME_VARIANTS_DIR) {
+    throw new Error(
+      `Variant "${nameOrPath}" is a bare name and RESUME_VARIANTS_DIR is unset: ` +
+        "set RESUME_VARIANTS_DIR or pass a path to the config"
+    );
   }
-  return path.join(os.homedir(), "Claude", "Projects", "KDS Resume", "variants", file);
+  return path.join(process.env.RESUME_VARIANTS_DIR, file);
 }
 
 function isObject(value) {
@@ -113,14 +115,14 @@ function throwValidationError(label, errors) {
 
 // A bullet_order item: "<entry id>/<n>", where n counts that entry's bullets as
 // written, from 0. A heading slug never carries a slash, and the index takes no
-// leading zero, so "senior-manager-it/01" cannot dodge the duplicate check.
+// leading zero, so "manager-it/01" cannot dodge the duplicate check.
 const BULLET_KEY_RE = /^([^/]+)\/(0|[1-9]\d*)$/;
 
 function parseBulletKey(key) {
   const match = typeof key === "string" ? BULLET_KEY_RE.exec(key) : null;
   if (!match) {
     throw new Error(
-      `bullet_order: ${JSON.stringify(key)} must be "<entry id>/<n>", as in "senior-manager-it/0"`
+      `bullet_order: ${JSON.stringify(key)} must be "<entry id>/<n>", as in "manager-it/0"`
     );
   }
   return { key, entryId: match[1], index: Number(match[2]) };
@@ -311,7 +313,13 @@ async function main() {
     process.exit(2);
   }
 
-  const configPath = resolveConfigPath(args.variant);
+  let configPath;
+  try {
+    configPath = resolveConfigPath(args.variant);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
   if (!existsSync(configPath)) {
     console.error(`Variant config not found: ${configPath}`);
     process.exit(2);
