@@ -46,7 +46,7 @@ Lead an offshore IT contractor team supporting static, LAMP, .NET, and Sitecore 
 
 ## Senior Manager, Web Development
 
-**Duke University, Office of IT** — Durham, NC | November 2021 – May 2022
+**Duke University, Office of IT** — Durham, NC | October 2021 – May 2022
 
 Led a consolidated team of 8 Drupal developers after Duke realigned web development into central IT. Ran two platforms: a self-serve, headless, containerized Drupal distribution and out-of-the-box Drupal with a highly customized theme. <!-- f: leadership, web-dev -->
 
@@ -63,7 +63,7 @@ Managed a team of up to 7 developers and IT analysts supporting 150+ department,
 
 ## Team Lead
 
-**Duke University, Trinity Technology Services** — Durham, NC | July 2013 – December 2015
+**Duke University, Trinity Technology Services** — Durham, NC | July 2013 – January 2016
 
 Led two Drupal developers and a programmer supporting Trinity College of Arts & Sciences websites. <!-- f: leadership, web-dev -->
 
