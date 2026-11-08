@@ -1,11 +1,13 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Script, createContext } from 'node:vm';
+import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import {
 	validateConfig,
 	parseResumePreviewPort,
 	buildTransform,
+	resolveConfigPath,
 } from '../../scripts/build-resume-variant.mjs';
 
 const knownEntryIds = new Set([
@@ -247,5 +249,48 @@ describe('parseResumePreviewPort', () => {
 			() => parseResumePreviewPort({ RESUME_PREVIEW_PORT: 'abc' }),
 			/Invalid RESUME_PREVIEW_PORT/,
 		);
+	});
+});
+
+describe('resolveConfigPath', () => {
+	const dir = path.join(path.sep, 'variants');
+
+	it('rejects a bare name when RESUME_VARIANTS_DIR is unset or empty', () => {
+		for (const env of [{}, { RESUME_VARIANTS_DIR: '' }]) {
+			assert.throws(
+				() => resolveConfigPath('platform-ops', env),
+				/"platform-ops" is a bare name and RESUME_VARIANTS_DIR is unset: set RESUME_VARIANTS_DIR or pass a path to the config/,
+			);
+		}
+	});
+
+	it('resolves a bare name through RESUME_VARIANTS_DIR', () => {
+		assert.equal(
+			resolveConfigPath('platform-ops', { RESUME_VARIANTS_DIR: dir }),
+			path.join(dir, 'platform-ops.json'),
+		);
+	});
+
+	it('does not append a second .json to a bare name that carries one', () => {
+		assert.equal(
+			resolveConfigPath('platform-ops.json', { RESUME_VARIANTS_DIR: dir }),
+			path.join(dir, 'platform-ops.json'),
+		);
+	});
+
+	it('resolves a relative path against the working directory, ignoring the variable', () => {
+		for (const env of [{}, { RESUME_VARIANTS_DIR: dir }]) {
+			assert.equal(
+				resolveConfigPath('configs/platform-ops.json', env),
+				path.resolve('configs/platform-ops.json'),
+			);
+		}
+	});
+
+	it('returns an absolute path unchanged, ignoring the variable', () => {
+		const absolute = path.join(path.sep, 'elsewhere', 'platform-ops.json');
+		for (const env of [{}, { RESUME_VARIANTS_DIR: dir }]) {
+			assert.equal(resolveConfigPath(absolute, env), absolute);
+		}
 	});
 });

@@ -1,6 +1,6 @@
 # Manager Tools Resume Rubric
 
-**Canonical reference.** This file is the single source of truth for the Manager Tools resume format used across this repo's resume workflow, linting, and the KDS Resume claude.ai project. Update here; all other surfaces point to this file.
+**Canonical reference.** This file is the single source of truth for the Manager Tools resume format used across this repo's resume workflow and linting. Update here; all other surfaces point to this file.
 
 Labels: **[MT]** marks official Manager Tools / Career Tools guidance and names the cast. **[Kyle]** marks Kyle's decision, which overrides MT. **[House]** marks a repo convention that MT doesn't address. When MT and a house rule conflict, MT wins and the house rule changes.
 
@@ -97,6 +97,6 @@ Write the resume yourself. After that, AI can proofread (review each correction)
 
 Each job entry: admin line, responsibilities paragraph, then accomplishment bullets in verb/result/method form.
 
-`scripts/lint-resume.mjs` checks each bullet for a measure, active voice, and no "we", plus the house banned-phrase list. `scripts/lib/resume-render.mjs` fails a print render when any bullet or admin line runs past one line or the page runs past one, and writes the .docx and .txt for ATS uploads from the same render. `resume-workflow/SKILL.md` governs editing cadence and register. `docs/features/resume-source.md` maps frontmatter fields to outputs.
+`scripts/lint-resume.mjs` checks each bullet for a measure, active voice, and no "we", plus the house banned-phrase list. `scripts/lib/resume-render.mjs` fails a print render when any bullet or admin line runs past one line or the page runs past one, and writes the .docx and .txt for ATS uploads from the same render. `docs/features/resume-source.md` maps frontmatter fields to outputs.
 
 Rules marked [MT] paraphrase Career Tools shownotes; this file doesn't reproduce them.
