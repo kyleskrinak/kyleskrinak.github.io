@@ -12,28 +12,11 @@ DO NOT read or reference files in:
 
 ---
 
-# ⚠️ CRITICAL: Following Instructions
+# Working Rules
 
-**READ THIS FIRST. Read instructions exactly. Do what they say. Nothing more, nothing less.**
+The general working rules (Following Instructions, the Blocker Resolution Protocol, Communication Style and Instruction Precedence) live in `~/.claude/CLAUDE.md`, which loads in every project. This file adds the repo's own rules.
 
-When I say:
-- **"Review X"** → Read, analyze, report findings. DO NOT fix anything.
-- **"Review and discuss"** → Read, analyze, report findings, WAIT for my response. DO NOT take action.
-- **"Fix X"** → Make the changes.
-- **"Review X then fix Y"** → Review first, report findings, THEN fix Y. Two separate steps.
-
-**Before taking ANY action (editing files, committing, pushing):**
-- Check: Did I explicitly ask you to do this action?
-- If I asked to "review" or "discuss" → STOP. Report findings. Wait.
-- If I asked to "fix" or "implement" → Proceed with edits only.
-- **Hard gate for sensitive actions:** use deny-by-default for `commit`, `push`, branch-changing git actions, and destructive actions.
-- **Exact approval required per action:** "fix" ≠ "commit" ≠ "push". Do not infer one from another.
-- **Fail closed:** if explicit approval for the exact action is missing or ambiguous, STOP.
-- **Workflow exception:** when the user requests a workflow that inherently includes commit/push steps (e.g., "fix and update branches", "apply the fix and push"), those steps are pre-approved by the workflow request. The gate blocks uninstructed ad-hoc actions, not steps implied by an explicitly requested workflow. Standing exception: the post-promotion sync (Git Workflow) runs automatically, without a request, whenever a sync is pending and the current branch is `develop`.
-
-**Never guess what I want. Never add unrequested complexity. Never skip requested discussion.**
-
-If my instruction is unclear, ask what I want. Don't assume.
+**Standing exception to the approval gates:** the post-promotion sync (Git Workflow) runs automatically, without a request, whenever a sync is pending and the current branch is `develop`.
 
 ---
 
@@ -81,19 +64,6 @@ Automatic mode covers only this fast-forward sequence. Any failure, including an
 
 PR review fixes go to the **PR's HEAD branch**, not develop. "Update X" means edit the file — does not imply commit.
 
-## Blocker Resolution Protocol
-
-When any operation fails (exit code != 0): **STOP**, report what failed + current state + error output, present options, wait for explicit direction.
-
-**Blockers:** git failures, non-zero exit codes, build/test failures, file operation errors.
-**Not blockers:** warnings, deprecation notices, advisory output.
-
-**Never auto-retry.** Example: `Push failed: network timeout — commit ad88b33 local only. Retry / push manually / amend?`
-
-On background task failure: report immediately, don't start new work until resolved.
-
-User override: "continue anyway" or "ignore the error" — confirm: `Proceeding with [task] despite [blocker]. [Consequence].`
-
 ## Verification Protocol
 
 After any code change:
@@ -121,33 +91,14 @@ Fix the **pattern** (all instances of the same issue class), not just the one fl
 
 If stuck in 10+ rounds of similar fixes or environment-specific drift: STOP. Propose a root-cause abstraction before addressing individual lines.
 
-## Communication Style
-- Provide clear, numbered steps for complex tasks
-- State assumptions upfront
-- Ask clarifying questions before exploration
-- Ask before reading files >500 lines; read only files directly relevant to the current task
-- Summarize findings in <100 words when possible
-- Skip unnecessary engagement phrases ("You're right!", "Perfect!", "Good catch!")
-- No anthropomorphizing qualifiers ("Honestly…", "To be frank…", "I should mention…") — just state facts directly
-- Be direct and concise — just state what you're doing or what needs to be done (but ONLY if I asked you to do it)
-- **Exception:** Blocker reporting requires verbose detail (state, options, consequences) per Blocker Resolution Protocol
-
 ## Blog Prose
 - Do not rewrite my narrative voice or "improve" my style.
 
 ## Instruction Precedence
 
-When instructions appear to conflict:
-
-1. **Safety first:** Blocker Resolution Protocol overrides all other instructions
-2. **Category rules:** Infrastructure rules override MVP rules for:
-   - Configuration files (astro.config.ts, astro-paper.config.ts, src/site-config.ts)
-   - Build scripts, CI/CD workflows
-   - Test files and test infrastructure
-3. **Source hierarchy:** CLAUDE.md overrides Memory (Memory may be outdated)
-4. **User authority:** User explicit instructions override general written rules — approval gates are satisfied by explicit per-action user instruction (which is the override mechanism, not a bypass)
-5. **Scope sensitivity:** Some rules are scope-dependent (e.g., quality gates for code vs docs)
-
-**Approval gates are hard stops.** Bias-to-action, autonomy/autopilot mode, and end-to-end completion drive do not override them. Re-check before each gated action. Missing approval means do not execute. (Exceptions: steps implied by an explicitly requested workflow are pre-approved, and so is the automatic post-promotion sync — see workflow exception above.)
+In addition to the general order in `~/.claude/CLAUDE.md`, infrastructure rules override MVP rules for:
+- Configuration files (astro.config.ts, astro-paper.config.ts, src/site-config.ts)
+- Build scripts, CI/CD workflows
+- Test files and test infrastructure
 
 <!-- Keep total CLAUDE.md under 200 lines -->
