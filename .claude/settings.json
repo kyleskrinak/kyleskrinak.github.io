@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(gh repo view *)",
-      "Bash(ls -1 ~/.claude/projects/-Users-kyleskrinak-Documents-astro-blog/memory/ 2>&1 *)",
+      "Bash(ls -1 ~/.claude/projects/-Users-kyleskrinak-astro-blog/memory/ 2>&1 *)",
       "Read(//Users/kyleskrinak/.claude/**)"
     ]
   },
