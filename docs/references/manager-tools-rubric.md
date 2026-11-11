@@ -34,7 +34,7 @@ Sources: Career Tools shownotes, read with a Career Tools license on 2026-10-24,
 - **Education after experience:** degree, school, dates. [MT: Sample]
 - **Continuing education:** list an item only if it's directly relevant to the target role, still relevant if older than about two years, and widely recognized in the industry. Three items at most. A course shows learning, not ability. [MT: RU20, Stinks]
 - **Certifications:** No certifications on any resume, tailored variants included. A certification the posting requires goes in the cover letter. [MT: Stinks]
-- **Tailored variants** follow every rule here. They vary only which accomplishments appear. [MT: Accomplishments, Myths]
+- **Tailored variants** follow every rule here. They change which accomplishments appear, never the wording. [MT: Accomplishments, Myths] They also order the bullets by value to the target role, most valuable first. [Kyle]
 
 ## Job Entry Format
 
