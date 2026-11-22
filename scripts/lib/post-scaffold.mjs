@@ -11,6 +11,7 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as prettier from 'prettier';
 import sharp from 'sharp';
+import { SITE_TIMEZONE } from '../../src/site-config.ts';
 
 // The repo's Prettier config. formatPostIndex names this file instead of
 // searching up from the output path, so a post that a test writes to a temp
@@ -23,15 +24,14 @@ export const RASTER_TO_WEBP = new Set(['.jpg', '.jpeg', '.png']);
 export const PASSTHROUGH_IMAGE_EXTS = new Set(['.webp', '.svg', '.gif', '.avif']);
 export const RASTER_SHARP_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 
-// A post's date names the calendar day in Eastern Time, the site's wall-clock
-// zone (SITE_TIMEZONE in src/site-config.ts, a TS module these scripts can't
-// import). Callers store that day as midnight UTC (`${date}T00:00:00.000Z`),
-// because the theme renders post dates in UTC.
-export const POST_DATE_TIMEZONE = 'America/New_York';
-
+// A post's date names the calendar day in the site's wall-clock zone,
+// SITE_TIMEZONE in src/site-config.ts. Node strips that module's types on
+// import; the engines field in package.json requires a Node version that does.
+// Callers store that day as midnight UTC (`${date}T00:00:00.000Z`), because
+// the theme renders post dates in UTC.
 export function todayEasternDate(now = new Date()) {
 	const parts = new Intl.DateTimeFormat('en-US', {
-		timeZone: POST_DATE_TIMEZONE,
+		timeZone: SITE_TIMEZONE,
 		year: 'numeric',
 		month: '2-digit',
 		day: '2-digit',
