@@ -16,12 +16,21 @@ export const RASTER_TO_WEBP = new Set(['.jpg', '.jpeg', '.png']);
 export const PASSTHROUGH_IMAGE_EXTS = new Set(['.webp', '.svg', '.gif', '.avif']);
 export const RASTER_SHARP_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 
-export function todayUTCDate() {
-	const now = new Date();
-	const y = now.getUTCFullYear();
-	const m = String(now.getUTCMonth() + 1).padStart(2, '0');
-	const d = String(now.getUTCDate()).padStart(2, '0');
-	return `${y}-${m}-${d}`;
+// A post's date names the calendar day in Eastern Time, the site's wall-clock
+// zone (SITE_TIMEZONE in src/site-config.ts, a TS module these scripts can't
+// import). Callers store that day as midnight UTC (`${date}T00:00:00.000Z`),
+// because the theme renders post dates in UTC.
+export const POST_DATE_TIMEZONE = 'America/New_York';
+
+export function todayEasternDate(now = new Date()) {
+	const parts = new Intl.DateTimeFormat('en-US', {
+		timeZone: POST_DATE_TIMEZONE,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+	}).formatToParts(now);
+	const part = (type) => parts.find((p) => p.type === type).value;
+	return `${part('year')}-${part('month')}-${part('day')}`;
 }
 
 export function altFromBasename(name) {

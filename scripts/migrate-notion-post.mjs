@@ -45,7 +45,7 @@ import { Client } from '@notionhq/client';
 import {
 	SLUG_RE,
 	DATE_PREFIX_RE,
-	todayUTCDate,
+	todayEasternDate,
 	convertImageBuffer,
 	createPostDirectory,
 	writePostIndex,
@@ -256,7 +256,7 @@ const SUPPORTED_BLOCK_TYPES = new Set([
  * write step begins, so a failed fetch never leaves a partial directory to
  * clean up.
  */
-async function fetchContentAndImages(notion, pageId) {
+export async function fetchContentAndImages(notion, pageId) {
 	const blocks = await fetchAllBlocks(notion, pageId);
 	const images = []; // { buffer, name, alt }
 	const lines = [];
@@ -325,6 +325,13 @@ async function fetchContentAndImages(notion, pageId) {
 				const webpBuffer = await convertImageBuffer(buffer);
 				const outName = `image-${images.length + 1}.webp`;
 				images.push({ buffer: webpBuffer, name: outName, alt: captionText });
+				// The first image becomes the frontmatter hero (see main()),
+				// which the post route renders above the body through
+				// PostHero, so a body line for it would show the hero twice.
+				// Later images stay in the body, as in new-post.mjs. The
+				// `continue` also skips the block's trailing blank line below;
+				// Notion image blocks carry no children for that check to miss.
+				if (images.length === 1) continue;
 				// Markdown image alt text follows the same inline-text grammar
 				// as link text, so it needs the same escaping (not just `]`) —
 				// the frontmatter `alt` field above intentionally stays plain.
@@ -422,11 +429,11 @@ async function main() {
 	await writeOutput('title', title);
 
 	const slugStem = slugifyStr(title);
-	// Capture the UTC date once and reuse it everywhere below — calling
-	// todayUTCDate() again later could return a different day if the run
-	// straddles UTC midnight, desyncing the slug from pubDatetime/post-url.
-	const utcDate = todayUTCDate();
-	const slug = `${utcDate}-${slugStem}`;
+	// Capture the Eastern date once and reuse it everywhere below — calling
+	// todayEasternDate() again later could return a different day if the run
+	// straddles Eastern midnight, desyncing the slug from pubDatetime/post-url.
+	const postDate = todayEasternDate();
+	const slug = `${postDate}-${slugStem}`;
 	if (!SLUG_RE.test(slugStem)) {
 		throw new Error(`Derived slug "${slug}" is invalid after slugifying title "${title}".`);
 	}
@@ -463,7 +470,7 @@ async function main() {
 
 		const frontmatter = {
 			title,
-			pubDatetime: `${utcDate}T00:00:00.000Z`,
+			pubDatetime: `${postDate}T00:00:00.000Z`,
 			tags: extractTags(page),
 			draft: true,
 			description,

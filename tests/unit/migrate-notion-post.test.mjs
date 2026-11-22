@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import sharp from 'sharp';
 import {
   richTextToMarkdown,
   richTextToPlainText,
@@ -14,6 +15,7 @@ import {
   escapeMarkdownText,
   slugifyStr,
   parseArgs,
+  fetchContentAndImages,
 } from '../../scripts/migrate-notion-post.mjs';
 
 /** Build a minimal Notion rich-text token. */
@@ -274,5 +276,41 @@ describe('parseArgs', () => {
 
   it('throws on an unknown flag', () => {
     assert.throws(() => parseArgs(['--bogus']), /Unknown flag/);
+  });
+});
+
+describe('fetchContentAndImages', () => {
+  const paragraph = (text) => ({
+    type: 'paragraph',
+    has_children: false,
+    paragraph: { rich_text: [rt(text)] },
+  });
+  const image = (url, caption) => ({
+    type: 'image',
+    has_children: false,
+    image: { type: 'external', external: { url }, caption: [rt(caption)] },
+  });
+  const fakeNotion = (blocks) => ({
+    blocks: { children: { list: async () => ({ results: blocks, has_more: false }) } },
+  });
+
+  it('keeps the hero image out of the body and keeps later images in it', async (t) => {
+    const png = await sharp({
+      create: { width: 4, height: 4, channels: 3, background: '#808080' },
+    }).png().toBuffer();
+    t.mock.method(globalThis, 'fetch', async () => new Response(png));
+
+    const { markdown, images } = await fetchContentAndImages(fakeNotion([
+      paragraph('Intro.'),
+      image('https://example.com/hero.jpg', 'Hero alt'),
+      paragraph('Middle.'),
+      image('https://example.com/second.jpg', 'Second alt'),
+    ]), 'page-id');
+
+    assert.deepEqual(
+      images.map((img) => [img.name, img.alt]),
+      [['image-1.webp', 'Hero alt'], ['image-2.webp', 'Second alt']],
+    );
+    assert.equal(markdown, 'Intro.\n\nMiddle.\n\n![Second alt](./image-2.webp)\n');
   });
 });

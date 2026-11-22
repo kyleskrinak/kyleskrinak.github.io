@@ -29,7 +29,7 @@ import {
 	RASTER_TO_WEBP,
 	PASSTHROUGH_IMAGE_EXTS,
 	RASTER_SHARP_EXTS,
-	todayUTCDate,
+	todayEasternDate,
 	altFromBasename,
 	emitImage,
 	createPostDirectory,
@@ -182,7 +182,7 @@ async function main() {
 
 		const frontmatter = {
 			title: deriveTitle(opts.slug),
-			pubDatetime: `${todayUTCDate()}T00:00:00.000Z`,
+			pubDatetime: `${todayEasternDate()}T00:00:00.000Z`,
 			tags: [],
 			draft: true,
 		};
