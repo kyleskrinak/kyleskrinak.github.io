@@ -225,7 +225,8 @@ export function richTextToMarkdown(richText) {
 			// a literal `]` inside one is inert. Wrap the destination in
 			// angle brackets — CommonMark treats a bare destination as
 			// ending at whitespace or an unbalanced `)`, both of which a
-			// real URL can contain.
+			// real URL can contain. writePostIndex() then runs Prettier,
+			// which drops the brackets wherever the URL doesn't need them.
 			if (safeHref) s = `[${s}](<${safeHref}>)`;
 		}
 		return s;

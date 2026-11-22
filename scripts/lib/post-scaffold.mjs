@@ -8,7 +8,14 @@
 import { mkdir, rm, copyFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import * as prettier from 'prettier';
 import sharp from 'sharp';
+
+// The repo's Prettier config. formatPostIndex names this file instead of
+// searching up from the output path, so a post that a test writes to a temp
+// dir still gets the settings that `npm run format:check` applies.
+export const PRETTIER_CONFIG_PATH = fileURLToPath(new URL('../../.prettierrc', import.meta.url));
 
 export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const DATE_PREFIX_RE = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
@@ -103,9 +110,22 @@ export async function createPostDirectory(postDir, writeFn) {
 	}
 }
 
+/**
+ * Formats a post's index.md content with the repo's Prettier config, so a
+ * generated post passes `npm run format:check` (`prettier --check .`) as
+ * written. The scripts' Markdown differs from Prettier's output: they write
+ * `*italic*` where Prettier writes `_italic_`, and wrap every link
+ * destination in angle brackets, which Prettier keeps only for a URL that
+ * holds a space or `)`. Throws when the config file is missing.
+ */
+export async function formatPostIndex(content, indexPath) {
+	const options = await prettier.resolveConfig(indexPath, { config: PRETTIER_CONFIG_PATH });
+	return prettier.format(content, { ...options, filepath: indexPath });
+}
+
 export async function writePostIndex(postDir, frontmatterYaml, body) {
-	const content = `---\n${frontmatterYaml}---\n${body}`;
 	const indexPath = join(postDir, 'index.md');
+	const content = await formatPostIndex(`---\n${frontmatterYaml}---\n${body}`, indexPath);
 	await writeFile(indexPath, content, 'utf8');
 	return indexPath;
 }
