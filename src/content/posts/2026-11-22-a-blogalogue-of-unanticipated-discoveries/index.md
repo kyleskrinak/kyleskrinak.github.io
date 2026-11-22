@@ -10,7 +10,7 @@ tags:
   - career
   - accessibility
   - seo
-draft: true
+draft: false
 description: Since my last post, I rebuilt my resume, fixed my social cards and
   accessibility, learned my theme had started my site as a copy, and left
   IndieWeb.
