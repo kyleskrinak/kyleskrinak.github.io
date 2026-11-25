@@ -14,6 +14,8 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 | `fflate` (under `satori` only) | 0.7.5 | GHSA-px8p-9vwx-vf98 (`unzipSync` infinite loop on malformed ZIP64 archives) | moderate |
 | `flatted` | 3.4.2 | GHSA-25h7-pfq9-p65f, GHSA-rf6f-7fwh-wjgh (DoS, prototype pollution) | high |
 | `brace-expansion` | 5.0.6 | GHSA-jxxr-4gwj-5jf2 (DoS via large numeric range) | moderate |
+| `js-yaml` | 4.3.1 | GHSA-5p4m-2wfm-xmqj (quadratic CPU consumption in `!!omap` resolution) | high |
+| `js-yaml` (under `markdownlint-cli2` only) | 5.5.0 | none: keeps `markdownlint-cli2` on the 5.x release it declares; the advisory covers only 3.x and 4.x | — |
 | `postcss` | 8.5.10 | GHSA-qx2v-qp2m-jg93 (XSS via stringify) | moderate |
 | `postcss-selector-parser` (under `@tailwindcss/typography` only) | 6.1.5 | GHSA-rj75-hqrm-r3gf (quadratic-time CPU exhaustion in flat selector parsing) | moderate |
 
@@ -24,6 +26,7 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 - **`brace-expansion`** — v5 is a recent major across the npm ecosystem (long-stable v1/v2 lineage broken by v5's API changes). Our pin is a patch bump within v5 (`5.0.5` → `5.0.6`), not a cross-major jump, because the dep tree was already resolving to v5 before the pin. No additional consumer-side API risk introduced by the pin itself. During quarterly review, verify no consumer in the tree has regressed to a v4 expectation.
 - **`fast-uri`** — stays on the 3.x line because `ajv` 8, its only dependent, declares `^3.0.1`. 4.2.3 fixes the same advisories, but pinning it would force `ajv` out of range, so decline a Renovate PR that moves this pin to 4.x unless `ajv` itself moves.
 - **`fflate`** — nested carve-out: `satori` 0.63.2 pins 0.7.3 exactly, so the override forces it out of range, and `OUT_OF_RANGE_EXCEPTIONS` records the reviewed reason. 0.7.5 is a patch release on the same line, and `satori`'s own `@shuding/opentype.js` already declares `^0.7.3`. `docx` resolves 0.8.3 on its own and sits outside the carve-out. Remove the override and its exception when `satori` unpins or moves past 0.7.4.
+- **`js-yaml`** — two entries. The tree-wide pin covers `@astrojs/internal-helpers` (under `@astrojs/mdx`), whose `^4.3.0` still admits the vulnerable 4.3.0. `markdownlint-cli2` 0.24.1 pins js-yaml 5.5.0 exactly, and the nested carve-out matches it. Without the carve-out, the tree-wide pin drags `markdownlint-cli2` down to 4.x across a major boundary, which happened in 7568222 and made `npm ls` report ELSPROBLEMS. `tests/unit/overrides-integrity.test.mjs` fails if the carve-out disappears or leaves 5.x. When Renovate bumps `markdownlint-cli2`, move the carve-out to the js-yaml version the new release declares, and decline a Renovate PR that moves the carve-out to 4.x, as PR #372 did. Remove both entries when `@astrojs/internal-helpers` declares `^4.3.1` or later.
 - **`postcss-selector-parser`** — nested carve-out: `@tailwindcss/typography` 0.5.20 pins 6.0.10 exactly, so the override forces it out of range, and `OUT_OF_RANGE_EXCEPTIONS` records the reviewed reason. 6.1.5 stays on the 6.x line the plugin targets. `eslint-plugin-astro` resolves 7.2.1 on its own and sits outside the carve-out. Remove the override and its exception when `@tailwindcss/typography` unpins or moves past 6.1.4.
 
 ## Deliberately deferred
