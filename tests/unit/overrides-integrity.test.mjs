@@ -228,7 +228,7 @@ const findOutOfRange = () => {
  *
  * Where npm puts a copy on disk says nothing about which override governs it: a
  * from-scratch resolve hoists whichever copy npm meets first, and PR #457's lockfile
- * put markdownlint-cli2's js-yaml 5.4.1 at the root `node_modules/js-yaml` and the
+ * put markdownlint-cli2's js-yaml 5.x at the root `node_modules/js-yaml` and the
  * tree-wide 4.3.2 under `@astrojs/mdx`. So this walks the logical tree down from the
  * root instead. npm applies a nested override to its parent's whole subtree ("a
  * child (or grandchild, or great grandchild, etc)", per the npm docs), so a
