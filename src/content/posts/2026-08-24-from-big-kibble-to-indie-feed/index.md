@@ -1,7 +1,7 @@
 ---
 title: "From Big Kibble to Indie Feed"
 pubDatetime: 2026-08-24T00:00:00.000Z
-modDatetime: 2026-11-01T00:00:00.000Z
+modDatetime: 2026-11-25T00:00:00.000Z
 description: "I went looking for what engagement might mean for a personal blog and found a fifteen-year-old movement that had been answering the question the whole time."
 image: ./2026-08-24-cole-architects-dream.webp
 alt: "Thomas Cole painting of an architect reclining on a column capital amid his drawings, looking out over Gothic, Greek, Roman and Egyptian buildings"
@@ -49,6 +49,11 @@ Thanks to this year's process, I now know what these tools are. The risks are re
 The critique of attention capture is a critique of the unwitting, which would be a comfortable place to stand if I could claim it. I can't. Naming a thing has never yet excused me from resisting it. I don't believe the current AI paradigm is sustainable. Leo's question isn't whether to use these tools but what gets built with them, which is the only question I can actually answer from where I sit.
 
 What the Indie Web lacks is the machinery that makes it hard to close a feed. Nothing here is built to hold me. And yet the reading has been better than I anticipated.
+
+> [!NOTE] Postscript
+> Three months in, the bloom came off the IndieWeb rose, and I withdrew on October 31. I kept the parts that strengthened my site. [A Blogalogue of Unanticipated Discoveries](https://kyle.skrinak.com/posts/2026-11-22-a-blogalogue-of-unanticipated-discoveries/#indieweb-oct-31) tells the rest.
+
+_Revised 2026-11-25: added a postscript on leaving the IndieWeb._
 
 ## Notes
 
