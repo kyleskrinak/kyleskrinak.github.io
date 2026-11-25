@@ -58,16 +58,21 @@ const lock = readJson('package-lock.json');
  * GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp) and added
  * markdown-it's, which only the nested markdownlint-cli2 override carries
  * (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q).
+ * fflate (GHSA-px8p-9vwx-vf98) and postcss-selector-parser (GHSA-rj75-hqrm-r3gf)
+ * have nested overrides only: satori and @tailwindcss/typography each pin a
+ * vulnerable copy exactly, and every other dependent already resolves a patched one.
  */
 const ADVISORY_FLOORS = {
 	'fast-uri': '3.1.9',
 	'fast-xml-builder': '1.1.7',
 	'fast-xml-parser': '5.7.0',
+	fflate: '0.7.5',
 	flatted: '3.4.2',
 	'brace-expansion': '5.0.6',
 	'js-yaml': '4.3.1',
 	'markdown-it': '15.0.3',
 	postcss: '8.5.10',
+	'postcss-selector-parser': '6.1.5',
 };
 
 /**
@@ -132,6 +137,22 @@ const OUT_OF_RANGE_EXCEPTIONS = {
 		reason:
 			'0.23.3 pins 15.0.1 exactly; 15.0.3 is the patch release that fixes GHSA-gfr2-rv44-r23c and ' +
 			'GHSA-vfgh-jcmw-g37q. markdownlint-cli2 0.24.0 pins 15.0.3 itself.',
+	},
+	'satori > fflate': {
+		range: '0.7.3',
+		version: '0.7.5',
+		reason:
+			'satori 0.63.2 pins 0.7.3 exactly; 0.7.5 is the patch release that fixes GHSA-px8p-9vwx-vf98 ' +
+			"(unzipSync infinite loop on malformed ZIP64). satori's own @shuding/opentype.js already " +
+			'declares ^0.7.3 and resolves 0.7.5. Drop this when satori unpins.',
+	},
+	'@tailwindcss/typography > postcss-selector-parser': {
+		range: '6.0.10',
+		version: '6.1.5',
+		reason:
+			'@tailwindcss/typography 0.5.20 pins 6.0.10 exactly; 6.1.5 is the oldest release that fixes ' +
+			'GHSA-rj75-hqrm-r3gf (quadratic flat-selector parsing). It stays on the 6.x line the plugin ' +
+			'targets. Drop this when @tailwindcss/typography unpins.',
 	},
 };
 

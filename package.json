@@ -115,6 +115,12 @@
       "js-yaml": "5.4.1",
       "markdown-it": "15.0.3"
     },
-    "postcss": "8.5.33"
+    "postcss": "8.5.33",
+    "satori": {
+      "fflate": "0.7.5"
+    },
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "6.1.5"
+    }
   }
 }

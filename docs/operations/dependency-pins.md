@@ -11,10 +11,12 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 | `fast-uri` | 3.1.9 | GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc (path traversal, host confusion); GHSA-w74x-v6f9-j3xg, GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp (scheme spoofing, path equivalence, host confusion, scheme injection) | high |
 | `fast-xml-builder` | 1.1.7 | GHSA-5wm8-gmm8-39j9 (XML injection via unwanted quotes) | high |
 | `fast-xml-parser` | 5.7.0 | GHSA-gh4j-gqv2-49f6 (XML comment / CDATA injection) | moderate |
+| `fflate` (under `satori` only) | 0.7.5 | GHSA-px8p-9vwx-vf98 (`unzipSync` infinite loop on malformed ZIP64 archives) | moderate |
 | `flatted` | 3.4.2 | GHSA-25h7-pfq9-p65f, GHSA-rf6f-7fwh-wjgh (DoS, prototype pollution) | high |
 | `brace-expansion` | 5.0.6 | GHSA-jxxr-4gwj-5jf2 (DoS via large numeric range) | moderate |
 | `markdown-it` (under `markdownlint-cli2` only) | 15.0.3 | GHSA-r7fv-28h4-cvq7, GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q (quadratic-time DoS: smartquotes, link reference definitions, inline HTML) | high |
 | `postcss` | 8.5.10 | GHSA-qx2v-qp2m-jg93 (XSS via stringify) | moderate |
+| `postcss-selector-parser` (under `@tailwindcss/typography` only) | 6.1.5 | GHSA-rj75-hqrm-r3gf (quadratic-time CPU exhaustion in flat selector parsing) | moderate |
 
 Each pin is set to the **oldest** version that satisfies the advisory, minimizing supply-chain exposure from freshly-published packages.
 
@@ -22,6 +24,8 @@ Each pin is set to the **oldest** version that satisfies the advisory, minimizin
 
 - **`brace-expansion`** — v5 is a recent major across the npm ecosystem (long-stable v1/v2 lineage broken by v5's API changes). Our pin is a patch bump within v5 (`5.0.5` → `5.0.6`), not a cross-major jump, because the dep tree was already resolving to v5 before the pin. No additional consumer-side API risk introduced by the pin itself. During quarterly review, verify no consumer in the tree has regressed to a v4 expectation.
 - **`fast-uri`** — stays on the 3.x line because `ajv` 8, its only dependent, declares `^3.0.1`. 4.2.3 fixes the same advisories, but pinning it would force `ajv` out of range, so decline a Renovate PR that moves this pin to 4.x unless `ajv` itself moves.
+- **`fflate`** — nested carve-out: `satori` 0.63.2 pins 0.7.3 exactly, so the override forces it out of range, and `OUT_OF_RANGE_EXCEPTIONS` records the reviewed reason. 0.7.5 is a patch release on the same line, and `satori`'s own `@shuding/opentype.js` already declares `^0.7.3`. `docx` resolves 0.8.3 on its own and sits outside the carve-out. Remove the override and its exception when `satori` unpins or moves past 0.7.4.
+- **`postcss-selector-parser`** — nested carve-out: `@tailwindcss/typography` 0.5.20 pins 6.0.10 exactly, so the override forces it out of range, and `OUT_OF_RANGE_EXCEPTIONS` records the reviewed reason. 6.1.5 stays on the 6.x line the plugin targets. `eslint-plugin-astro` resolves 7.2.1 on its own and sits outside the carve-out. Remove the override and its exception when `@tailwindcss/typography` unpins or moves past 6.1.4.
 - **`markdown-it`** — nested carve-out: the pin applies only inside `markdownlint-cli2`, which resolves the 15.x line. The top-level copy (used by `scripts/build-presentations.js`) stays on 14.x, which carries its own fixes (14.3.3); 15.x would change presentation output because linkify-it 6 drops fuzzy links. `markdownlint-cli2` 0.24.0 pins `markdown-it` 15.0.3 itself — remove this override when that upgrade lands, and do not leave it in place past a later `markdownlint-cli2` that needs a newer 15.x, or the exact pin silently downgrades it.
 
 ## Deliberately deferred
