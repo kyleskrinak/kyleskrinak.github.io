@@ -6,7 +6,7 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 
 ## Current pins
 
-| Package | Pinned version | Advisory | Severity |
+| Package | Floor | Advisory | Severity |
 |---|---|---|---|
 | `fast-uri` | 3.1.9 | GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc (path traversal, host confusion); GHSA-w74x-v6f9-j3xg, GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp (scheme spoofing, path equivalence, host confusion, scheme injection) | high |
 | `fast-xml-builder` | 1.1.7 | GHSA-5wm8-gmm8-39j9 (XML injection via unwanted quotes) | high |
@@ -15,7 +15,7 @@ This site uses `package.json` `overrides` to pin specific transitive dependencie
 | `flatted` | 3.4.2 | GHSA-25h7-pfq9-p65f, GHSA-rf6f-7fwh-wjgh (DoS, prototype pollution) | high |
 | `brace-expansion` | 5.0.6 | GHSA-jxxr-4gwj-5jf2 (DoS via large numeric range) | moderate |
 | `js-yaml` | 4.3.1 | GHSA-5p4m-2wfm-xmqj (quadratic CPU consumption in `!!omap` resolution) | high |
-| `js-yaml` (under `markdownlint-cli2` only) | 5.5.0 | none: keeps `markdownlint-cli2` on the 5.x release it declares; the advisory covers only 3.x and 4.x | — |
+| `js-yaml` (under `markdownlint-cli2` only) | none | none: holds `markdownlint-cli2` at the js-yaml 5.5.0 it declares; the advisory covers only 3.x and 4.x | — |
 | `postcss` | 8.5.10 | GHSA-qx2v-qp2m-jg93 (XSS via stringify) | moderate |
 | `postcss-selector-parser` (under `@tailwindcss/typography` only) | 6.1.5 | GHSA-rj75-hqrm-r3gf (quadratic-time CPU exhaustion in flat selector parsing) | moderate |
 
