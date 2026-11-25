@@ -57,7 +57,9 @@ const lock = readJson('package-lock.json');
  * PR #425 also raised fast-uri's floor to 3.1.9 (GHSA-w74x-v6f9-j3xg,
  * GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr, GHSA-333x-w4r6-6crp) and added
  * markdown-it's, which only the nested markdownlint-cli2 override carries
- * (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q).
+ * (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q). markdownlint-cli2 0.24.1 pins
+ * markdown-it 15.0.3 itself, so that floor went with its override; the top-level
+ * markdown-it 14.x copy carries its own fixes and never had a pin.
  * fflate (GHSA-px8p-9vwx-vf98) and postcss-selector-parser (GHSA-rj75-hqrm-r3gf)
  * have nested overrides only: satori and @tailwindcss/typography each pin a
  * vulnerable copy exactly, and every other dependent already resolves a patched one.
@@ -70,7 +72,6 @@ const ADVISORY_FLOORS = {
 	flatted: '3.4.2',
 	'brace-expansion': '5.0.6',
 	'js-yaml': '4.3.1',
-	'markdown-it': '15.0.3',
 	postcss: '8.5.10',
 	'postcss-selector-parser': '6.1.5',
 };
@@ -131,13 +132,6 @@ const satisfies = (version, range, label) =>
  * same key fails until someone reviews that mismatch. Anything not listed here fails.
  */
 const OUT_OF_RANGE_EXCEPTIONS = {
-	'markdownlint-cli2 > markdown-it': {
-		range: '15.0.1',
-		version: '15.0.3',
-		reason:
-			'0.23.3 pins 15.0.1 exactly; 15.0.3 is the patch release that fixes GHSA-gfr2-rv44-r23c and ' +
-			'GHSA-vfgh-jcmw-g37q. markdownlint-cli2 0.24.0 pins 15.0.3 itself.',
-	},
 	'satori > fflate': {
 		range: '0.7.3',
 		version: '0.7.5',
@@ -234,7 +228,7 @@ const findOutOfRange = () => {
  *
  * Where npm puts a copy on disk says nothing about which override governs it: a
  * from-scratch resolve hoists whichever copy npm meets first, and PR #457's lockfile
- * put markdownlint-cli2's js-yaml 5.4.1 at the root `node_modules/js-yaml` and the
+ * put markdownlint-cli2's js-yaml 5.x at the root `node_modules/js-yaml` and the
  * tree-wide 4.3.2 under `@astrojs/mdx`. So this walks the logical tree down from the
  * root instead. npm applies a nested override to its parent's whole subtree ("a
  * child (or grandchild, or great grandchild, etc)", per the npm docs), so a
