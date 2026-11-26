@@ -58,7 +58,7 @@ async function waitForCardImagesLoaded(page: Page, cardRow: Locator, timeoutMs =
  * Run against different environments:
  *
  * Local (default):
- *   npm run test:visual
+ *   npm run test:visual:docker
  *
  * Production:
  *   PLAYWRIGHT_TEST_BASE_URL=https://kyle.skrinak.com npm run test:visual

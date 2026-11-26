@@ -3,7 +3,7 @@
 # Visual Regression Testing Helper
 #
 # Usage:
-#   ./scripts/visual-test.sh local              # Test local dev
+#   ./scripts/visual-test.sh local              # Local, host fonts (macOS shows false diffs; use docker)
 #   ./scripts/visual-test.sh production         # Test production
 #   ./scripts/visual-test.sh baseline           # Create/update baselines from local (guarded; see ALLOW_NATIVE_BASELINE)
 #   ./scripts/visual-test.sh docker             # Test against a container matching CI's OS/fonts
@@ -281,7 +281,7 @@ case $ENVIRONMENT in
     echo "Unknown environment: $ENVIRONMENT"
     echo ""
     echo "Usage:"
-    echo "  ./scripts/visual-test.sh local              # Test local dev"
+    echo "  ./scripts/visual-test.sh local              # Local, host fonts (macOS shows false diffs; use docker)"
     echo "  ./scripts/visual-test.sh production         # Test production (kyle.skrinak.com)"
     echo "  ./scripts/visual-test.sh baseline           # Create/update baselines (guarded; see ALLOW_NATIVE_BASELINE)"
     echo "  ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts"

@@ -74,7 +74,7 @@ npm run format           # Auto-format code
 npm run check:links      # Two-tier link checking (htmltest + Playwright)
 npm run check:live-weight # Nightly live page-weight check against production (see weightwatch.yml)
 npm run test:console     # Check for console errors
-npm run test:visual      # Visual regression testing
+npm run test:visual:docker # Visual regression testing (Docker, matches CI)
 
 # Configuration management
 npm run config:generate  # Generate configuration docs

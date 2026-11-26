@@ -21,9 +21,9 @@ For now, refer to the following existing documentation:
 
 **Build Health**:
 ```bash
-npm run build          # Verify build succeeds
-npm run test:visual    # Check for visual regressions
-npm run check:links    # Validate all links
+npm run build               # Verify build succeeds
+npm run test:visual:docker  # Check for visual regressions
+npm run check:links         # Validate all links
 ```
 
 **Live Page Weight** (nightly, non-blocking — see `weightwatch.yml`):

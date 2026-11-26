@@ -63,7 +63,7 @@ npm applies an override even when it violates the range a dependent declares, an
 3. For each advisory in the table above, check if a newer non-vulnerable version exists. If so, consider bumping the pin (preferring the oldest still-fixed version).
 4. Run `npm audit` to see whether new advisories have surfaced — extend the overrides block as needed.
 5. Run `npm audit signatures` to confirm registry signature integrity.
-6. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual`.
+6. After any bump: `npm install`, `npm run build`, `npm run check:links`, `npm run test:visual:docker`.
 7. Re-evaluate the deferred `yaml` chain — when `@astrojs/check` ships a release that no longer pulls the vulnerable `yaml-language-server`, drop the deferral and update.
 8. Re-check the TypeScript hold: run `npm view typescript-eslint peerDependencies` and `npm view @astrojs/check peerDependencies`. When both admit `typescript` 7, follow [Held direct dependencies](#held-direct-dependencies).
 9. Review the **manually pinned** CI/build dependencies (GitHub Action SHAs, Docker base image) — these are excluded from Renovate and do not self-update. See [Supply-Chain Security → Manually pinned](./supply-chain.md#manually-pinned-not-managed-by-renovate).

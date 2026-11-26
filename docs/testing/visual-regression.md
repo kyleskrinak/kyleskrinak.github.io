@@ -10,7 +10,7 @@ Playwright visual regression tests for key pages. Baselines are committed in `te
 
 ### Commands
 ```bash
-npm run test:visual                  # Run tests against local baseline
+npm run test:visual                  # Run natively (host fonts; macOS shows false diffs)
 ALLOW_NATIVE_BASELINE=1 npm run test:visual:baseline   # Host-rendered baselines (local iteration only — do not commit; the env var is required only off Linux)
 npm run test:visual:docker           # Run tests in a container matching CI's Ubuntu font rendering
 npm run test:visual:baseline:docker  # Generate baseline snapshots matching CI (use this before committing)
@@ -28,7 +28,7 @@ The site uses a system font stack (no web fonts), so macOS and CI's Ubuntu runne
 
 ### For Developers
 1. Make UI changes
-2. Run `npm run test:visual` locally
+2. Run `npm run test:visual:docker` locally
 3. If diffs are expected, run `npm run test:visual:baseline:docker` to update snapshots against CI's Ubuntu font rendering, then commit the updated files in `tests/visual/visual-regression.spec.ts-snapshots/`
 
 ## Technical Details
