@@ -6,7 +6,7 @@ This section covers testing strategies, test runs, and quality validation for th
 
 ### Visual Regression Testing
 - **[Visual Regression Guide](./visual-regression.md)** - Playwright visual tests with committed baselines
-- Run with: `npm run test:visual` (local) or automatic on PRs to `main` (`pr-visual-check.yml`)
+- Run with: `npm run test:visual:docker` (local) or automatic on PRs to `main` (`pr-visual-check.yml`)
 - Status: ✅ **Active** (July 2026) - committed baselines, CI gate on PRs to main
 - Tests 8+ key pages across multiple viewports (mobile, tablet, desktop) to catch unexpected visual changes
 
@@ -57,7 +57,7 @@ This section covers testing strategies, test runs, and quality validation for th
 
 ```bash
 # Individual test suites (local development)
-npm run test:visual          # Visual regression
+npm run test:visual:docker   # Visual regression
 npm run test:console         # Console errors
 npm run test:seo             # SEO meta tags & sitemap
 npm run test:links           # Link validation

@@ -87,7 +87,7 @@ npm run test:production -- --project=analytics
 ### Running Locally
 
 ```bash
-npm run test:visual
+npm run test:visual:docker
 ```
 
 ### Updating Baselines

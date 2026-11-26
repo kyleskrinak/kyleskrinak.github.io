@@ -12,13 +12,14 @@ This generates reference screenshots in `tests/visual/visual-regression.spec.ts-
 
 ### 2. Run Tests Against Local Dev
 ```bash
-npm run test:visual
+npm run test:visual:docker
 ```
-Compares current rendering against baselines. The preview server starts automatically on
-port 4322. This calls Playwright directly, so it does **not** carry the preview-server
-guard described in [Troubleshooting](#a-preview-server-is-live-on-port-n-which-blocks-this-run)
-— if a stray `astro preview` is running, this command reports a 180s `webServer` timeout
-instead of the real cause.
+Compares current rendering against baselines inside a container that matches CI's Ubuntu
+runner. The bare `npm run test:visual` starts the preview server on port 4322 and renders
+with the host's fonts, so on macOS it reports diffs that aren't regressions. It also calls
+Playwright directly, so it does **not** carry the preview-server guard described in
+[Troubleshooting](#a-preview-server-is-live-on-port-n-which-blocks-this-run) — if a stray
+`astro preview` is running, it reports a 180s `webServer` timeout instead of the real cause.
 
 ### 3. Verify Production After Launch
 ```bash
@@ -29,7 +30,7 @@ Tests against production URL. Should match baselines.
 ## Available Commands
 
 ```bash
-# Local dev (auto-starts dev server)
+# Local, host fonts (macOS shows false diffs; use test:visual:docker)
 npm run test:visual
 
 # Create/update baselines matching CI's Ubuntu font rendering (use this to commit)
@@ -49,7 +50,7 @@ npm run test:production -- --project=visual-*
 npm run test:visual:report
 
 # Or use the shell script directly
-./scripts/visual-test.sh local              # Local dev
+./scripts/visual-test.sh local              # Local, host fonts (macOS shows false diffs; use docker)
 ./scripts/visual-test.sh production         # Production
 ./scripts/visual-test.sh baseline           # Create baselines from this host (fast iteration only; needs ALLOW_NATIVE_BASELINE=1 off Linux)
 ./scripts/visual-test.sh docker             # Test in a container matching CI's OS/fonts
@@ -89,7 +90,7 @@ npm run test:visual:report
 npm run test:visual:baseline:docker
 
 # 2. Verify all local tests pass
-npm run test:visual
+npm run test:visual:docker
 
 # 3. Review HTML report
 npm run test:visual:report
